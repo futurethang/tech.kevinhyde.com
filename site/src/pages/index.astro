@@ -1,0 +1,112 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import AppCard from '../components/AppCard.astro';
+import manifest from '../../../apps-manifest.json';
+
+// Filter out slot apps and templates
+const apps = manifest.apps.filter(app =>
+  !app.slug.startsWith('slot-') && !app.slug.startsWith('_template')
+);
+const slots = manifest.slots.filter(s => s.available);
+---
+
+<Layout title="Tech Experiments | Kevin Hyde">
+  <Header />
+  <main class="main">
+    <section class="hero">
+      <h1>Tech Experiments</h1>
+      <p>A collection of mini applications, tools, and creative coding experiments.</p>
+    </section>
+
+    {apps.length > 0 ? (
+      <section class="app-grid">
+        {apps.map(app => (
+          <AppCard
+            slug={app.slug}
+            name={app.name}
+            description={app.description}
+            type={app.type}
+            status={app.status}
+            tags={app.tags}
+          />
+        ))}
+      </section>
+    ) : (
+      <section class="empty-state">
+        <div class="empty-content">
+          <h2>No apps yet</h2>
+          <p>This is a fresh start. Apps will appear here as they're created.</p>
+          <p class="slots-available">
+            <strong>{slots.length}</strong> slots available for new experiments
+          </p>
+        </div>
+      </section>
+    )}
+  </main>
+</Layout>
+
+<style>
+  .main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  .hero {
+    text-align: center;
+    padding: 3rem 0 4rem;
+  }
+
+  .hero h1 {
+    font-size: 3rem;
+    color: #00d4ff;
+    margin-bottom: 1rem;
+  }
+
+  .hero p {
+    font-size: 1.25rem;
+    color: #a0a0a0;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .app-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .empty-state {
+    display: flex;
+    justify-content: center;
+    padding: 4rem 2rem;
+  }
+
+  .empty-content {
+    text-align: center;
+    padding: 3rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px dashed rgba(255, 255, 255, 0.2);
+    border-radius: 1rem;
+    max-width: 400px;
+  }
+
+  .empty-content h2 {
+    color: #fff;
+    margin-bottom: 1rem;
+  }
+
+  .empty-content p {
+    color: #a0a0a0;
+    margin-bottom: 1rem;
+  }
+
+  .slots-available {
+    color: #00d4ff;
+  }
+
+  .slots-available strong {
+    font-size: 1.5rem;
+  }
+</style>

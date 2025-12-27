@@ -1,0 +1,98 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build showcase site
+        run: pnpm --filter=site build
+
+      - name: Copy static apps to dist
+        run: |
+          # Copy all static apps (those without package.json)
+          for dir in apps/*/; do
+            app_name=$(basename "$dir")
+            # Skip templates
+            if [[ "$app_name" == _template* ]]; then
+              continue
+            fi
+            # If no package.json, it's a static app - copy directly
+            if [ ! -f "$dir/package.json" ]; then
+              echo "Copying static app: $app_name"
+              mkdir -p "dist/apps/$app_name"
+              cp -r "$dir"* "dist/apps/$app_name/"
+            fi
+          done
+
+      - name: Build and copy React/Vite apps
+        run: |
+          for dir in apps/*/; do
+            app_name=$(basename "$dir")
+            # Skip templates
+            if [[ "$app_name" == _template* ]]; then
+              continue
+            fi
+            # If has package.json, build it
+            if [ -f "$dir/package.json" ]; then
+              echo "Building app: $app_name"
+              cd "$dir"
+              pnpm install
+              pnpm build
+              cd ../..
+              # Copy built output
+              if [ -d "$dir/dist" ]; then
+                mkdir -p "dist/apps/$app_name"
+                cp -r "$dir/dist/"* "dist/apps/$app_name/"
+              fi
+            fi
+          done
+
+      - name: Add .nojekyll file
+        run: touch dist/.nojekyll
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
