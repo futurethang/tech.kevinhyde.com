@@ -1,5 +1,15 @@
 {
-  "apps": [],
+  "apps": [
+    {
+      "slug": "reading-pacer",
+      "name": "ReadPace",
+      "description": "Track your reading speed and pace per page",
+      "type": "static",
+      "status": "live",
+      "createdAt": "2025-12-27",
+      "tags": ["tool", "productivity", "pwa"]
+    }
+  ],
   "slots": [
     { "slug": "slot-01", "available": true },
     { "slug": "slot-02", "available": true },

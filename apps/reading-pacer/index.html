@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#1a1a2e">
+  <title>ReadPace</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.svg">
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <h1>ReadPace</h1>
+      <button class="menu-btn" id="menuBtn" aria-label="Open menu">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+    </header>
+
+    <main class="main">
+      <div class="timer" id="timer">00:00:00</div>
+
+      <button class="tap-area" id="tapArea">
+        <span class="page-count" id="pageCount">0</span>
+        <span class="page-label">pages</span>
+      </button>
+
+      <div class="stats">
+        <div class="stat">
+          <span class="stat-value" id="avgPace">--:--</span>
+          <span class="stat-label">avg per page</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value" id="lastPace">--:--</span>
+          <span class="stat-label">last page</span>
+        </div>
+      </div>
+
+      <div class="estimate">
+        <label for="pagesInput">Time to read</label>
+        <div class="estimate-input">
+          <input type="number" id="pagesInput" min="1" placeholder="0">
+          <span>pages</span>
+        </div>
+        <div class="estimate-result" id="estimateResult">--:--:--</div>
+      </div>
+    </main>
+
+    <footer class="controls">
+      <button class="control-btn" id="pauseBtn" aria-label="Pause/Resume">
+        <svg class="icon-play" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+          <polygon points="5,3 19,12 5,21"></polygon>
+        </svg>
+        <svg class="icon-pause" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style="display:none">
+          <rect x="6" y="4" width="4" height="16"></rect>
+          <rect x="14" y="4" width="4" height="16"></rect>
+        </svg>
+      </button>
+      <button class="control-btn" id="wakeBtn" aria-label="Keep screen awake">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+      </button>
+      <button class="control-btn" id="resetBtn" aria-label="Reset">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="1,4 1,10 7,10"></polyline>
+          <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+        </svg>
+      </button>
+    </footer>
+
+    <div class="menu-overlay" id="menuOverlay"></div>
+    <nav class="side-menu" id="sideMenu">
+      <button class="menu-close" id="menuClose" aria-label="Close menu">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+      <button class="menu-item" id="saveSession">Save Session</button>
+      <button class="menu-item" id="exportData">Export Data</button>
+      <div class="saved-sessions">
+        <h3>Saved Sessions</h3>
+        <div id="sessionsList"></div>
+      </div>
+    </nav>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
