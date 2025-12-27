@@ -1,0 +1,92 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+---
+
+<Layout title="About | Tech Experiments">
+  <Header />
+  <main class="main">
+    <article class="about">
+      <h1>About This Site</h1>
+
+      <p>
+        This is a collection of experimental mini applications, tools, and creative
+        coding projects. It's a space for trying out new ideas, learning new technologies,
+        and building things for fun.
+      </p>
+
+      <h2>The Approach</h2>
+      <p>
+        Each experiment lives in its own folder, ranging from simple HTML/CSS/JS pages
+        to more complex React applications. The goal is zero-friction creation:
+        have an idea, build it, deploy it.
+      </p>
+
+      <h2>Tech Stack</h2>
+      <ul>
+        <li><strong>Monorepo</strong> - pnpm workspaces + Turborepo</li>
+        <li><strong>Showcase Site</strong> - Astro (static site generation)</li>
+        <li><strong>Apps</strong> - Varies by project (static HTML, React, etc.)</li>
+        <li><strong>Hosting</strong> - GitHub Pages</li>
+      </ul>
+
+      <h2>Connect</h2>
+      <p>
+        Find more of my work at <a href="https://kevinhyde.com">kevinhyde.com</a>.
+      </p>
+    </article>
+  </main>
+</Layout>
+
+<style>
+  .main {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  .about {
+    padding: 2rem 0;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    color: #00d4ff;
+    margin-bottom: 1.5rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    color: #fff;
+    margin: 2rem 0 1rem;
+  }
+
+  p {
+    color: #c0c0c0;
+    line-height: 1.8;
+    margin-bottom: 1rem;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  li {
+    color: #c0c0c0;
+    padding: 0.5rem 0;
+    padding-left: 1.5rem;
+    position: relative;
+  }
+
+  li::before {
+    content: '>';
+    position: absolute;
+    left: 0;
+    color: #00d4ff;
+  }
+
+  li strong {
+    color: #fff;
+  }
+</style>

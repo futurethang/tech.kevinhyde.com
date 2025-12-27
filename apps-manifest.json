@@ -1,0 +1,10 @@
+{
+  "apps": [],
+  "slots": [
+    { "slug": "slot-01", "available": true },
+    { "slug": "slot-02", "available": true },
+    { "slug": "slot-03", "available": true },
+    { "slug": "slot-04", "available": true },
+    { "slug": "slot-05", "available": true }
+  ]
+}

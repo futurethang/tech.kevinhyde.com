@@ -1,0 +1,14 @@
+{
+  "name": "tech-kevinhyde",
+  "private": true,
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "build:site": "pnpm --filter=site build",
+    "preview": "pnpm --filter=site preview"
+  },
+  "devDependencies": {
+    "turbo": "^2.3.0"
+  },
+  "packageManager": "pnpm@9.15.0"
+}

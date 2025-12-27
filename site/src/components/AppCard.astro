@@ -1,0 +1,130 @@
+---
+interface Props {
+  slug: string;
+  name: string;
+  description: string;
+  type: string;
+  status: string;
+  tags?: string[];
+}
+
+const { slug, name, description, type, status, tags = [] } = Astro.props;
+const appUrl = `/apps/${slug}/`;
+---
+
+<a href={appUrl} class="app-card">
+  <div class="thumbnail">
+    <span class="placeholder">{name.charAt(0)}</span>
+  </div>
+  <div class="content">
+    <h3>{name}</h3>
+    <p>{description}</p>
+    <div class="meta">
+      <span class={`status status-${status}`}>{status}</span>
+      <span class="type">{type}</span>
+    </div>
+    {tags.length > 0 && (
+      <div class="tags">
+        {tags.map(tag => (
+          <span class="tag">{tag}</span>
+        ))}
+      </div>
+    )}
+  </div>
+</a>
+
+<style>
+  .app-card {
+    display: block;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    overflow: hidden;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+
+  .app-card:hover {
+    transform: translateY(-4px);
+    border-color: #00d4ff;
+  }
+
+  .thumbnail {
+    aspect-ratio: 16 / 10;
+    background: rgba(0, 212, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .placeholder {
+    font-size: 3rem;
+    font-weight: bold;
+    color: #00d4ff;
+    opacity: 0.5;
+  }
+
+  .content {
+    padding: 1.25rem;
+  }
+
+  h3 {
+    color: #fff;
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    color: #a0a0a0;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+  }
+
+  .meta {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .status, .type {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .status {
+    background: rgba(0, 212, 255, 0.2);
+    color: #00d4ff;
+  }
+
+  .status-wip {
+    background: rgba(255, 193, 7, 0.2);
+    color: #ffc107;
+  }
+
+  .status-idea {
+    background: rgba(156, 39, 176, 0.2);
+    color: #ce93d8;
+  }
+
+  .type {
+    background: rgba(255, 255, 255, 0.1);
+    color: #a0a0a0;
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .tag {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 0.25rem;
+    color: #808080;
+  }
+</style>
