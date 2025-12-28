@@ -8,6 +8,15 @@
       "status": "live",
       "createdAt": "2025-12-27",
       "tags": ["tool", "productivity", "pwa"]
+    },
+    {
+      "slug": "spinner",
+      "name": "Spinner",
+      "description": "Random spinner for game night - spin to pick a player!",
+      "type": "static",
+      "status": "live",
+      "createdAt": "2025-12-28",
+      "tags": ["game", "pwa", "entertainment"]
     }
   ],
   "slots": [

@@ -1,0 +1,62 @@
+// Service Worker for Spinner PWA
+const CACHE_NAME = 'spinner-v1';
+const ASSETS_TO_CACHE = [
+  './',
+  './index.html',
+  './styles.css',
+  './script.js',
+  './manifest.json',
+  './icon-192.svg',
+  './icon-512.svg'
+];
+
+// Install event - cache assets
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then((cache) => {
+        console.log('Caching app assets');
+        return cache.addAll(ASSETS_TO_CACHE);
+      })
+      .then(() => self.skipWaiting())
+  );
+});
+
+// Activate event - clean up old caches
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames
+          .filter((name) => name !== CACHE_NAME)
+          .map((name) => caches.delete(name))
+      );
+    }).then(() => self.clients.claim())
+  );
+});
+
+// Fetch event - serve from cache, fallback to network
+self.addEventListener('fetch', (event) => {
+  event.respondWith(
+    caches.match(event.request)
+      .then((response) => {
+        // Return cached version or fetch from network
+        return response || fetch(event.request)
+          .then((fetchResponse) => {
+            // Cache new requests
+            if (event.request.method === 'GET') {
+              const responseClone = fetchResponse.clone();
+              caches.open(CACHE_NAME)
+                .then((cache) => cache.put(event.request, responseClone));
+            }
+            return fetchResponse;
+          });
+      })
+      .catch(() => {
+        // Offline fallback
+        if (event.request.destination === 'document') {
+          return caches.match('./index.html');
+        }
+      })
+  );
+});
