@@ -6,17 +6,38 @@ import * as CANNON from 'cannon-es';
 // ============================================
 const CONFIG = {
   diceSize: 1,
-  diceRestitution: 0.3,
-  diceFriction: 0.4,
   diceMass: 1,
-  wallRestitution: 0.5,
-  wallFriction: 0.3,
-  throwForce: { min: 5, max: 8 },
-  spinForce: { min: 10, max: 20 },
-  gravity: -40,
-  settleVelocityThreshold: 0.05,
-  shakeThreshold: 20,
-  shakeTimeout: 500
+  // Lower gravity = solver converges better, more realistic tumbles
+  gravity: -20,
+  // Throw parameters - stronger for longer rolls
+  throwForce: { min: 12, max: 18 },
+  throwHeight: 3,
+  spinForce: { min: 8, max: 15 },
+  // Very low damping = dice roll longer, don't feel sticky
+  linearDamping: 0.1,
+  angularDamping: 0.1,
+  // Settle detection
+  settleVelocityThreshold: 0.08,
+  settleAngularThreshold: 0.1,
+  // Shake
+  shakeThreshold: 25,
+  shakeTimeout: 600
+};
+
+// Physics materials - tuned for realistic behavior
+const PHYSICS = {
+  // Dice: moderate friction, low bounce
+  dice: { friction: 0.3, restitution: 0.25 },
+  // Felt floor: high friction (felt grips), very low bounce
+  floor: { friction: 0.7, restitution: 0.1 },
+  // Walls: low friction, moderate bounce
+  wall: { friction: 0.1, restitution: 0.4 },
+  // Dice-to-dice: lower friction so they don't stick
+  diceToDice: { friction: 0.2, restitution: 0.3 },
+  // Dice-to-floor: high friction (felt), low bounce
+  diceToFloor: { friction: 0.6, restitution: 0.15 },
+  // Dice-to-wall: slides along wall, decent bounce
+  diceToWall: { friction: 0.1, restitution: 0.5 }
 };
 
 // ============================================
@@ -29,6 +50,9 @@ let wallBodies = [];
 let diceCount = 2;
 let isRolling = false;
 let animationId = null;
+
+// Materials for contact definitions
+let diceMaterial, floorMaterial, wallMaterial;
 
 // Shake detection
 let shakeEnabled = false;
@@ -58,11 +82,9 @@ function init() {
 }
 
 function initThreeJS() {
-  // Scene
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x1a472a);
 
-  // Camera - orthographic for consistent sizing
   const aspect = window.innerWidth / window.innerHeight;
   const viewSize = 10;
   camera = new THREE.OrthographicCamera(
@@ -76,7 +98,6 @@ function initThreeJS() {
   camera.position.set(0, 20, 0);
   camera.lookAt(0, 0, 0);
 
-  // Renderer
   renderer = new THREE.WebGLRenderer({
     canvas,
     antialias: true,
@@ -87,7 +108,7 @@ function initThreeJS() {
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-  // Lighting - softer for cleaner look
+  // Lighting
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
   scene.add(ambientLight);
 
@@ -106,12 +127,12 @@ function initThreeJS() {
 
   // Floor (felt surface)
   const floorGeometry = new THREE.PlaneGeometry(30, 30);
-  const floorMaterial = new THREE.MeshStandardMaterial({
+  const floorMat = new THREE.MeshStandardMaterial({
     color: 0x1a472a,
     roughness: 0.95,
     metalness: 0
   });
-  const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+  const floor = new THREE.Mesh(floorGeometry, floorMat);
   floor.rotation.x = -Math.PI / 2;
   floor.receiveShadow = true;
   scene.add(floor);
@@ -120,18 +141,56 @@ function initThreeJS() {
 function initCannonWorld() {
   world = new CANNON.World();
   world.gravity.set(0, CONFIG.gravity, 0);
-  world.broadphase = new CANNON.NaiveBroadphase();
-  world.solver.iterations = 15;
+
+  // Use SAPBroadphase for better performance with multiple dice
+  world.broadphase = new CANNON.SAPBroadphase(world);
+
+  // More iterations = better constraint solving, less energy gain
+  world.solver.iterations = 20;
+  world.solver.tolerance = 0.001;
+
   world.allowSleep = true;
+  world.sleepSpeedLimit = 0.1;
+  world.sleepTimeLimit = 0.5;
+
+  // Create materials
+  diceMaterial = new CANNON.Material('dice');
+  floorMaterial = new CANNON.Material('floor');
+  wallMaterial = new CANNON.Material('wall');
+
+  // Define contact behaviors between materials
+  // Dice-to-Floor: felt grips dice, minimal bounce
+  const diceFloorContact = new CANNON.ContactMaterial(diceMaterial, floorMaterial, {
+    friction: PHYSICS.diceToFloor.friction,
+    restitution: PHYSICS.diceToFloor.restitution,
+    contactEquationStiffness: 1e8,
+    contactEquationRelaxation: 3
+  });
+  world.addContactMaterial(diceFloorContact);
+
+  // Dice-to-Dice: should slide off each other, not stick
+  const diceDiceContact = new CANNON.ContactMaterial(diceMaterial, diceMaterial, {
+    friction: PHYSICS.diceToDice.friction,
+    restitution: PHYSICS.diceToDice.restitution,
+    contactEquationStiffness: 1e8,
+    contactEquationRelaxation: 3
+  });
+  world.addContactMaterial(diceDiceContact);
+
+  // Dice-to-Wall: bouncy, slides along
+  const diceWallContact = new CANNON.ContactMaterial(diceMaterial, wallMaterial, {
+    friction: PHYSICS.diceToWall.friction,
+    restitution: PHYSICS.diceToWall.restitution,
+    contactEquationStiffness: 1e8,
+    contactEquationRelaxation: 3
+  });
+  world.addContactMaterial(diceWallContact);
 
   // Floor body
   const floorBody = new CANNON.Body({
     type: CANNON.Body.STATIC,
     shape: new CANNON.Plane(),
-    material: new CANNON.Material({
-      friction: 0.5,
-      restitution: 0.3
-    })
+    material: floorMaterial
   });
   floorBody.quaternion.setFromEuler(-Math.PI / 2, 0, 0);
   world.addBody(floorBody);
@@ -140,7 +199,6 @@ function initCannonWorld() {
 function getViewBounds() {
   const aspect = window.innerWidth / window.innerHeight;
   const viewSize = 10;
-  // Add padding for dice size and wall thickness
   const padding = CONFIG.diceSize + 0.5;
   return {
     halfWidth: (viewSize * aspect) / 2 - padding,
@@ -149,18 +207,12 @@ function getViewBounds() {
 }
 
 function initWalls() {
-  // Remove old walls
   wallBodies.forEach(body => world.removeBody(body));
   wallBodies = [];
 
   const { halfWidth, halfHeight } = getViewBounds();
-  const wallHeight = 8;
+  const wallHeight = 10;
   const wallThickness = 1;
-
-  const wallMaterial = new CANNON.Material({
-    friction: CONFIG.wallFriction,
-    restitution: CONFIG.wallRestitution
-  });
 
   const walls = [
     { pos: [0, wallHeight / 2, -halfHeight - wallThickness / 2], size: [halfWidth * 2 + wallThickness * 2, wallHeight, wallThickness] },
@@ -186,11 +238,7 @@ function initWalls() {
 // ============================================
 function createDiceMesh() {
   const size = CONFIG.diceSize;
-
-  // Clean box geometry - no vertex manipulation
   const geometry = new THREE.BoxGeometry(size, size, size);
-
-  // Simple white material
   const material = new THREE.MeshStandardMaterial({
     color: 0xf5f5f5,
     roughness: 0.4,
@@ -200,10 +248,7 @@ function createDiceMesh() {
   const mesh = new THREE.Mesh(geometry, material);
   mesh.castShadow = true;
   mesh.receiveShadow = true;
-
-  // Add dots
   addDots(mesh);
-
   return mesh;
 }
 
@@ -217,7 +262,6 @@ function addDots(diceMesh) {
     roughness: 0.8
   });
 
-  // Dot positions for each face (1-6)
   const dotPatterns = {
     1: [[0, 0]],
     2: [[-0.25, -0.25], [0.25, 0.25]],
@@ -227,14 +271,13 @@ function addDots(diceMesh) {
     6: [[-0.25, -0.3], [0.25, -0.3], [-0.25, 0], [0.25, 0], [-0.25, 0.3], [0.25, 0.3]]
   };
 
-  // Standard die opposite faces sum to 7
   const faces = [
-    { value: 1, normal: [0, 0, 1], rotation: [0, 0, 0] },
-    { value: 6, normal: [0, 0, -1], rotation: [0, Math.PI, 0] },
-    { value: 3, normal: [1, 0, 0], rotation: [0, Math.PI / 2, 0] },
-    { value: 4, normal: [-1, 0, 0], rotation: [0, -Math.PI / 2, 0] },
-    { value: 2, normal: [0, 1, 0], rotation: [-Math.PI / 2, 0, 0] },
-    { value: 5, normal: [0, -1, 0], rotation: [Math.PI / 2, 0, 0] }
+    { value: 1, normal: [0, 0, 1] },
+    { value: 6, normal: [0, 0, -1] },
+    { value: 3, normal: [1, 0, 0] },
+    { value: 4, normal: [-1, 0, 0] },
+    { value: 2, normal: [0, 1, 0] },
+    { value: 5, normal: [0, -1, 0] }
   ];
 
   faces.forEach(face => {
@@ -244,7 +287,6 @@ function addDots(diceMesh) {
     pattern.forEach(([x, y]) => {
       const dot = new THREE.Mesh(dotGeometry, dotMaterial);
 
-      // Position based on face
       if (face.normal[2] !== 0) {
         dot.position.set(x * size, y * size, face.normal[2] * offset);
         if (face.normal[2] < 0) dot.rotation.y = Math.PI;
@@ -267,12 +309,12 @@ function createDiceBody() {
   const body = new CANNON.Body({
     mass: CONFIG.diceMass,
     shape: new CANNON.Box(new CANNON.Vec3(size / 2, size / 2, size / 2)),
-    material: new CANNON.Material({
-      friction: CONFIG.diceFriction,
-      restitution: CONFIG.diceRestitution
-    }),
-    linearDamping: 0.4,
-    angularDamping: 0.4
+    material: diceMaterial,
+    linearDamping: CONFIG.linearDamping,
+    angularDamping: CONFIG.angularDamping,
+    allowSleep: true,
+    sleepSpeedLimit: 0.1,
+    sleepTimeLimit: 0.5
   });
 
   return body;
@@ -281,14 +323,14 @@ function createDiceBody() {
 function initDice() {
   clearDice();
 
-  const { halfWidth, halfHeight } = getViewBounds();
+  const { halfWidth } = getViewBounds();
 
   for (let i = 0; i < diceCount; i++) {
     const mesh = createDiceMesh();
     const body = createDiceBody();
 
-    // Position dice in center, spread out
-    const spacing = Math.min(1.5, (halfWidth * 2) / (diceCount + 1));
+    // Position dice spread out at bottom
+    const spacing = Math.min(2.0, (halfWidth * 2) / (diceCount + 1));
     const x = (i - (diceCount - 1) / 2) * spacing;
     body.position.set(x, CONFIG.diceSize / 2, 0);
     mesh.position.copy(body.position);
@@ -320,57 +362,66 @@ function rollDice() {
 
   const { halfWidth, halfHeight } = getViewBounds();
 
-  // Reset and throw each die
+  // Dice originate from bottom of screen (positive Z = toward viewer/bottom)
+  // and are thrown forward (negative Z = away from viewer/toward top)
   dice.forEach((die, index) => {
-    // Starting position - within bounds, above play area
-    const startX = (Math.random() - 0.5) * halfWidth;
-    const startZ = (Math.random() - 0.5) * halfHeight;
+    // Starting position: bottom of view, spread horizontally
+    // Add randomness so dice don't start at exact same spot
+    const spreadX = (halfWidth * 1.5) / Math.max(diceCount, 2);
+    const startX = (index - (diceCount - 1) / 2) * spreadX + (Math.random() - 0.5) * 0.5;
+    const startZ = halfHeight * 0.7 + Math.random() * 0.3; // Near bottom edge
+    const startY = CONFIG.throwHeight + Math.random() * 1.5;
 
-    die.body.position.set(startX, 5 + Math.random() * 2, startZ);
+    die.body.position.set(startX, startY, startZ);
     die.body.velocity.set(0, 0, 0);
     die.body.angularVelocity.set(0, 0, 0);
 
-    // Random initial rotation
+    // Random initial rotation for variety
     die.body.quaternion.setFromEuler(
       Math.random() * Math.PI * 2,
       Math.random() * Math.PI * 2,
       Math.random() * Math.PI * 2
     );
 
-    // Apply throw force - toward center
+    // Throw force - primarily forward (negative Z), slight arc upward
     const throwForce = CONFIG.throwForce.min + Math.random() * (CONFIG.throwForce.max - CONFIG.throwForce.min);
-    const targetX = (Math.random() - 0.5) * halfWidth * 0.5;
-    const targetZ = (Math.random() - 0.5) * halfHeight * 0.5;
+
+    // Target: spread across the play area, biased toward opposite corners
+    const targetX = (Math.random() - 0.5) * halfWidth * 1.2;
+    const targetZ = -halfHeight * (0.3 + Math.random() * 0.5); // Toward top of screen
+
+    // Direction vector
     const dirX = targetX - startX;
     const dirZ = targetZ - startZ;
-    const dirLen = Math.sqrt(dirX * dirX + dirZ * dirZ) || 1;
+    const dirLen = Math.sqrt(dirX * dirX + dirZ * dirZ);
 
     die.body.velocity.set(
-      (dirX / dirLen) * throwForce,
-      -2,
-      (dirZ / dirLen) * throwForce
+      (dirX / dirLen) * throwForce * 0.6,  // Some sideways spread
+      throwForce * 0.15,                     // Slight upward arc
+      (dirZ / dirLen) * throwForce          // Primary forward motion
     );
 
-    // Apply spin
+    // Tumbling spin - weighted toward rolling forward
     const spinForce = CONFIG.spinForce.min + Math.random() * (CONFIG.spinForce.max - CONFIG.spinForce.min);
     die.body.angularVelocity.set(
-      (Math.random() - 0.5) * spinForce,
-      (Math.random() - 0.5) * spinForce,
-      (Math.random() - 0.5) * spinForce
+      spinForce * (0.5 + Math.random() * 0.5),  // Roll forward (around X axis)
+      (Math.random() - 0.5) * spinForce * 0.5,  // Some yaw
+      (Math.random() - 0.5) * spinForce * 0.3   // Some sideways tilt
     );
 
     die.body.wakeUp();
   });
 
-  // Check for settling
-  setTimeout(checkSettled, 500);
+  // Start checking for settle after dice have had time to land
+  setTimeout(checkSettled, 800);
 }
 
 function checkSettled() {
   const allSettled = dice.every(die => {
     const vel = die.body.velocity.length();
     const angVel = die.body.angularVelocity.length();
-    return vel < CONFIG.settleVelocityThreshold && angVel < CONFIG.settleVelocityThreshold;
+    const isAsleep = die.body.sleepState === CANNON.Body.SLEEPING;
+    return isAsleep || (vel < CONFIG.settleVelocityThreshold && angVel < CONFIG.settleAngularThreshold);
   });
 
   if (allSettled) {
@@ -397,7 +448,6 @@ function getDieValue(die) {
   const upVector = new THREE.Vector3(0, 1, 0);
   const dieUp = new THREE.Vector3();
 
-  // Standard die: opposite faces sum to 7
   const faceNormals = [
     { normal: new THREE.Vector3(0, 0, 1), value: 1 },
     { normal: new THREE.Vector3(0, 0, -1), value: 6 },
@@ -428,16 +478,20 @@ function getDieValue(die) {
 // SHAKE DETECTION
 // ============================================
 function initShakeDetection() {
-  // Load saved preference
   shakeEnabled = localStorage.getItem('diceRoller_shakeEnabled') === 'true';
   updateShakeUI();
+
+  if (shakeEnabled) {
+    requestMotionPermission().then(granted => {
+      if (granted) startShakeListening();
+    });
+  }
 
   shakeToggle.addEventListener('click', toggleShake);
 }
 
 async function toggleShake() {
   if (!shakeEnabled) {
-    // Try to enable
     const granted = await requestMotionPermission();
     if (granted) {
       shakeEnabled = true;
@@ -453,7 +507,6 @@ async function toggleShake() {
 }
 
 async function requestMotionPermission() {
-  // iOS 13+ requires permission
   if (typeof DeviceMotionEvent !== 'undefined' &&
       typeof DeviceMotionEvent.requestPermission === 'function') {
     try {
@@ -466,7 +519,6 @@ async function requestMotionPermission() {
     }
   }
 
-  // Non-iOS or older iOS - check if API exists
   if ('DeviceMotionEvent' in window) {
     motionPermissionGranted = true;
     return true;
@@ -514,14 +566,12 @@ function updateShakeUI() {
 // EVENT HANDLERS
 // ============================================
 function initEventListeners() {
-  // Roll button
   rollButton.addEventListener('click', rollDice);
   rollButton.addEventListener('touchstart', (e) => {
     e.preventDefault();
     rollDice();
   });
 
-  // Dice count buttons
   diceButtons.forEach(btn => {
     btn.addEventListener('click', () => {
       if (isRolling) return;
@@ -534,10 +584,8 @@ function initEventListeners() {
     });
   });
 
-  // Window resize
   window.addEventListener('resize', onResize);
 
-  // Prevent pull-to-refresh on mobile
   document.body.addEventListener('touchmove', (e) => {
     if (e.touches.length === 1) {
       e.preventDefault();
@@ -558,8 +606,6 @@ function onResize() {
   camera.updateProjectionMatrix();
 
   renderer.setSize(width, height);
-
-  // Rebuild walls for new aspect ratio
   initWalls();
 }
 
@@ -569,10 +615,9 @@ function onResize() {
 function animate() {
   animationId = requestAnimationFrame(animate);
 
-  // Step physics
+  // Fixed timestep for consistent physics
   world.step(1 / 60);
 
-  // Sync meshes with physics bodies
   dice.forEach(die => {
     die.mesh.position.copy(die.body.position);
     die.mesh.quaternion.copy(die.body.quaternion);
