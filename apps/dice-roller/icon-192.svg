@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
+  <defs>
+    <linearGradient id="diceGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff"/>
+      <stop offset="100%" style="stop-color:#e0e0e0"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="2" dy="4" stdDeviation="4" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="192" height="192" rx="32" fill="#1a472a"/>
+
+  <!-- Dice body -->
+  <g filter="url(#shadow)">
+    <rect x="44" y="44" width="104" height="104" rx="16" fill="url(#diceGrad)"/>
+  </g>
+
+  <!-- Dots (showing 5) -->
+  <circle cx="72" cy="72" r="10" fill="#1a472a"/>
+  <circle cx="120" cy="72" r="10" fill="#1a472a"/>
+  <circle cx="96" cy="96" r="10" fill="#1a472a"/>
+  <circle cx="72" cy="120" r="10" fill="#1a472a"/>
+  <circle cx="120" cy="120" r="10" fill="#1a472a"/>
+</svg>

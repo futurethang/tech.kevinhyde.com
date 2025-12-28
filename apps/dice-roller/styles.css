@@ -1,0 +1,363 @@
+/* Casino Dice Roller - Green Felt Theme */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --felt-green: #1a472a;
+  --felt-dark: #0d2818;
+  --felt-light: #2d5a3d;
+  --gold: #d4af37;
+  --gold-light: #f4d03f;
+  --wood-brown: #5d4037;
+  --wood-dark: #3e2723;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  touch-action: none;
+}
+
+body {
+  font-family: 'Georgia', serif;
+  background: var(--felt-dark);
+  color: #fff;
+}
+
+.app {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background:
+    radial-gradient(ellipse at center, var(--felt-light) 0%, var(--felt-green) 50%, var(--felt-dark) 100%);
+  overflow: hidden;
+}
+
+/* Felt texture overlay */
+.app::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Wood border effect */
+.felt-border {
+  position: absolute;
+  background: linear-gradient(
+    to bottom,
+    var(--wood-dark) 0%,
+    var(--wood-brown) 20%,
+    #8d6e63 50%,
+    var(--wood-brown) 80%,
+    var(--wood-dark) 100%
+  );
+  z-index: 10;
+}
+
+.felt-border.top,
+.felt-border.bottom {
+  left: 0;
+  right: 0;
+  height: 12px;
+}
+
+.felt-border.left,
+.felt-border.right {
+  top: 0;
+  bottom: 0;
+  width: 12px;
+}
+
+.felt-border.top {
+  top: 0;
+  border-radius: 0 0 4px 4px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+}
+
+.felt-border.bottom {
+  bottom: 0;
+  border-radius: 4px 4px 0 0;
+  box-shadow: 0 -4px 8px rgba(0,0,0,0.5);
+}
+
+.felt-border.left {
+  left: 0;
+  border-radius: 0 4px 4px 0;
+  box-shadow: 4px 0 8px rgba(0,0,0,0.5);
+}
+
+.felt-border.right {
+  right: 0;
+  border-radius: 4px 0 0 4px;
+  box-shadow: -4px 0 8px rgba(0,0,0,0.5);
+}
+
+/* Inner gold trim */
+.felt-border::after {
+  content: '';
+  position: absolute;
+  background: linear-gradient(
+    to right,
+    var(--gold) 0%,
+    var(--gold-light) 50%,
+    var(--gold) 100%
+  );
+}
+
+.felt-border.top::after,
+.felt-border.bottom::after {
+  left: 12px;
+  right: 12px;
+  height: 2px;
+}
+
+.felt-border.top::after {
+  bottom: 0;
+}
+
+.felt-border.bottom::after {
+  top: 0;
+}
+
+.felt-border.left::after,
+.felt-border.right::after {
+  top: 12px;
+  bottom: 12px;
+  width: 2px;
+}
+
+.felt-border.left::after {
+  right: 0;
+}
+
+.felt-border.right::after {
+  left: 0;
+}
+
+/* Canvas */
+#diceCanvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Controls */
+.controls {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  z-index: 20;
+}
+
+.dice-selector {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 8px 16px;
+  border-radius: 24px;
+  border: 1px solid var(--gold);
+}
+
+.dice-selector label {
+  font-size: 14px;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.dice-buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.dice-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid var(--gold);
+  background: transparent;
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dice-btn:hover {
+  background: rgba(212, 175, 55, 0.3);
+}
+
+.dice-btn.active {
+  background: var(--gold);
+  color: var(--felt-dark);
+}
+
+/* Roll button */
+.roll-button {
+  padding: 16px 48px;
+  font-size: 20px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background: linear-gradient(
+    to bottom,
+    #c41e3a 0%,
+    #8b0000 50%,
+    #5c0000 100%
+  );
+  color: #fff;
+  box-shadow:
+    0 4px 0 #3d0000,
+    0 6px 12px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transition: all 0.1s ease;
+}
+
+.roll-button:hover {
+  background: linear-gradient(
+    to bottom,
+    #d4283f 0%,
+    #9b0000 50%,
+    #6c0000 100%
+  );
+}
+
+.roll-button:active {
+  transform: translateY(4px);
+  box-shadow:
+    0 0 0 #3d0000,
+    0 2px 8px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.roll-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Result display */
+.result {
+  min-height: 32px;
+  font-size: 24px;
+  font-weight: bold;
+  color: var(--gold-light);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.5);
+  padding: 8px 24px;
+  border-radius: 16px;
+  border: 1px solid var(--gold);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.result.visible {
+  opacity: 1;
+}
+
+/* PWA install prompt hint */
+@media (display-mode: browser) {
+  .app::after {
+    content: '';
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 8px;
+    height: 8px;
+    background: var(--gold);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+    z-index: 100;
+    opacity: 0.8;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.5); opacity: 0.4; }
+}
+
+/* Mobile optimizations */
+@media (max-width: 480px) {
+  .controls {
+    bottom: 16px;
+    gap: 12px;
+  }
+
+  .dice-selector {
+    padding: 6px 12px;
+    gap: 8px;
+  }
+
+  .dice-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+
+  .roll-button {
+    padding: 14px 40px;
+    font-size: 18px;
+  }
+
+  .result {
+    font-size: 20px;
+    padding: 6px 20px;
+  }
+
+  .felt-border.top,
+  .felt-border.bottom {
+    height: 8px;
+  }
+
+  .felt-border.left,
+  .felt-border.right {
+    width: 8px;
+  }
+
+  .felt-border.left::after,
+  .felt-border.right::after {
+    top: 8px;
+    bottom: 8px;
+  }
+
+  .felt-border.top::after,
+  .felt-border.bottom::after {
+    left: 8px;
+    right: 8px;
+  }
+}
+
+/* Landscape mode adjustments */
+@media (max-height: 500px) {
+  .controls {
+    flex-direction: row;
+    bottom: 12px;
+    gap: 16px;
+  }
+
+  .result {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="diceGrad512" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff"/>
+      <stop offset="100%" style="stop-color:#e0e0e0"/>
+    </linearGradient>
+    <filter id="shadow512" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="4" dy="8" stdDeviation="8" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="80" fill="#1a472a"/>
+
+  <!-- Felt texture hint -->
+  <rect width="512" height="512" rx="80" fill="url(#feltNoise)" opacity="0.1"/>
+
+  <!-- Dice body -->
+  <g filter="url(#shadow512)">
+    <rect x="116" y="116" width="280" height="280" rx="40" fill="url(#diceGrad512)"/>
+  </g>
+
+  <!-- Dots (showing 5) -->
+  <circle cx="190" cy="190" r="26" fill="#1a472a"/>
+  <circle cx="322" cy="190" r="26" fill="#1a472a"/>
+  <circle cx="256" cy="256" r="26" fill="#1a472a"/>
+  <circle cx="190" cy="322" r="26" fill="#1a472a"/>
+  <circle cx="322" cy="322" r="26" fill="#1a472a"/>
+</svg>

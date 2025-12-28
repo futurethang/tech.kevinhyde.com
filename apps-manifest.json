@@ -17,6 +17,15 @@
       "status": "live",
       "createdAt": "2025-12-28",
       "tags": ["game", "pwa", "entertainment"]
+    },
+    {
+      "slug": "dice-roller",
+      "name": "Dice Roller",
+      "description": "Realistic 3D dice roller with physics - roll 1 to 5 dice!",
+      "type": "static",
+      "status": "live",
+      "createdAt": "2025-12-28",
+      "tags": ["game", "pwa", "3d", "physics"]
     }
   ],
   "slots": [
