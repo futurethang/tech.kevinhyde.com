@@ -9,19 +9,27 @@ const CONFIG = {
   diceMass: 1,
   // Lower gravity = solver converges better, more realistic tumbles
   gravity: -20,
-  // Throw parameters - stronger for longer rolls
-  throwForce: { min: 12, max: 18 },
+  // Throw parameters - base values, scaled by intensity
+  throwForce: { min: 8, max: 22 },  // Wider range for intensity scaling
   throwHeight: 3,
-  spinForce: { min: 8, max: 15 },
+  spinForce: { min: 6, max: 18 },
   // Very low damping = dice roll longer, don't feel sticky
   linearDamping: 0.1,
   angularDamping: 0.1,
   // Settle detection
   settleVelocityThreshold: 0.08,
   settleAngularThreshold: 0.1,
-  // Shake
-  shakeThreshold: 25,
-  shakeTimeout: 600
+  // Dice separation - minimum distance between dice centers
+  minDiceSeparation: 1.3,  // Slightly larger than dice size
+  // Shake detection
+  shakeThreshold: 20,
+  shakeTimeout: 500,
+  // Shake intensity mapping
+  shakeIntensity: {
+    min: 20,   // Minimum acceleration to trigger
+    max: 60,   // Acceleration for maximum throw force
+    smoothing: 0.3  // How much to blend with previous reading
+  }
 };
 
 // Physics materials - tuned for realistic behavior
@@ -58,6 +66,8 @@ let diceMaterial, floorMaterial, wallMaterial;
 let shakeEnabled = false;
 let lastShakeTime = 0;
 let motionPermissionGranted = false;
+let currentShakeIntensity = 0;  // 0.0 to 1.0, based on shake force
+let peakAcceleration = 0;       // Track peak during shake gesture
 
 // DOM elements
 const canvas = document.getElementById('diceCanvas');
@@ -353,14 +363,22 @@ function clearDice() {
 // ============================================
 // ROLLING MECHANICS
 // ============================================
-function rollDice() {
+function rollDice(intensity = 0.5) {
   if (isRolling) return;
 
   isRolling = true;
   rollButton.disabled = true;
   resultDisplay.classList.remove('visible');
 
+  // Clamp intensity to valid range
+  intensity = Math.max(0.2, Math.min(1.0, intensity));
+
   const { halfWidth, halfHeight } = getViewBounds();
+
+  // Scale throw force based on intensity (0.2 to 1.0 maps to min-max range)
+  const intensityScale = (intensity - 0.2) / 0.8;  // Normalize to 0-1
+  const baseThrowForce = CONFIG.throwForce.min + intensityScale * (CONFIG.throwForce.max - CONFIG.throwForce.min);
+  const baseSpinForce = CONFIG.spinForce.min + intensityScale * (CONFIG.spinForce.max - CONFIG.spinForce.min);
 
   // Dice originate from bottom of screen (positive Z = toward viewer/bottom)
   // and are thrown forward (negative Z = away from viewer/toward top)
@@ -383,8 +401,8 @@ function rollDice() {
       Math.random() * Math.PI * 2
     );
 
-    // Throw force - primarily forward (negative Z), slight arc upward
-    const throwForce = CONFIG.throwForce.min + Math.random() * (CONFIG.throwForce.max - CONFIG.throwForce.min);
+    // Throw force - scaled by intensity, with some randomness
+    const throwForce = baseThrowForce * (0.9 + Math.random() * 0.2);
 
     // Target: spread across the play area, biased toward opposite corners
     const targetX = (Math.random() - 0.5) * halfWidth * 1.2;
@@ -401,8 +419,8 @@ function rollDice() {
       (dirZ / dirLen) * throwForce          // Primary forward motion
     );
 
-    // Tumbling spin - weighted toward rolling forward
-    const spinForce = CONFIG.spinForce.min + Math.random() * (CONFIG.spinForce.max - CONFIG.spinForce.min);
+    // Tumbling spin - scaled by intensity
+    const spinForce = baseSpinForce * (0.8 + Math.random() * 0.4);
     die.body.angularVelocity.set(
       spinForce * (0.5 + Math.random() * 0.5),  // Roll forward (around X axis)
       (Math.random() - 0.5) * spinForce * 0.5,  // Some yaw
@@ -425,10 +443,83 @@ function checkSettled() {
   });
 
   if (allSettled) {
-    finishRoll();
+    // Separate overlapping dice before showing result
+    separateDice();
+    // Give a moment for separation to complete
+    setTimeout(finishRoll, 200);
   } else {
     setTimeout(checkSettled, 100);
   }
+}
+
+// Separate dice that are too close or overlapping
+function separateDice() {
+  if (dice.length < 2) return;
+
+  const minDist = CONFIG.minDiceSeparation;
+  const { halfWidth, halfHeight } = getViewBounds();
+
+  // First, force all dice to floor level (no stacking)
+  dice.forEach(die => {
+    die.body.position.y = CONFIG.diceSize / 2;
+    die.body.velocity.set(0, 0, 0);
+    die.body.angularVelocity.set(0, 0, 0);
+  });
+
+  // Then separate horizontally if too close
+  for (let iterations = 0; iterations < 10; iterations++) {
+    let needsMoreSeparation = false;
+
+    for (let i = 0; i < dice.length; i++) {
+      for (let j = i + 1; j < dice.length; j++) {
+        const posA = dice[i].body.position;
+        const posB = dice[j].body.position;
+
+        // Distance in XZ plane only (horizontal)
+        const dx = posB.x - posA.x;
+        const dz = posB.z - posA.z;
+        const dist = Math.sqrt(dx * dx + dz * dz);
+
+        if (dist < minDist) {
+          needsMoreSeparation = true;
+
+          // Calculate separation vector
+          const overlap = minDist - dist;
+          let nx, nz;
+
+          if (dist > 0.01) {
+            nx = dx / dist;
+            nz = dz / dist;
+          } else {
+            // If exactly overlapping, push in random direction
+            const angle = Math.random() * Math.PI * 2;
+            nx = Math.cos(angle);
+            nz = Math.sin(angle);
+          }
+
+          // Push both dice apart equally
+          const push = overlap / 2 + 0.1;
+          posA.x -= nx * push;
+          posA.z -= nz * push;
+          posB.x += nx * push;
+          posB.z += nz * push;
+
+          // Keep within bounds
+          posA.x = Math.max(-halfWidth + 0.5, Math.min(halfWidth - 0.5, posA.x));
+          posA.z = Math.max(-halfHeight + 0.5, Math.min(halfHeight - 0.5, posA.z));
+          posB.x = Math.max(-halfWidth + 0.5, Math.min(halfWidth - 0.5, posB.x));
+          posB.z = Math.max(-halfHeight + 0.5, Math.min(halfHeight - 0.5, posB.z));
+        }
+      }
+    }
+
+    if (!needsMoreSeparation) break;
+  }
+
+  // Sync mesh positions
+  dice.forEach(die => {
+    die.mesh.position.copy(die.body.position);
+  });
 }
 
 function finishRoll() {
@@ -542,13 +633,34 @@ function handleMotion(event) {
   if (!acc) return;
 
   const total = Math.abs(acc.x) + Math.abs(acc.y) + Math.abs(acc.z);
+  const now = Date.now();
 
+  // Track peak acceleration during shake gesture
   if (total > CONFIG.shakeThreshold) {
-    const now = Date.now();
+    // Smooth the peak reading
+    peakAcceleration = Math.max(
+      peakAcceleration * (1 - CONFIG.shakeIntensity.smoothing),
+      total
+    );
+
+    // Check if enough time has passed since last roll
     if (now - lastShakeTime > CONFIG.shakeTimeout) {
       lastShakeTime = now;
-      rollDice();
+
+      // Map acceleration to intensity (0.2 to 1.0)
+      const { min, max } = CONFIG.shakeIntensity;
+      const normalizedAcc = Math.min(1, Math.max(0, (peakAcceleration - min) / (max - min)));
+      const intensity = 0.2 + normalizedAcc * 0.8;
+
+      // Roll with calculated intensity
+      rollDice(intensity);
+
+      // Reset peak for next shake
+      peakAcceleration = 0;
     }
+  } else {
+    // Decay peak when not shaking
+    peakAcceleration *= 0.9;
   }
 }
 
