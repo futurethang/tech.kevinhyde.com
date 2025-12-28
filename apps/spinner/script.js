@@ -58,7 +58,7 @@ class Spinner {
 
     this.isSpinning = true;
     this.spinButton.disabled = true;
-    this.spinner.classList.remove('celebrate', 'finishing');
+    this.spinner.classList.remove('celebrate');
 
     // Generate random final position
     const randomAngle = this.generateRandomAngle();
@@ -82,9 +82,8 @@ class Spinner {
     // Handle spin completion
     const spinDuration = 4000; // matches CSS transition
 
-    // Add finishing effect near the end
+    // Haptic feedback near the end (no visual effect to avoid jitter)
     setTimeout(() => {
-      this.spinner.classList.add('finishing');
       this.triggerHaptic('medium');
     }, spinDuration - 500);
 
@@ -92,7 +91,7 @@ class Spinner {
     setTimeout(() => {
       this.isSpinning = false;
       this.spinButton.disabled = false;
-      this.spinner.classList.remove('spinning', 'finishing');
+      this.spinner.classList.remove('spinning');
       this.spinner.classList.add('celebrate');
       this.triggerHaptic('heavy');
 
