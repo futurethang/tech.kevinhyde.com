@@ -31,29 +31,36 @@
   <div class="app">
     <canvas id="diceCanvas"></canvas>
 
+    <!-- Result display - top of screen -->
+    <div class="result" id="result"></div>
+
+    <!-- Minimal floating controls -->
     <div class="controls">
-      <div class="dice-selector">
-        <label>Dice:</label>
-        <div class="dice-buttons" id="diceButtons">
-          <button class="dice-btn" data-count="1">1</button>
-          <button class="dice-btn active" data-count="2">2</button>
-          <button class="dice-btn" data-count="3">3</button>
-          <button class="dice-btn" data-count="4">4</button>
-          <button class="dice-btn" data-count="5">5</button>
-        </div>
+      <!-- Dice count selector -->
+      <div class="dice-selector" id="diceButtons">
+        <button class="dice-btn" data-count="1">1</button>
+        <button class="dice-btn active" data-count="2">2</button>
+        <button class="dice-btn" data-count="3">3</button>
+        <button class="dice-btn" data-count="4">4</button>
+        <button class="dice-btn" data-count="5">5</button>
       </div>
 
-      <button class="roll-button" id="rollButton">
-        <span class="roll-text">ROLL</span>
-      </button>
+      <!-- Roll button -->
+      <button class="roll-button" id="rollButton">ROLL</button>
 
-      <div class="result" id="result"></div>
+      <!-- Shake toggle -->
+      <button class="shake-toggle" id="shakeToggle">
+        <svg class="shake-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M2 8l2-2m0 0l2-2M4 6l2 2M4 6L2 4"/>
+          <rect x="6" y="4" width="12" height="16" rx="2"/>
+          <path d="M20 8l2-2m0 0l2-2m-2 2l2 2m-2-2l-2-2"/>
+        </svg>
+        <span class="shake-status" id="shakeStatus">OFF</span>
+      </button>
     </div>
 
-    <div class="felt-border top"></div>
-    <div class="felt-border bottom"></div>
-    <div class="felt-border left"></div>
-    <div class="felt-border right"></div>
+    <!-- Subtle felt border -->
+    <div class="felt-edge"></div>
   </div>
 
   <script type="module" src="script.js"></script>

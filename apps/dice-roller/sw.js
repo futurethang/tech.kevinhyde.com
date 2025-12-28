@@ -1,5 +1,5 @@
 // Service Worker for Dice Roller PWA
-const CACHE_NAME = 'dice-roller-v1';
+const CACHE_NAME = 'dice-roller-v2';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
