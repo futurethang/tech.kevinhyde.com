@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#1a1a2e">
+  <meta name="description" content="A random spinner for game night - spin to pick a player!">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Spinner">
+
+  <title>Spinner - Game Night Selector</title>
+
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.svg">
+  <link rel="icon" type="image/svg+xml" href="icon-192.svg">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>Spinner</h1>
+      <p class="subtitle">Tap to spin!</p>
+    </header>
+
+    <main class="spinner-container">
+      <div class="spinner-ring"></div>
+      <div class="spinner-glow"></div>
+      <div class="spinner" id="spinner">
+        <div class="spinner-face">
+          <div class="spinner-center"></div>
+          <div class="spinner-arrow"></div>
+        </div>
+      </div>
+      <div class="direction-markers">
+        <span class="marker" style="--angle: 0deg;"></span>
+        <span class="marker" style="--angle: 45deg;"></span>
+        <span class="marker" style="--angle: 90deg;"></span>
+        <span class="marker" style="--angle: 135deg;"></span>
+        <span class="marker" style="--angle: 180deg;"></span>
+        <span class="marker" style="--angle: 225deg;"></span>
+        <span class="marker" style="--angle: 270deg;"></span>
+        <span class="marker" style="--angle: 315deg;"></span>
+      </div>
+    </main>
+
+    <button class="spin-button" id="spinButton">
+      <span class="button-text">SPIN</span>
+      <span class="button-icon">&#10148;</span>
+    </button>
+
+    <footer>
+      <p>Place phone in center of table</p>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

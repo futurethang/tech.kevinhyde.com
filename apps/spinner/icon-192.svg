@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e"/>
+      <stop offset="100%" style="stop-color:#0f0f1a"/>
+    </linearGradient>
+    <linearGradient id="arrow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#e94560"/>
+      <stop offset="100%" style="stop-color:#ff6b6b"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffd700"/>
+      <stop offset="100%" style="stop-color:#b8860b"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="192" height="192" rx="40" fill="url(#bg)"/>
+
+  <!-- Outer ring -->
+  <circle cx="96" cy="96" r="70" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="3"/>
+
+  <!-- Spinner face -->
+  <circle cx="96" cy="96" r="55" fill="#1f1f3a"/>
+
+  <!-- Arrow -->
+  <polygon points="96,30 80,70 112,70" fill="url(#arrow)"/>
+  <rect x="91" y="60" width="10" height="35" rx="5" fill="url(#arrow)"/>
+
+  <!-- Center -->
+  <circle cx="96" cy="96" r="18" fill="url(#gold)"/>
+</svg>
