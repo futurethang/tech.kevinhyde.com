@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+  <meta name="theme-color" content="#1a472a">
+  <meta name="description" content="A realistic 3D dice roller with physics - roll 1 to 5 dice!">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Dice Roller">
+
+  <title>Dice Roller - 3D Physics Dice</title>
+
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.svg">
+  <link rel="icon" type="image/svg+xml" href="icon-192.svg">
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- Three.js and Cannon-es from CDN -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "cannon-es": "https://unpkg.com/cannon-es@0.20.0/dist/cannon-es.js"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div class="app">
+    <canvas id="diceCanvas"></canvas>
+
+    <div class="controls">
+      <div class="dice-selector">
+        <label>Dice:</label>
+        <div class="dice-buttons" id="diceButtons">
+          <button class="dice-btn" data-count="1">1</button>
+          <button class="dice-btn active" data-count="2">2</button>
+          <button class="dice-btn" data-count="3">3</button>
+          <button class="dice-btn" data-count="4">4</button>
+          <button class="dice-btn" data-count="5">5</button>
+        </div>
+      </div>
+
+      <button class="roll-button" id="rollButton">
+        <span class="roll-text">ROLL</span>
+      </button>
+
+      <div class="result" id="result"></div>
+    </div>
+
+    <div class="felt-border top"></div>
+    <div class="felt-border bottom"></div>
+    <div class="felt-border left"></div>
+    <div class="felt-border right"></div>
+  </div>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>
