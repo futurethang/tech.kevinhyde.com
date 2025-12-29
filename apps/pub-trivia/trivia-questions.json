@@ -11,225 +11,224 @@
       "questions": [
         {
           "id": "r1q1",
-          "type": "open",
-          "category": "Geography",
-          "difficulty": "easy",
-          "question": "What is the only country in the world that starts with the letter 'Q'?",
-          "answer": "Qatar",
-          "acceptableAnswers": ["Qatar"],
-          "funFact": "Qatar will host the 2030 Asian Games!",
-          "hostHint": "It's in the Middle East and hosted the 2022 FIFA World Cup"
-        },
-        {
-          "id": "r1q2",
           "type": "multiple-choice",
           "category": "Science",
           "difficulty": "medium",
-          "question": "How many bones does an adult human body have?",
-          "options": ["186", "206", "226", "256"],
-          "answer": "206",
-          "acceptableAnswers": ["206"],
-          "funFact": "Babies are born with about 270 bones, but many fuse together as we grow!"
+          "question": "On average, which planet is actually closest to Earth - not Venus, but this small, fast-orbiting world?",
+          "options": ["Mars", "Mercury", "Venus", "Jupiter"],
+          "answer": "Mercury",
+          "acceptableAnswers": ["Mercury"],
+          "funFact": "While Venus comes closer to Earth at times, Mercury's tighter orbit around the Sun means it's actually nearest to Earth on average - about 1.04 AU compared to Venus at 1.14 AU."
         },
         {
-          "id": "r1q3",
-          "type": "open",
-          "category": "History",
-          "difficulty": "medium",
-          "question": "In what year did the Titanic sink on its maiden voyage?",
-          "answer": "1912",
-          "acceptableAnswers": ["1912"],
-          "funFact": "The Titanic's band famously kept playing as the ship sank"
-        },
-        {
-          "id": "r1q4",
-          "type": "musical",
-          "category": "Music",
-          "difficulty": "easy",
-          "question": "Complete this classic lyric: 'Should old acquaintance be forgot, and never brought to ____?'",
-          "answer": "mind",
-          "acceptableAnswers": ["mind"],
-          "songTitle": "Auld Lang Syne",
-          "hostHint": "Very appropriate for tonight! This is the traditional New Year's Eve song.",
-          "funFact": "The song was written by Scottish poet Robert Burns in 1788"
-        },
-        {
-          "id": "r1q5",
+          "id": "r1q2",
           "type": "open",
           "category": "Pop Culture",
           "difficulty": "medium",
-          "question": "What fictional city is the home of Batman?",
-          "answer": "Gotham City",
-          "acceptableAnswers": ["Gotham", "Gotham City"],
-          "funFact": "Gotham was actually a nickname for New York City before Batman existed!"
+          "question": "Author Joe Hill successfully published novels for 10 years before revealing his famous father's identity. Who is his father?",
+          "answer": "Stephen King",
+          "acceptableAnswers": ["Stephen King", "Steve King"],
+          "funFact": "Joe Hill is the author of 'Horns' and 'NOS4A2'. He deliberately kept his parentage secret to succeed on his own merits."
+        },
+        {
+          "id": "r1q3",
+          "type": "multiple-choice",
+          "category": "Food & Drink",
+          "difficulty": "medium",
+          "question": "Doritos corn chips were actually invented at a restaurant in which famous theme park?",
+          "options": ["Six Flags", "Disneyland", "Universal Studios", "Busch Gardens"],
+          "answer": "Disneyland",
+          "acceptableAnswers": ["Disneyland"],
+          "funFact": "Arch West created Doritos at Casa de Fritos in Disneyland in 1966, using leftover tortillas that were being thrown away."
+        },
+        {
+          "id": "r1q4",
+          "type": "open",
+          "category": "Language",
+          "difficulty": "medium",
+          "question": "What is a single strand of spaghetti called?",
+          "answer": "Spaghetto",
+          "acceptableAnswers": ["Spaghetto", "A spaghetto"],
+          "funFact": "In Italian, 'spaghetti' is actually the plural form. The singular 'spaghetto' comes from 'spago' meaning 'string' or 'twine'."
+        },
+        {
+          "id": "r1q5",
+          "type": "multiple-choice",
+          "category": "Geography",
+          "difficulty": "medium",
+          "question": "In Sedona, Arizona, McDonald's uses what unusual color instead of their traditional golden arches yellow?",
+          "options": ["Brown", "Turquoise", "Terracotta", "Forest Green"],
+          "answer": "Turquoise",
+          "acceptableAnswers": ["Turquoise", "Teal", "Blue-green"],
+          "funFact": "Sedona officials worried the yellow would clash with the red rock scenery, making it the only McDonald's in the world with turquoise arches."
         },
         {
           "id": "r1q6",
-          "type": "multiple-choice",
-          "category": "Food & Drink",
-          "difficulty": "easy",
-          "question": "What is the main ingredient in traditional hummus?",
-          "options": ["Lentils", "Black beans", "Chickpeas", "Split peas"],
-          "answer": "Chickpeas",
-          "acceptableAnswers": ["Chickpeas", "Garbanzo beans"],
-          "funFact": "Hummus dates back over 7,000 years to ancient Egypt!"
+          "type": "open",
+          "category": "Comics & Science",
+          "difficulty": "medium",
+          "question": "Gary Larson's 'The Far Side' comic invented a joke name for the spikes on a Stegosaurus tail. What term, now used by actual scientists, did he create?",
+          "answer": "Thagomizer",
+          "acceptableAnswers": ["Thagomizer", "The thagomizer"],
+          "hostHint": "The joke was that it was named 'after the late Thag Simmons'",
+          "funFact": "Paleontologists loved it so much they adopted 'thagomizer' as the actual scientific term - it now appears in academic papers!"
         },
         {
           "id": "r1q7",
-          "type": "open",
-          "category": "Literature",
+          "type": "multiple-choice",
+          "category": "Sports",
           "difficulty": "medium",
-          "question": "What author created the character of Sherlock Holmes?",
-          "answer": "Arthur Conan Doyle",
-          "acceptableAnswers": ["Arthur Conan Doyle", "Conan Doyle", "Sir Arthur Conan Doyle"],
-          "funFact": "Doyle actually grew tired of Holmes and tried to kill him off at Reichenbach Falls!"
+          "question": "What fruit can be found at the very top of the men's Wimbledon trophy?",
+          "options": ["Apple", "Pineapple", "Grape cluster", "Strawberry"],
+          "answer": "Pineapple",
+          "acceptableAnswers": ["Pineapple"],
+          "funFact": "The pineapple was a symbol of hospitality in 18th century England, when the trophy was designed. Pineapples were so rare they were often rented for display at parties!"
         },
         {
           "id": "r1q8",
-          "type": "riddle",
-          "category": "Brain Teaser",
+          "type": "open",
+          "category": "Technology",
           "difficulty": "medium",
-          "question": "I have cities, but no houses. I have mountains, but no trees. I have water, but no fish. What am I?",
-          "answer": "A map",
-          "acceptableAnswers": ["A map", "Map"],
-          "hostHint": "Think about representations of the world..."
+          "question": "Google Images was invented because of the massive search demand for photos of what celebrity wearing a specific green dress at the 2000 Grammys?",
+          "answer": "Jennifer Lopez",
+          "acceptableAnswers": ["Jennifer Lopez", "J-Lo", "J Lo", "JLo"],
+          "funFact": "The Versace jungle dress caused so many image searches that Google realized they needed a dedicated image search. The dress has its own Wikipedia page!"
         },
         {
           "id": "r1q9",
-          "type": "open",
-          "category": "Sports",
-          "difficulty": "easy",
-          "question": "In which sport would you perform a slam dunk?",
-          "answer": "Basketball",
-          "acceptableAnswers": ["Basketball"],
-          "funFact": "The slam dunk was actually banned in college basketball from 1967 to 1976!"
+          "type": "multiple-choice",
+          "category": "History",
+          "difficulty": "medium",
+          "question": "Before 'cheese' became the standard, what word did photographers in the 1800s tell subjects to say before taking their picture?",
+          "options": ["Prunes", "Whiskey", "Peas", "Pickles"],
+          "answer": "Prunes",
+          "acceptableAnswers": ["Prunes"],
+          "funFact": "Victorians thought smiling in photos was undignified, so 'prunes' was chosen specifically because it made a serious, puckered expression!"
         },
         {
           "id": "r1q10",
-          "type": "multiple-choice",
+          "type": "open",
           "category": "Nature",
           "difficulty": "medium",
-          "question": "What is the largest living species of lizard?",
-          "options": ["Nile Monitor", "Komodo Dragon", "Green Iguana", "Saltwater Crocodile"],
-          "answer": "Komodo Dragon",
-          "acceptableAnswers": ["Komodo Dragon", "Komodo"],
-          "funFact": "Komodo dragons can grow up to 10 feet long and weigh over 150 pounds! (Note: Crocodiles are not lizards)"
+          "question": "What is a group of flamingos called?",
+          "answer": "A flamboyance",
+          "acceptableAnswers": ["A flamboyance", "Flamboyance", "A stand"],
+          "funFact": "Flamingos aren't born pink - they hatch with gray/white feathers and only turn pink from eating brine shrimp and blue-green algae."
         }
       ]
     },
     {
       "id": "round2",
       "name": "Through the Decades",
-      "description": "Pop culture and events spanning the generations! Something for everyone. 3 points per correct answer.",
+      "description": "Pop culture spanning the generations! Something for everyone. 3 points per correct answer.",
       "pointsPerQuestion": 3,
       "timePerQuestion": 60,
       "questions": [
         {
           "id": "r2q1",
           "type": "open",
-          "category": "1960s",
+          "category": "1970s",
           "difficulty": "medium",
-          "question": "What was the name of the famous music festival held in upstate New York in August 1969, featuring Jimi Hendrix, The Who, and Janis Joplin?",
-          "answer": "Woodstock",
-          "acceptableAnswers": ["Woodstock", "Woodstock Festival", "Woodstock Music Festival"],
-          "funFact": "Despite being called Woodstock, it was actually held in Bethel, NY - about 40 miles from Woodstock!"
+          "question": "In 1973, Billie Jean King defeated Bobby Riggs in a famous tennis match watched by 90 million viewers. What was this event called?",
+          "answer": "The Battle of the Sexes",
+          "acceptableAnswers": ["The Battle of the Sexes", "Battle of the Sexes"],
+          "funFact": "King won in straight sets 6-4, 6-3, 6-3. Riggs had previously beaten Margaret Court, the world #1, which set up this showdown."
         },
         {
           "id": "r2q2",
-          "type": "musical",
+          "type": "multiple-choice",
           "category": "1970s",
           "difficulty": "medium",
-          "question": "Complete the disco lyric: 'Ah, ha, ha, ha, stayin' alive, stayin' alive. Ah, ha, ha, ha, ______'",
-          "answer": "stayin' alive",
-          "acceptableAnswers": ["stayin' alive", "staying alive", "stayin alive"],
-          "songTitle": "Stayin' Alive by the Bee Gees",
-          "hostHint": "This Bee Gees hit from Saturday Night Fever has saved lives - it has the perfect tempo for CPR!",
-          "funFact": "The song is 104 beats per minute - the ideal rate for chest compressions"
+          "question": "Gary Dahl became a millionaire in 1975 by selling what inanimate objects as 'pets' - complete with a carrying case and care instructions?",
+          "options": ["Sea Monkeys", "Pet Rocks", "Chia Pets", "Mood Rings"],
+          "answer": "Pet Rocks",
+          "acceptableAnswers": ["Pet Rocks", "Pet Rock"],
+          "funFact": "The Pet Rock fad lasted about 6 months but sold over 1.5 million rocks at $4 each. Dahl made about $15 million before the fad died."
         },
         {
           "id": "r2q3",
-          "type": "multiple-choice",
+          "type": "open",
           "category": "1980s",
           "difficulty": "medium",
-          "question": "In the 1985 movie 'The Breakfast Club', the students are serving detention at what high school?",
-          "options": ["Shermer High School", "Ridgemont High", "Bayside High", "Sunnydale High"],
-          "answer": "Shermer High School",
-          "acceptableAnswers": ["Shermer High School", "Shermer High", "Shermer"],
-          "funFact": "Shermer, Illinois is a fictional town that appears in many John Hughes films!"
+          "question": "Originally given the Japanese title 'Puckman' before being renamed for Western audiences, what 1980s arcade game was later named 'Most Successful Coin-Operated Game' by Guinness?",
+          "answer": "Pac-Man",
+          "acceptableAnswers": ["Pac-Man", "Pacman", "Pac Man"],
+          "funFact": "It was renamed from 'Puckman' because arcade operators worried vandals would change the P to an F. Smart move!"
         },
         {
           "id": "r2q4",
-          "type": "open",
-          "category": "1990s",
-          "difficulty": "easy",
-          "question": "What virtual pet toy, shaped like an egg, became a massive craze in 1997?",
-          "answer": "Tamagotchi",
-          "acceptableAnswers": ["Tamagotchi", "Tamagochi"],
-          "funFact": "Over 82 million Tamagotchis were sold worldwide in the first wave!"
+          "type": "multiple-choice",
+          "category": "1980s",
+          "difficulty": "medium",
+          "question": "'Babyland General Hospital' was the fictional birthplace of which wildly popular 1980s collectible dolls, each with their own birth certificate?",
+          "options": ["Strawberry Shortcake", "Cabbage Patch Kids", "Rainbow Brite", "My Little Pony"],
+          "answer": "Cabbage Patch Kids",
+          "acceptableAnswers": ["Cabbage Patch Kids", "Cabbage Patch dolls"],
+          "funFact": "The 1983 Christmas shopping frenzy for these dolls caused actual riots, with some stores using riot gear to control crowds."
         },
         {
           "id": "r2q5",
           "type": "open",
-          "category": "2000s",
+          "category": "1990s",
           "difficulty": "medium",
-          "question": "What social media platform, founded by Mark Zuckerberg, launched in February 2004?",
-          "answer": "Facebook",
-          "acceptableAnswers": ["Facebook", "The Facebook"],
-          "funFact": "It was originally called 'TheFacebook' and only available to Harvard students!"
+          "question": "Which Britpop band had their biggest US hit in 1997 with the explosive 'Song 2,' making everyone yell 'Woo-hoo!'?",
+          "answer": "Blur",
+          "acceptableAnswers": ["Blur"],
+          "funFact": "The song was written as a parody of American grunge rock, but ironically became their only US hit and is now a stadium anthem."
         },
         {
           "id": "r2q6",
           "type": "multiple-choice",
-          "category": "2010s",
-          "difficulty": "easy",
-          "question": "What 2013 Disney animated film features the song 'Let It Go'?",
-          "options": ["Tangled", "Frozen", "Moana", "Brave"],
-          "answer": "Frozen",
-          "acceptableAnswers": ["Frozen"],
-          "funFact": "The songwriters wrote 'Let It Go' in just one day!"
+          "category": "1990s",
+          "difficulty": "medium",
+          "question": "In 1997, what Spanish pop duo released the song that sparked a worldwide dance craze with a distinctive arm-crossing move?",
+          "options": ["Gipsy Kings", "Los del Río", "Mecano", "La Oreja de Van Gogh"],
+          "answer": "Los del Río",
+          "acceptableAnswers": ["Los del Río", "Los del Rio"],
+          "funFact": "The Macarena spent 14 weeks at #1 on the Billboard Hot 100. Both members of Los del Río were in their 60s when it became a hit!"
         },
         {
           "id": "r2q7",
           "type": "open",
-          "category": "2020s",
+          "category": "2000s",
           "difficulty": "medium",
-          "question": "What short-form video app, known for viral dances and trends, surpassed 1 billion users in 2021?",
-          "answer": "TikTok",
-          "acceptableAnswers": ["TikTok", "Tik Tok"],
-          "funFact": "TikTok users watch an average of 95 minutes of content per day!"
+          "question": "In 2002, what animated movie took home the first-ever Academy Award for Best Animated Feature?",
+          "answer": "Shrek",
+          "acceptableAnswers": ["Shrek"],
+          "funFact": "Shrek beat out Monsters Inc. and Jimmy Neutron. The category was created because animation had become so sophisticated it deserved its own award."
         },
         {
           "id": "r2q8",
-          "type": "musical",
-          "category": "Classic Rock",
+          "type": "multiple-choice",
+          "category": "2000s",
           "difficulty": "medium",
-          "question": "Name that tune! The host will hum or sing: 'We will, we will ROCK YOU!' What Queen song is this?",
-          "answer": "We Will Rock You",
-          "acceptableAnswers": ["We Will Rock You"],
-          "songTitle": "We Will Rock You by Queen",
-          "hostHint": "Stomp-stomp-clap pattern! Feel free to get the whole room doing it!",
-          "funFact": "Brian May wrote this song specifically to be performed by stadium crowds"
+          "question": "The internet prank where Rick Astley's 'Never Gonna Give You Up' music video is unexpectedly planted into an unrelated link became popular around 2008. What is this called?",
+          "options": ["Punk'd", "Rick Rolling", "Astley Bombing", "The Rick Trick"],
+          "answer": "Rick Rolling",
+          "acceptableAnswers": ["Rick Rolling", "Rickrolling", "Rickroll"],
+          "funFact": "By 2021, the original video had over 1 billion views. Rick Astley himself has said he finds it hilarious and feels honored."
         },
         {
           "id": "r2q9",
           "type": "open",
-          "category": "Television",
+          "category": "2010s",
           "difficulty": "medium",
-          "question": "What long-running animated TV show features a family with children named Bart, Lisa, and Maggie?",
-          "answer": "The Simpsons",
-          "acceptableAnswers": ["The Simpsons", "Simpsons"],
-          "funFact": "The Simpsons has been on the air since 1989, making it the longest-running American animated program!"
+          "question": "What fantasy TV series holds the record for the most Emmy Awards won by a drama series, with 59 total wins?",
+          "answer": "Game of Thrones",
+          "acceptableAnswers": ["Game of Thrones", "GoT"],
+          "funFact": "The show won Best Drama 4 times and ran for 8 seasons. The finale was watched by 19.3 million viewers."
         },
         {
           "id": "r2q10",
-          "type": "creative",
+          "type": "musical",
           "category": "All Eras",
-          "difficulty": "hard",
-          "question": "TEAM CHALLENGE: Each team must quickly agree on their collective answer. What decade was 'the best' for music, and name ONE hit song from that decade to prove it. Teams earn points for having a valid song from their chosen decade!",
-          "answer": "Any valid decade + song combination",
-          "acceptableAnswers": ["*"],
-          "hostHint": "This is subjective! Award points if the song genuinely is from the decade they claim. Bonus point if they can sing a few bars!",
-          "funFact": "This question is meant to spark fun debate between generations!"
+          "difficulty": "medium",
+          "question": "SING-OFF BONUS: The host will play or hum the opening notes. Teams must identify 'Bohemian Rhapsody' by Queen. For full points, what year was this epic 6-minute song released?",
+          "answer": "1975",
+          "acceptableAnswers": ["1975"],
+          "songTitle": "Bohemian Rhapsody by Queen",
+          "hostHint": "Hum 'Is this the real life? Is this just fantasy?' - Award 2 points for the song title, 1 bonus point for the correct year.",
+          "funFact": "The song was considered too long for radio at 5:55, but became the third best-selling UK single of all time."
         }
       ]
     },
@@ -244,122 +243,122 @@
         {
           "id": "lrq1",
           "type": "open",
-          "category": "Quick Fire",
-          "question": "What color are Smurfs?",
-          "answer": "Blue",
-          "acceptableAnswers": ["Blue"]
+          "category": "New Year's",
+          "question": "In what year did the Times Square ball drop tradition begin?",
+          "answer": "1907",
+          "acceptableAnswers": ["1907"]
         },
         {
           "id": "lrq2",
           "type": "open",
-          "category": "Quick Fire",
-          "question": "How many days are in a leap year?",
-          "answer": "366",
-          "acceptableAnswers": ["366", "Three hundred sixty-six"]
+          "category": "New Year's",
+          "question": "How many grapes do Spaniards traditionally eat at midnight on New Year's Eve - one for each chime of the clock?",
+          "answer": "12",
+          "acceptableAnswers": ["12", "Twelve"]
         },
         {
           "id": "lrq3",
           "type": "open",
-          "category": "Quick Fire",
-          "question": "What planet is known as the Red Planet?",
-          "answer": "Mars",
-          "acceptableAnswers": ["Mars"]
+          "category": "Geography",
+          "question": "South Africa has three capital cities. Name ANY one of them.",
+          "answer": "Pretoria, Cape Town, or Bloemfontein",
+          "acceptableAnswers": ["Pretoria", "Cape Town", "Bloemfontein"]
         },
         {
           "id": "lrq4",
           "type": "open",
-          "category": "Quick Fire",
-          "question": "In what country would you find the Eiffel Tower?",
-          "answer": "France",
-          "acceptableAnswers": ["France"]
+          "category": "Music",
+          "question": "What 1965 space mission made 'Jingle Bells' the first song ever played in space?",
+          "answer": "Gemini 6",
+          "acceptableAnswers": ["Gemini 6", "Gemini 6A", "Gemini VI", "Gemini"]
         },
         {
           "id": "lrq5",
           "type": "open",
-          "category": "Quick Fire",
-          "question": "What do you call a baby dog?",
-          "answer": "Puppy",
-          "acceptableAnswers": ["Puppy", "Pup"]
+          "category": "Astronomy",
+          "question": "What cute name did astronomers give to the Universe's average color - a beige shade close to white?",
+          "answer": "Cosmic Latte",
+          "acceptableAnswers": ["Cosmic Latte", "Cosmic latte"]
         },
         {
           "id": "lrq6",
           "type": "open",
-          "category": "Quick Fire",
-          "question": "What superhero is also known as the 'Man of Steel'?",
-          "answer": "Superman",
-          "acceptableAnswers": ["Superman"]
+          "category": "Literature",
+          "question": "Robert Burns wrote 'Auld Lang Syne' in 1788. What do the words 'auld lang syne' mean in English?",
+          "answer": "Times long past",
+          "acceptableAnswers": ["Times long past", "Old long since", "Days gone by", "Long long ago", "Old times"]
         },
         {
           "id": "lrq7",
           "type": "open",
-          "category": "Quick Fire",
-          "question": "How many sides does a hexagon have?",
-          "answer": "6",
-          "acceptableAnswers": ["6", "Six"]
+          "category": "New Year's",
+          "question": "In what color underwear do Italians traditionally dress on New Year's Eve for good luck?",
+          "answer": "Red",
+          "acceptableAnswers": ["Red"]
         },
         {
           "id": "lrq8",
           "type": "open",
-          "category": "Quick Fire",
-          "question": "What fruit do you traditionally bob for at Halloween?",
-          "answer": "Apples",
-          "acceptableAnswers": ["Apples", "Apple"]
+          "category": "Science",
+          "question": "Marie Curie won Nobel Prizes in two different scientific fields. Name either one.",
+          "answer": "Physics or Chemistry",
+          "acceptableAnswers": ["Physics", "Chemistry"]
         },
         {
           "id": "lrq9",
           "type": "open",
-          "category": "Quick Fire",
-          "question": "What animal is Bambi?",
-          "answer": "A deer",
-          "acceptableAnswers": ["Deer", "A deer", "Fawn"]
+          "category": "Movies",
+          "question": "What 2010 Christopher Nolan film features dreams within dreams and a spinning top?",
+          "answer": "Inception",
+          "acceptableAnswers": ["Inception"]
         },
         {
           "id": "lrq10",
           "type": "open",
-          "category": "Quick Fire",
-          "question": "What do we drop in Times Square at midnight on New Year's Eve?",
-          "answer": "A ball",
-          "acceptableAnswers": ["A ball", "Ball", "The ball", "Crystal ball", "New Year's ball"]
+          "category": "TV",
+          "question": "What show about a chemistry teacher turned drug lord won the Emmy for Outstanding Drama Series twice?",
+          "answer": "Breaking Bad",
+          "acceptableAnswers": ["Breaking Bad"]
         },
         {
           "id": "lrq11",
           "type": "open",
-          "category": "Quick Fire",
-          "question": "What is the largest ocean on Earth?",
-          "answer": "Pacific",
-          "acceptableAnswers": ["Pacific", "Pacific Ocean", "The Pacific"]
+          "category": "New Year's",
+          "question": "How many times do Japanese temples ring their bells to welcome the new year?",
+          "answer": "108",
+          "acceptableAnswers": ["108", "One hundred eight", "One hundred and eight"]
         },
         {
           "id": "lrq12",
           "type": "open",
-          "category": "Quick Fire",
-          "question": "Who wrote 'Romeo and Juliet'?",
-          "answer": "Shakespeare",
-          "acceptableAnswers": ["Shakespeare", "William Shakespeare"]
+          "category": "Geography",
+          "question": "The Times Square ball weighs about how many pounds - 1,000, 6,000, or 12,000?",
+          "answer": "12,000",
+          "acceptableAnswers": ["12000", "12,000", "About 12000", "Nearly 12000", "11875"]
         },
         {
           "id": "lrq13",
           "type": "open",
-          "category": "Quick Fire",
-          "question": "What is frozen water called?",
-          "answer": "Ice",
-          "acceptableAnswers": ["Ice"]
+          "category": "Tech",
+          "question": "When Twitter launched in 2006, posts were limited to how many characters?",
+          "answer": "140",
+          "acceptableAnswers": ["140", "One hundred forty"]
         },
         {
           "id": "lrq14",
           "type": "open",
-          "category": "Quick Fire",
-          "question": "What holiday comes the day after New Year's Eve?",
-          "answer": "New Year's Day",
-          "acceptableAnswers": ["New Year's Day", "New Years Day", "New Year"]
+          "category": "Food",
+          "question": "In the American South, what are you supposed to eat on New Year's Day for prosperity - the greens represent money?",
+          "answer": "Collard greens",
+          "acceptableAnswers": ["Collard greens", "Collards", "Greens", "Black eyed peas and collard greens"]
         },
         {
           "id": "lrq15",
           "type": "open",
-          "category": "Quick Fire",
-          "question": "Final question! What year are we about to enter at midnight tonight?",
-          "answer": "2025",
-          "acceptableAnswers": ["2025", "Twenty twenty-five"]
+          "category": "New Year's",
+          "question": "Final question! Due to the International Date Line, what Pacific island nation celebrates New Year's first each year?",
+          "answer": "Kiribati",
+          "acceptableAnswers": ["Kiribati", "Kiritimati", "Christmas Island"]
         }
       ]
     }
@@ -377,9 +376,18 @@
       "id": "bonus2",
       "type": "open",
       "category": "Tiebreaker",
-      "question": "CLOSEST GUESS: How many M&Ms can fit in a standard 16oz mason jar?",
-      "answer": "509",
-      "hostHint": "Actual answer varies, but ~509 is average. Closest guess without going over wins, Price is Right style!"
+      "question": "CLOSEST GUESS: The Times Square New Year's Eve ball contains how many LED lights? (Hint: it's over 30,000)",
+      "answer": "32,256",
+      "hostHint": "Closest guess without going over wins, Price is Right style!"
+    },
+    {
+      "id": "bonus3",
+      "type": "open",
+      "category": "Tiebreaker",
+      "question": "CLOSEST GUESS: What percentage of New Year's resolutions are typically abandoned by February?",
+      "answer": "80%",
+      "acceptableAnswers": ["80", "80%", "Eighty percent"],
+      "hostHint": "Accept anything from 75-85% as correct. It's higher than most people think!"
     }
   ],
   "scoringRules": {
