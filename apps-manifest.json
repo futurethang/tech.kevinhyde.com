@@ -26,6 +26,15 @@
       "status": "live",
       "createdAt": "2025-12-28",
       "tags": ["game", "pwa", "3d", "physics"]
+    },
+    {
+      "slug": "pub-trivia",
+      "name": "Pub Trivia",
+      "description": "Family-friendly pub trivia game for New Year's Eve with multiple rounds and team scoring",
+      "type": "static",
+      "status": "live",
+      "createdAt": "2025-12-29",
+      "tags": ["game", "trivia", "party", "family"]
     }
   ],
   "slots": [
