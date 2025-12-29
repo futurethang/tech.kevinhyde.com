@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Year's Eve Pub Trivia 2025</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1a1a2e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+</head>
+<body>
+  <div id="app">
+    <!-- Setup Screen -->
+    <section id="setup-screen" class="screen active">
+      <div class="container">
+        <h1 class="game-title">New Year's Eve<br>Pub Trivia 2025</h1>
+        <p class="subtitle">Family Edition</p>
+
+        <div class="setup-section">
+          <h2>Team Setup</h2>
+          <div id="teams-container">
+            <div class="team-input">
+              <input type="text" class="team-name-input" placeholder="Team 1 Name" value="">
+            </div>
+            <div class="team-input">
+              <input type="text" class="team-name-input" placeholder="Team 2 Name" value="">
+            </div>
+          </div>
+          <button id="add-team-btn" class="btn btn-secondary">+ Add Team</button>
+        </div>
+
+        <button id="start-game-btn" class="btn btn-primary btn-large">Start Game</button>
+      </div>
+    </section>
+
+    <!-- Game Screen -->
+    <section id="game-screen" class="screen">
+      <header class="game-header">
+        <div class="round-info">
+          <span id="round-name">Round 1</span>
+          <span id="question-counter">Q1 of 10</span>
+        </div>
+        <button id="scoreboard-toggle" class="btn btn-icon" title="View Scoreboard">
+          <span class="icon">📊</span>
+        </button>
+      </header>
+
+      <main class="question-area">
+        <div class="question-meta">
+          <span id="category" class="category-badge">Category</span>
+          <span id="question-type" class="type-badge">Type</span>
+          <span id="points" class="points-badge">2 pts</span>
+        </div>
+
+        <div id="question-card" class="question-card">
+          <p id="question-text" class="question-text">Question will appear here...</p>
+
+          <div id="options-container" class="options-container hidden">
+            <!-- Multiple choice options rendered here -->
+          </div>
+
+          <div id="host-hint" class="host-hint hidden">
+            <strong>Host Hint:</strong> <span id="hint-text"></span>
+          </div>
+        </div>
+
+        <div id="answer-section" class="answer-section hidden">
+          <div class="answer-reveal">
+            <h3>Answer</h3>
+            <p id="answer-text" class="answer-text"></p>
+            <p id="fun-fact" class="fun-fact hidden"></p>
+          </div>
+        </div>
+
+        <div id="timer-section" class="timer-section">
+          <div id="timer-bar" class="timer-bar"></div>
+          <span id="timer-text" class="timer-text">45s</span>
+        </div>
+      </main>
+
+      <footer class="game-controls">
+        <button id="prev-btn" class="btn btn-secondary" disabled>Previous</button>
+        <button id="reveal-btn" class="btn btn-primary">Reveal Answer</button>
+        <button id="next-btn" class="btn btn-secondary">Next</button>
+      </footer>
+    </section>
+
+    <!-- Scoreboard Modal -->
+    <div id="scoreboard-modal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Scoreboard</h2>
+          <button id="close-scoreboard" class="btn btn-icon">&times;</button>
+        </div>
+        <div id="scoreboard-content" class="scoreboard-content">
+          <!-- Scores rendered here -->
+        </div>
+        <div class="modal-footer">
+          <button id="continue-game" class="btn btn-primary">Continue Game</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Score Input Modal -->
+    <div id="score-modal" class="modal hidden">
+      <div class="modal-content modal-small">
+        <div class="modal-header">
+          <h2>Award Points</h2>
+          <button id="close-score-modal" class="btn btn-icon">&times;</button>
+        </div>
+        <div id="score-buttons" class="score-buttons">
+          <!-- Team buttons rendered here -->
+        </div>
+        <div class="modal-footer">
+          <button id="skip-scoring" class="btn btn-secondary">Skip (No points)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Round Complete Screen -->
+    <section id="round-complete-screen" class="screen">
+      <div class="container centered">
+        <h2 id="round-complete-title">Round Complete!</h2>
+        <div id="round-scores" class="round-scores">
+          <!-- Scores rendered here -->
+        </div>
+        <button id="next-round-btn" class="btn btn-primary btn-large">Start Next Round</button>
+      </div>
+    </section>
+
+    <!-- Game Complete Screen -->
+    <section id="game-complete-screen" class="screen">
+      <div class="container centered">
+        <h1 class="winner-title">Game Over!</h1>
+        <div id="final-standings" class="final-standings">
+          <!-- Final scores rendered here -->
+        </div>
+        <div id="winner-announcement" class="winner-announcement">
+          <!-- Winner announcement -->
+        </div>
+        <div class="celebration">
+          <span class="confetti">🎉</span>
+          <span class="confetti">🎊</span>
+          <span class="confetti">🥳</span>
+        </div>
+        <button id="play-again-btn" class="btn btn-primary btn-large">Play Again</button>
+      </div>
+    </section>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,392 @@
+{
+  "gameTitle": "New Year's Eve Pub Trivia 2025",
+  "hostNotes": "Welcome to our family trivia night! Each round has different formats. Read questions clearly and give teams time to discuss. Have fun with it!",
+  "rounds": [
+    {
+      "id": "round1",
+      "name": "The Warm-Up Round",
+      "description": "A mix of general knowledge to get everyone's brains firing. 2 points per correct answer.",
+      "pointsPerQuestion": 2,
+      "timePerQuestion": 45,
+      "questions": [
+        {
+          "id": "r1q1",
+          "type": "open",
+          "category": "Geography",
+          "difficulty": "easy",
+          "question": "What is the only country in the world that starts with the letter 'Q'?",
+          "answer": "Qatar",
+          "acceptableAnswers": ["Qatar"],
+          "funFact": "Qatar will host the 2030 Asian Games!",
+          "hostHint": "It's in the Middle East and hosted the 2022 FIFA World Cup"
+        },
+        {
+          "id": "r1q2",
+          "type": "multiple-choice",
+          "category": "Science",
+          "difficulty": "medium",
+          "question": "How many bones does an adult human body have?",
+          "options": ["186", "206", "226", "256"],
+          "answer": "206",
+          "acceptableAnswers": ["206"],
+          "funFact": "Babies are born with about 270 bones, but many fuse together as we grow!"
+        },
+        {
+          "id": "r1q3",
+          "type": "open",
+          "category": "History",
+          "difficulty": "medium",
+          "question": "In what year did the Titanic sink on its maiden voyage?",
+          "answer": "1912",
+          "acceptableAnswers": ["1912"],
+          "funFact": "The Titanic's band famously kept playing as the ship sank"
+        },
+        {
+          "id": "r1q4",
+          "type": "musical",
+          "category": "Music",
+          "difficulty": "easy",
+          "question": "Complete this classic lyric: 'Should old acquaintance be forgot, and never brought to ____?'",
+          "answer": "mind",
+          "acceptableAnswers": ["mind"],
+          "songTitle": "Auld Lang Syne",
+          "hostHint": "Very appropriate for tonight! This is the traditional New Year's Eve song.",
+          "funFact": "The song was written by Scottish poet Robert Burns in 1788"
+        },
+        {
+          "id": "r1q5",
+          "type": "open",
+          "category": "Pop Culture",
+          "difficulty": "medium",
+          "question": "What fictional city is the home of Batman?",
+          "answer": "Gotham City",
+          "acceptableAnswers": ["Gotham", "Gotham City"],
+          "funFact": "Gotham was actually a nickname for New York City before Batman existed!"
+        },
+        {
+          "id": "r1q6",
+          "type": "multiple-choice",
+          "category": "Food & Drink",
+          "difficulty": "easy",
+          "question": "What is the main ingredient in traditional hummus?",
+          "options": ["Lentils", "Black beans", "Chickpeas", "Split peas"],
+          "answer": "Chickpeas",
+          "acceptableAnswers": ["Chickpeas", "Garbanzo beans"],
+          "funFact": "Hummus dates back over 7,000 years to ancient Egypt!"
+        },
+        {
+          "id": "r1q7",
+          "type": "open",
+          "category": "Literature",
+          "difficulty": "medium",
+          "question": "What author created the character of Sherlock Holmes?",
+          "answer": "Arthur Conan Doyle",
+          "acceptableAnswers": ["Arthur Conan Doyle", "Conan Doyle", "Sir Arthur Conan Doyle"],
+          "funFact": "Doyle actually grew tired of Holmes and tried to kill him off at Reichenbach Falls!"
+        },
+        {
+          "id": "r1q8",
+          "type": "riddle",
+          "category": "Brain Teaser",
+          "difficulty": "medium",
+          "question": "I have cities, but no houses. I have mountains, but no trees. I have water, but no fish. What am I?",
+          "answer": "A map",
+          "acceptableAnswers": ["A map", "Map"],
+          "hostHint": "Think about representations of the world..."
+        },
+        {
+          "id": "r1q9",
+          "type": "open",
+          "category": "Sports",
+          "difficulty": "easy",
+          "question": "In which sport would you perform a slam dunk?",
+          "answer": "Basketball",
+          "acceptableAnswers": ["Basketball"],
+          "funFact": "The slam dunk was actually banned in college basketball from 1967 to 1976!"
+        },
+        {
+          "id": "r1q10",
+          "type": "multiple-choice",
+          "category": "Nature",
+          "difficulty": "medium",
+          "question": "What is the largest living species of lizard?",
+          "options": ["Nile Monitor", "Komodo Dragon", "Green Iguana", "Saltwater Crocodile"],
+          "answer": "Komodo Dragon",
+          "acceptableAnswers": ["Komodo Dragon", "Komodo"],
+          "funFact": "Komodo dragons can grow up to 10 feet long and weigh over 150 pounds! (Note: Crocodiles are not lizards)"
+        }
+      ]
+    },
+    {
+      "id": "round2",
+      "name": "Through the Decades",
+      "description": "Pop culture and events spanning the generations! Something for everyone. 3 points per correct answer.",
+      "pointsPerQuestion": 3,
+      "timePerQuestion": 60,
+      "questions": [
+        {
+          "id": "r2q1",
+          "type": "open",
+          "category": "1960s",
+          "difficulty": "medium",
+          "question": "What was the name of the famous music festival held in upstate New York in August 1969, featuring Jimi Hendrix, The Who, and Janis Joplin?",
+          "answer": "Woodstock",
+          "acceptableAnswers": ["Woodstock", "Woodstock Festival", "Woodstock Music Festival"],
+          "funFact": "Despite being called Woodstock, it was actually held in Bethel, NY - about 40 miles from Woodstock!"
+        },
+        {
+          "id": "r2q2",
+          "type": "musical",
+          "category": "1970s",
+          "difficulty": "medium",
+          "question": "Complete the disco lyric: 'Ah, ha, ha, ha, stayin' alive, stayin' alive. Ah, ha, ha, ha, ______'",
+          "answer": "stayin' alive",
+          "acceptableAnswers": ["stayin' alive", "staying alive", "stayin alive"],
+          "songTitle": "Stayin' Alive by the Bee Gees",
+          "hostHint": "This Bee Gees hit from Saturday Night Fever has saved lives - it has the perfect tempo for CPR!",
+          "funFact": "The song is 104 beats per minute - the ideal rate for chest compressions"
+        },
+        {
+          "id": "r2q3",
+          "type": "multiple-choice",
+          "category": "1980s",
+          "difficulty": "medium",
+          "question": "In the 1985 movie 'The Breakfast Club', the students are serving detention at what high school?",
+          "options": ["Shermer High School", "Ridgemont High", "Bayside High", "Sunnydale High"],
+          "answer": "Shermer High School",
+          "acceptableAnswers": ["Shermer High School", "Shermer High", "Shermer"],
+          "funFact": "Shermer, Illinois is a fictional town that appears in many John Hughes films!"
+        },
+        {
+          "id": "r2q4",
+          "type": "open",
+          "category": "1990s",
+          "difficulty": "easy",
+          "question": "What virtual pet toy, shaped like an egg, became a massive craze in 1997?",
+          "answer": "Tamagotchi",
+          "acceptableAnswers": ["Tamagotchi", "Tamagochi"],
+          "funFact": "Over 82 million Tamagotchis were sold worldwide in the first wave!"
+        },
+        {
+          "id": "r2q5",
+          "type": "open",
+          "category": "2000s",
+          "difficulty": "medium",
+          "question": "What social media platform, founded by Mark Zuckerberg, launched in February 2004?",
+          "answer": "Facebook",
+          "acceptableAnswers": ["Facebook", "The Facebook"],
+          "funFact": "It was originally called 'TheFacebook' and only available to Harvard students!"
+        },
+        {
+          "id": "r2q6",
+          "type": "multiple-choice",
+          "category": "2010s",
+          "difficulty": "easy",
+          "question": "What 2013 Disney animated film features the song 'Let It Go'?",
+          "options": ["Tangled", "Frozen", "Moana", "Brave"],
+          "answer": "Frozen",
+          "acceptableAnswers": ["Frozen"],
+          "funFact": "The songwriters wrote 'Let It Go' in just one day!"
+        },
+        {
+          "id": "r2q7",
+          "type": "open",
+          "category": "2020s",
+          "difficulty": "medium",
+          "question": "What short-form video app, known for viral dances and trends, surpassed 1 billion users in 2021?",
+          "answer": "TikTok",
+          "acceptableAnswers": ["TikTok", "Tik Tok"],
+          "funFact": "TikTok users watch an average of 95 minutes of content per day!"
+        },
+        {
+          "id": "r2q8",
+          "type": "musical",
+          "category": "Classic Rock",
+          "difficulty": "medium",
+          "question": "Name that tune! The host will hum or sing: 'We will, we will ROCK YOU!' What Queen song is this?",
+          "answer": "We Will Rock You",
+          "acceptableAnswers": ["We Will Rock You"],
+          "songTitle": "We Will Rock You by Queen",
+          "hostHint": "Stomp-stomp-clap pattern! Feel free to get the whole room doing it!",
+          "funFact": "Brian May wrote this song specifically to be performed by stadium crowds"
+        },
+        {
+          "id": "r2q9",
+          "type": "open",
+          "category": "Television",
+          "difficulty": "medium",
+          "question": "What long-running animated TV show features a family with children named Bart, Lisa, and Maggie?",
+          "answer": "The Simpsons",
+          "acceptableAnswers": ["The Simpsons", "Simpsons"],
+          "funFact": "The Simpsons has been on the air since 1989, making it the longest-running American animated program!"
+        },
+        {
+          "id": "r2q10",
+          "type": "creative",
+          "category": "All Eras",
+          "difficulty": "hard",
+          "question": "TEAM CHALLENGE: Each team must quickly agree on their collective answer. What decade was 'the best' for music, and name ONE hit song from that decade to prove it. Teams earn points for having a valid song from their chosen decade!",
+          "answer": "Any valid decade + song combination",
+          "acceptableAnswers": ["*"],
+          "hostHint": "This is subjective! Award points if the song genuinely is from the decade they claim. Bonus point if they can sing a few bars!",
+          "funFact": "This question is meant to spark fun debate between generations!"
+        }
+      ]
+    },
+    {
+      "id": "lightning",
+      "name": "Lightning Round",
+      "description": "Speed counts! Quick answers, 1 point each. First team to shout it out wins the point!",
+      "pointsPerQuestion": 1,
+      "timePerQuestion": 10,
+      "hostNotes": "Read these FAST! Teams shout out answers. First correct answer wins. Keep the energy up!",
+      "questions": [
+        {
+          "id": "lrq1",
+          "type": "open",
+          "category": "Quick Fire",
+          "question": "What color are Smurfs?",
+          "answer": "Blue",
+          "acceptableAnswers": ["Blue"]
+        },
+        {
+          "id": "lrq2",
+          "type": "open",
+          "category": "Quick Fire",
+          "question": "How many days are in a leap year?",
+          "answer": "366",
+          "acceptableAnswers": ["366", "Three hundred sixty-six"]
+        },
+        {
+          "id": "lrq3",
+          "type": "open",
+          "category": "Quick Fire",
+          "question": "What planet is known as the Red Planet?",
+          "answer": "Mars",
+          "acceptableAnswers": ["Mars"]
+        },
+        {
+          "id": "lrq4",
+          "type": "open",
+          "category": "Quick Fire",
+          "question": "In what country would you find the Eiffel Tower?",
+          "answer": "France",
+          "acceptableAnswers": ["France"]
+        },
+        {
+          "id": "lrq5",
+          "type": "open",
+          "category": "Quick Fire",
+          "question": "What do you call a baby dog?",
+          "answer": "Puppy",
+          "acceptableAnswers": ["Puppy", "Pup"]
+        },
+        {
+          "id": "lrq6",
+          "type": "open",
+          "category": "Quick Fire",
+          "question": "What superhero is also known as the 'Man of Steel'?",
+          "answer": "Superman",
+          "acceptableAnswers": ["Superman"]
+        },
+        {
+          "id": "lrq7",
+          "type": "open",
+          "category": "Quick Fire",
+          "question": "How many sides does a hexagon have?",
+          "answer": "6",
+          "acceptableAnswers": ["6", "Six"]
+        },
+        {
+          "id": "lrq8",
+          "type": "open",
+          "category": "Quick Fire",
+          "question": "What fruit do you traditionally bob for at Halloween?",
+          "answer": "Apples",
+          "acceptableAnswers": ["Apples", "Apple"]
+        },
+        {
+          "id": "lrq9",
+          "type": "open",
+          "category": "Quick Fire",
+          "question": "What animal is Bambi?",
+          "answer": "A deer",
+          "acceptableAnswers": ["Deer", "A deer", "Fawn"]
+        },
+        {
+          "id": "lrq10",
+          "type": "open",
+          "category": "Quick Fire",
+          "question": "What do we drop in Times Square at midnight on New Year's Eve?",
+          "answer": "A ball",
+          "acceptableAnswers": ["A ball", "Ball", "The ball", "Crystal ball", "New Year's ball"]
+        },
+        {
+          "id": "lrq11",
+          "type": "open",
+          "category": "Quick Fire",
+          "question": "What is the largest ocean on Earth?",
+          "answer": "Pacific",
+          "acceptableAnswers": ["Pacific", "Pacific Ocean", "The Pacific"]
+        },
+        {
+          "id": "lrq12",
+          "type": "open",
+          "category": "Quick Fire",
+          "question": "Who wrote 'Romeo and Juliet'?",
+          "answer": "Shakespeare",
+          "acceptableAnswers": ["Shakespeare", "William Shakespeare"]
+        },
+        {
+          "id": "lrq13",
+          "type": "open",
+          "category": "Quick Fire",
+          "question": "What is frozen water called?",
+          "answer": "Ice",
+          "acceptableAnswers": ["Ice"]
+        },
+        {
+          "id": "lrq14",
+          "type": "open",
+          "category": "Quick Fire",
+          "question": "What holiday comes the day after New Year's Eve?",
+          "answer": "New Year's Day",
+          "acceptableAnswers": ["New Year's Day", "New Years Day", "New Year"]
+        },
+        {
+          "id": "lrq15",
+          "type": "open",
+          "category": "Quick Fire",
+          "question": "Final question! What year are we about to enter at midnight tonight?",
+          "answer": "2025",
+          "acceptableAnswers": ["2025", "Twenty twenty-five"]
+        }
+      ]
+    }
+  ],
+  "bonusQuestions": [
+    {
+      "id": "bonus1",
+      "type": "creative",
+      "category": "Team Challenge",
+      "description": "Use if you need a tiebreaker or want extra fun!",
+      "question": "SING-OFF: Each team has 30 seconds to sing as many song titles as they can that include a NUMBER in the title (e.g., 'I Got 99 Problems', 'One More Night'). One point per unique song!",
+      "hostHint": "Keep a tally. If a song is repeated by another team, neither gets the point for that one!"
+    },
+    {
+      "id": "bonus2",
+      "type": "open",
+      "category": "Tiebreaker",
+      "question": "CLOSEST GUESS: How many M&Ms can fit in a standard 16oz mason jar?",
+      "answer": "509",
+      "hostHint": "Actual answer varies, but ~509 is average. Closest guess without going over wins, Price is Right style!"
+    }
+  ],
+  "scoringRules": {
+    "round1": "2 points per correct answer (max 20 points)",
+    "round2": "3 points per correct answer (max 30 points)",
+    "lightning": "1 point per correct answer (max 15 points)",
+    "bonusPoints": "Available for creative rounds - host discretion",
+    "maxPossible": 65
+  }
+}
