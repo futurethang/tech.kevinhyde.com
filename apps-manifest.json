@@ -1,6 +1,15 @@
 {
   "apps": [
     {
+      "slug": "chompie-advent",
+      "name": "Chompie's December Calendar",
+      "description": "A digital advent calendar featuring Chompie the December Gnome with daily poems and treats",
+      "type": "static",
+      "status": "live",
+      "createdAt": "2026-01-05",
+      "tags": ["holiday", "advent", "interactive", "seasonal"]
+    },
+    {
       "slug": "reading-pacer",
       "name": "ReadPace",
       "description": "Track your reading speed and pace per page",
