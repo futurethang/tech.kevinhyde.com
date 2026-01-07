@@ -1,10 +1,11 @@
 import Dexie, { type EntityTable } from 'dexie'
-import type { UserProfile, WeightEntry, DiaryEntry, SavedFood, FoodItem } from '../types'
+import type { UserProfile, WeightEntry, WaterEntry, DiaryEntry, SavedFood, FoodItem } from '../types'
 
 // Database schema
 class CalTrackDB extends Dexie {
   profile!: EntityTable<UserProfile, 'id'>
   weightEntries!: EntityTable<WeightEntry, 'id'>
+  waterEntries!: EntityTable<WaterEntry, 'id'>
   diaryEntries!: EntityTable<DiaryEntry, 'id'>
   savedFoods!: EntityTable<SavedFood, 'id'>
   customFoods!: EntityTable<FoodItem, 'id'>
@@ -15,6 +16,16 @@ class CalTrackDB extends Dexie {
     this.version(1).stores({
       profile: 'id',
       weightEntries: 'id, date',
+      diaryEntries: 'id, date, meal, foodId',
+      savedFoods: 'id, lastUsed, usageCount',
+      customFoods: 'id, name, source'
+    })
+
+    // Version 2: Add water tracking
+    this.version(2).stores({
+      profile: 'id',
+      weightEntries: 'id, date',
+      waterEntries: 'id, date',
       diaryEntries: 'id, date, meal, foodId',
       savedFoods: 'id, lastUsed, usageCount',
       customFoods: 'id, name, source'
@@ -31,24 +42,42 @@ export function generateId(): string {
 
 // Profile operations
 export async function getProfile(): Promise<UserProfile | undefined> {
-  return db.profile.toCollection().first()
+  const profile = await db.profile.toCollection().first()
+  // Migrate old profiles without new fields
+  if (profile && (profile.unitSystem === undefined || profile.waterGoalOz === undefined)) {
+    const updated: UserProfile = {
+      ...profile,
+      unitSystem: profile.unitSystem ?? 'us',
+      waterGoalOz: profile.waterGoalOz ?? 64
+    }
+    await db.profile.put(updated)
+    return updated
+  }
+  return profile
 }
 
 export async function saveProfile(profile: Omit<UserProfile, 'id' | 'createdAt' | 'updatedAt'>): Promise<UserProfile> {
   const existing = await getProfile()
   const now = new Date().toISOString()
 
+  // Ensure defaults
+  const profileWithDefaults = {
+    ...profile,
+    unitSystem: profile.unitSystem ?? 'us',
+    waterGoalOz: profile.waterGoalOz ?? 64
+  }
+
   if (existing) {
     const updated: UserProfile = {
       ...existing,
-      ...profile,
+      ...profileWithDefaults,
       updatedAt: now
     }
     await db.profile.put(updated)
     return updated
   } else {
     const newProfile: UserProfile = {
-      ...profile,
+      ...profileWithDefaults,
       id: generateId(),
       createdAt: now,
       updatedAt: now
@@ -85,6 +114,31 @@ export async function getLatestWeight(): Promise<WeightEntry | undefined> {
 
 export async function deleteWeightEntry(id: string): Promise<void> {
   await db.weightEntries.delete(id)
+}
+
+// Water entry operations
+export async function addWaterEntry(amountOz: number, date?: string): Promise<WaterEntry> {
+  const entry: WaterEntry = {
+    id: generateId(),
+    date: date || new Date().toISOString().split('T')[0]!,
+    amountOz,
+    createdAt: new Date().toISOString()
+  }
+  await db.waterEntries.add(entry)
+  return entry
+}
+
+export async function getWaterEntriesForDate(date: string): Promise<WaterEntry[]> {
+  return db.waterEntries.where('date').equals(date).toArray()
+}
+
+export async function getTotalWaterForDate(date: string): Promise<number> {
+  const entries = await getWaterEntriesForDate(date)
+  return entries.reduce((sum, e) => sum + e.amountOz, 0)
+}
+
+export async function deleteWaterEntry(id: string): Promise<void> {
+  await db.waterEntries.delete(id)
 }
 
 // Diary entry operations
@@ -183,6 +237,7 @@ export async function clearAllData(): Promise<void> {
   await Promise.all([
     db.profile.clear(),
     db.weightEntries.clear(),
+    db.waterEntries.clear(),
     db.diaryEntries.clear(),
     db.savedFoods.clear(),
     db.customFoods.clear()

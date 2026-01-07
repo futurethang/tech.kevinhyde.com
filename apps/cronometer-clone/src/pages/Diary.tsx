@@ -13,7 +13,8 @@ import {
   Coffee,
   Sun,
   Moon,
-  Cookie
+  Cookie,
+  Droplets
 } from 'lucide-react'
 
 const MEALS: { type: MealType; label: string; icon: typeof Coffee }[] = [
@@ -23,6 +24,8 @@ const MEALS: { type: MealType; label: string; icon: typeof Coffee }[] = [
   { type: 'snack', label: 'Snacks', icon: Cookie }
 ]
 
+const WATER_AMOUNTS = [8, 12, 16, 24] // oz options
+
 export function Diary() {
   const navigate = useNavigate()
   const {
@@ -31,7 +34,8 @@ export function Diary() {
     dailyStats,
     diaryEntries,
     metrics,
-    removeDiaryEntry
+    removeDiaryEntry,
+    addWater
   } = useStore()
 
   const isToday = currentDate === getTodayDate()
@@ -56,6 +60,10 @@ export function Diary() {
   const remaining = dailyStats?.remaining ?? 0
   const percentComplete = dailyStats?.percentComplete ?? 0
   const isOverBudget = remaining < 0
+
+  const waterOz = dailyStats?.waterOz ?? 0
+  const waterGoalOz = dailyStats?.waterGoalOz ?? 64
+  const waterPercentComplete = dailyStats?.waterPercentComplete ?? 0
 
   return (
     <div className="min-h-screen flex flex-col pb-20">
@@ -152,6 +160,44 @@ export function Diary() {
         </div>
       </div>
 
+      {/* Water Tracker */}
+      <div className="px-4 pb-4">
+        <div className="card">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Droplets className="w-5 h-5 text-cyan-400" />
+              <span className="font-medium">Water</span>
+            </div>
+            <span className="text-slate-400">
+              {waterOz} / {waterGoalOz} oz
+            </span>
+          </div>
+
+          {/* Water progress bar */}
+          <div className="h-2 bg-slate-700 rounded-full overflow-hidden mb-3">
+            <div
+              className="h-full rounded-full transition-all duration-300 bg-cyan-500"
+              style={{ width: `${Math.min(100, waterPercentComplete)}%` }}
+            />
+          </div>
+
+          {/* Quick add water buttons */}
+          {isToday && (
+            <div className="flex gap-2">
+              {WATER_AMOUNTS.map(amount => (
+                <button
+                  key={amount}
+                  onClick={() => addWater(amount)}
+                  className="flex-1 py-2 text-sm text-cyan-400 hover:bg-cyan-500/10 rounded-lg border border-cyan-500/30 transition-colors"
+                >
+                  +{amount}oz
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Meals */}
       <div className="flex-1 px-4 space-y-4">
         {MEALS.map(({ type, label, icon: Icon }) => {
@@ -245,9 +291,10 @@ function DiaryEntryRow({
   onDelete: () => void
 }) {
   const calories = Math.round(entry.food.nutrition.calories * entry.servings)
+  const servingDesc = entry.food.servingDescription || `${entry.food.servingSize} ${entry.food.servingUnit}`
   const servingText = entry.servings === 1
-    ? `${entry.food.servingSize} ${entry.food.servingUnit}`
-    : `${entry.servings} × ${entry.food.servingSize} ${entry.food.servingUnit}`
+    ? servingDesc
+    : `${entry.servings} × ${servingDesc}`
 
   return (
     <div className="flex items-center gap-3 py-2 px-3 -mx-3 rounded-lg hover:bg-slate-700/30 group">

@@ -12,6 +12,8 @@ export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack'
 
 export type FoodSource = 'openfoodfacts' | 'usda' | 'custom' | 'quick'
 
+export type UnitSystem = 'metric' | 'us'
+
 // User profile and goals
 export interface UserProfile {
   id: string
@@ -23,6 +25,8 @@ export interface UserProfile {
   goalType: GoalType
   targetWeightKg: number
   targetDate: string       // ISO date string
+  unitSystem: UnitSystem   // metric (kg/cm) or us (lbs/ft-in)
+  waterGoalOz: number      // daily water goal in oz (default 64)
   createdAt: string
   updatedAt: string
 }
@@ -33,6 +37,14 @@ export interface WeightEntry {
   date: string             // YYYY-MM-DD
   weightKg: number
   note?: string
+  createdAt: string
+}
+
+// Water log entry
+export interface WaterEntry {
+  id: string
+  date: string             // YYYY-MM-DD
+  amountOz: number         // in fluid ounces
   createdAt: string
 }
 
@@ -58,7 +70,9 @@ export interface FoodItem {
   brand?: string
   servingSize: number
   servingUnit: string
+  servingDescription?: string  // Human-readable serving description
   nutrition: NutritionData
+  nutritionPer100g?: NutritionData  // For flexible serving entry
   imageUrl?: string
   createdAt: string
 }
@@ -91,6 +105,9 @@ export interface DailyStats {
   calorieTarget: number
   remaining: number
   percentComplete: number
+  waterOz: number
+  waterGoalOz: number
+  waterPercentComplete: number
 }
 
 // Computed user metrics (not stored)
@@ -123,8 +140,11 @@ export interface OpenFoodFactsProduct {
       fat_100g?: number
       fat_serving?: number
       fiber_100g?: number
+      fiber_serving?: number
       sugars_100g?: number
+      sugars_serving?: number
       sodium_100g?: number
+      sodium_serving?: number
       'saturated-fat_100g'?: number
     }
     image_url?: string

@@ -1,4 +1,4 @@
-import type { ActivityLevel, UserProfile, WeightEntry, DiaryEntry, NutritionData, UserMetrics, DailyStats } from '../types'
+import type { ActivityLevel, UserProfile, WeightEntry, DiaryEntry, NutritionData, UserMetrics, DailyStats, UnitSystem } from '../types'
 
 // Activity level multipliers for TDEE
 const ACTIVITY_MULTIPLIERS: Record<ActivityLevel, number> = {
@@ -16,6 +16,20 @@ const KCAL_PER_KG_FAT = 7700
 const MIN_CALORIES_FEMALE = 1200
 const MIN_CALORIES_MALE = 1500
 const MAX_DAILY_DEFICIT = 1000 // ~2 lbs/week
+
+// Conversion constants
+const KG_PER_LB = 0.453592
+const LBS_PER_KG = 2.20462
+const CM_PER_INCH = 2.54
+const OZ_PER_ML = 0.033814
+
+// Water recommendations (oz per day)
+export const WATER_RECOMMENDATIONS = {
+  minimum: 64,      // 8 cups (8oz each)
+  moderate: 80,     // 10 cups
+  active: 96,       // 12 cups
+  athlete: 128      // 16 cups (1 gallon)
+}
 
 /**
  * Calculate age from birth date
@@ -207,16 +221,21 @@ export function sumNutrition(entries: DiaryEntry[]): NutritionData {
 }
 
 /**
- * Calculate daily stats
+ * Calculate daily stats including water
  */
 export function calculateDailyStats(
   date: string,
   entries: DiaryEntry[],
-  calorieTarget: number
+  calorieTarget: number,
+  waterOz: number = 0,
+  waterGoalOz: number = 64
 ): DailyStats {
   const totals = sumNutrition(entries)
   const remaining = calorieTarget - totals.calories
   const percentComplete = Math.min(100, Math.round((totals.calories / calorieTarget) * 100))
+  const waterPercentComplete = waterGoalOz > 0
+    ? Math.min(100, Math.round((waterOz / waterGoalOz) * 100))
+    : 0
 
   return {
     date,
@@ -224,52 +243,113 @@ export function calculateDailyStats(
     totals,
     calorieTarget,
     remaining,
-    percentComplete
+    percentComplete,
+    waterOz,
+    waterGoalOz,
+    waterPercentComplete
   }
 }
 
-/**
- * Format weight for display
- */
-export function formatWeight(kg: number, unit: 'kg' | 'lbs' = 'kg'): string {
-  if (unit === 'lbs') {
-    return `${Math.round(kg * 2.20462)} lbs`
-  }
-  return `${Math.round(kg * 10) / 10} kg`
-}
+// ==================== UNIT CONVERSIONS ====================
 
 /**
  * Convert lbs to kg
  */
 export function lbsToKg(lbs: number): number {
-  return lbs / 2.20462
+  return lbs * KG_PER_LB
 }
 
 /**
  * Convert kg to lbs
  */
 export function kgToLbs(kg: number): number {
-  return kg * 2.20462
+  return kg * LBS_PER_KG
 }
 
 /**
- * Format height for display
+ * Convert feet/inches to cm
  */
-export function formatHeight(cm: number, unit: 'cm' | 'ft' = 'cm'): string {
-  if (unit === 'ft') {
-    const totalInches = cm / 2.54
-    const feet = Math.floor(totalInches / 12)
-    const inches = Math.round(totalInches % 12)
+export function ftInToCm(feet: number, inches: number): number {
+  return (feet * 12 + inches) * CM_PER_INCH
+}
+
+/**
+ * Convert cm to feet and inches
+ */
+export function cmToFtIn(cm: number): { feet: number; inches: number } {
+  const totalInches = cm / CM_PER_INCH
+  const feet = Math.floor(totalInches / 12)
+  const inches = Math.round(totalInches % 12)
+  return { feet, inches }
+}
+
+/**
+ * Convert oz to ml
+ */
+export function ozToMl(oz: number): number {
+  return oz / OZ_PER_ML
+}
+
+/**
+ * Convert ml to oz
+ */
+export function mlToOz(ml: number): number {
+  return ml * OZ_PER_ML
+}
+
+// ==================== FORMATTING ====================
+
+/**
+ * Format weight for display based on unit system
+ */
+export function formatWeight(kg: number, unitSystem: UnitSystem = 'metric'): string {
+  if (unitSystem === 'us') {
+    return `${Math.round(kgToLbs(kg) * 10) / 10} lbs`
+  }
+  return `${Math.round(kg * 10) / 10} kg`
+}
+
+/**
+ * Format weight value only (no unit suffix)
+ */
+export function formatWeightValue(kg: number, unitSystem: UnitSystem = 'metric'): number {
+  if (unitSystem === 'us') {
+    return Math.round(kgToLbs(kg) * 10) / 10
+  }
+  return Math.round(kg * 10) / 10
+}
+
+/**
+ * Get weight unit label
+ */
+export function getWeightUnit(unitSystem: UnitSystem): string {
+  return unitSystem === 'us' ? 'lbs' : 'kg'
+}
+
+/**
+ * Format height for display based on unit system
+ */
+export function formatHeight(cm: number, unitSystem: UnitSystem = 'metric'): string {
+  if (unitSystem === 'us') {
+    const { feet, inches } = cmToFtIn(cm)
     return `${feet}'${inches}"`
   }
   return `${Math.round(cm)} cm`
 }
 
 /**
- * Convert feet/inches to cm
+ * Format water amount
  */
-export function ftToCm(feet: number, inches: number): number {
-  return (feet * 12 + inches) * 2.54
+export function formatWater(oz: number): string {
+  return `${Math.round(oz)} oz`
+}
+
+/**
+ * Format water as cups (8oz each)
+ */
+export function formatWaterCups(oz: number): string {
+  const cups = oz / 8
+  return `${Math.round(cups * 10) / 10} cups`
 }
 
 /**
@@ -302,4 +382,31 @@ export function formatDate(dateStr: string): string {
     month: 'short',
     day: 'numeric'
   })
+}
+
+/**
+ * Parse weight input based on unit system
+ * Returns weight in kg
+ */
+export function parseWeightInput(value: string, unitSystem: UnitSystem): number {
+  const num = parseFloat(value)
+  if (isNaN(num)) return 0
+  return unitSystem === 'us' ? lbsToKg(num) : num
+}
+
+/**
+ * Parse height input based on unit system
+ * Returns height in cm
+ */
+export function parseHeightInput(value: string, unitSystem: UnitSystem): number {
+  if (unitSystem === 'us') {
+    // Expect format like "5'10" or "5 10" or just feet
+    const match = value.match(/(\d+)['\s]*(\d*)/)
+    if (match) {
+      const feet = parseInt(match[1] || '0')
+      const inches = parseInt(match[2] || '0')
+      return ftInToCm(feet, inches)
+    }
+  }
+  return parseFloat(value) || 0
 }
