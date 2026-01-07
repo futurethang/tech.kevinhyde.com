@@ -1,6 +1,15 @@
 {
   "apps": [
     {
+      "slug": "cronometer-clone",
+      "name": "CalTrack",
+      "description": "Simple, frictionless calorie and nutrition tracking PWA with barcode scanning",
+      "type": "react",
+      "status": "live",
+      "createdAt": "2026-01-07",
+      "tags": ["health", "fitness", "pwa", "tool"]
+    },
+    {
       "slug": "workout-tracker",
       "name": "Workout Tracker",
       "description": "Track workouts with timed sets, rest periods, and progress logging",
