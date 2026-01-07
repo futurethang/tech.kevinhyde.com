@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store'
-import type { ActivityLevel, GoalType } from '../types'
-import { calculateAge, formatWeight } from '../utils/calculations'
-import { ArrowLeft, Save } from 'lucide-react'
+import type { ActivityLevel, GoalType, UnitSystem } from '../types'
+import { calculateAge, formatWeight, lbsToKg, kgToLbs, ftInToCm, cmToFtIn } from '../utils/calculations'
+import { ArrowLeft, Save, Droplets } from 'lucide-react'
 
 const ACTIVITY_LABELS: Record<ActivityLevel, string> = {
   sedentary: 'Sedentary',
@@ -20,40 +20,127 @@ export function Profile() {
   const [name, setName] = useState(profile?.name || '')
   const [birthDate, setBirthDate] = useState(profile?.birthDate || '')
   const [sex, setSex] = useState<'male' | 'female'>(profile?.sex || 'male')
-  const [heightCm, setHeightCm] = useState(profile?.heightCm?.toString() || '')
+  const [unitSystem, setUnitSystem] = useState<UnitSystem>(profile?.unitSystem || 'us')
+
+  // Height - stored in display units
+  const [heightCm, setHeightCm] = useState('')
+  const [heightFeet, setHeightFeet] = useState('')
+  const [heightInches, setHeightInches] = useState('')
+
+  // Target weight in display units
+  const [targetWeightDisplay, setTargetWeightDisplay] = useState('')
+
   const [activityLevel, setActivityLevel] = useState<ActivityLevel>(profile?.activityLevel || 'moderate')
   const [goalType, setGoalType] = useState<GoalType>(profile?.goalType || 'lose')
-  const [targetWeight, setTargetWeight] = useState(profile?.targetWeightKg?.toString() || '')
   const [targetDate, setTargetDate] = useState(profile?.targetDate || '')
+  const [waterGoalOz, setWaterGoalOz] = useState(profile?.waterGoalOz?.toString() || '64')
+
   const [isSaving, setIsSaving] = useState(false)
   const [hasChanges, setHasChanges] = useState(false)
 
+  // Initialize form values from profile
   useEffect(() => {
     if (profile) {
       setName(profile.name)
       setBirthDate(profile.birthDate)
       setSex(profile.sex)
-      setHeightCm(profile.heightCm.toString())
+      setUnitSystem(profile.unitSystem || 'us')
       setActivityLevel(profile.activityLevel)
       setGoalType(profile.goalType)
-      setTargetWeight(profile.targetWeightKg.toString())
       setTargetDate(profile.targetDate)
+      setWaterGoalOz((profile.waterGoalOz || 64).toString())
+
+      // Set height based on stored cm
+      if (profile.unitSystem === 'us' || !profile.unitSystem) {
+        const { feet, inches } = cmToFtIn(profile.heightCm)
+        setHeightFeet(feet.toString())
+        setHeightInches(inches.toString())
+      } else {
+        setHeightCm(profile.heightCm.toString())
+      }
+
+      // Set target weight based on unit system
+      if (profile.unitSystem === 'us' || !profile.unitSystem) {
+        setTargetWeightDisplay(Math.round(kgToLbs(profile.targetWeightKg) * 10) / 10 + '')
+      } else {
+        setTargetWeightDisplay(profile.targetWeightKg.toString())
+      }
     }
   }, [profile])
 
+  // Handle unit system change - convert values
+  const handleUnitSystemChange = (newSystem: UnitSystem) => {
+    if (newSystem === unitSystem) return
+
+    // Convert height
+    if (newSystem === 'us' && heightCm) {
+      const cm = parseFloat(heightCm)
+      if (!isNaN(cm)) {
+        const { feet, inches } = cmToFtIn(cm)
+        setHeightFeet(feet.toString())
+        setHeightInches(inches.toString())
+      }
+    } else if (newSystem === 'metric') {
+      const feet = parseInt(heightFeet) || 0
+      const inches = parseInt(heightInches) || 0
+      if (feet || inches) {
+        setHeightCm(Math.round(ftInToCm(feet, inches)).toString())
+      }
+    }
+
+    // Convert target weight
+    if (targetWeightDisplay) {
+      const currentVal = parseFloat(targetWeightDisplay)
+      if (!isNaN(currentVal)) {
+        if (newSystem === 'us') {
+          // Was metric, convert kg to lbs
+          setTargetWeightDisplay((Math.round(currentVal * 2.20462 * 10) / 10).toString())
+        } else {
+          // Was US, convert lbs to kg
+          setTargetWeightDisplay((Math.round(currentVal * 0.453592 * 10) / 10).toString())
+        }
+      }
+    }
+
+    setUnitSystem(newSystem)
+  }
+
+  // Get height in cm for storage
+  const getHeightCm = (): number => {
+    if (unitSystem === 'us') {
+      const feet = parseInt(heightFeet) || 0
+      const inches = parseInt(heightInches) || 0
+      return ftInToCm(feet, inches)
+    }
+    return parseFloat(heightCm) || 0
+  }
+
+  // Get target weight in kg for storage
+  const getTargetWeightKg = (): number => {
+    const val = parseFloat(targetWeightDisplay)
+    if (isNaN(val)) return 0
+    return unitSystem === 'us' ? lbsToKg(val) : val
+  }
+
   useEffect(() => {
     if (!profile) return
+    const currentHeightCm = getHeightCm()
+    const currentTargetKg = getTargetWeightKg()
+
     const changed =
       name !== profile.name ||
       birthDate !== profile.birthDate ||
       sex !== profile.sex ||
-      heightCm !== profile.heightCm.toString() ||
+      Math.abs(currentHeightCm - profile.heightCm) > 0.5 ||
       activityLevel !== profile.activityLevel ||
       goalType !== profile.goalType ||
-      targetWeight !== profile.targetWeightKg.toString() ||
-      targetDate !== profile.targetDate
+      Math.abs(currentTargetKg - profile.targetWeightKg) > 0.05 ||
+      targetDate !== profile.targetDate ||
+      unitSystem !== (profile.unitSystem || 'us') ||
+      parseInt(waterGoalOz) !== (profile.waterGoalOz || 64)
+
     setHasChanges(changed)
-  }, [profile, name, birthDate, sex, heightCm, activityLevel, goalType, targetWeight, targetDate])
+  }, [profile, name, birthDate, sex, heightCm, heightFeet, heightInches, activityLevel, goalType, targetWeightDisplay, targetDate, unitSystem, waterGoalOz])
 
   const handleSave = async () => {
     setIsSaving(true)
@@ -62,11 +149,13 @@ export function Profile() {
         name: name || 'User',
         birthDate,
         sex,
-        heightCm: parseFloat(heightCm),
+        heightCm: getHeightCm(),
         activityLevel,
         goalType,
-        targetWeightKg: parseFloat(targetWeight),
-        targetDate
+        targetWeightKg: getTargetWeightKg(),
+        targetDate,
+        unitSystem,
+        waterGoalOz: parseInt(waterGoalOz) || 64
       })
       navigate('/')
     } catch (error) {
@@ -110,7 +199,7 @@ export function Profile() {
             <StatCard label="BMI" value={metrics.bmi.toString()} />
             <StatCard
               label="Current Weight"
-              value={formatWeight(metrics.currentWeightKg)}
+              value={formatWeight(metrics.currentWeightKg, unitSystem)}
             />
             {metrics.projectedDaysToGoal > 0 && (
               <StatCard
@@ -123,6 +212,65 @@ export function Profile() {
 
         {/* Form */}
         <div className="p-4 space-y-6">
+          {/* Units & Preferences */}
+          <section className="card space-y-4">
+            <h2 className="font-medium text-slate-300">Preferences</h2>
+
+            <div>
+              <label className="block text-sm text-slate-500 mb-2">Unit System</label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleUnitSystemChange('us')}
+                  className={`py-2 px-4 rounded-lg border-2 ${
+                    unitSystem === 'us'
+                      ? 'border-primary-500 bg-primary-500/10 text-primary-400'
+                      : 'border-slate-700 text-slate-400'
+                  }`}
+                >
+                  US (lbs, ft)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleUnitSystemChange('metric')}
+                  className={`py-2 px-4 rounded-lg border-2 ${
+                    unitSystem === 'metric'
+                      ? 'border-primary-500 bg-primary-500/10 text-primary-400'
+                      : 'border-slate-700 text-slate-400'
+                  }`}
+                >
+                  Metric (kg, cm)
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm text-slate-500 mb-2">
+                <Droplets className="w-4 h-4 inline mr-1 text-cyan-400" />
+                Daily Water Goal
+              </label>
+              <div className="grid grid-cols-4 gap-2">
+                {['48', '64', '80', '96'].map(oz => (
+                  <button
+                    key={oz}
+                    type="button"
+                    onClick={() => setWaterGoalOz(oz)}
+                    className={`py-2 px-3 rounded-lg border-2 transition-colors ${
+                      waterGoalOz === oz
+                        ? 'border-cyan-500 bg-cyan-500/10 text-cyan-400'
+                        : 'border-slate-700 text-slate-400'
+                    }`}
+                  >
+                    {oz}oz
+                  </button>
+                ))}
+              </div>
+              <p className="text-xs text-slate-500 mt-2">
+                64oz (8 cups) is a common recommendation
+              </p>
+            </div>
+          </section>
+
           <section className="card space-y-4">
             <h2 className="font-medium text-slate-300">Personal Info</h2>
 
@@ -174,15 +322,51 @@ export function Profile() {
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm text-slate-500 mb-1">Height (cm)</label>
-              <input
-                type="number"
-                value={heightCm}
-                onChange={e => setHeightCm(e.target.value)}
-                className="w-full"
-              />
-            </div>
+            {/* Height - conditional based on unit system */}
+            {unitSystem === 'us' ? (
+              <div>
+                <label className="block text-sm text-slate-500 mb-1">Height</label>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="relative">
+                    <input
+                      type="number"
+                      value={heightFeet}
+                      onChange={e => setHeightFeet(e.target.value)}
+                      placeholder="5"
+                      className="w-full pr-10"
+                      min="3"
+                      max="8"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500">ft</span>
+                  </div>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      value={heightInches}
+                      onChange={e => setHeightInches(e.target.value)}
+                      placeholder="10"
+                      className="w-full pr-10"
+                      min="0"
+                      max="11"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500">in</span>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <label className="block text-sm text-slate-500 mb-1">Height (cm)</label>
+                <input
+                  type="number"
+                  value={heightCm}
+                  onChange={e => setHeightCm(e.target.value)}
+                  placeholder="170"
+                  className="w-full"
+                  min="100"
+                  max="250"
+                />
+              </div>
+            )}
           </section>
 
           <section className="card space-y-4">
@@ -236,11 +420,13 @@ export function Profile() {
             {goalType !== 'maintain' && (
               <>
                 <div>
-                  <label className="block text-sm text-slate-500 mb-1">Target Weight (kg)</label>
+                  <label className="block text-sm text-slate-500 mb-1">
+                    Target Weight ({unitSystem === 'us' ? 'lbs' : 'kg'})
+                  </label>
                   <input
                     type="number"
-                    value={targetWeight}
-                    onChange={e => setTargetWeight(e.target.value)}
+                    value={targetWeightDisplay}
+                    onChange={e => setTargetWeightDisplay(e.target.value)}
                     className="w-full"
                     step="0.1"
                   />

@@ -10,6 +10,7 @@ interface AppState {
   currentDate: string
   diaryEntries: DiaryEntry[]
   recentFoods: SavedFood[]
+  waterOz: number
 
   // Computed
   metrics: UserMetrics | null
@@ -30,6 +31,8 @@ interface AppState {
   updateServings: (id: string, servings: number) => Promise<void>
   loadRecentFoods: () => Promise<void>
   toggleFavorite: (foodId: string) => Promise<void>
+  addWater: (amountOz: number) => Promise<void>
+  refreshDailyStats: () => Promise<void>
 }
 
 export const useStore = create<AppState>((set, get) => ({
@@ -39,6 +42,7 @@ export const useStore = create<AppState>((set, get) => ({
   currentDate: getTodayDate(),
   diaryEntries: [],
   recentFoods: [],
+  waterOz: 0,
   metrics: null,
   dailyStats: null,
   isLoading: true,
@@ -62,8 +66,17 @@ export const useStore = create<AppState>((set, get) => ({
 
       const metrics = calculateUserMetrics(profile, latestWeight ?? undefined)
       const currentDate = getTodayDate()
-      const entries = await db.getDiaryEntriesForDate(currentDate)
-      const dailyStats = calculateDailyStats(currentDate, entries, metrics.dailyCalorieTarget)
+      const [entries, waterOz] = await Promise.all([
+        db.getDiaryEntriesForDate(currentDate),
+        db.getTotalWaterForDate(currentDate)
+      ])
+      const dailyStats = calculateDailyStats(
+        currentDate,
+        entries,
+        metrics.dailyCalorieTarget,
+        waterOz,
+        profile.waterGoalOz
+      )
 
       set({
         profile,
@@ -73,6 +86,7 @@ export const useStore = create<AppState>((set, get) => ({
         diaryEntries: entries,
         dailyStats,
         recentFoods,
+        waterOz,
         isLoading: false,
         isOnboarding: false
       })
@@ -85,26 +99,36 @@ export const useStore = create<AppState>((set, get) => ({
   // Save or update profile
   setProfile: async (profileData) => {
     const profile = await db.saveProfile(profileData)
-    const { latestWeight } = get()
+    const { latestWeight, currentDate, diaryEntries, waterOz } = get()
     const metrics = calculateUserMetrics(profile, latestWeight ?? undefined)
 
     set({ profile, metrics, isOnboarding: false })
 
     // Recalculate daily stats with new target
-    const { currentDate, diaryEntries } = get()
-    const dailyStats = calculateDailyStats(currentDate, diaryEntries, metrics.dailyCalorieTarget)
+    const dailyStats = calculateDailyStats(
+      currentDate,
+      diaryEntries,
+      metrics.dailyCalorieTarget,
+      waterOz,
+      profile.waterGoalOz
+    )
     set({ dailyStats })
   },
 
   // Add weight entry
   addWeight: async (weightKg, note) => {
     const entry = await db.addWeightEntry(weightKg, getTodayDate(), note)
-    const { profile } = get()
+    const { profile, currentDate, diaryEntries, waterOz } = get()
 
     if (profile) {
       const metrics = calculateUserMetrics(profile, entry)
-      const { currentDate, diaryEntries } = get()
-      const dailyStats = calculateDailyStats(currentDate, diaryEntries, metrics.dailyCalorieTarget)
+      const dailyStats = calculateDailyStats(
+        currentDate,
+        diaryEntries,
+        metrics.dailyCalorieTarget,
+        waterOz,
+        profile.waterGoalOz
+      )
       set({ latestWeight: entry, metrics, dailyStats })
     } else {
       set({ latestWeight: entry })
@@ -119,15 +143,24 @@ export const useStore = create<AppState>((set, get) => ({
 
   // Load diary entries for a specific date
   loadDiaryForDate: async (date) => {
-    const entries = await db.getDiaryEntriesForDate(date)
-    const { metrics } = get()
-    const dailyStats = calculateDailyStats(date, entries, metrics?.dailyCalorieTarget || 2000)
-    set({ diaryEntries: entries, dailyStats })
+    const { profile, metrics } = get()
+    const [entries, waterOz] = await Promise.all([
+      db.getDiaryEntriesForDate(date),
+      db.getTotalWaterForDate(date)
+    ])
+    const dailyStats = calculateDailyStats(
+      date,
+      entries,
+      metrics?.dailyCalorieTarget || 2000,
+      waterOz,
+      profile?.waterGoalOz || 64
+    )
+    set({ diaryEntries: entries, dailyStats, waterOz })
   },
 
   // Add food to diary
   addFoodToDiary: async (food, meal, servings) => {
-    const { currentDate, metrics } = get()
+    const { currentDate, metrics, profile, waterOz } = get()
 
     const entry = await db.addDiaryEntry({
       date: currentDate,
@@ -138,7 +171,13 @@ export const useStore = create<AppState>((set, get) => ({
     })
 
     const entries = [...get().diaryEntries, entry]
-    const dailyStats = calculateDailyStats(currentDate, entries, metrics?.dailyCalorieTarget || 2000)
+    const dailyStats = calculateDailyStats(
+      currentDate,
+      entries,
+      metrics?.dailyCalorieTarget || 2000,
+      waterOz,
+      profile?.waterGoalOz || 64
+    )
 
     // Refresh recent foods
     const recentFoods = await db.getRecentFoods(30)
@@ -149,20 +188,32 @@ export const useStore = create<AppState>((set, get) => ({
   // Remove diary entry
   removeDiaryEntry: async (id) => {
     await db.deleteDiaryEntry(id)
-    const { currentDate, metrics } = get()
+    const { currentDate, metrics, profile, waterOz } = get()
     const entries = get().diaryEntries.filter(e => e.id !== id)
-    const dailyStats = calculateDailyStats(currentDate, entries, metrics?.dailyCalorieTarget || 2000)
+    const dailyStats = calculateDailyStats(
+      currentDate,
+      entries,
+      metrics?.dailyCalorieTarget || 2000,
+      waterOz,
+      profile?.waterGoalOz || 64
+    )
     set({ diaryEntries: entries, dailyStats })
   },
 
   // Update servings for an entry
   updateServings: async (id, servings) => {
     await db.updateDiaryEntryServings(id, servings)
-    const { currentDate, metrics } = get()
+    const { currentDate, metrics, profile, waterOz } = get()
     const entries = get().diaryEntries.map(e =>
       e.id === id ? { ...e, servings } : e
     )
-    const dailyStats = calculateDailyStats(currentDate, entries, metrics?.dailyCalorieTarget || 2000)
+    const dailyStats = calculateDailyStats(
+      currentDate,
+      entries,
+      metrics?.dailyCalorieTarget || 2000,
+      waterOz,
+      profile?.waterGoalOz || 64
+    )
     set({ diaryEntries: entries, dailyStats })
   },
 
@@ -177,5 +228,33 @@ export const useStore = create<AppState>((set, get) => ({
     await db.toggleFavorite(foodId)
     const recentFoods = await db.getRecentFoods(30)
     set({ recentFoods })
+  },
+
+  // Add water
+  addWater: async (amountOz) => {
+    const { currentDate, profile, metrics, diaryEntries, waterOz } = get()
+    await db.addWaterEntry(amountOz, currentDate)
+    const newWaterOz = waterOz + amountOz
+    const dailyStats = calculateDailyStats(
+      currentDate,
+      diaryEntries,
+      metrics?.dailyCalorieTarget || 2000,
+      newWaterOz,
+      profile?.waterGoalOz || 64
+    )
+    set({ waterOz: newWaterOz, dailyStats })
+  },
+
+  // Refresh daily stats (useful after profile changes)
+  refreshDailyStats: async () => {
+    const { currentDate, profile, metrics, diaryEntries, waterOz } = get()
+    const dailyStats = calculateDailyStats(
+      currentDate,
+      diaryEntries,
+      metrics?.dailyCalorieTarget || 2000,
+      waterOz,
+      profile?.waterGoalOz || 64
+    )
+    set({ dailyStats })
   }
 }))
