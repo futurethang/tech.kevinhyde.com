@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useStore } from '../store'
 import { searchFoods, searchByBarcode, createQuickAddFood } from '../services/foodApi'
@@ -36,45 +36,67 @@ export function AddFood() {
   const [scanError, setScanError] = useState<string | null>(null)
 
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout>>()
+  const abortControllerRef = useRef<AbortController | null>(null)
   const scannerRef = useRef<Html5Qrcode | null>(null)
 
-  // Debounced search
-  const handleSearch = useCallback(async (searchQuery: string) => {
-    if (!searchQuery.trim()) {
-      setResults([])
-      return
-    }
-
-    setIsSearching(true)
-    try {
-      const foods = await searchFoods(searchQuery, 20)
-      setResults(foods)
-    } catch (error) {
-      console.error('Search failed:', error)
-    } finally {
-      setIsSearching(false)
-    }
-  }, [])
-
+  // Debounced search with AbortController for cancellation
   useEffect(() => {
+    // Clear any pending timeout
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current)
     }
 
-    if (query.trim()) {
-      searchTimeoutRef.current = setTimeout(() => {
-        handleSearch(query)
-      }, 300)
-    } else {
-      setResults([])
+    // Cancel any in-flight request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+      abortControllerRef.current = null
     }
+
+    const trimmedQuery = query.trim()
+
+    if (!trimmedQuery) {
+      setResults([])
+      setIsSearching(false)
+      return
+    }
+
+    // Debounce for 500ms before searching
+    searchTimeoutRef.current = setTimeout(async () => {
+      // Create new AbortController for this request
+      const controller = new AbortController()
+      abortControllerRef.current = controller
+
+      setIsSearching(true)
+
+      try {
+        const foods = await searchFoods(trimmedQuery, 20, controller.signal)
+
+        // Only update results if this request wasn't aborted
+        if (!controller.signal.aborted) {
+          setResults(foods)
+        }
+      } catch (error) {
+        // Don't log abort errors - they're expected
+        if (error instanceof Error && error.name !== 'AbortError') {
+          console.error('Search failed:', error)
+        }
+      } finally {
+        // Only clear loading state if this is still the active request
+        if (abortControllerRef.current === controller) {
+          setIsSearching(false)
+        }
+      }
+    }, 500)
 
     return () => {
       if (searchTimeoutRef.current) {
         clearTimeout(searchTimeoutRef.current)
       }
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort()
+      }
     }
-  }, [query, handleSearch])
+  }, [query])
 
   // Barcode scanner
   useEffect(() => {
