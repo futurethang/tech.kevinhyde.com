@@ -4,7 +4,7 @@ import { DEFAULT_PREFERENCES } from './types/workout';
 import { useLocalStorage, useExerciseWeights } from './hooks/useLocalStorage';
 import { WorkoutView } from './components/WorkoutView';
 import { PlanOverview } from './components/PlanOverview';
-import { samplePlan, sampleSessions, getTodaySession } from './data/samplePlan';
+import { samplePlan, sampleSessions, getTodaySession, getPlanPhaseInfo, getCurrentWeek } from './data/samplePlan';
 import './App.css';
 
 type AppView = 'home' | 'workout' | 'plan';
@@ -81,6 +81,13 @@ function App() {
   const today = new Date();
   const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   const dayName = dayNames[today.getDay()];
+  const phaseInfo = getPlanPhaseInfo();
+  const currentWeek = getCurrentWeek();
+
+  // Get sessions relevant to current phase
+  const relevantSessions = currentWeek <= 2
+    ? sampleSessions.filter(s => s.id.includes('foundation'))
+    : sampleSessions.filter(s => s.id.includes('building') || s.id.includes('core'));
 
   return (
     <div className="app">
@@ -88,6 +95,15 @@ function App() {
         <h1 className="home__title">Workout</h1>
         <p className="home__date">{dayName}</p>
       </header>
+
+      {/* Phase Banner */}
+      <div className="home__phase">
+        <div className="home__phase-info">
+          <span className="home__phase-name">{phaseInfo.phase}</span>
+          {phaseInfo.week > 0 && <span className="home__phase-week">Week {phaseInfo.week}</span>}
+        </div>
+        <p className="home__phase-desc">{phaseInfo.description}</p>
+      </div>
 
       <main className="home__main">
         {todaySession ? (
@@ -109,7 +125,7 @@ function App() {
           </div>
         ) : (
           <div className="home__rest">
-            <div className="home__rest-icon">🌟</div>
+            <div className="home__rest-icon">*</div>
             <h2 className="home__rest-title">Rest Day</h2>
             <p className="home__rest-text">
               No workout scheduled for today. Take it easy and recover!
@@ -120,7 +136,7 @@ function App() {
         <div className="home__quick-start">
           <h2 className="home__section-title">Quick Start</h2>
           <div className="home__sessions">
-            {sampleSessions.slice(0, 3).map((session) => (
+            {relevantSessions.map((session) => (
               <button
                 key={session.id}
                 className="home__session-btn"
