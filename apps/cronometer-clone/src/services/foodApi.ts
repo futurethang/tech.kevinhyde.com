@@ -1,80 +1,28 @@
-import type { FoodItem, NutritionData, OpenFoodFactsProduct, USDAFoodSearchResult, USDAFood } from '../types'
+import type { FoodItem, NutritionData, OpenFoodFactsProduct } from '../types'
 import { generateId } from '../db'
 
 const OFF_BASE_URL = 'https://world.openfoodfacts.org'
-const USDA_BASE_URL = 'https://api.nal.usda.gov/fdc/v1'
-const USDA_API_KEY = 'DEMO_KEY' // Works for low volume, user can add their own
 
-// USDA nutrient IDs
-const NUTRIENT_IDS = {
-  calories: 1008,
-  protein: 1003,
-  carbs: 1005,
-  fat: 1004,
-  fiber: 1079,
-  sugar: 2000,
-  sodium: 1093,
-  saturatedFat: 1258
-}
-
-// Rate limiting and caching
+// Caching for search results
 const searchCache = new Map<string, { results: FoodItem[]; timestamp: number }>()
 const CACHE_TTL = 5 * 60 * 1000 // 5 minutes
-const MIN_REQUEST_INTERVAL = 500 // ms between requests to same API
+
+// Rate limiting - prevent hammering the API
+const MIN_REQUEST_INTERVAL = 300 // ms between requests
 let lastOFFRequest = 0
-let lastUSDARequest = 0
 
 /**
- * Wait for rate limit
+ * Wait for rate limit before making a request
  */
-async function waitForRateLimit(api: 'off' | 'usda'): Promise<void> {
+async function waitForRateLimit(): Promise<void> {
   const now = Date.now()
-  const lastRequest = api === 'off' ? lastOFFRequest : lastUSDARequest
-  const timeSince = now - lastRequest
+  const timeSince = now - lastOFFRequest
 
   if (timeSince < MIN_REQUEST_INTERVAL) {
     await new Promise(resolve => setTimeout(resolve, MIN_REQUEST_INTERVAL - timeSince))
   }
 
-  if (api === 'off') {
-    lastOFFRequest = Date.now()
-  } else {
-    lastUSDARequest = Date.now()
-  }
-}
-
-/**
- * Fetch with retry and exponential backoff for rate limits
- */
-async function fetchWithRetry(
-  url: string,
-  options: RequestInit = {},
-  maxRetries: number = 3
-): Promise<Response> {
-  let lastError: Error | null = null
-
-  for (let attempt = 0; attempt < maxRetries; attempt++) {
-    try {
-      const response = await fetch(url, options)
-
-      if (response.status === 429) {
-        // Rate limited - exponential backoff
-        const backoffMs = Math.min(1000 * Math.pow(2, attempt), 8000)
-        console.warn(`Rate limited, waiting ${backoffMs}ms before retry`)
-        await new Promise(resolve => setTimeout(resolve, backoffMs))
-        continue
-      }
-
-      return response
-    } catch (error) {
-      lastError = error as Error
-      // Network error - wait and retry
-      const backoffMs = 1000 * Math.pow(2, attempt)
-      await new Promise(resolve => setTimeout(resolve, backoffMs))
-    }
-  }
-
-  throw lastError || new Error('Request failed after retries')
+  lastOFFRequest = Date.now()
 }
 
 /**
@@ -82,9 +30,9 @@ async function fetchWithRetry(
  */
 export async function searchByBarcode(barcode: string): Promise<FoodItem | null> {
   try {
-    await waitForRateLimit('off')
+    await waitForRateLimit()
 
-    const response = await fetchWithRetry(
+    const response = await fetch(
       `${OFF_BASE_URL}/api/v2/product/${barcode}?fields=code,product_name,brands,serving_size,serving_quantity,nutriments,image_url`,
       {
         headers: {
@@ -112,10 +60,20 @@ export async function searchByBarcode(barcode: string): Promise<FoodItem | null>
 
 /**
  * Search Open Food Facts by text query
+ * Supports AbortSignal for cancellation
  */
-export async function searchOpenFoodFacts(query: string, limit: number = 15): Promise<FoodItem[]> {
+async function searchOpenFoodFacts(
+  query: string,
+  limit: number = 20,
+  signal?: AbortSignal
+): Promise<FoodItem[]> {
   try {
-    await waitForRateLimit('off')
+    await waitForRateLimit()
+
+    // Check if already aborted before making request
+    if (signal?.aborted) {
+      return []
+    }
 
     const params = new URLSearchParams({
       search_terms: query,
@@ -126,10 +84,11 @@ export async function searchOpenFoodFacts(query: string, limit: number = 15): Pr
       fields: 'code,product_name,brands,serving_size,serving_quantity,nutriments,image_url'
     })
 
-    const response = await fetchWithRetry(`${OFF_BASE_URL}/cgi/search.pl?${params}`, {
+    const response = await fetch(`${OFF_BASE_URL}/cgi/search.pl?${params}`, {
       headers: {
         'User-Agent': 'CalTrack/1.0 (personal calorie tracker)'
-      }
+      },
+      signal
     })
 
     if (!response.ok) {
@@ -145,85 +104,54 @@ export async function searchOpenFoodFacts(query: string, limit: number = 15): Pr
       .map(p => mapOpenFoodFactsToFoodItem(p, p.code))
       .filter((item): item is FoodItem => item !== null)
   } catch (error) {
+    // Don't log abort errors - they're expected
+    if (error instanceof Error && error.name === 'AbortError') {
+      return []
+    }
     console.error('Error searching Open Food Facts:', error)
     return []
   }
 }
 
 /**
- * Search USDA FoodData Central
+ * Search foods using Open Food Facts
+ *
+ * Supports AbortSignal for cancelling in-flight requests.
+ * Uses caching to reduce API calls.
+ *
+ * Note: USDA FoodData Central removed - their DEMO_KEY only allows 10 requests/hour
+ * which is completely inadequate for real-time search-as-you-type functionality.
  */
-export async function searchUSDA(query: string, limit: number = 15): Promise<FoodItem[]> {
-  try {
-    await waitForRateLimit('usda')
-
-    const params = new URLSearchParams({
-      query,
-      pageSize: limit.toString(),
-      api_key: USDA_API_KEY,
-      dataType: 'Branded,Foundation,SR Legacy' // Include common food types
-    })
-
-    const response = await fetchWithRetry(`${USDA_BASE_URL}/foods/search?${params}`)
-
-    if (!response.ok) {
-      console.warn('USDA search failed:', response.status)
-      return []
-    }
-
-    const data: USDAFoodSearchResult = await response.json()
-
-    return data.foods
-      .map(mapUSDAToFoodItem)
-      .filter((item): item is FoodItem => item !== null)
-  } catch (error) {
-    console.error('Error searching USDA:', error)
+export async function searchFoods(
+  query: string,
+  limit: number = 20,
+  signal?: AbortSignal
+): Promise<FoodItem[]> {
+  const trimmedQuery = query.trim()
+  if (!trimmedQuery) {
     return []
   }
-}
 
-/**
- * Combined search with caching and fallback
- * - Checks cache first
- * - Tries USDA first (more reliable rate limits)
- * - Falls back to Open Food Facts if needed
- * - Caches results
- */
-export async function searchFoods(query: string, limit: number = 20): Promise<FoodItem[]> {
-  const cacheKey = `${query.toLowerCase().trim()}-${limit}`
+  const cacheKey = `${trimmedQuery.toLowerCase()}-${limit}`
 
-  // Check cache
+  // Check cache first
   const cached = searchCache.get(cacheKey)
   if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
     return cached.results
   }
 
-  // Try USDA first (generally more reliable)
-  let results: FoodItem[] = []
-
-  try {
-    const usdaResults = await searchUSDA(query, limit)
-    results = usdaResults
-  } catch (error) {
-    console.warn('USDA search failed, trying Open Food Facts')
+  // Check if already aborted
+  if (signal?.aborted) {
+    return []
   }
 
-  // If we don't have enough results, supplement with Open Food Facts
-  if (results.length < limit) {
-    try {
-      const offResults = await searchOpenFoodFacts(query, limit - results.length)
+  // Search Open Food Facts
+  const results = await searchOpenFoodFacts(trimmedQuery, limit, signal)
 
-      // Dedupe by name similarity and merge
-      const existingNames = new Set(results.map(r => r.name.toLowerCase()))
-      const newResults = offResults.filter(r => !existingNames.has(r.name.toLowerCase()))
-      results = [...results, ...newResults].slice(0, limit)
-    } catch (error) {
-      console.warn('Open Food Facts search also failed')
-    }
+  // Cache results (but not if aborted)
+  if (!signal?.aborted && results.length > 0) {
+    searchCache.set(cacheKey, { results, timestamp: Date.now() })
   }
-
-  // Cache results
-  searchCache.set(cacheKey, { results, timestamp: Date.now() })
 
   return results
 }
@@ -379,62 +307,6 @@ function parseServingInfo(servingSize?: string, servingQuantity?: number): {
 
   // Default
   return { size: 1, unit: 'serving', description: servingSize }
-}
-
-/**
- * Map USDA food to our FoodItem type
- */
-function mapUSDAToFoodItem(food: USDAFood): FoodItem | null {
-  const getNutrient = (id: number): number => {
-    const nutrient = food.foodNutrients.find(n => n.nutrientId === id)
-    return nutrient?.value ?? 0
-  }
-
-  // USDA provides nutrition per 100g, but also includes serving size info
-  const per100g: NutritionData = {
-    calories: Math.round(getNutrient(NUTRIENT_IDS.calories)),
-    protein: round1(getNutrient(NUTRIENT_IDS.protein)),
-    carbs: round1(getNutrient(NUTRIENT_IDS.carbs)),
-    fat: round1(getNutrient(NUTRIENT_IDS.fat)),
-    fiber: getNutrient(NUTRIENT_IDS.fiber) || undefined,
-    sugar: getNutrient(NUTRIENT_IDS.sugar) || undefined,
-    sodium: Math.round(getNutrient(NUTRIENT_IDS.sodium)) || undefined
-  }
-
-  // Skip items with no meaningful nutrition data
-  if (per100g.calories === 0 && per100g.protein === 0 && per100g.carbs === 0 && per100g.fat === 0) {
-    return null
-  }
-
-  // Get serving size - USDA often provides this
-  const servingSize = food.servingSize || 100
-  const servingUnit = food.servingSizeUnit?.toLowerCase() || 'g'
-
-  // Scale nutrition to serving size
-  const scale = servingSize / 100
-  const nutrition: NutritionData = {
-    calories: Math.round(per100g.calories * scale),
-    protein: round1(per100g.protein * scale),
-    carbs: round1(per100g.carbs * scale),
-    fat: round1(per100g.fat * scale),
-    fiber: per100g.fiber ? round1(per100g.fiber * scale) : undefined,
-    sugar: per100g.sugar ? round1(per100g.sugar * scale) : undefined,
-    sodium: per100g.sodium ? Math.round(per100g.sodium * scale) : undefined
-  }
-
-  return {
-    id: `usda-${food.fdcId}`,
-    source: 'usda',
-    sourceId: food.fdcId.toString(),
-    name: food.description,
-    brand: food.brandName || food.brandOwner,
-    servingSize,
-    servingUnit,
-    servingDescription: `${servingSize}${servingUnit}`,
-    nutrition,
-    nutritionPer100g: per100g,
-    createdAt: new Date().toISOString()
-  }
 }
 
 /**
