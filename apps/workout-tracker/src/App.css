@@ -1,0 +1,234 @@
+.app {
+  min-height: 100vh;
+  padding: 1rem;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+/* Home View */
+.home__header {
+  margin-bottom: 2rem;
+}
+
+.home__title {
+  font-size: 2rem;
+  font-weight: 900;
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.home__date {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  margin: 0.25rem 0 0 0;
+}
+
+.home__main {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Phase Banner */
+.home__phase {
+  background: var(--bg-secondary);
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  border-left: 4px solid var(--color-accent);
+}
+
+.home__phase-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.25rem;
+}
+
+.home__phase-name {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--color-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.home__phase-week {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: var(--bg-tertiary);
+  padding: 0.15rem 0.5rem;
+  border-radius: 0.25rem;
+}
+
+.home__phase-desc {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.home__section-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin: 0 0 0.75rem 0;
+}
+
+/* Today's Workout Card */
+.home__today-card {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 1.25rem;
+  background: var(--color-active);
+  border: none;
+  border-radius: 1rem;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+}
+
+.home__today-card:active {
+  transform: scale(0.99);
+}
+
+.home__today-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.home__today-name {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--bg-primary);
+}
+
+.home__today-desc {
+  font-size: 0.9rem;
+  color: var(--bg-primary);
+  opacity: 0.85;
+}
+
+.home__today-meta {
+  font-size: 0.85rem;
+  color: var(--bg-primary);
+  opacity: 0.7;
+}
+
+.home__today-go {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--bg-primary);
+}
+
+/* Rest Day */
+.home__rest {
+  text-align: center;
+  padding: 2rem;
+  background: var(--bg-secondary);
+  border-radius: 1rem;
+}
+
+.home__rest-icon {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+}
+
+.home__rest-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin: 0 0 0.5rem 0;
+  color: var(--text-primary);
+}
+
+.home__rest-text {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* Quick Start Sessions */
+.home__sessions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.home__session-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 1rem;
+  background: var(--bg-secondary);
+  border: none;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.home__session-btn:active {
+  transform: scale(0.99);
+  background: var(--bg-tertiary);
+}
+
+.home__session-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.home__session-count {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  background: var(--bg-tertiary);
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+}
+
+/* Plan Button */
+.home__plan-btn {
+  width: 100%;
+  padding: 1rem;
+  background: transparent;
+  border: 2px solid var(--border-color);
+  border-radius: 0.75rem;
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.home__plan-btn:active {
+  transform: scale(0.99);
+  background: var(--bg-secondary);
+}
+
+/* Stats */
+.home__stats {
+  padding-top: 0.5rem;
+}
+
+.home__stat {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.home__stat-value {
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--color-accent);
+}
+
+.home__stat-label {
+  font-size: 1rem;
+  color: var(--text-secondary);
+}

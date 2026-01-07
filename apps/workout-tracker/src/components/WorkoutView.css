@@ -1,0 +1,86 @@
+.workout-view {
+  min-height: 100vh;
+  padding-bottom: 2rem;
+}
+
+.workout-view--timer {
+  display: flex;
+  flex-direction: column;
+}
+
+.workout-view__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.workout-view__back {
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  border: none;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.workout-view__back:active {
+  transform: scale(0.98);
+}
+
+.workout-view__title h1 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin: 0 0 0.25rem 0;
+}
+
+.workout-view__title p {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.workout-view__timer-header {
+  text-align: center;
+  padding: 1rem;
+}
+
+.workout-view__timer-header h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.workout-view__progress {
+  margin-bottom: 1.5rem;
+}
+
+.workout-view__progress-bar {
+  height: 0.5rem;
+  background: var(--bg-secondary);
+  border-radius: 0.25rem;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.workout-view__progress-fill {
+  height: 100%;
+  background: var(--color-complete);
+  border-radius: 0.25rem;
+  transition: width 0.3s ease;
+}
+
+.workout-view__progress-text {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.workout-view__exercises {
+  display: flex;
+  flex-direction: column;
+}
