@@ -36,43 +36,30 @@ jobs:
       - name: Build showcase site
         run: pnpm --filter=site build
 
-      - name: Copy static apps to dist
+      - name: Build all apps with Turbo
+        run: pnpm turbo build --filter='./apps/*'
+
+      - name: Copy apps to dist
         run: |
-          # Copy all static apps (those without package.json)
           for dir in apps/*/; do
             app_name=$(basename "$dir")
-            # Skip templates
-            if [[ "$app_name" == _template* ]]; then
+
+            # Skip templates and slots
+            if [[ "$app_name" == _template* ]] || [[ "$app_name" == slot-* ]]; then
               continue
             fi
-            # If no package.json, it's a static app - copy directly
-            if [ ! -f "$dir/package.json" ]; then
+
+            # Determine source: built apps have dist/, static apps don't
+            if [ -d "$dir/dist" ]; then
+              # React/Vite app - copy built output
+              echo "Copying built app: $app_name"
+              mkdir -p "dist/apps/$app_name"
+              cp -r "$dir/dist/"* "dist/apps/$app_name/"
+            elif [ ! -f "$dir/package.json" ]; then
+              # Static app - copy source directly
               echo "Copying static app: $app_name"
               mkdir -p "dist/apps/$app_name"
               cp -r "$dir"* "dist/apps/$app_name/"
-            fi
-          done
-
-      - name: Build and copy React/Vite apps
-        run: |
-          for dir in apps/*/; do
-            app_name=$(basename "$dir")
-            # Skip templates
-            if [[ "$app_name" == _template* ]]; then
-              continue
-            fi
-            # If has package.json, build it
-            if [ -f "$dir/package.json" ]; then
-              echo "Building app: $app_name"
-              cd "$dir"
-              pnpm install
-              pnpm build
-              cd ../..
-              # Copy built output
-              if [ -d "$dir/dist" ]; then
-                mkdir -p "dist/apps/$app_name"
-                cp -r "$dir/dist/"* "dist/apps/$app_name/"
-              fi
             fi
           done
 
