@@ -1,0 +1,115 @@
+.plan-overview {
+  min-height: 100vh;
+  padding-bottom: 2rem;
+}
+
+.plan-overview__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.plan-overview__back {
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  border: none;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.plan-overview__back:active {
+  transform: scale(0.98);
+}
+
+.plan-overview__title h1 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin: 0 0 0.25rem 0;
+}
+
+.plan-overview__title p {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.plan-overview__info {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.plan-overview__info span {
+  padding: 0.25rem 0.75rem;
+  background: var(--bg-secondary);
+  border-radius: 1rem;
+}
+
+.plan-overview__sessions h2 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 1rem;
+}
+
+.plan-overview__session {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  background: var(--bg-secondary);
+  border: none;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+}
+
+.plan-overview__session:active {
+  transform: scale(0.99);
+  background: var(--bg-tertiary);
+}
+
+.plan-overview__session-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.plan-overview__session-name {
+  display: block;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.plan-overview__session-desc {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.plan-overview__session-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-right: 0.75rem;
+}
+
+.plan-overview__session-arrow {
+  font-size: 1.25rem;
+  color: var(--text-secondary);
+}

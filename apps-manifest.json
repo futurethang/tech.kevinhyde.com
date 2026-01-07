@@ -1,6 +1,15 @@
 {
   "apps": [
     {
+      "slug": "workout-tracker",
+      "name": "Workout Tracker",
+      "description": "Track workouts with timed sets, rest periods, and progress logging",
+      "type": "react",
+      "status": "live",
+      "createdAt": "2026-01-07",
+      "tags": ["fitness", "pwa", "tool", "health"]
+    },
+    {
       "slug": "chompie-advent",
       "name": "Chompie's December Calendar",
       "description": "A digital advent calendar featuring Chompie the December Gnome with daily poems and treats",
