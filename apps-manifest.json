@@ -1,6 +1,15 @@
 {
   "apps": [
     {
+      "slug": "ai-cost-tracker",
+      "name": "AI Cost Tracker",
+      "description": "Visualize the environmental cost of AI requests - water and electricity usage per query",
+      "type": "react",
+      "status": "live",
+      "createdAt": "2026-01-12",
+      "tags": ["tool", "visualization", "environment", "ai"]
+    },
+    {
       "slug": "cronometer-clone",
       "name": "CalTrack",
       "description": "Simple, frictionless calorie and nutrition tracking PWA with barcode scanning",
