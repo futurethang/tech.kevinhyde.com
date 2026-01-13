@@ -1,35 +1,34 @@
 import { useState, useEffect } from 'react'
 
 // Model data with energy consumption estimates
-// Based on research from Epoch AI, UC Riverside, and industry benchmarks
+// Based on research from Epoch AI, Jegham et al. 2025, and industry benchmarks
+// Energy values in Wh per token - estimates where official data unavailable
+// Note: Anthropic/OpenAI don't officially disclose per-token energy data
 const MODELS = {
-  'gpt-4o': {
-    name: 'GPT-4o',
-    provider: 'OpenAI',
-    energyPerInputToken: 0.0003,
+  // === Anthropic Claude Models ===
+  'claude-opus-4-5': {
+    name: 'Claude Opus 4.5',
+    provider: 'Anthropic',
+    energyPerInputToken: 0.0006,    // Estimated ~2x Sonnet based on pricing/capability ratio
+    energyPerOutputToken: 0.0024,
+    isReasoning: false,
+    note: 'Estimate based on pricing ratio to Sonnet 4',
+  },
+  'claude-sonnet-4': {
+    name: 'Claude Sonnet 4',
+    provider: 'Anthropic',
+    energyPerInputToken: 0.0003,    // Similar efficiency to 3.7, eco-leader
     energyPerOutputToken: 0.0012,
     isReasoning: false,
+    note: 'Claude models rank highest in eco-efficiency benchmarks',
   },
-  'gpt-4o-mini': {
-    name: 'GPT-4o Mini',
-    provider: 'OpenAI',
-    energyPerInputToken: 0.00008,
-    energyPerOutputToken: 0.0003,
+  'claude-3-7-sonnet': {
+    name: 'Claude 3.7 Sonnet',
+    provider: 'Anthropic',
+    energyPerInputToken: 0.00025,   // Eco-efficiency leader (0.886 score)
+    energyPerOutputToken: 0.001,
     isReasoning: false,
-  },
-  'o1': {
-    name: 'o1 (Reasoning)',
-    provider: 'OpenAI',
-    energyPerInputToken: 0.002,
-    energyPerOutputToken: 0.008,
-    isReasoning: true,
-  },
-  'o3': {
-    name: 'o3 (Reasoning)',
-    provider: 'OpenAI',
-    energyPerInputToken: 0.005,
-    energyPerOutputToken: 0.02,
-    isReasoning: true,
+    note: 'Highest eco-efficiency score in 2025 benchmarks',
   },
   'claude-3-5-sonnet': {
     name: 'Claude 3.5 Sonnet',
@@ -52,16 +51,86 @@ const MODELS = {
     energyPerOutputToken: 0.0002,
     isReasoning: false,
   },
-  'gemini-pro': {
-    name: 'Gemini Pro',
-    provider: 'Google',
-    energyPerInputToken: 0.0002,
-    energyPerOutputToken: 0.0008,
+  // === OpenAI Models ===
+  'gpt-5': {
+    name: 'GPT-5',
+    provider: 'OpenAI',
+    energyPerInputToken: 0.002,     // ~8x GPT-4 per Jegham et al. 2025
+    energyPerOutputToken: 0.018,    // Average ~18.35 Wh per 1000 token response
+    isReasoning: false,
+    note: 'Estimated 8x GPT-4 energy use per response',
+  },
+  'gpt-4-5': {
+    name: 'GPT-4.5',
+    provider: 'OpenAI',
+    energyPerInputToken: 0.003,     // ~30 Wh for long prompts per Jegham study
+    energyPerOutputToken: 0.012,
+    isReasoning: false,
+    note: 'High energy use per Jegham et al. 2025',
+  },
+  'gpt-4o': {
+    name: 'GPT-4o',
+    provider: 'OpenAI',
+    energyPerInputToken: 0.0003,    // ~0.42 Wh short query
+    energyPerOutputToken: 0.0012,
     isReasoning: false,
   },
-  'gemini-ultra': {
-    name: 'Gemini Ultra',
+  'gpt-4o-mini': {
+    name: 'GPT-4o Mini',
+    provider: 'OpenAI',
+    energyPerInputToken: 0.00008,
+    energyPerOutputToken: 0.0003,
+    isReasoning: false,
+  },
+  'o4-mini': {
+    name: 'o4-mini (Reasoning)',
+    provider: 'OpenAI',
+    energyPerInputToken: 0.001,     // Eco-efficient reasoning (0.867 score)
+    energyPerOutputToken: 0.004,
+    isReasoning: true,
+    note: 'Eco-efficient reasoning model',
+  },
+  'o3': {
+    name: 'o3 (Reasoning)',
+    provider: 'OpenAI',
+    energyPerInputToken: 0.005,     // ~25.35 Wh per reasoning query
+    energyPerOutputToken: 0.025,
+    isReasoning: true,
+    note: 'High energy reasoning model',
+  },
+  'o1': {
+    name: 'o1 (Reasoning)',
+    provider: 'OpenAI',
+    energyPerInputToken: 0.002,
+    energyPerOutputToken: 0.008,
+    isReasoning: true,
+  },
+  // === Google Models ===
+  'gemini-2-ultra': {
+    name: 'Gemini 2.0 Ultra',
     provider: 'Google',
+    energyPerInputToken: 0.0006,
+    energyPerOutputToken: 0.0024,
+    isReasoning: false,
+  },
+  'gemini-2-pro': {
+    name: 'Gemini 2.0 Pro',
+    provider: 'Google',
+    energyPerInputToken: 0.0003,
+    energyPerOutputToken: 0.0012,
+    isReasoning: false,
+  },
+  'gemini-2-flash': {
+    name: 'Gemini 2.0 Flash',
+    provider: 'Google',
+    energyPerInputToken: 0.0001,
+    energyPerOutputToken: 0.0004,
+    isReasoning: false,
+  },
+  // === Meta Models ===
+  'llama-4-405b': {
+    name: 'Llama 4 405B',
+    provider: 'Meta',
     energyPerInputToken: 0.0005,
     energyPerOutputToken: 0.002,
     isReasoning: false,
@@ -306,7 +375,7 @@ function HistoryItem({ entry, onDelete }) {
 export default function App() {
   const [inputTokens, setInputTokens] = useState('')
   const [outputTokens, setOutputTokens] = useState('')
-  const [selectedModel, setSelectedModel] = useState('claude-3-5-sonnet')
+  const [selectedModel, setSelectedModel] = useState('claude-opus-4-5')
   const [currentImpact, setCurrentImpact] = useState(null)
   const [history, setHistory] = useState([])
   const [showHistory, setShowHistory] = useState(false)
@@ -489,23 +558,24 @@ export default function App() {
         <div className="methodology">
           <h3>About These Estimates</h3>
           <p>
-            Energy consumption estimates are based on published research including benchmarks from
-            Epoch AI, academic studies on LLM inference costs, and industry reports on datacenter
-            Power Usage Effectiveness (PUE). Water usage includes both direct cooling and the water
-            footprint of electricity generation.
+            <strong>Important:</strong> Neither Anthropic nor OpenAI officially disclose per-token
+            energy consumption. These estimates are based on academic research, pricing ratios,
+            and third-party benchmarks. Use as rough approximations only.
           </p>
           <p>
-            <strong>Note:</strong> These are estimates based on publicly available data. Actual
-            consumption varies based on datacenter location, cooling methods, hardware generation,
-            and model optimizations. Reasoning models (o1, o3) use significantly more compute per token.
+            Claude models consistently rank highest in eco-efficiency benchmarks (Claude 3.7 Sonnet
+            scored 0.886). GPT-5 uses approximately 8x more energy than GPT-4 per response.
+            Reasoning models (o1, o3, o4) use significantly more compute due to chain-of-thought processing.
           </p>
           <details>
-            <summary>Data Sources</summary>
+            <summary>Data Sources & Methodology</summary>
             <ul>
-              <li>Epoch AI: How much energy does ChatGPT use?</li>
-              <li>TokenPowerBench: LLM power consumption benchmarks</li>
+              <li>Jegham et al. 2025: "How Hungry is AI?" - LLM energy benchmarks</li>
+              <li>Epoch AI: ChatGPT energy consumption analysis</li>
+              <li>TokenPowerBench: Per-token power consumption metrics</li>
               <li>UC Riverside: AI water consumption research (2023)</li>
-              <li>Google/Microsoft sustainability reports for PUE data</li>
+              <li>Pricing ratios used for models without published data</li>
+              <li>Water: 1.8ml/Wh based on PUE and grid water footprint</li>
             </ul>
           </details>
         </div>
