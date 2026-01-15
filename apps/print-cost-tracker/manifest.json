@@ -1,0 +1,16 @@
+{
+  "name": "Print Cost Tracker",
+  "short_name": "PrintCost",
+  "description": "Track 3D printing costs and compare savings vs buying products",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0f0f1a",
+  "theme_color": "#1a1a2e",
+  "icons": [
+    {
+      "src": "icons/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    }
+  ]
+}

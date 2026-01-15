@@ -1,6 +1,15 @@
 {
   "apps": [
     {
+      "slug": "print-cost-tracker",
+      "name": "Print Cost Tracker",
+      "description": "Track 3D printing costs and calculate savings vs buying products - with break-even calculator",
+      "type": "static",
+      "status": "live",
+      "createdAt": "2026-01-15",
+      "tags": ["tool", "3d-printing", "finance", "calculator"]
+    },
+    {
       "slug": "ai-cost-tracker",
       "name": "AI Cost Tracker",
       "description": "Visualize the environmental cost of AI requests - water and electricity usage per query",

@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#1a1a2e">
+  <title>Print Cost Tracker</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.svg">
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+    <header class="header">
+      <h1>Print Cost Tracker</h1>
+      <button class="menu-btn" id="menuBtn" aria-label="Open menu">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+    </header>
+
+    <!-- Tab Navigation -->
+    <nav class="tabs">
+      <button class="tab active" data-tab="dashboard">Dashboard</button>
+      <button class="tab" data-tab="prints">Prints</button>
+      <button class="tab" data-tab="filaments">Filaments</button>
+      <button class="tab" data-tab="settings">Settings</button>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main">
+      <!-- Dashboard Tab -->
+      <section class="tab-content active" id="dashboard">
+        <div class="dashboard-grid">
+          <!-- Break-even Progress -->
+          <div class="card break-even-card">
+            <h2>Break-Even Progress</h2>
+            <div class="progress-ring-container">
+              <svg class="progress-ring" viewBox="0 0 120 120">
+                <circle class="progress-ring-bg" cx="60" cy="60" r="52"></circle>
+                <circle class="progress-ring-fill" cx="60" cy="60" r="52" id="progressRing"></circle>
+              </svg>
+              <div class="progress-text">
+                <span class="progress-percent" id="breakEvenPercent">0%</span>
+                <span class="progress-label" id="breakEvenLabel">of break-even</span>
+              </div>
+            </div>
+            <div class="break-even-details">
+              <div class="detail">
+                <span class="detail-label">Machine Cost</span>
+                <span class="detail-value" id="machineCostDisplay">$0</span>
+              </div>
+              <div class="detail">
+                <span class="detail-label">Total Savings</span>
+                <span class="detail-value" id="totalSavingsDisplay">$0</span>
+              </div>
+              <div class="detail highlight">
+                <span class="detail-label">Net Position</span>
+                <span class="detail-value" id="netPositionDisplay">-$0</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Stats -->
+          <div class="card stats-card">
+            <h2>Statistics</h2>
+            <div class="stats-grid">
+              <div class="stat-item">
+                <span class="stat-value" id="totalPrintsDisplay">0</span>
+                <span class="stat-label">Total Prints</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-value" id="totalFilamentDisplay">0g</span>
+                <span class="stat-label">Filament Used</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-value" id="printCostDisplay">$0</span>
+                <span class="stat-label">Print Costs</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-value" id="avgSavingsDisplay">$0</span>
+                <span class="stat-label">Avg Savings/Print</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Prints -->
+          <div class="card recent-card">
+            <h2>Recent Prints</h2>
+            <div class="recent-list" id="recentPrintsList">
+              <p class="empty-state">No prints yet. Add your first print!</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Prints Tab -->
+      <section class="tab-content" id="prints">
+        <div class="section-header">
+          <h2>Your Prints</h2>
+          <button class="btn btn-primary" id="addPrintBtn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Add Print
+          </button>
+        </div>
+        <div class="prints-list" id="printsList">
+          <p class="empty-state">No prints recorded yet.</p>
+        </div>
+      </section>
+
+      <!-- Filaments Tab -->
+      <section class="tab-content" id="filaments">
+        <div class="section-header">
+          <h2>Your Filaments</h2>
+          <button class="btn btn-primary" id="addFilamentBtn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Add Filament
+          </button>
+        </div>
+        <div class="filaments-list" id="filamentsList">
+          <p class="empty-state">No filaments added yet.</p>
+        </div>
+      </section>
+
+      <!-- Settings Tab -->
+      <section class="tab-content" id="settings">
+        <div class="card">
+          <h2>Printer Settings</h2>
+          <form id="settingsForm">
+            <div class="form-group">
+              <label for="machineCostInput">Machine Cost ($)</label>
+              <input type="number" id="machineCostInput" min="0" step="0.01" placeholder="700">
+              <span class="help-text">Total cost of your 3D printer (for break-even calculation)</span>
+            </div>
+            <button type="submit" class="btn btn-primary">Save Settings</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <h2>Data Management</h2>
+          <p class="help-text">Export your data for backup or migration to a database.</p>
+          <div class="button-group">
+            <button class="btn btn-secondary" id="exportDataBtn">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              Export Data
+            </button>
+            <button class="btn btn-secondary" id="importDataBtn">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+              Import Data
+            </button>
+          </div>
+          <input type="file" id="importFileInput" accept=".json" style="display: none;">
+        </div>
+
+        <div class="card danger-zone">
+          <h2>Danger Zone</h2>
+          <p class="help-text">This action cannot be undone. Make sure to export your data first.</p>
+          <button class="btn btn-danger" id="clearDataBtn">Clear All Data</button>
+        </div>
+      </section>
+    </main>
+
+    <!-- Side Menu -->
+    <div class="menu-overlay" id="menuOverlay"></div>
+    <nav class="side-menu" id="sideMenu">
+      <button class="menu-close" id="menuClose" aria-label="Close menu">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+      <div class="menu-content">
+        <h3>Print Cost Tracker</h3>
+        <p>Track your 3D printing costs and see how much you're saving compared to buying products.</p>
+        <hr>
+        <h4>Future Features</h4>
+        <ul>
+          <li>Bambu Lab Cloud sync</li>
+          <li>Firebase data persistence</li>
+          <li>Print time tracking</li>
+          <li>Electricity cost calculation</li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Modals -->
+    <div class="modal-overlay" id="modalOverlay">
+      <!-- Add Print Modal -->
+      <div class="modal" id="printModal">
+        <div class="modal-header">
+          <h2 id="printModalTitle">Add Print</h2>
+          <button class="modal-close" data-close-modal>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        <form id="printForm">
+          <input type="hidden" id="printId">
+          <div class="form-group">
+            <label for="printName">Print Name *</label>
+            <input type="text" id="printName" required placeholder="e.g., Phone Stand, Hook, Figurine">
+          </div>
+          <div class="form-group">
+            <label for="printFilament">Filament *</label>
+            <select id="printFilament" required>
+              <option value="">Select filament...</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="printGrams">Filament Used (grams) *</label>
+            <input type="number" id="printGrams" required min="0.1" step="0.1" placeholder="e.g., 25">
+          </div>
+          <div class="form-group">
+            <label for="printTime">Print Time (minutes)</label>
+            <input type="number" id="printTime" min="0" step="1" placeholder="e.g., 120">
+          </div>
+          <div class="form-group">
+            <label for="printNotes">Notes</label>
+            <textarea id="printNotes" rows="2" placeholder="Optional notes..."></textarea>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" data-close-modal>Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Print</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Add Filament Modal -->
+      <div class="modal" id="filamentModal">
+        <div class="modal-header">
+          <h2 id="filamentModalTitle">Add Filament</h2>
+          <button class="modal-close" data-close-modal>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        <form id="filamentForm">
+          <input type="hidden" id="filamentId">
+          <div class="form-group">
+            <label for="filamentName">Name *</label>
+            <input type="text" id="filamentName" required placeholder="e.g., Bambu PLA Basic Black">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="filamentMaterial">Material</label>
+              <select id="filamentMaterial">
+                <option value="PLA">PLA</option>
+                <option value="PETG">PETG</option>
+                <option value="ABS">ABS</option>
+                <option value="TPU">TPU</option>
+                <option value="ASA">ASA</option>
+                <option value="Nylon">Nylon</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="filamentColor">Color</label>
+              <input type="color" id="filamentColor" value="#4CAF50">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="filamentBrand">Brand</label>
+            <input type="text" id="filamentBrand" placeholder="e.g., Bambu Lab, Hatchbox">
+          </div>
+          <div class="form-group">
+            <label for="filamentCost">Cost per kg ($) *</label>
+            <input type="number" id="filamentCost" required min="0" step="0.01" placeholder="e.g., 25">
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" data-close-modal>Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Filament</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Add Comparison Modal -->
+      <div class="modal" id="comparisonModal">
+        <div class="modal-header">
+          <h2 id="comparisonModalTitle">Add Amazon Comparison</h2>
+          <button class="modal-close" data-close-modal>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        <form id="comparisonForm">
+          <input type="hidden" id="comparisonId">
+          <input type="hidden" id="comparisonPrintId">
+          <div class="form-group">
+            <label for="comparisonProduct">Product Name *</label>
+            <input type="text" id="comparisonProduct" required placeholder="e.g., Amazon Basics Phone Stand">
+          </div>
+          <div class="form-group">
+            <label for="comparisonPrice">Product Price ($) *</label>
+            <input type="number" id="comparisonPrice" required min="0" step="0.01" placeholder="e.g., 12.99">
+          </div>
+          <div class="form-group">
+            <label for="comparisonQuantity">Prints per Product</label>
+            <input type="number" id="comparisonQuantity" min="1" value="1" placeholder="1">
+            <span class="help-text">If you need multiple prints to equal one product, enter that number</span>
+          </div>
+          <div class="form-group">
+            <label for="comparisonUrl">Amazon URL</label>
+            <input type="url" id="comparisonUrl" placeholder="https://amazon.com/...">
+          </div>
+          <div class="form-group">
+            <label for="comparisonNotes">Notes</label>
+            <textarea id="comparisonNotes" rows="2" placeholder="Optional notes..."></textarea>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" data-close-modal>Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Comparison</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Confirm Dialog -->
+      <div class="modal modal-sm" id="confirmModal">
+        <div class="modal-header">
+          <h2 id="confirmTitle">Confirm</h2>
+        </div>
+        <p id="confirmMessage">Are you sure?</p>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" data-close-modal>Cancel</button>
+          <button type="button" class="btn btn-danger" id="confirmBtn">Confirm</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
