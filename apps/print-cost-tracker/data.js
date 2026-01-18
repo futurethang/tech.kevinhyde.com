@@ -402,12 +402,18 @@ function initializeDefaults() {
 }
 
 // Export the API
-window.PrintCostDB = {
-  Settings,
-  Filaments,
-  Prints,
-  Comparisons,
-  Calculations,
-  DataMigration,
-  initializeDefaults
-};
+try {
+  window.PrintCostDB = {
+    Settings,
+    Filaments,
+    Prints,
+    Comparisons,
+    Calculations,
+    DataMigration,
+    initializeDefaults
+  };
+  console.log('PrintCostDB: Data layer loaded successfully');
+} catch (error) {
+  console.error('PrintCostDB: Failed to export data layer:', error);
+  alert('Failed to load data layer: ' + error.message);
+}

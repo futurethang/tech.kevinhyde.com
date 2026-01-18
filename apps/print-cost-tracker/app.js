@@ -732,44 +732,85 @@ function initElements() {
 
 // Initialize data layer references
 function initDataLayer() {
-  const db = window.PrintCostDB;
-  if (!db) {
-    console.error('PrintCostDB not found. Make sure data.js is loaded first.');
+  try {
+    const db = window.PrintCostDB;
+    if (!db) {
+      console.error('PrintCostDB not found. Make sure data.js is loaded first.');
+      console.error('window.PrintCostDB is:', typeof window.PrintCostDB);
+      return false;
+    }
+    Settings = db.Settings;
+    Filaments = db.Filaments;
+    Prints = db.Prints;
+    Comparisons = db.Comparisons;
+    Calculations = db.Calculations;
+    DataMigration = db.DataMigration;
+    initializeDefaults = db.initializeDefaults;
+
+    // Verify all components exist
+    if (!Settings || !Filaments || !Prints || !Comparisons || !Calculations) {
+      console.error('PrintCostDB is missing required components');
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error initializing data layer:', error);
     return false;
   }
-  Settings = db.Settings;
-  Filaments = db.Filaments;
-  Prints = db.Prints;
-  Comparisons = db.Comparisons;
-  Calculations = db.Calculations;
-  DataMigration = db.DataMigration;
-  initializeDefaults = db.initializeDefaults;
-  return true;
 }
 
 // Initialize
 function init() {
-  // Initialize data layer
-  if (!initDataLayer()) {
-    showToast('Failed to initialize data layer', 'error');
-    return;
+  try {
+    console.log('Print Cost Tracker: Starting initialization...');
+
+    // Initialize data layer
+    if (!initDataLayer()) {
+      console.error('Print Cost Tracker: Failed to initialize data layer');
+      alert('Failed to initialize data layer. Check console for errors.');
+      return;
+    }
+    console.log('Print Cost Tracker: Data layer initialized');
+
+    // Initialize DOM elements
+    initElements();
+    console.log('Print Cost Tracker: DOM elements initialized');
+
+    // Initialize defaults
+    initializeDefaults();
+    console.log('Print Cost Tracker: Defaults initialized');
+
+    // Initialize UI components
+    initTabs();
+    console.log('Print Cost Tracker: Tabs initialized');
+
+    initMenu();
+    console.log('Print Cost Tracker: Menu initialized');
+
+    initModals();
+    console.log('Print Cost Tracker: Modals initialized');
+
+    initConfirm();
+    console.log('Print Cost Tracker: Confirm initialized');
+
+    initEventListeners();
+    console.log('Print Cost Tracker: Event listeners initialized');
+
+    // Render initial state
+    refreshAll();
+    console.log('Print Cost Tracker: Initial render complete');
+
+  } catch (error) {
+    console.error('Print Cost Tracker: Initialization error:', error);
+    alert('Initialization error: ' + error.message);
   }
-
-  // Initialize DOM elements
-  initElements();
-
-  // Initialize defaults
-  initializeDefaults();
-
-  // Initialize UI components
-  initTabs();
-  initMenu();
-  initModals();
-  initConfirm();
-  initEventListeners();
-
-  // Render initial state
-  refreshAll();
 }
 
-document.addEventListener('DOMContentLoaded', init);
+// Run init when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  // DOM is already ready
+  init();
+}
