@@ -2,92 +2,11 @@
  * Print Cost Tracker - Main Application
  */
 
-const { Settings, Filaments, Prints, Comparisons, Calculations, DataMigration, initializeDefaults } = window.PrintCostDB;
+// DOM Elements - populated on init
+let elements = {};
 
-// DOM Elements
-const elements = {
-  // Tabs
-  tabs: document.querySelectorAll('.tab'),
-  tabContents: document.querySelectorAll('.tab-content'),
-
-  // Dashboard
-  breakEvenPercent: document.getElementById('breakEvenPercent'),
-  breakEvenLabel: document.getElementById('breakEvenLabel'),
-  progressRing: document.getElementById('progressRing'),
-  machineCostDisplay: document.getElementById('machineCostDisplay'),
-  totalSavingsDisplay: document.getElementById('totalSavingsDisplay'),
-  netPositionDisplay: document.getElementById('netPositionDisplay'),
-  totalPrintsDisplay: document.getElementById('totalPrintsDisplay'),
-  totalFilamentDisplay: document.getElementById('totalFilamentDisplay'),
-  printCostDisplay: document.getElementById('printCostDisplay'),
-  avgSavingsDisplay: document.getElementById('avgSavingsDisplay'),
-  recentPrintsList: document.getElementById('recentPrintsList'),
-
-  // Lists
-  printsList: document.getElementById('printsList'),
-  filamentsList: document.getElementById('filamentsList'),
-
-  // Buttons
-  addPrintBtn: document.getElementById('addPrintBtn'),
-  addFilamentBtn: document.getElementById('addFilamentBtn'),
-  exportDataBtn: document.getElementById('exportDataBtn'),
-  importDataBtn: document.getElementById('importDataBtn'),
-  importFileInput: document.getElementById('importFileInput'),
-  clearDataBtn: document.getElementById('clearDataBtn'),
-
-  // Settings
-  settingsForm: document.getElementById('settingsForm'),
-  machineCostInput: document.getElementById('machineCostInput'),
-
-  // Menu
-  menuBtn: document.getElementById('menuBtn'),
-  menuOverlay: document.getElementById('menuOverlay'),
-  sideMenu: document.getElementById('sideMenu'),
-  menuClose: document.getElementById('menuClose'),
-
-  // Modals
-  modalOverlay: document.getElementById('modalOverlay'),
-  printModal: document.getElementById('printModal'),
-  filamentModal: document.getElementById('filamentModal'),
-  comparisonModal: document.getElementById('comparisonModal'),
-  confirmModal: document.getElementById('confirmModal'),
-
-  // Print Form
-  printForm: document.getElementById('printForm'),
-  printId: document.getElementById('printId'),
-  printName: document.getElementById('printName'),
-  printFilament: document.getElementById('printFilament'),
-  printGrams: document.getElementById('printGrams'),
-  printTime: document.getElementById('printTime'),
-  printNotes: document.getElementById('printNotes'),
-  printModalTitle: document.getElementById('printModalTitle'),
-
-  // Filament Form
-  filamentForm: document.getElementById('filamentForm'),
-  filamentId: document.getElementById('filamentId'),
-  filamentName: document.getElementById('filamentName'),
-  filamentMaterial: document.getElementById('filamentMaterial'),
-  filamentColor: document.getElementById('filamentColor'),
-  filamentBrand: document.getElementById('filamentBrand'),
-  filamentCost: document.getElementById('filamentCost'),
-  filamentModalTitle: document.getElementById('filamentModalTitle'),
-
-  // Comparison Form
-  comparisonForm: document.getElementById('comparisonForm'),
-  comparisonId: document.getElementById('comparisonId'),
-  comparisonPrintId: document.getElementById('comparisonPrintId'),
-  comparisonProduct: document.getElementById('comparisonProduct'),
-  comparisonPrice: document.getElementById('comparisonPrice'),
-  comparisonQuantity: document.getElementById('comparisonQuantity'),
-  comparisonUrl: document.getElementById('comparisonUrl'),
-  comparisonNotes: document.getElementById('comparisonNotes'),
-  comparisonModalTitle: document.getElementById('comparisonModalTitle'),
-
-  // Confirm Modal
-  confirmTitle: document.getElementById('confirmTitle'),
-  confirmMessage: document.getElementById('confirmMessage'),
-  confirmBtn: document.getElementById('confirmBtn')
-};
+// Data layer references - populated on init
+let Settings, Filaments, Prints, Comparisons, Calculations, DataMigration, initializeDefaults;
 
 // State
 let confirmCallback = null;
@@ -724,14 +643,132 @@ function initEventListeners() {
   });
 }
 
+// Initialize DOM elements
+function initElements() {
+  elements = {
+    // Tabs
+    tabs: document.querySelectorAll('.tab'),
+    tabContents: document.querySelectorAll('.tab-content'),
+
+    // Dashboard
+    breakEvenPercent: document.getElementById('breakEvenPercent'),
+    breakEvenLabel: document.getElementById('breakEvenLabel'),
+    progressRing: document.getElementById('progressRing'),
+    machineCostDisplay: document.getElementById('machineCostDisplay'),
+    totalSavingsDisplay: document.getElementById('totalSavingsDisplay'),
+    netPositionDisplay: document.getElementById('netPositionDisplay'),
+    totalPrintsDisplay: document.getElementById('totalPrintsDisplay'),
+    totalFilamentDisplay: document.getElementById('totalFilamentDisplay'),
+    printCostDisplay: document.getElementById('printCostDisplay'),
+    avgSavingsDisplay: document.getElementById('avgSavingsDisplay'),
+    recentPrintsList: document.getElementById('recentPrintsList'),
+
+    // Lists
+    printsList: document.getElementById('printsList'),
+    filamentsList: document.getElementById('filamentsList'),
+
+    // Buttons
+    addPrintBtn: document.getElementById('addPrintBtn'),
+    addFilamentBtn: document.getElementById('addFilamentBtn'),
+    exportDataBtn: document.getElementById('exportDataBtn'),
+    importDataBtn: document.getElementById('importDataBtn'),
+    importFileInput: document.getElementById('importFileInput'),
+    clearDataBtn: document.getElementById('clearDataBtn'),
+
+    // Settings
+    settingsForm: document.getElementById('settingsForm'),
+    machineCostInput: document.getElementById('machineCostInput'),
+
+    // Menu
+    menuBtn: document.getElementById('menuBtn'),
+    menuOverlay: document.getElementById('menuOverlay'),
+    sideMenu: document.getElementById('sideMenu'),
+    menuClose: document.getElementById('menuClose'),
+
+    // Modals
+    modalOverlay: document.getElementById('modalOverlay'),
+    printModal: document.getElementById('printModal'),
+    filamentModal: document.getElementById('filamentModal'),
+    comparisonModal: document.getElementById('comparisonModal'),
+    confirmModal: document.getElementById('confirmModal'),
+
+    // Print Form
+    printForm: document.getElementById('printForm'),
+    printId: document.getElementById('printId'),
+    printName: document.getElementById('printName'),
+    printFilament: document.getElementById('printFilament'),
+    printGrams: document.getElementById('printGrams'),
+    printTime: document.getElementById('printTime'),
+    printNotes: document.getElementById('printNotes'),
+    printModalTitle: document.getElementById('printModalTitle'),
+
+    // Filament Form
+    filamentForm: document.getElementById('filamentForm'),
+    filamentId: document.getElementById('filamentId'),
+    filamentName: document.getElementById('filamentName'),
+    filamentMaterial: document.getElementById('filamentMaterial'),
+    filamentColor: document.getElementById('filamentColor'),
+    filamentBrand: document.getElementById('filamentBrand'),
+    filamentCost: document.getElementById('filamentCost'),
+    filamentModalTitle: document.getElementById('filamentModalTitle'),
+
+    // Comparison Form
+    comparisonForm: document.getElementById('comparisonForm'),
+    comparisonId: document.getElementById('comparisonId'),
+    comparisonPrintId: document.getElementById('comparisonPrintId'),
+    comparisonProduct: document.getElementById('comparisonProduct'),
+    comparisonPrice: document.getElementById('comparisonPrice'),
+    comparisonQuantity: document.getElementById('comparisonQuantity'),
+    comparisonUrl: document.getElementById('comparisonUrl'),
+    comparisonNotes: document.getElementById('comparisonNotes'),
+    comparisonModalTitle: document.getElementById('comparisonModalTitle'),
+
+    // Confirm Modal
+    confirmTitle: document.getElementById('confirmTitle'),
+    confirmMessage: document.getElementById('confirmMessage'),
+    confirmBtn: document.getElementById('confirmBtn')
+  };
+}
+
+// Initialize data layer references
+function initDataLayer() {
+  const db = window.PrintCostDB;
+  if (!db) {
+    console.error('PrintCostDB not found. Make sure data.js is loaded first.');
+    return false;
+  }
+  Settings = db.Settings;
+  Filaments = db.Filaments;
+  Prints = db.Prints;
+  Comparisons = db.Comparisons;
+  Calculations = db.Calculations;
+  DataMigration = db.DataMigration;
+  initializeDefaults = db.initializeDefaults;
+  return true;
+}
+
 // Initialize
 function init() {
+  // Initialize data layer
+  if (!initDataLayer()) {
+    showToast('Failed to initialize data layer', 'error');
+    return;
+  }
+
+  // Initialize DOM elements
+  initElements();
+
+  // Initialize defaults
   initializeDefaults();
+
+  // Initialize UI components
   initTabs();
   initMenu();
   initModals();
   initConfirm();
   initEventListeners();
+
+  // Render initial state
   refreshAll();
 }
 
