@@ -1,6 +1,15 @@
 {
   "apps": [
     {
+      "slug": "life-os-agent",
+      "name": "Life OS Agent",
+      "description": "AI-powered personal scheduling assistant using Claude, Google Calendar, and natural language",
+      "type": "static",
+      "status": "wip",
+      "createdAt": "2026-01-20",
+      "tags": ["ai", "productivity", "scheduling", "backend"]
+    },
+    {
       "slug": "print-cost-tracker",
       "name": "Print Cost Tracker",
       "description": "Track 3D printing costs and calculate savings vs buying products - with break-even calculator",

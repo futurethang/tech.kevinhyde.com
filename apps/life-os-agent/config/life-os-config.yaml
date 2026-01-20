@@ -1,0 +1,125 @@
+# Life OS Agent - Personal Configuration
+# This defines your life structure for scheduling
+
+meta:
+  user: "Kevin Hyde"
+  timezone: "America/Los_Angeles"
+
+# Work schedule template
+template:
+  work:
+    days: [monday, tuesday, wednesday, thursday, friday]
+    start: "09:00"
+    end: "16:00"
+
+  office_days:
+    days: [tuesday, wednesday, thursday]
+    location: "Adobe Fremont"
+    commute_minutes: 30
+
+# Non-negotiable recurring events
+commitments:
+  - name: "Monday Gym Class"
+    day: monday
+    start: "06:00"
+    end: "06:45"
+
+  - name: "Tuesday Cardio"
+    day: tuesday
+    start: "07:45"
+    end: "08:30"
+
+  - name: "Wednesday Weights"
+    day: wednesday
+    start: "07:45"
+    end: "08:30"
+
+  - name: "Thursday Cardio"
+    day: thursday
+    start: "07:45"
+    end: "08:30"
+
+  - name: "Thursday Social Hour"
+    day: thursday
+    start: "16:00"
+    end: "17:00"
+
+# Activities to schedule
+activities:
+  - id: chess
+    name: "Chess Practice"
+    category: learning
+    frequency: daily
+    duration: 30
+    time_preference: morning
+    days_preference: null
+
+  - id: weights
+    name: "Weight Training"
+    category: health
+    frequency: 3
+    duration: 45
+    time_preference: morning
+    days_preference: [monday, wednesday, friday]
+
+  - id: cardio
+    name: "Cardio"
+    category: health
+    frequency: 5
+    duration: 30
+    time_preference: morning
+    days_preference: null
+
+  - id: studio_session
+    name: "Studio Session"
+    category: creative
+    frequency: 2
+    duration: 120
+    time_preference: afternoon
+    days_preference: [tuesday, saturday]
+    location: "Dismal Nitch"
+
+  - id: skill_development
+    name: "Skill Development"
+    category: learning
+    frequency: "4-5"
+    duration: "60-90"
+    time_preference: flexible
+    days_preference: null
+
+  - id: reading
+    name: "Reading"
+    category: learning
+    frequency: daily
+    duration: 15
+    time_preference: flexible
+    days_preference: null
+
+  - id: instrument_practice
+    name: "Instrument Practice"
+    category: creative
+    frequency: daily
+    duration: 15
+    time_preference: evening
+    days_preference: null
+
+  - id: chores_errands
+    name: "Chores & Errands"
+    category: life
+    frequency: weekly
+    duration: 120
+    time_preference: flexible
+    days_preference: [saturday, sunday]
+
+# Priority rankings for scheduling conflicts
+priorities:
+  critical: [weights, cardio]
+  high: [studio_session, chess]
+  medium: [skill_development, reading]
+  low: [chores_errands]
+
+# Calendar configuration
+calendars:
+  primary: "k.p.hyde@gmail.com"
+  work: null
+  personal: null

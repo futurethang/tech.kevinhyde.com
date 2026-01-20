@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Life OS Agent - AI Scheduling Assistant</title>
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --surface: #141414;
+            --surface-2: #1e1e1e;
+            --text: #e0e0e0;
+            --text-muted: #888;
+            --accent: #4a9eff;
+            --accent-dim: #2a5a9a;
+            --border: #333;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            padding: 3rem 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 3rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--accent), #7c5aff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .tagline {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .principle {
+            background: var(--surface);
+            border-left: 3px solid var(--accent);
+            padding: 1rem 1.5rem;
+            margin: 2rem 0;
+            font-style: italic;
+            color: var(--text-muted);
+        }
+
+        h2 {
+            color: var(--accent);
+            font-size: 1.3rem;
+            margin: 2.5rem 0 1rem;
+            font-weight: 500;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .feature {
+            background: var(--surface);
+            padding: 1.25rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .feature h3 {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+
+        .feature p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .interfaces {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin: 1rem 0;
+        }
+
+        .interface {
+            background: var(--surface-2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .interface .icon {
+            font-size: 1.1rem;
+        }
+
+        code {
+            background: var(--surface);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 0.85em;
+        }
+
+        pre {
+            background: var(--surface);
+            padding: 1rem 1.25rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            border: 1px solid var(--border);
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+        }
+
+        .examples {
+            margin: 1rem 0;
+        }
+
+        .example {
+            background: var(--surface);
+            padding: 0.75rem 1rem;
+            margin: 0.5rem 0;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            border-left: 2px solid var(--accent-dim);
+        }
+
+        .status {
+            text-align: center;
+            padding: 2rem;
+            background: var(--surface);
+            border-radius: 8px;
+            margin: 2rem 0;
+        }
+
+        .status-badge {
+            display: inline-block;
+            background: var(--accent-dim);
+            color: var(--accent);
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem 0;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            border-top: 1px solid var(--border);
+            margin-top: 3rem;
+        }
+
+        a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Life OS Agent</h1>
+            <p class="tagline">AI-powered personal scheduling assistant</p>
+        </header>
+
+        <div class="principle">
+            Calendar is the UI. Memory is the work log. Chat is the interface.
+        </div>
+
+        <h2>What It Does</h2>
+        <div class="features">
+            <div class="feature">
+                <h3>Natural Language</h3>
+                <p>Schedule, query, and plan using conversational commands</p>
+            </div>
+            <div class="feature">
+                <h3>Smart Scheduling</h3>
+                <p>Respects priorities, preferences, and time constraints</p>
+            </div>
+            <div class="feature">
+                <h3>Week Planning</h3>
+                <p>Generates proposals based on activity requirements</p>
+            </div>
+            <div class="feature">
+                <h3>Memory</h3>
+                <p>Remembers decisions and stated preferences over time</p>
+            </div>
+        </div>
+
+        <h2>Interfaces</h2>
+        <div class="interfaces">
+            <div class="interface">
+                <span class="icon">📱</span>
+                <span>Telegram Bot</span>
+            </div>
+            <div class="interface">
+                <span class="icon">🔌</span>
+                <span>MCP Server</span>
+            </div>
+            <div class="interface">
+                <span class="icon">🌐</span>
+                <span>REST API</span>
+            </div>
+            <div class="interface">
+                <span class="icon">⌨️</span>
+                <span>CLI</span>
+            </div>
+        </div>
+
+        <h2>Example Commands</h2>
+        <div class="examples">
+            <div class="example">"What's on my calendar today?"</div>
+            <div class="example">"Schedule chess tomorrow morning"</div>
+            <div class="example">"Plan my week"</div>
+            <div class="example">"Move Thursday's studio session to Friday"</div>
+            <div class="example">"When do I have free time on Saturday?"</div>
+        </div>
+
+        <h2>Quick Start</h2>
+        <pre><code>cd apps/life-os-agent
+python -m venv .venv
+source .venv/bin/activate
+pip install -e .
+
+# Configure
+cp .env.example .env
+# Edit .env with your API keys
+
+# Run
+lifeos chat        # Interactive CLI
+lifeos serve       # API server
+lifeos telegram    # Telegram bot</code></pre>
+
+        <div class="status">
+            <span class="status-badge">Backend Service</span>
+            <p>This app runs as a server, not in the browser.</p>
+            <p style="margin-top: 0.5rem; color: var(--text-muted);">
+                Deploy to <a href="https://railway.app">Railway</a> or run locally.
+            </p>
+        </div>
+
+        <h2>Tech Stack</h2>
+        <p>
+            Python 3.11+ &bull; FastAPI &bull; Claude (Anthropic) &bull;
+            Google Calendar API &bull; Mem0 &bull; Telegram Bot API
+        </p>
+
+        <footer>
+            <p>Part of <a href="https://tech.kevinhyde.com">tech.kevinhyde.com</a></p>
+            <p>View source on <a href="https://github.com/futurethang/tech.kevinhyde.com/tree/main/apps/life-os-agent">GitHub</a></p>
+        </footer>
+    </div>
+</body>
+</html>
