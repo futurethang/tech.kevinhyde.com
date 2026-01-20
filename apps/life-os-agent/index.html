@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Life OS Agent - AI Personal Scheduler</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="hero">
+    <nav>
+      <a href="/" class="back-link">&larr; Back to Tech Experiments</a>
+    </nav>
+    <div class="hero-content">
+      <div class="badge">Personal Project</div>
+      <h1>Life OS Agent</h1>
+      <p class="tagline">AI-powered personal time orchestration</p>
+      <p class="philosophy">Calendar is the UI. Memory is the database. Chat is the interface.</p>
+    </div>
+  </div>
+
+  <main class="container">
+    <section class="intro">
+      <h2>What is Life OS Agent?</h2>
+      <p>
+        Life OS Agent is a personal scheduling assistant that uses Claude to manage time allocation
+        across all life domains—work, health, creative pursuits, skill development, and maintenance.
+      </p>
+      <p>
+        Rather than building a complex application with its own UI, Life OS Agent leverages
+        <strong>Google Calendar</strong> as the primary interface while providing an intelligent
+        layer that understands your goals, interests, and constraints—and can dynamically schedule
+        time to pursue them.
+      </p>
+    </section>
+
+    <section class="architecture">
+      <h2>How It Works</h2>
+      <div class="arch-diagram">
+        <div class="layer user-layer">
+          <h3>User Layer</h3>
+          <div class="components">
+            <div class="component">
+              <span class="icon">💬</span>
+              <span>CLI Chat</span>
+            </div>
+            <div class="component">
+              <span class="icon">📅</span>
+              <span>Google Calendar</span>
+            </div>
+          </div>
+        </div>
+        <div class="connector">&darr;</div>
+        <div class="layer agent-layer">
+          <h3>Agent Layer</h3>
+          <div class="components">
+            <div class="component">
+              <span class="icon">🤖</span>
+              <span>Claude (LLM)</span>
+            </div>
+            <div class="component">
+              <span class="icon">🛠️</span>
+              <span>Scheduling Logic</span>
+            </div>
+          </div>
+        </div>
+        <div class="connector">&darr;</div>
+        <div class="layer data-layer">
+          <h3>Persistence Layer</h3>
+          <div class="components">
+            <div class="component">
+              <span class="icon">🧠</span>
+              <span>Mem0 (Memory)</span>
+            </div>
+            <div class="component">
+              <span class="icon">⚙️</span>
+              <span>YAML Config</span>
+            </div>
+            <div class="component">
+              <span class="icon">📆</span>
+              <span>Calendar API</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="features">
+      <h2>Key Features</h2>
+      <div class="feature-grid">
+        <div class="feature">
+          <h3>Natural Language Chat</h3>
+          <p>"Plan my week" or "Add a 3D printing session this weekend" - the agent understands context and constraints.</p>
+        </div>
+        <div class="feature">
+          <h3>Persistent Memory</h3>
+          <p>Remember preferences, patterns, and history. "You've skipped Thursday workouts 3 times this month."</p>
+        </div>
+        <div class="feature">
+          <h3>Priority-Based Scheduling</h3>
+          <p>Define what's critical vs. nice-to-have. The agent knows what to cut when time is tight.</p>
+        </div>
+        <div class="feature">
+          <h3>Gap Analysis</h3>
+          <p>Find unscheduled time and get suggestions on what to fill it with based on your goals.</p>
+        </div>
+        <div class="feature">
+          <h3>Human Override</h3>
+          <p>Edit your calendar directly anytime. The agent adapts to your changes.</p>
+        </div>
+        <div class="feature">
+          <h3>Weekly Reports</h3>
+          <p>"How much time did I spend on music last month?" - track your time allocation over time.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="example">
+      <h2>Example Interaction</h2>
+      <div class="terminal">
+        <div class="terminal-header">
+          <span class="dot red"></span>
+          <span class="dot yellow"></span>
+          <span class="dot green"></span>
+          <span class="terminal-title">lifeos chat</span>
+        </div>
+        <div class="terminal-body">
+          <div class="line user">
+            <span class="prompt">You:</span>
+            <span class="text">What's on my calendar tomorrow?</span>
+          </div>
+          <div class="line agent">
+            <span class="prompt">Agent:</span>
+            <span class="text">Tomorrow (Tuesday, Jan 21):</span>
+          </div>
+          <div class="line agent">
+            <span class="text">- 7:00 AM: Leave for office</span>
+          </div>
+          <div class="line agent">
+            <span class="text">- 7:45-8:30 AM: Cardio at Adobe gym</span>
+          </div>
+          <div class="line agent">
+            <span class="text">- 9:00 AM - 4:00 PM: Work</span>
+          </div>
+          <div class="line agent">
+            <span class="text">- 4:15-6:30 PM: Studio session at Dismal Nitch</span>
+          </div>
+          <div class="line agent">
+            <span class="text">- 7:00 PM: Home, easy dinner</span>
+          </div>
+          <div class="line agent spacer"></div>
+          <div class="line agent">
+            <span class="text">You still need: chess (30 min), instrument practice (15 min)</span>
+          </div>
+          <div class="line agent">
+            <span class="text">I can fit those in the 8:00-10:45 PM window if you want.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="tech-stack">
+      <h2>Technology Stack</h2>
+      <div class="stack-list">
+        <div class="stack-item">
+          <strong>Language:</strong> Python 3.11+
+        </div>
+        <div class="stack-item">
+          <strong>LLM:</strong> Claude API (Anthropic)
+        </div>
+        <div class="stack-item">
+          <strong>Memory:</strong> Mem0 (self-hosted with Docker)
+        </div>
+        <div class="stack-item">
+          <strong>Calendar:</strong> Google Calendar API (OAuth2)
+        </div>
+        <div class="stack-item">
+          <strong>Config:</strong> YAML files
+        </div>
+        <div class="stack-item">
+          <strong>Interface:</strong> Rich CLI
+        </div>
+      </div>
+    </section>
+
+    <section class="cta">
+      <h2>Open Source</h2>
+      <p>
+        Life OS Agent is a personal project, but the code is available if you want to
+        build something similar for yourself.
+      </p>
+      <a href="https://github.com/futurethang/tech.kevinhyde.com/tree/main/life-os-agent" class="button" target="_blank" rel="noopener noreferrer">
+        View on GitHub
+      </a>
+    </section>
+  </main>
+
+  <footer>
+    <p>
+      Built by <a href="/">Kevin Hyde</a> as part of <a href="/">tech.kevinhyde.com</a>
+    </p>
+  </footer>
+</body>
+</html>
