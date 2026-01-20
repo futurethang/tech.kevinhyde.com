@@ -1,0 +1,182 @@
+# Life OS Configuration for Kevin Hyde
+# This file defines your life structure, activities, and scheduling preferences.
+
+meta:
+  version: "1.0"
+  user: "Kevin Hyde"
+  timezone: "America/Los_Angeles"
+
+# Fixed weekly structure
+template:
+  work:
+    days: [monday, tuesday, wednesday, thursday, friday]
+    start: "09:00"
+    end: "16:00"
+    lunch:
+      start: "12:00"
+      duration: 60
+
+  sleep:
+    target_bedtime: "23:00"
+    target_wake: "06:30"
+    wind_down: 15
+
+  office_days:
+    days: [tuesday, wednesday, thursday]
+    location: "Adobe Fremont"
+    commute_minutes: 30
+
+# Recurring commitments (non-negotiable)
+commitments:
+  - name: "Monday Gym Class"
+    day: monday
+    start: "06:00"
+    end: "06:45"
+    location: "Gym (20 min away)"
+    travel_time: 20
+
+  - name: "Adobe Gym (Weights)"
+    day: wednesday
+    start: "07:45"
+    end: "08:30"
+    location: "Adobe Fremont"
+
+  - name: "Adobe Gym (Cardio)"
+    days: [tuesday, thursday]
+    start: "07:45"
+    end: "08:30"
+    location: "Adobe Fremont"
+
+  - name: "Adobe Social Hour"
+    day: thursday
+    start: "16:00"
+    end: "17:30"
+    note: "Beer - avoid focused work after"
+
+  - name: "Dinner with Jill (late)"
+    day: wednesday
+    start: "21:15"
+    duration: 45
+
+# Activities to schedule
+activities:
+  # Health & Fitness
+  - id: weights
+    name: "Weight Training"
+    category: health
+    frequency: 3
+    duration: 45
+    days_preference: [monday, wednesday, friday]
+    time_preference: morning
+    note: "Mon is gym class, Wed/Fri flexible"
+
+  - id: cardio
+    name: "Cardio (walk/run)"
+    category: health
+    frequency: "3-4"
+    duration: 45
+    days_preference: [tuesday, thursday, saturday, sunday]
+    time_preference: morning
+
+  # Creative / Music
+  - id: studio_session
+    name: "Studio Session"
+    category: creative
+    frequency: 2
+    duration: "120-180"
+    location: "Dismal Nitch (Fremont)"
+    days_preference: [tuesday, wednesday]
+    note: "Best after work on office days - already in Fremont"
+
+  - id: instrument_practice
+    name: "Instrument Practice (Chops)"
+    category: creative
+    frequency: daily
+    duration: 15
+    time_preference: flexible
+    note: "Quick daily practice, can be anywhere"
+
+  # Mental / Learning
+  - id: chess
+    name: "Chess Practice"
+    category: learning
+    frequency: daily
+    duration: 30
+    time_preference: [morning, evening]
+
+  - id: reading_daytime
+    name: "Reading (Daytime)"
+    category: learning
+    frequency: daily
+    duration: "15-30"
+    time_preference: flexible
+    note: "In addition to bedtime reading"
+
+  # Skill Development (flexible pool)
+  - id: skill_development
+    name: "Skill Development"
+    category: growth
+    frequency: "4-5"
+    duration: "90-180"
+    time_preference: [evening, weekend]
+    sub_interests:
+      - name: "AI Orchestration Research"
+        current_priority: high
+      - name: "Radio Station Planning"
+        current_priority: medium
+      - name: "3D Printing Projects"
+        current_priority: medium
+      - name: "Claude Code Workflows"
+        current_priority: low
+
+  # Home / Life
+  - id: cook_dinner
+    name: "Cook Dinner"
+    category: home
+    frequency: "2-3"
+    duration: 90
+    days_preference: [monday, thursday, sunday]
+
+  - id: chores_errands
+    name: "Chores & Errands"
+    category: home
+    frequency: weekly
+    duration: 180
+    days_preference: [saturday, sunday]
+
+  # Weekend specific
+  - id: hike
+    name: "Hike"
+    category: health
+    frequency: weekly
+    duration: 180
+    days_preference: [saturday]
+    time_preference: morning
+
+# Priority tiers (what gets cut first when time is tight)
+priorities:
+  critical:  # Never skip
+    - weights
+    - cardio
+  high:      # Skip only if necessary
+    - studio_session
+    - instrument_practice
+    - chess
+  medium:    # Flexible
+    - skill_development
+    - reading_daytime
+    - hike
+  low:       # Nice to have
+    - chores_errands
+    - cook_dinner
+
+# Calendar mapping
+calendars:
+  primary: "k.p.hyde@gmail.com"
+  # shared: "Jill and Kevin's Super Mega Awesome Calendar"
+  # studio: "Crackle & Pop!"
+
+# Event naming conventions
+event_format:
+  prefix: ""
+  include_category: false

@@ -1,6 +1,15 @@
 {
   "apps": [
     {
+      "slug": "life-os-agent",
+      "name": "Life OS Agent",
+      "description": "AI-powered personal time orchestration - uses Claude to manage calendar scheduling across all life domains",
+      "type": "static",
+      "status": "live",
+      "createdAt": "2026-01-20",
+      "tags": ["tool", "ai", "productivity", "personal"]
+    },
+    {
       "slug": "print-cost-tracker",
       "name": "Print Cost Tracker",
       "description": "Track 3D printing costs and calculate savings vs buying products - with break-even calculator",
