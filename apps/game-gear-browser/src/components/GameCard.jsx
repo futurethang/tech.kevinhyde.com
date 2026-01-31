@@ -1,16 +1,41 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 
-const PLACEHOLDER_IMAGE = 'data:image/svg+xml,' + encodeURIComponent(`
-<svg xmlns="http://www.w3.org/2000/svg" width="200" height="150" viewBox="0 0 200 150">
-  <rect fill="#1a1a2e" width="200" height="150"/>
-  <text fill="#0f3460" font-size="14" font-family="sans-serif" text-anchor="middle" x="100" y="70">Game Gear</text>
-  <text fill="#0f3460" font-size="12" font-family="sans-serif" text-anchor="middle" x="100" y="90">No Image</text>
-</svg>
-`);
+// Generate a color based on the game title for variety
+function getColorForTitle(title) {
+  const colors = [
+    '#e94560', '#0f3460', '#16213e', '#533483',
+    '#1fab89', '#1a508b', '#c70039', '#2c3e50'
+  ];
+  let hash = 0;
+  for (let i = 0; i < title.length; i++) {
+    hash = title.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return colors[Math.abs(hash) % colors.length];
+}
 
 export function GameCard({ game, onPlay, isFavorite, onToggleFavorite }) {
   const [imageError, setImageError] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+
+  // Generate placeholder SVG with game's initial
+  const placeholderImage = useMemo(() => {
+    const initial = game.title.charAt(0).toUpperCase();
+    const color = getColorForTitle(game.title);
+    return 'data:image/svg+xml,' + encodeURIComponent(`
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="150" viewBox="0 0 200 150">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e"/>
+      <stop offset="100%" style="stop-color:#0a0a12"/>
+    </linearGradient>
+  </defs>
+  <rect fill="url(#bg)" width="200" height="150"/>
+  <circle cx="100" cy="65" r="40" fill="${color}" opacity="0.3"/>
+  <text fill="${color}" font-size="48" font-family="system-ui, sans-serif" font-weight="bold" text-anchor="middle" x="100" y="82">${initial}</text>
+  <text fill="#4a4a6a" font-size="10" font-family="system-ui, sans-serif" text-anchor="middle" x="100" y="130">GAME GEAR</text>
+</svg>
+`);
+  }, [game.title]);
 
   const handleImageError = () => {
     setImageError(true);
@@ -39,7 +64,7 @@ export function GameCard({ game, onPlay, isFavorite, onToggleFavorite }) {
           <div className="absolute inset-0 skeleton" />
         )}
         <img
-          src={imageError ? PLACEHOLDER_IMAGE : game.boxartUrl}
+          src={imageError ? placeholderImage : game.boxartUrl}
           alt={game.title}
           className={`w-full h-full object-cover transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
           onError={handleImageError}

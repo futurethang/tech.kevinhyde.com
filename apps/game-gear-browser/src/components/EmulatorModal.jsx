@@ -24,7 +24,7 @@ export function EmulatorModal({ game, onClose, onAddToRecent }) {
 
     // Configure EmulatorJS
     window.EJS_player = '#game';
-    window.EJS_core = 'gamegear';
+    window.EJS_core = 'segaGG';
     window.EJS_gameUrl = game.romUrl;
     window.EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
     window.EJS_startOnLoaded = true;
