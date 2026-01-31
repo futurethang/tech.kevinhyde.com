@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#1a472a"/>
+  <circle cx="256" cy="256" r="186" fill="#f5f5dc" stroke="#8b4513" stroke-width="10"/>
+  <path d="M 147 133 Q 256 213 147 379" fill="none" stroke="#cc0000" stroke-width="8"/>
+  <path d="M 365 133 Q 256 213 365 379" fill="none" stroke="#cc0000" stroke-width="8"/>
+  <line x1="139" y1="160" x2="165" y2="147" stroke="#cc0000" stroke-width="5"/>
+  <line x1="128" y1="200" x2="155" y2="192" stroke="#cc0000" stroke-width="5"/>
+  <line x1="123" y1="240" x2="150" y2="240" stroke="#cc0000" stroke-width="5"/>
+  <line x1="128" y1="280" x2="155" y2="288" stroke="#cc0000" stroke-width="5"/>
+  <line x1="139" y1="320" x2="165" y2="333" stroke="#cc0000" stroke-width="5"/>
+  <line x1="373" y1="160" x2="347" y2="147" stroke="#cc0000" stroke-width="5"/>
+  <line x1="384" y1="200" x2="357" y2="192" stroke="#cc0000" stroke-width="5"/>
+  <line x1="389" y1="240" x2="362" y2="240" stroke="#cc0000" stroke-width="5"/>
+  <line x1="384" y1="280" x2="357" y2="288" stroke="#cc0000" stroke-width="5"/>
+  <line x1="373" y1="320" x2="347" y2="333" stroke="#cc0000" stroke-width="5"/>
+</svg>
