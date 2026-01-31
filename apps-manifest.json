@@ -1,6 +1,15 @@
 {
   "apps": [
     {
+      "slug": "game-gear-browser",
+      "name": "Game Gear Browser",
+      "description": "Browse and play 300+ classic Sega Game Gear games directly in your browser",
+      "type": "react",
+      "status": "live",
+      "createdAt": "2026-01-31",
+      "tags": ["game", "emulator", "retro", "sega"]
+    },
+    {
       "slug": "print-cost-tracker",
       "name": "Print Cost Tracker",
       "description": "Track 3D printing costs and calculate savings vs buying products - with break-even calculator",
