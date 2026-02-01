@@ -909,4 +909,255 @@ These are open questions to discuss before/during implementation:
 
 ---
 
+## Addendum: Async Utilities Module (Future Enhancement)
+
+This section documents a reusable async utilities module that was designed during Phase 5 development but not included in the final implementation. It provides robust retry logic, standardized error handling, and operation metadata that would benefit the game session service and WebSocket layer.
+
+### Overview
+
+The module provides:
+- **Configurable retry with exponential backoff** - Automatic retries for transient failures
+- **Typed operation results with metadata** - Consistent success/failure responses with timing info
+- **Frontend-friendly error format** - Structured errors with codes for UI handling
+- **Circuit breaker support** - Foundation for future resilience patterns
+
+### Target Location
+
+```
+backend/src/utils/async-utils.ts
+backend/src/__tests__/unit/async-utils.test.ts
+```
+
+### Type Definitions
+
+```typescript
+// Operation result metadata (timing, attempts, tracing)
+interface OperationResultMeta {
+  operationId: string;   // UUID for tracing
+  duration: number;      // Total time in ms
+  attempts: number;      // 1 = first attempt succeeded
+}
+
+// Structured error data for frontend consumption
+interface OperationErrorData {
+  code: string;          // Machine-readable code (e.g., 'network_error')
+  message: string;       // Human-readable message
+  retriable: boolean;    // Can client retry?
+  retryAfter?: number;   // Suggested wait time in ms
+  details?: Record<string, unknown>;  // Additional context
+}
+
+// Unified result type for all async operations
+interface OperationResult<T> {
+  success: boolean;
+  data?: T;
+  error?: OperationErrorData;
+  meta: OperationResultMeta;
+}
+
+// Configuration for retry behavior
+interface RetryOptions {
+  operationId?: string;    // Override auto-generated UUID
+  maxRetries?: number;     // Default: 3
+  baseDelayMs?: number;    // Default: 1000
+  maxDelayMs?: number;     // Default: 30000
+  timeoutMs?: number;      // Per-attempt timeout (optional)
+  jitter?: boolean;        // Add randomness to delays (default: true)
+  onRetry?: (info: { attempt: number; error: Error; nextDelayMs: number }) => void;
+}
+```
+
+### Core Functions to Implement
+
+#### 1. `OperationError` Class
+
+Custom error class with retry semantics:
+
+```typescript
+class OperationError extends Error {
+  code: string;
+  retriable: boolean;
+  details?: Record<string, unknown>;
+}
+```
+
+**Test cases:**
+- Creates error with all properties
+- Maintains proper stack trace
+- Works with instanceof checks
+
+#### 2. `calculateBackoff(attempt, baseDelayMs, maxDelayMs, jitter)`
+
+Calculates exponential backoff delay:
+
+```typescript
+calculateBackoff(0, 100) → 100      // 2^0 * 100
+calculateBackoff(1, 100) → 200      // 2^1 * 100
+calculateBackoff(2, 100) → 400      // 2^2 * 100
+calculateBackoff(10, 100, 1000) → 1000  // Capped at max
+```
+
+**Test cases:**
+- Returns correct exponential values
+- Respects max delay cap
+- Adds jitter (0.5x-1.5x multiplier) when enabled
+- Multiple calls with jitter produce variation
+
+#### 3. `isRetriableError(error)`
+
+Determines if an error should trigger retry:
+
+```typescript
+// Retriable:
+- OperationError with retriable: true
+- Errors containing: ECONNREFUSED, ECONNRESET, ETIMEDOUT,
+  ENOTFOUND, ENETUNREACH, EAI_AGAIN, "fetch failed", "network"
+
+// Not retriable:
+- OperationError with retriable: false
+- Validation errors
+- Auth errors
+- Unknown errors (default safe)
+```
+
+**Test cases:**
+- Returns true for OperationError with retriable flag
+- Returns false for OperationError without retriable flag
+- Detects network-related standard errors
+- Returns false for unknown errors (safe default)
+
+#### 4. `asyncWithRetry<T>(operation, options)`
+
+Main retry wrapper function:
+
+```typescript
+const result = await asyncWithRetry(
+  () => gameService.createGame(userId, teamId),
+  { maxRetries: 3, baseDelayMs: 1000, timeoutMs: 5000 }
+);
+
+if (result.success) {
+  return res.json(result.data);
+} else {
+  return res.status(getHttpStatus(result.error.code)).json(result.error);
+}
+```
+
+**Algorithm:**
+1. Execute operation
+2. If success → return OperationResult with data
+3. If failure:
+   - Check if retriable
+   - If not retriable or max retries exceeded → return error result
+   - Calculate backoff delay
+   - Call onRetry callback if provided
+   - Wait, then retry
+4. Include metadata (operationId, duration, attempts) in all results
+
+**Test cases:**
+- Returns result on first attempt success
+- Includes operation metadata
+- Generates operationId if not provided
+- Retries on retriable error
+- Does not retry on non-retriable error
+- Respects maxRetries limit
+- Uses exponential backoff between retries
+- Wraps unknown errors as OperationError
+- Includes retryAfter for retriable errors
+- Calls onRetry callback when retrying
+- Aborts operation on timeout
+
+#### 5. `Errors` Factory Object
+
+Pre-built error factories for common cases:
+
+```typescript
+const Errors = {
+  network: (message?) => new OperationError('network_error', message, true),
+  timeout: (message?) => new OperationError('timeout', message, true),
+  rateLimit: (retryAfterSeconds?) => new OperationError('rate_limit', ..., true),
+  validation: (message, details?) => new OperationError('validation_error', ..., false),
+  notFound: (resource) => new OperationError('not_found', `${resource} not found`, false),
+  forbidden: (message?) => new OperationError('forbidden', message, false),
+  conflict: (message) => new OperationError('conflict', message, false),
+  serverError: (message?) => new OperationError('server_error', message, true),
+};
+```
+
+### Integration Points
+
+Once implemented, integrate with:
+
+| Service | Use Case |
+|---------|----------|
+| `game-service.ts` | Wrap database operations for retry on transient failures |
+| `mlb-sync.ts` | Retry failed MLB API calls with backoff |
+| `socket/handlers.ts` | Retry state persistence on WebSocket events |
+| API routes | Return consistent error format to frontend |
+
+### Example: Game Service Integration
+
+```typescript
+// Before (current)
+async function createGame(userId: string, teamId: string) {
+  try {
+    const game = await db.games.create({ ... });
+    return game;
+  } catch (error) {
+    throw error; // Unstructured
+  }
+}
+
+// After (with async-utils)
+async function createGame(userId: string, teamId: string) {
+  return asyncWithRetry(
+    async () => {
+      const team = await teamService.getTeamById(teamId);
+      if (!team) throw Errors.notFound('Team');
+      if (team.userId !== userId) throw Errors.forbidden('Not your team');
+      return db.games.create({ ... });
+    },
+    { maxRetries: 2, baseDelayMs: 500 }
+  );
+}
+```
+
+### Test File Structure
+
+```typescript
+// async-utils.test.ts
+describe('asyncWithRetry', () => {
+  describe('successful operations', () => { ... })
+  describe('retry behavior', () => { ... })
+  describe('error handling', () => { ... })
+  describe('timeout handling', () => { ... })
+})
+
+describe('createOperationResult', () => { ... })
+describe('OperationError', () => { ... })
+describe('isRetriableError', () => { ... })
+describe('calculateBackoff', () => { ... })
+```
+
+**Total: ~25 test cases**
+
+### Implementation Order
+
+1. **Types & OperationError class** - Foundation types and custom error
+2. **calculateBackoff** - Pure function, easy to test
+3. **isRetriableError** - Pure function, pattern matching
+4. **createOperationResult** - Helper for consistent result creation
+5. **asyncWithRetry** - Main function, depends on all above
+6. **Errors factory** - Convenience helpers
+
+### Notes
+
+- Uses `uuid` package for operationId generation (already in dependencies)
+- All functions are pure except asyncWithRetry (has side effects via delays)
+- Jitter prevents thundering herd when multiple clients retry simultaneously
+- The 30-second max delay is conservative; adjust based on use case
+- Circuit breaker pattern can be added later using the same foundation
+
+---
+
 *This document is the source of truth for implementation. Update it as decisions are made and the project evolves.*
