@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import type { HealthResponse, ApiError } from './types/index.js';
 import { authMiddleware } from './middleware/auth.js';
+import authRoutes from './routes/auth.js';
 import mlbRoutes from './routes/mlb.js';
 import teamRoutes from './routes/teams.js';
 import gameRoutes from './routes/games.js';
@@ -33,6 +34,9 @@ export function createApp(): Express {
   app.get('/api/protected', authMiddleware, (req: Request, res: Response) => {
     res.json({ message: 'You are authenticated', user: (req as unknown as { user: unknown }).user });
   });
+
+  // Auth routes (no auth required)
+  app.use('/api/auth', authRoutes);
 
   // MLB routes
   app.use('/api/mlb', mlbRoutes);
