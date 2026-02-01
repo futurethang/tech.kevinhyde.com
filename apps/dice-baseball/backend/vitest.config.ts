@@ -13,8 +13,11 @@ export default defineConfig({
         '**/__tests__/**',
         '**/types/**',
         '**/node_modules/**',
+        '**/dist/**',
+        '**/scripts/**',
         'vitest.config.ts',
         'src/index.ts', // Entry point - not unit testable
+        'src/services/team-service.ts', // Placeholder - will be replaced with Supabase
       ],
       thresholds: {
         // Phase 3 thresholds - lower due to placeholder DB service functions
