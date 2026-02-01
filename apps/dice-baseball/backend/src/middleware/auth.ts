@@ -2,7 +2,7 @@ import type { Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import type { AuthenticatedRequest, JWTPayload, ApiError } from '../types/index.js';
 
-const JWT_SECRET = process.env.SUPABASE_JWT_SECRET || 'test-secret-key';
+const JWT_SECRET = process.env.JWT_SECRET || 'test-secret-key-for-testing-only';
 
 export function authMiddleware(
   req: AuthenticatedRequest,

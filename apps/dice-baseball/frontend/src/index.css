@@ -1,0 +1,90 @@
+@import 'tailwindcss';
+
+/* Custom theme configuration for Tailwind v4 */
+@theme {
+  /* Colors */
+  --color-green-900: #0f2417;
+  --color-green-800: #1a3d28;
+  --color-green-700: #1e5631;
+  --color-green-600: #2d7a47;
+  --color-green-500: #3d9b5d;
+  --color-green-400: #4fb871;
+  --color-green-300: #6dd58f;
+
+  --color-brown-900: #2d1f14;
+  --color-brown-800: #4a3425;
+  --color-brown-700: #6b4d36;
+  --color-brown-600: #8b6848;
+  --color-brown-500: #a67c52;
+
+  --color-baseball-red: #c9302c;
+  --color-baseball-red-dark: #a02622;
+
+  --color-gold: #fbbf24;
+
+  /* Fonts */
+  --font-display: 'Oswald', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+/* Base styles */
+body {
+  @apply bg-gray-900 text-gray-100 min-h-screen;
+  font-family: var(--font-body);
+  margin: 0;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  @apply min-h-screen;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+.font-body {
+  font-family: var(--font-body);
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* Touch-friendly defaults */
+button, a, [role="button"] {
+  @apply min-h-[48px];
+  touch-action: manipulation;
+}
+
+/* Focus styles for accessibility */
+:focus-visible {
+  @apply outline-2 outline-offset-2 outline-green-500;
+}
+
+/* Custom scrollbar for dark theme */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-800;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-600 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-500;
+}
