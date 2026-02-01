@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import type { HealthResponse, ApiError } from './types/index.js';
 import { authMiddleware } from './middleware/auth.js';
 import mlbRoutes from './routes/mlb.js';
+import teamRoutes from './routes/teams.js';
 
 export function createApp(): Express {
   const app = express();
@@ -34,6 +35,9 @@ export function createApp(): Express {
 
   // MLB routes
   app.use('/api/mlb', mlbRoutes);
+
+  // Team routes
+  app.use('/api/teams', teamRoutes);
 
   // 404 handler
   app.use((_req: Request, res: Response<ApiError>) => {
