@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import type { HealthResponse, ApiError } from './types/index.js';
 import { authMiddleware } from './middleware/auth.js';
+import mlbRoutes from './routes/mlb.js';
 
 export function createApp(): Express {
   const app = express();
@@ -30,6 +31,9 @@ export function createApp(): Express {
   app.get('/api/protected', authMiddleware, (req: Request, res: Response) => {
     res.json({ message: 'You are authenticated', user: (req as unknown as { user: unknown }).user });
   });
+
+  // MLB routes
+  app.use('/api/mlb', mlbRoutes);
 
   // 404 handler
   app.use((_req: Request, res: Response<ApiError>) => {
