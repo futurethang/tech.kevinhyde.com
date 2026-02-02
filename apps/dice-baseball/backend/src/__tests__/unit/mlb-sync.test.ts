@@ -296,7 +296,7 @@ describe('MLB Sync Service', () => {
     });
 
     it('returns current year at start of season (April 1)', () => {
-      vi.setSystemTime(new Date('2025-04-01'));
+      vi.setSystemTime(new Date('2025-04-01T12:00:00'));
       expect(getCurrentSeason()).toBe(2025);
     });
 
