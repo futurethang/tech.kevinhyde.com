@@ -2,17 +2,34 @@
  * Home Page - Dashboard with quick actions
  */
 
-import { Link } from 'react-router-dom';
-import { Card, CardContent } from '../components/common';
+import { Link, useNavigate } from 'react-router-dom';
+import { Card, CardContent, Button } from '../components/common';
 import { Header, PageContainer } from '../components/layout/Header';
 import { useAuthStore } from '../stores/authStore';
 
 export function Home() {
-  const { user } = useAuthStore();
+  const { user, logout } = useAuthStore();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/auth');
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-900">
-      <Header title="DICE BASEBALL" />
+      <Header 
+        title="DICE BASEBALL" 
+        rightAction={
+          <Button 
+            variant="secondary" 
+            size="sm"
+            onClick={handleLogout}
+          >
+            Logout
+          </Button>
+        }
+      />
 
       <PageContainer>
         {/* Logo and Welcome */}
