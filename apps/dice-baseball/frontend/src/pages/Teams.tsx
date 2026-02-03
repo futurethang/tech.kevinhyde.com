@@ -3,23 +3,32 @@
  */
 
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button, Card, CardContent, Input } from '../components/common';
 import { Header, PageContainer } from '../components/layout/Header';
+import { TeamEditor } from '../components/team';
 import { useTeamStore } from '../stores/teamStore';
 import * as api from '../services/api';
 import type { Team } from '../types';
 
 export function Teams() {
   const navigate = useNavigate();
+  const { teamId } = useParams<{ teamId: string }>();
   const { teams, setTeams, setLoading, isLoading } = useTeamStore();
   const [showNewTeamModal, setShowNewTeamModal] = useState(false);
   const [newTeamName, setNewTeamName] = useState('');
   const [creating, setCreating] = useState(false);
 
   useEffect(() => {
-    loadTeams();
-  }, []);
+    if (!teamId) {
+      loadTeams();
+    }
+  }, [teamId]);
+
+  // If teamId is present, show the team editor
+  if (teamId) {
+    return <TeamEditor teamId={teamId} />;
+  }
 
   async function loadTeams() {
     setLoading(true);
