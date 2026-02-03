@@ -112,7 +112,7 @@ export interface GetPlayersParams {
 
 export async function getPlayers(
   params: GetPlayersParams = {}
-): Promise<PaginatedResponse<MLBPlayer>> {
+): Promise<{ players: MLBPlayer[]; total: number; limit: number; offset: number }> {
   const searchParams = new URLSearchParams();
   if (params.position) searchParams.set('position', params.position);
   if (params.team) searchParams.set('team', params.team);
