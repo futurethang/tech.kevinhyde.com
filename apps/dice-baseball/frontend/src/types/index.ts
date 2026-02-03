@@ -20,42 +20,56 @@ export interface User {
 // ============================================
 
 export interface BattingStats {
+  gamesPlayed: number;
+  atBats: number;
+  runs: number;
+  hits: number;
+  doubles: number;
+  triples: number;
+  homeRuns: number;
+  rbi: number;
+  walks: number;
+  strikeouts: number;
+  stolenBases: number;
   avg: number;
   obp: number;
   slg: number;
   ops: number;
-  hr: number;
-  rbi: number;
-  bb: number;
-  so: number;
-  ab: number;
-  hits: number;
-  games: number;
-  sb?: number;
 }
 
 export interface PitchingStats {
+  gamesPlayed: number;
+  gamesStarted: number;
+  wins: number;
+  losses: number;
   era: number;
+  inningsPitched: number;
+  hits: number;
+  runs: number;
+  earnedRuns: number;
+  homeRuns: number;
+  walks: number;
+  strikeouts: number;
   whip: number;
   kPer9: number;
   bbPer9: number;
   hrPer9: number;
-  wins: number;
-  losses: number;
-  strikeouts: number;
-  inningsPitched: number;
-  games: number;
-  gamesStarted: number;
 }
 
 export interface MLBPlayer {
   mlbId: number;
-  name: string;
-  team: string;
-  position: string;
-  imageUrl?: string;
+  fullName: string;
+  firstName: string;
+  lastName: string;
+  primaryPosition: string;
+  currentTeam: string;
+  currentTeamId: number;
+  photoUrl?: string;
   battingStats?: BattingStats;
   pitchingStats?: PitchingStats;
+  seasonYear?: number;
+  isActive: boolean;
+  lastUpdated: string;
   salary?: number;
 }
 
