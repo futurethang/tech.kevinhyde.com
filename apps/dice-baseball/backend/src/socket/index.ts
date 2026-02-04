@@ -159,6 +159,10 @@ export function createSocketServer(httpServer: HttpServer): SocketServer {
           return;
         }
 
+        // Check if this is the first time both players are connected
+        const opponentId = getOpponentId(game, userId);
+        console.log(`🎮 Player ${userId} joining game ${gameId}. Status: ${game.status}, OpponentId: ${opponentId}`);
+
         // Join the socket.io room
         socket.join(gameId);
         socket.gameId = gameId;
@@ -185,6 +189,15 @@ export function createSocketServer(httpServer: HttpServer): SocketServer {
             if (opponentSocketId) {
               io.to(opponentSocketId).emit('opponent:connected', { userId });
             }
+          }
+        }
+
+        // Notify opponent if they're connected
+        if (opponentId) {
+          const opponentSocketId = userToSocket.get(`${gameId}:${opponentId}`);
+          if (opponentSocketId) {
+            console.log(`📡 Notifying opponent ${opponentId} of player connection`);
+            io.to(opponentSocketId).emit('opponent:connected', { userId });
           }
         }
 
