@@ -1,14 +1,16 @@
 import express, { type Express, type Request, type Response, type NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import { createServer } from 'http';
 import type { HealthResponse, ApiError } from './types/index.js';
 import { authMiddleware } from './middleware/auth.js';
 import authRoutes from './routes/auth.js';
 import mlbRoutes from './routes/mlb.js';
 import teamRoutes from './routes/teams.js';
 import gameRoutes from './routes/games.js';
+import { createSocketServer } from './socket/index.js';
 
-export function createApp(): Express {
+export function createApp() {
   const app = express();
 
   // Security middleware
@@ -64,5 +66,11 @@ export function createApp(): Express {
     });
   });
 
-  return app;
+  // Create HTTP server
+  const httpServer = createServer(app);
+  
+  // Initialize WebSocket server
+  const io = createSocketServer(httpServer);
+
+  return { app, httpServer, io };
 }

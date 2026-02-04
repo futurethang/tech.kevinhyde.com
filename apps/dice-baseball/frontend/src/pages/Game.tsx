@@ -59,6 +59,32 @@ export function Game() {
       // Load game data
       const game = await api.getGameById(id);
       setGame(game);
+      
+      console.log('🎮 Game loaded:', {
+        status: game.status,
+        homeUserId: game.homeUserId,
+        visitorUserId: game.visitorUserId,
+        currentUserId: user?.id
+      });
+      
+      // If game is already active (both players joined), set opponent as connected
+      if (game.status === 'active' && game.visitorUserId) {
+        console.log('✅ Game is active, setting opponent as connected');
+        setOpponentConnected(true);
+        
+        // Initialize turn state with current game state
+        if (game.state) {
+          console.log('🎯 Initializing turn state:', {
+            inning: game.state.inning,
+            isTopOfInning: game.state.isTopOfInning,
+            currentUserId: user?.id,
+            homeUserId: game.homeUserId,
+            visitorUserId: game.visitorUserId
+          });
+          setGameState(game.state);
+          updateTurn(game.state);
+        }
+      }
 
       // Connect to WebSocket
       await socket.connect();
@@ -82,11 +108,13 @@ export function Game() {
         setWinner(winnerId);
       });
 
-      socket.on<{ userId: string }>('opponent:connected', () => {
+      socket.on<{ userId: string }>('opponent:connected', ({ userId }) => {
+        console.log('🤝 Opponent connected:', userId);
         setOpponentConnected(true);
       });
 
-      socket.on<{ userId: string; timeout: number }>('opponent:disconnected', ({ timeout }) => {
+      socket.on<{ userId: string; timeout: number }>('opponent:disconnected', ({ userId, timeout }) => {
+        console.log('💔 Opponent disconnected:', userId, 'timeout:', timeout);
         setOpponentConnected(false, timeout);
       });
 
@@ -94,8 +122,10 @@ export function Game() {
         setError(message);
       });
 
-      // Join the game room
-      socket.joinGame(id);
+      // Join the game room (add small delay to ensure connection is ready)
+      setTimeout(() => {
+        socket.joinGame(id);
+      }, 100);
     } catch (err: unknown) {
       const errorObj = err as { message?: string };
       setError(errorObj.message || 'Failed to load game');
@@ -105,12 +135,26 @@ export function Game() {
   }
 
   function updateTurn(state: GameState) {
-    if (!currentGame || !user) return;
+    if (!currentGame || !user) {
+      console.log('⚠️ Cannot update turn - missing game or user');
+      return;
+    }
+    
     // Top of inning = visitor batting (visitor's turn)
     // Bottom = home batting (home's turn)
     const isVisitor = user.id === currentGame.visitorUserId;
     const isTopInning = state.isTopOfInning;
-    setMyTurn(isVisitor ? isTopInning : !isTopInning);
+    const myTurn = isVisitor ? isTopInning : !isTopInning;
+    
+    console.log('🎯 Turn calculation:', {
+      userId: user.id,
+      isVisitor,
+      isTopInning,
+      myTurn,
+      inning: state.inning
+    });
+    
+    setMyTurn(myTurn);
   }
 
   function handleRoll() {

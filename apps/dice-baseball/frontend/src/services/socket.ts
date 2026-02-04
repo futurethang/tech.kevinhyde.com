@@ -19,7 +19,8 @@ function getToken(): string | null {
     const authData = localStorage.getItem('dice-baseball-auth');
     if (authData) {
       const parsed = JSON.parse(authData);
-      return parsed.state?.token || null;
+      // Zustand persist middleware structure: { state: {...}, version: 0 }
+      return parsed.state?.token || parsed.token || null;
     }
   } catch {
     // Ignore parse errors
@@ -34,12 +35,20 @@ export function connect(): Promise<void> {
   return new Promise((resolve, reject) => {
     const token = getToken();
 
+    console.log('🔐 Socket connection attempt:', {
+      wsUrl: WS_URL,
+      hasToken: !!token,
+      tokenPreview: token ? `${token.substring(0, 20)}...` : null
+    });
+
     if (!token) {
+      console.error('❌ No auth token available for socket connection');
       reject(new Error('No auth token available'));
       return;
     }
 
     if (socket?.connected) {
+      console.log('✅ Socket already connected');
       resolve();
       return;
     }
@@ -53,12 +62,17 @@ export function connect(): Promise<void> {
     });
 
     socket.on('connect', () => {
-      console.log('Socket connected');
-      resolve();
+      console.log('✅ Socket connected successfully');
+      // Small delay to ensure socket is fully ready
+      setTimeout(() => {
+        console.log('🔌 Socket connection verified');
+        resolve();
+      }, 50);
     });
 
     socket.on('connect_error', (error) => {
-      console.error('Socket connection error:', error);
+      console.error('❌ Socket connection error:', error.message);
+      console.error('Full error:', error);
       reject(error);
     });
 
@@ -115,10 +129,17 @@ export function isConnected(): boolean {
  * Join a game room
  */
 export function joinGame(gameId: string): void {
-  if (!socket?.connected) {
-    console.error('Socket not connected');
+  if (!socket) {
+    console.error('❌ Socket not initialized');
     return;
   }
+  
+  if (!socket.connected) {
+    console.error('❌ Socket not connected - current state:', socket.disconnected ? 'disconnected' : 'connecting');
+    return;
+  }
+  
+  console.log('🎮 Joining game room:', gameId);
   socket.emit('game:join', { gameId });
 }
 

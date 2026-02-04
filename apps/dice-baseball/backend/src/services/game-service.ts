@@ -160,12 +160,14 @@ export async function joinGame(gameId: string, userId: string, teamId: string): 
     throw new Error('Game not found');
   }
 
+  // Update game with visitor info
   game.visitorTeamId = teamId;
   game.visitorUserId = userId;
   game.status = 'active';
 
   games.set(gameId, game);
 
+  console.log(`🎮 Game ${gameId} activated: ${game.homeUserId} vs ${game.visitorUserId}`);
   return game;
 }
 
