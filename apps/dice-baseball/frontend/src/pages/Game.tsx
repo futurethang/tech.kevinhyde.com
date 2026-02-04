@@ -53,6 +53,13 @@ export function Game() {
     };
   }, [gameId]);
 
+  // Update turn whenever game state changes
+  useEffect(() => {
+    if (currentGame && gameState && user) {
+      updateTurn(gameState, currentGame);
+    }
+  }, [gameState, currentGame, user]);
+
   async function initializeGame(id: string) {
     setLoading(true);
     try {
@@ -82,7 +89,7 @@ export function Game() {
             visitorUserId: game.visitorUserId
           });
           setGameState(game.state);
-          updateTurn(game.state);
+          updateTurn(game.state, game);
         }
       }
 
@@ -92,15 +99,23 @@ export function Game() {
 
       // Register event handlers
       socket.on<{ state: GameState }>('game:state', ({ state }) => {
+        console.log('📊 Game state update received:', {
+          inning: state.inning,
+          isTopOfInning: state.isTopOfInning,
+          outs: state.outs
+        });
         setGameState(state);
-        updateTurn(state);
+        // Turn will be updated by useEffect when gameState changes
+        setRolling(false); // Ensure rolling is reset on state updates
       });
 
       socket.on<PlayResult>('game:roll-result', (result) => {
         setLastRoll(result.diceRolls, result.outcome);
         setGameState(result.newState);
         addPlayLogEntry(result);
-        updateTurn(result.newState);
+        // Turn will be updated by useEffect when gameState changes
+        setRolling(false); // Reset rolling state after result
+        setError(''); // Clear any previous errors
       });
 
       socket.on<{ winnerId: string; reason: string }>('game:ended', ({ winnerId }) => {
@@ -118,8 +133,10 @@ export function Game() {
         setOpponentConnected(false, timeout);
       });
 
-      socket.on<{ error: string; message: string }>('error', ({ message }) => {
+      socket.on<{ error: string; message: string }>('error', ({ error, message }) => {
+        console.error('⚠️ Game error:', error, message);
         setError(message);
+        setRolling(false); // Reset rolling state on error
       });
 
       // Join the game room (add small delay to ensure connection is ready)
@@ -134,15 +151,20 @@ export function Game() {
     }
   }
 
-  function updateTurn(state: GameState) {
-    if (!currentGame || !user) {
-      console.log('⚠️ Cannot update turn - missing game or user');
+  function updateTurn(state: GameState, game?: Game) {
+    const gameToUse = game || currentGame;
+    
+    if (!gameToUse || !user) {
+      console.log('⚠️ Cannot update turn - missing game or user', {
+        hasGame: !!gameToUse,
+        hasUser: !!user
+      });
       return;
     }
     
     // Top of inning = visitor batting (visitor's turn)
     // Bottom = home batting (home's turn)
-    const isVisitor = user.id === currentGame.visitorUserId;
+    const isVisitor = user.id === gameToUse.visitorUserId;
     const isTopInning = state.isTopOfInning;
     const myTurn = isVisitor ? isTopInning : !isTopInning;
     
@@ -155,6 +177,11 @@ export function Game() {
     });
     
     setMyTurn(myTurn);
+    
+    // Clear error when it becomes player's turn
+    if (myTurn) {
+      setError('');
+    }
   }
 
   function handleRoll() {
