@@ -4,8 +4,9 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Card, CardContent, Input, Select } from '../common';
+import { Button, Card, CardContent, Input, ConfirmDialog } from '../common';
 import { Header, PageContainer } from '../layout/Header';
+import { BattingOrderEditor } from './BattingOrderEditor';
 import { useTeamStore } from '../../stores/teamStore';
 import * as api from '../../services/api';
 import type { Team, MLBPlayer, RosterSlot, Position } from '../../types';
@@ -30,7 +31,7 @@ const POSITION_NAMES = {
 
 export function TeamEditor({ teamId }: TeamEditorProps) {
   const navigate = useNavigate();
-  const { teams, setCurrentEditingTeam, updateTeam } = useTeamStore();
+  const { teams, setCurrentEditingTeam, updateTeam, setHasUnsavedChanges, hasUnsavedChanges } = useTeamStore();
   
   const [team, setTeam] = useState<Team | null>(null);
   const [loading, setLoading] = useState(true);
@@ -42,20 +43,61 @@ export function TeamEditor({ teamId }: TeamEditorProps) {
   const [showPlayerSearch, setShowPlayerSearch] = useState<Position | null>(null);
   const [populatedRoster, setPopulatedRoster] = useState<Record<string, MLBPlayer>>({});
   const [savingPosition, setSavingPosition] = useState<Position | null>(null);
-  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [showBattingOrder, setShowBattingOrder] = useState(false);
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
+  const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
+  const searchTimeoutRef = useRef<number | null>(null);
+  const autoSaveTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
     loadTeam();
   }, [teamId]);
 
-  // Cleanup timeout on unmount
+  // Cleanup timeouts on unmount
   useEffect(() => {
     return () => {
       if (searchTimeoutRef.current) {
         clearTimeout(searchTimeoutRef.current);
       }
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current);
+      }
     };
   }, []);
+
+  // Auto-save functionality
+  useEffect(() => {
+    if (team && hasUnsavedChanges) {
+      // Clear existing timeout
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current);
+      }
+      
+      // Set new auto-save timeout for 30 seconds
+      autoSaveTimeoutRef.current = setTimeout(() => {
+        handleSaveDraft();
+      }, 30000);
+    }
+    
+    return () => {
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current);
+      }
+    };
+  }, [team, hasUnsavedChanges]);
+
+  // Warn before leaving with unsaved changes
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasUnsavedChanges]);
 
   async function loadTeam() {
     console.log('Loading team with ID:', teamId);
@@ -215,12 +257,14 @@ export function TeamEditor({ teamId }: TeamEditorProps) {
       ...prev,
       [player.mlbId.toString()]: player
     }));
+    setHasUnsavedChanges(true);
     closePlayerSearch();
     
-    // Auto-save if roster is now complete
+    // Mark as having unsaved changes when roster becomes complete
     if (updatedTeam.rosterComplete) {
-      console.log('Roster complete, auto-saving...');
-      await saveCompleteRoster(updatedTeam);
+      console.log('Roster complete! Click "Save & Complete" to finalize.');
+      // Don't auto-save complete rosters - let user click the button
+      setHasUnsavedChanges(true);
     }
     
     console.log(`Added ${player.fullName} to ${position} position`);
@@ -239,8 +283,10 @@ export function TeamEditor({ teamId }: TeamEditorProps) {
       
       // Update the team store with the saved state
       updateTeam(teamToSave.id, teamToSave);
+      setHasUnsavedChanges(false);
       
       console.log('Complete roster saved successfully!');
+      alert('Team saved successfully! Ready to play!');
     } catch (error) {
       console.error('Failed to save complete roster:', error);
       
@@ -272,10 +318,9 @@ export function TeamEditor({ teamId }: TeamEditorProps) {
         return updated;
       });
     }
+    setHasUnsavedChanges(true);
     
     console.log(`Removed player from ${position} position`);
-    // Note: Not auto-saving on remove since roster will be incomplete
-    // User can manually save if needed or auto-save will happen when roster is complete again
   }
 
   function getNextBattingOrder(roster: RosterSlot[]): number {
@@ -314,8 +359,86 @@ export function TeamEditor({ teamId }: TeamEditorProps) {
     await saveCompleteRoster(team);
   }
 
+  async function handleSaveDraft() {
+    if (!team) return;
+    
+    setSaving(true);
+    try {
+      const slots = (team.roster || []).map(slot => ({
+        position: slot.position,
+        mlbPlayerId: slot.mlbPlayerId,
+        battingOrder: slot.battingOrder
+      }));
+
+      await api.saveTeamDraft(team.id, slots);
+      setHasUnsavedChanges(false);
+      console.log('Draft saved successfully!');
+    } catch (error) {
+      console.error('Failed to save draft:', error);
+      alert('Failed to save draft. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function handleReorderBattingOrder(newPlayerOrder: number[]) {
+    if (!team) return;
+    
+    const updatedRoster = team.roster?.map(slot => {
+      if (slot.position === 'SP') return slot; // Skip pitcher
+      
+      const newIndex = newPlayerOrder.indexOf(slot.mlbPlayerId);
+      return {
+        ...slot,
+        battingOrder: newIndex >= 0 ? newIndex + 1 : slot.battingOrder
+      };
+    }) || [];
+    
+    const updatedTeam = { ...team, roster: updatedRoster };
+    setTeam(updatedTeam);
+    setHasUnsavedChanges(true);
+  }
+
+  async function saveBattingOrder() {
+    if (!team) return;
+    
+    try {
+      const order = team.roster
+        ?.filter(slot => slot.position !== 'SP' && slot.battingOrder !== null)
+        .sort((a, b) => (a.battingOrder || 0) - (b.battingOrder || 0))
+        .map(slot => slot.position) || [];
+      
+      await api.updateBattingOrder(team.id, order);
+      updateTeam(team.id, team);
+      setHasUnsavedChanges(false);
+      setShowBattingOrder(false);
+      console.log('Batting order saved successfully!');
+    } catch (error) {
+      console.error('Failed to save batting order:', error);
+      alert('Failed to save batting order. Please try again.');
+    }
+  }
+
+  function handleNavigate(path: string) {
+    if (hasUnsavedChanges) {
+      setPendingNavigation(path);
+      setShowLeaveConfirm(true);
+    } else {
+      navigate(path);
+    }
+  }
+
+  function confirmLeave() {
+    if (pendingNavigation) {
+      setHasUnsavedChanges(false);
+      navigate(pendingNavigation);
+    }
+    setShowLeaveConfirm(false);
+    setPendingNavigation(null);
+  }
+
   function goBackToTeams() {
-    navigate('/teams');
+    handleNavigate('/teams');
   }
 
   if (loading || !team) {
@@ -324,7 +447,7 @@ export function TeamEditor({ teamId }: TeamEditorProps) {
         <Header title="Loading..." showBack />
         <PageContainer>
           <div className="space-y-4">
-            {POSITIONS.map((pos, i) => (
+            {POSITIONS.map((pos) => (
               <Card key={pos} className="animate-pulse">
                 <CardContent>
                   <div className="h-6 bg-gray-700 rounded w-24 mb-2" />
@@ -355,13 +478,23 @@ export function TeamEditor({ teamId }: TeamEditorProps) {
         showBack
         rightAction={
           <div className="flex gap-2">
+            {hasUnsavedChanges && (
+              <Button 
+                size="sm" 
+                variant="ghost"
+                onClick={handleSaveDraft}
+                disabled={saving}
+              >
+                {saving ? 'SAVING...' : 'SAVE DRAFT'}
+              </Button>
+            )}
             {team.rosterComplete && (
               <Button 
                 size="sm" 
                 onClick={saveRoster}
                 disabled={savingPosition !== null}
               >
-                {savingPosition ? 'SAVING...' : 'SAVE'}
+                {savingPosition ? 'SAVING...' : 'SAVE & COMPLETE'}
               </Button>
             )}
             <Button 
@@ -386,12 +519,22 @@ export function TeamEditor({ teamId }: TeamEditorProps) {
                   <p className="text-sm text-gray-400">
                     {roster.length}/10 positions filled
                   </p>
-                  {savingPosition && (
+                  {saving && (
                     <p className="text-xs text-blue-400 mt-1">
-                      💾 Saving to server...
+                      💾 Saving draft...
                     </p>
                   )}
-                  {!savingPosition && team.rosterComplete && (
+                  {savingPosition && (
+                    <p className="text-xs text-blue-400 mt-1">
+                      💾 Saving complete roster...
+                    </p>
+                  )}
+                  {hasUnsavedChanges && !saving && !savingPosition && (
+                    <p className="text-xs text-yellow-400 mt-1">
+                      ⚠️ Unsaved changes
+                    </p>
+                  )}
+                  {!hasUnsavedChanges && !saving && !savingPosition && team.rosterComplete && (
                     <p className="text-xs text-green-400 mt-1">
                       ✅ Ready to save roster
                     </p>
@@ -405,6 +548,32 @@ export function TeamEditor({ teamId }: TeamEditorProps) {
               </div>
             </CardContent>
           </Card>
+
+          {/* Batting Order Section */}
+          {roster.filter(s => s.position !== 'SP').length > 0 && (
+            <>
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold text-white">Batting Order</h3>
+                <Button 
+                  size="sm" 
+                  variant="ghost"
+                  onClick={() => setShowBattingOrder(!showBattingOrder)}
+                >
+                  {showBattingOrder ? 'Hide' : 'Edit Order'}
+                </Button>
+              </div>
+              
+              {showBattingOrder && (
+                <BattingOrderEditor
+                  roster={roster}
+                  populatedRoster={populatedRoster}
+                  onReorder={handleReorderBattingOrder}
+                  onSave={saveBattingOrder}
+                  disabled={saving || savingPosition !== null}
+                />
+              )}
+            </>
+          )}
 
           {/* Position Slots */}
           {POSITIONS.map((position) => {
@@ -637,6 +806,18 @@ export function TeamEditor({ teamId }: TeamEditorProps) {
           </Card>
         </div>
       )}
+
+      {/* Leave Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={showLeaveConfirm}
+        title="Unsaved Changes"
+        message="You have unsaved changes that will be lost. Are you sure you want to leave?"
+        confirmText="Leave"
+        cancelText="Stay"
+        confirmVariant="danger"
+        onConfirm={confirmLeave}
+        onCancel={() => setShowLeaveConfirm(false)}
+      />
     </div>
   );
 }

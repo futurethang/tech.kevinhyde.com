@@ -6,11 +6,12 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button, Card, CardContent } from '../components/common';
 import { Header, PageContainer } from '../components/layout/Header';
+import { MatchupDisplay, OpponentInfo, BoxScore } from '../components/game';
 import { useGameStore } from '../stores/gameStore';
 import { useAuthStore } from '../stores/authStore';
 import * as api from '../services/api';
 import * as socket from '../services/socket';
-import type { GameState, PlayResult, OutcomeType } from '../types';
+import type { GameState, PlayResult, OutcomeType, MLBPlayer, Game } from '../types';
 
 export function Game() {
   const { gameId } = useParams<{ gameId: string }>();
@@ -43,11 +44,18 @@ export function Game() {
   const [winner, setWinner] = useState<string | null>(null);
 
   useEffect(() => {
+    let cleanup: (() => void) | undefined;
+
     if (gameId) {
-      initializeGame(gameId);
+      initializeGame(gameId).then((cleanupFn) => {
+        cleanup = cleanupFn;
+      });
     }
 
     return () => {
+      if (cleanup) {
+        cleanup();
+      }
       socket.disconnect();
       resetGame();
     };
@@ -60,7 +68,7 @@ export function Game() {
     }
   }, [gameState, currentGame, user]);
 
-  async function initializeGame(id: string) {
+  async function initializeGame(id: string): Promise<(() => void) | undefined> {
     setLoading(true);
     try {
       // Load game data
@@ -97,8 +105,8 @@ export function Game() {
       await socket.connect();
       setConnected(true);
 
-      // Register event handlers
-      socket.on<{ state: GameState }>('game:state', ({ state }) => {
+      // Register event handlers with cleanup
+      const unsubscribeGameState = socket.on<{ state: GameState }>('game:state', ({ state }) => {
         console.log('📊 Game state update received:', {
           inning: state.inning,
           isTopOfInning: state.isTopOfInning,
@@ -109,7 +117,8 @@ export function Game() {
         setRolling(false); // Ensure rolling is reset on state updates
       });
 
-      socket.on<PlayResult>('game:roll-result', (result) => {
+      const unsubscribeRollResult = socket.on<PlayResult>('game:roll-result', (result) => {
+        console.log('🎲 Roll result received:', result.outcome, result.description);
         setLastRoll(result.diceRolls, result.outcome);
         setGameState(result.newState);
         addPlayLogEntry(result);
@@ -118,34 +127,51 @@ export function Game() {
         setError(''); // Clear any previous errors
       });
 
-      socket.on<{ winnerId: string; reason: string }>('game:ended', ({ winnerId }) => {
+      const unsubscribeGameEnded = socket.on<{ winnerId: string; reason: string }>('game:ended', ({ winnerId }) => {
         setGameEnded(true);
         setWinner(winnerId);
       });
 
-      socket.on<{ userId: string }>('opponent:connected', ({ userId }) => {
+      const unsubscribeOpponentConnected = socket.on<{ userId: string }>('opponent:connected', ({ userId }) => {
         console.log('🤝 Opponent connected:', userId);
         setOpponentConnected(true);
       });
 
-      socket.on<{ userId: string; timeout: number }>('opponent:disconnected', ({ userId, timeout }) => {
+      const unsubscribeOpponentDisconnected = socket.on<{ userId: string; timeout: number }>('opponent:disconnected', ({ userId, timeout }) => {
         console.log('💔 Opponent disconnected:', userId, 'timeout:', timeout);
         setOpponentConnected(false, timeout);
       });
 
-      socket.on<{ error: string; message: string }>('error', ({ error, message }) => {
+      const unsubscribeError = socket.on<{ error: string; message: string }>('error', ({ error, message }) => {
         console.error('⚠️ Game error:', error, message);
         setError(message);
         setRolling(false); // Reset rolling state on error
       });
 
+      // Store cleanup functions for proper cleanup
+      const cleanupRef = {
+        unsubscribeGameState,
+        unsubscribeRollResult,
+        unsubscribeGameEnded,
+        unsubscribeOpponentConnected,
+        unsubscribeOpponentDisconnected,
+        unsubscribeError,
+      };
+
       // Join the game room (add small delay to ensure connection is ready)
       setTimeout(() => {
         socket.joinGame(id);
       }, 100);
+
+      // Return cleanup function
+      return () => {
+        console.log('🧹 Cleaning up game event handlers');
+        Object.values(cleanupRef).forEach(cleanup => cleanup?.());
+      };
     } catch (err: unknown) {
       const errorObj = err as { message?: string };
       setError(errorObj.message || 'Failed to load game');
+      return undefined;
     } finally {
       setLoading(false);
     }
@@ -230,21 +256,18 @@ export function Game() {
     return (
       <div className="min-h-screen flex flex-col bg-gray-900">
         <Header title="GAME OVER" />
-        <PageContainer className="flex items-center justify-center">
-          <Card className="text-center w-full">
+        <PageContainer>
+          <Card className="w-full max-w-2xl mx-auto">
             <CardContent>
-              <div className="text-5xl mb-4">🏆</div>
-              <h2 className="text-2xl font-display font-bold text-white mb-2">
-                {didWin ? 'YOU WIN!' : 'YOU LOSE'}
-              </h2>
-              <div className="text-4xl font-mono font-bold text-white my-6">
-                {gameState?.scores[0]} - {gameState?.scores[1]}
-              </div>
-              <div className="flex gap-3 justify-center">
-                <Button variant="secondary" onClick={() => navigate('/')}>
-                  🏠 Home
-                </Button>
-              </div>
+              {currentGame && gameState && (
+                <BoxScore
+                  game={currentGame}
+                  gameState={gameState}
+                  playLog={playLog}
+                  didWin={didWin}
+                  onGoHome={() => navigate('/')}
+                />
+              )}
             </CardContent>
           </Card>
         </PageContainer>
@@ -268,27 +291,19 @@ export function Game() {
       />
 
       <div className="flex-1 flex flex-col p-4 max-w-lg mx-auto w-full">
+        {/* Opponent Info */}
+        {currentGame && user && (
+          <OpponentInfo game={currentGame} currentUser={user} />
+        )}
+
         {/* Scoreboard */}
         <Scoreboard state={gameState} />
 
-        {/* Matchup placeholder */}
-        <div className="my-4 text-center">
-          <div className="flex justify-center gap-8 items-center">
-            <div className="text-center">
-              <div className="w-16 h-16 rounded-full bg-gray-700 flex items-center justify-center text-2xl mb-2">
-                ⚾
-              </div>
-              <p className="text-sm text-gray-400">AT BAT</p>
-            </div>
-            <span className="text-gray-500 text-xl">VS</span>
-            <div className="text-center">
-              <div className="w-16 h-16 rounded-full bg-gray-700 flex items-center justify-center text-2xl mb-2">
-                ⚾
-              </div>
-              <p className="text-sm text-gray-400">PITCHING</p>
-            </div>
-          </div>
-        </div>
+        {/* Matchup Display */}
+        <MatchupDisplay
+          batter={getCurrentBatter()}
+          pitcher={getCurrentPitcher()}
+        />
 
         {/* Diamond */}
         <Diamond bases={gameState?.bases || [false, false, false]} />
@@ -336,6 +351,39 @@ export function Game() {
       </div>
     </div>
   );
+
+  // Helper functions to get current players
+  function getCurrentBatter(): MLBPlayer | null {
+    if (!currentGame || !gameState || !user) return null;
+    
+    // Determine which team is batting
+    const isVisitorBatting = gameState.isTopOfInning;
+    const battingTeam = isVisitorBatting ? currentGame.visitorTeam : currentGame.homeTeam;
+    
+    if (!battingTeam?.roster) return null;
+    
+    // Get the current batter by batting order
+    const currentBatterSlot = battingTeam.roster.find(
+      slot => slot.battingOrder === gameState.currentBatterIndex + 1 && slot.position !== 'SP'
+    );
+    
+    return currentBatterSlot?.player || null;
+  }
+
+  function getCurrentPitcher(): MLBPlayer | null {
+    if (!currentGame || !gameState || !user) return null;
+    
+    // Determine which team is pitching (opposite of batting)
+    const isVisitorBatting = gameState.isTopOfInning;
+    const pitchingTeam = isVisitorBatting ? currentGame.homeTeam : currentGame.visitorTeam;
+    
+    if (!pitchingTeam?.roster) return null;
+    
+    // Find the starting pitcher
+    const pitcherSlot = pitchingTeam.roster.find(slot => slot.position === 'SP');
+    
+    return pitcherSlot?.player || null;
+  }
 }
 
 // Scoreboard Component

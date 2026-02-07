@@ -2,7 +2,7 @@
  * API Service - REST API client for Dice Baseball backend
  */
 
-import type { User, Team, Game, MLBPlayer, PaginatedResponse, ApiError } from '../types';
+import type { User, Team, Game, MLBPlayer, ApiError } from '../types';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
@@ -104,10 +104,20 @@ async function fetchWithAuth<T>(
 export interface GetPlayersParams {
   position?: string;
   team?: string;
+  league?: string;
   search?: string;
   sort?: string;
   page?: number;
   limit?: number;
+  // Stats range filters
+  minOps?: number;
+  maxOps?: number;
+  minEra?: number;
+  maxEra?: number;
+  minHr?: number;
+  maxHr?: number;
+  minRbi?: number;
+  maxRbi?: number;
 }
 
 export async function getPlayers(
@@ -116,10 +126,21 @@ export async function getPlayers(
   const searchParams = new URLSearchParams();
   if (params.position) searchParams.set('position', params.position);
   if (params.team) searchParams.set('team', params.team);
+  if (params.league) searchParams.set('league', params.league);
   if (params.search) searchParams.set('search', params.search);
   if (params.sort) searchParams.set('sort', params.sort);
   if (params.page) searchParams.set('page', String(params.page));
   if (params.limit) searchParams.set('limit', String(params.limit));
+  
+  // Stats range filters
+  if (params.minOps !== undefined) searchParams.set('minOps', String(params.minOps));
+  if (params.maxOps !== undefined) searchParams.set('maxOps', String(params.maxOps));
+  if (params.minEra !== undefined) searchParams.set('minEra', String(params.minEra));
+  if (params.maxEra !== undefined) searchParams.set('maxEra', String(params.maxEra));
+  if (params.minHr !== undefined) searchParams.set('minHr', String(params.minHr));
+  if (params.maxHr !== undefined) searchParams.set('maxHr', String(params.maxHr));
+  if (params.minRbi !== undefined) searchParams.set('minRbi', String(params.minRbi));
+  if (params.maxRbi !== undefined) searchParams.set('maxRbi', String(params.maxRbi));
 
   const query = searchParams.toString();
   return fetchWithAuth(`/mlb/players${query ? `?${query}` : ''}`);
@@ -170,6 +191,30 @@ export async function updateBattingOrder(
 
 export async function deleteTeam(teamId: string): Promise<void> {
   await fetchWithAuth(`/teams/${teamId}`, { method: 'DELETE' });
+}
+
+export async function saveTeamDraft(
+  teamId: string,
+  slots: Array<{ position: string; mlbPlayerId: number; battingOrder: number | null }>
+): Promise<{ message: string }> {
+  return fetchWithAuth(`/teams/${teamId}/draft`, {
+    method: 'PUT',
+    body: JSON.stringify({ slots }),
+  });
+}
+
+export async function duplicateTeam(teamId: string, newName: string): Promise<Team> {
+  return fetchWithAuth(`/teams/${teamId}/duplicate`, {
+    method: 'POST',
+    body: JSON.stringify({ name: newName }),
+  });
+}
+
+export async function reorderTeams(teamIds: string[]): Promise<{ message: string }> {
+  return fetchWithAuth('/teams/reorder', {
+    method: 'PATCH',
+    body: JSON.stringify({ teamIds }),
+  });
 }
 
 // ============================================

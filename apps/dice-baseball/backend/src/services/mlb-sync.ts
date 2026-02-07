@@ -233,8 +233,13 @@ export async function getPlayers(options: GetPlayersOptions): Promise<GetPlayers
     players = players.filter(p => p.fullName.toLowerCase().includes(search));
   }
 
-  // Sort
+  // Filter to only pitchers when sorting by pitching stats
   const sort = options.sort || 'ops';
+  if (sort === 'era' || sort === 'whip' || sort === 'wins') {
+    players = players.filter(p => p.primaryPosition === 'SP' || p.primaryPosition === 'RP');
+  }
+
+  // Sort
   const order = options.order || 'desc';
   players.sort((a, b) => {
     let aVal = 0, bVal = 0;

@@ -152,7 +152,7 @@ export function Auth() {
               </div>
 
               {/* Development Quick Login */}
-              {process.env.NODE_ENV === 'development' && (
+              {import.meta.env.DEV && (
                 <div className="mt-6 pt-6 border-t border-gray-700">
                   <button
                     type="button"
