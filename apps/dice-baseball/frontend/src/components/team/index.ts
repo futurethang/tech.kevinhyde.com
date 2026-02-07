@@ -3,3 +3,4 @@
  */
 
 export { TeamEditor } from './TeamEditor';
+export { BattingOrderEditor } from './BattingOrderEditor';

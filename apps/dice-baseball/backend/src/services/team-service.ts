@@ -126,7 +126,7 @@ export async function deleteTeam(teamId: string): Promise<void> {
 /**
  * Update team roster
  */
-export async function updateRoster(teamId: string, roster: RosterSlot[]): Promise<Team> {
+export async function updateRoster(teamId: string, roster: RosterSlot[], validateComplete: boolean = true): Promise<Team> {
   const team = teamStore.get(teamId);
   if (!team) {
     throw new Error('Team not found');
@@ -140,6 +140,9 @@ export async function updateRoster(teamId: string, roster: RosterSlot[]): Promis
   // Check if team can be active (has complete roster)
   if (team.rosterComplete) {
     team.isActive = true;
+  } else if (!validateComplete) {
+    // For drafts, we allow incomplete rosters
+    team.isActive = false;
   }
   
   // Save back to store
