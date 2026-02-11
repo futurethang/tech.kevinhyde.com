@@ -1,0 +1,74 @@
+export interface ApiError {
+  error: string;
+  message: string;
+  details?: Record<string, unknown>;
+}
+
+export interface AuthUser {
+  id: string;
+  email: string;
+  username: string;
+  wins?: number;
+  losses?: number;
+  createdAt?: string;
+}
+
+export interface AuthResponse {
+  user: AuthUser;
+  token: string;
+}
+
+export interface PlayersQuery {
+  q?: string;
+  search?: string;
+  position?: string;
+  team?: string;
+  league?: string;
+  sort?: 'ops' | 'avg' | 'hr' | 'rbi' | 'era' | 'whip' | 'wins' | 'name';
+  order?: 'asc' | 'desc';
+  limit?: number;
+  offset?: number;
+  page?: number;
+  minOps?: number;
+  maxOps?: number;
+  minEra?: number;
+  maxEra?: number;
+  minHr?: number;
+  maxHr?: number;
+  minRbi?: number;
+  maxRbi?: number;
+}
+
+export interface GameState {
+  inning: number;
+  isTopOfInning: boolean;
+  outs: number;
+  scores: [number, number];
+  bases: [boolean, boolean, boolean];
+  currentBatterIndex: number;
+  isGameOver?: boolean;
+  winner?: string;
+}
+
+export interface RollResultEvent {
+  diceRolls: [number, number];
+  outcome: 'homeRun' | 'triple' | 'double' | 'single' | 'walk' | 'strikeout' | 'groundOut' | 'flyOut';
+  runsScored: number;
+  outsRecorded: number;
+  description: string;
+  batter: { mlbId: number; name: string };
+  pitcher: { mlbId: number; name: string };
+  newState: GameState;
+}
+
+export interface SocketEventMap {
+  'game:join': { gameId: string };
+  'game:roll': { gameId: string };
+  'game:forfeit': { gameId: string };
+  'game:state': { state: GameState };
+  'game:roll-result': RollResultEvent;
+  'game:ended': { winnerId: string; loserId: string; reason: string; finalScore?: [number, number] };
+  'opponent:connected': { userId: string };
+  'opponent:disconnected': { userId: string; timeout: number };
+  'error': ApiError;
+}

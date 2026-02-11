@@ -72,7 +72,8 @@ export const TEAM_OPTIONS = [
 ];
 
 // Helper functions
-export function getTeamByAbbreviation(abbreviation: string): MLBTeam | undefined {
+export function getTeamByAbbreviation(abbreviation: string | null): MLBTeam | undefined {
+  if (!abbreviation) return undefined;
   return MLB_TEAMS.find(team => team.abbreviation === abbreviation);
 }
 

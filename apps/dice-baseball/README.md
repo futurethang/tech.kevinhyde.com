@@ -31,3 +31,8 @@ A two-player dice baseball game PWA. Roll dice and play ball!
 - Visual baseball diamond with runners
 - Full scoreboard with inning-by-inning tracking
 - Works offline once loaded
+
+## Architecture & Contracts
+
+- Local architecture baseline: `docs/LOCAL-ARCHITECTURE.md`
+- Current REST/socket contracts: `docs/LOCAL-CONTRACTS.md`

@@ -7,6 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { RosterSlot } from './roster-validation.js';
+import { teamRepository } from '../repositories/team-repository.js';
 
 export interface Team {
   id: string;
@@ -24,23 +25,11 @@ export interface BattingOrderResult {
   battingOrder: Array<{ order: number; position: string; playerName?: string }>;
 }
 
-// In-memory storage for teams (development mode)
-const teamStore: Map<string, Team> = new Map();
-const userTeamIndex: Map<string, Set<string>> = new Map(); // userId -> Set of teamIds
-
 /**
  * Get all teams for a user
  */
 export async function getTeams(userId: string): Promise<Team[]> {
-  const userTeamIds = userTeamIndex.get(userId) || new Set();
-  const teams: Team[] = [];
-  
-  for (const teamId of userTeamIds) {
-    const team = teamStore.get(teamId);
-    if (team) {
-      teams.push(team);
-    }
-  }
+  const teams = await teamRepository.listByUser(userId);
   
   // Sort by creation date, newest first
   return teams.sort((a, b) => 
@@ -52,7 +41,7 @@ export async function getTeams(userId: string): Promise<Team[]> {
  * Get a single team by ID
  */
 export async function getTeamById(teamId: string): Promise<Team | null> {
-  return teamStore.get(teamId) || null;
+  return teamRepository.getById(teamId);
 }
 
 /**
@@ -69,14 +58,7 @@ export async function createTeam(userId: string, name: string): Promise<Team> {
     roster: [],
   };
   
-  // Store the team
-  teamStore.set(team.id, team);
-  
-  // Update user index
-  if (!userTeamIndex.has(userId)) {
-    userTeamIndex.set(userId, new Set());
-  }
-  userTeamIndex.get(userId)!.add(team.id);
+  await teamRepository.save(team);
   
   return team;
 }
@@ -88,7 +70,7 @@ export async function updateTeam(
   teamId: string,
   updates: Partial<Pick<Team, 'name' | 'isActive'>>
 ): Promise<Team> {
-  const team = teamStore.get(teamId);
+  const team = await teamRepository.getById(teamId);
   if (!team) {
     throw new Error('Team not found');
   }
@@ -98,8 +80,7 @@ export async function updateTeam(
   if (updates.isActive !== undefined) team.isActive = updates.isActive;
   team.updatedAt = new Date().toISOString();
   
-  // Save back to store
-  teamStore.set(teamId, team);
+  await teamRepository.save(team);
   
   return team;
 }
@@ -108,26 +89,19 @@ export async function updateTeam(
  * Delete a team
  */
 export async function deleteTeam(teamId: string): Promise<void> {
-  const team = teamStore.get(teamId);
+  const team = await teamRepository.getById(teamId);
   if (!team) {
     throw new Error('Team not found');
   }
-  
-  // Remove from team store
-  teamStore.delete(teamId);
-  
-  // Remove from user index
-  const userTeamIds = userTeamIndex.get(team.userId);
-  if (userTeamIds) {
-    userTeamIds.delete(teamId);
-  }
+
+  await teamRepository.delete(teamId);
 }
 
 /**
  * Update team roster
  */
 export async function updateRoster(teamId: string, roster: RosterSlot[], validateComplete: boolean = true): Promise<Team> {
-  const team = teamStore.get(teamId);
+  const team = await teamRepository.getById(teamId);
   if (!team) {
     throw new Error('Team not found');
   }
@@ -145,8 +119,7 @@ export async function updateRoster(teamId: string, roster: RosterSlot[], validat
     team.isActive = false;
   }
   
-  // Save back to store
-  teamStore.set(teamId, team);
+  await teamRepository.save(team);
   
   return team;
 }
@@ -158,7 +131,7 @@ export async function updateBattingOrder(
   teamId: string,
   order: string[]
 ): Promise<BattingOrderResult> {
-  const team = teamStore.get(teamId);
+  const team = await teamRepository.getById(teamId);
   if (!team) {
     throw new Error('Team not found');
   }
@@ -183,7 +156,7 @@ export async function updateBattingOrder(
   });
   
   team.updatedAt = new Date().toISOString();
-  teamStore.set(teamId, team);
+  await teamRepository.save(team);
   
   return {
     message: 'Batting order updated successfully',

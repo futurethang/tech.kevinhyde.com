@@ -1,9 +1,12 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+
 import request from 'supertest';
 import { createApp } from '../../server.js';
 import { createTestToken, authHeader } from '../helpers/auth.js';
 import * as gameService from '../../services/game-service.js';
 import * as teamService from '../../services/team-service.js';
+
+const describeIfNetwork = process.env.SKIP_NETWORK_TESTS === "1" ? describe.skip : describe;
 
 // Mock the game service
 vi.mock('../../services/game-service.js', () => ({
@@ -30,8 +33,8 @@ vi.mock('../../services/team-service.js', () => ({
 
 console.log('🧪 Starting test suite...');
 
-describe('POST /api/games', () => {
-  const app = createApp();
+describeIfNetwork('POST /api/games', () => {
+  const { app } = createApp();
   const token = createTestToken({ id: 'user-123' });
 
   beforeEach(() => {
@@ -229,8 +232,8 @@ describe('POST /api/games', () => {
   });
 });
 
-describe('POST /api/games/join', () => {
-  const app = createApp();
+describeIfNetwork('POST /api/games/join', () => {
+  const { app } = createApp();
   const token = createTestToken({ id: 'user-456' });
 
   beforeEach(() => {
@@ -476,8 +479,8 @@ describe('POST /api/games/join', () => {
   });
 });
 
-describe('GET /api/games/:id', () => {
-  const app = createApp();
+describeIfNetwork('GET /api/games/:id', () => {
+  const { app } = createApp();
   const token = createTestToken({ id: 'user-123' });
 
   beforeEach(() => {
@@ -543,8 +546,8 @@ describe('GET /api/games/:id', () => {
   });
 });
 
-describe('GET /api/games', () => {
-  const app = createApp();
+describeIfNetwork('GET /api/games', () => {
+  const { app } = createApp();
   const token = createTestToken({ id: 'user-123' });
 
   beforeEach(() => {
@@ -586,8 +589,8 @@ describe('GET /api/games', () => {
   });
 });
 
-describe('Game State Persistence', () => {
-  const app = createApp();
+describeIfNetwork('Game State Persistence', () => {
+  const { app } = createApp();
   const token = createTestToken({ id: 'user-123' });
 
   beforeEach(() => {
@@ -745,8 +748,8 @@ describe('Game State Persistence', () => {
   });
 });
 
-describe('POST /api/games/:id/forfeit', () => {
-  const app = createApp();
+describeIfNetwork('POST /api/games/:id/forfeit', () => {
+  const { app } = createApp();
   const token = createTestToken({ id: 'user-123' });
 
   beforeEach(() => {

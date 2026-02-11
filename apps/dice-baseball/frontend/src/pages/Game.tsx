@@ -367,8 +367,9 @@ export function Game() {
     if (!battingTeam?.roster) return null;
     
     // Get the current batter by batting order
+    const lineupSpot = (gameState.currentBatterIndex % 9) + 1;
     const currentBatterSlot = battingTeam.roster.find(
-      slot => slot.battingOrder === gameState.currentBatterIndex + 1 && slot.position !== 'SP'
+      slot => slot.battingOrder === lineupSpot && slot.position !== 'SP'
     );
     
     return currentBatterSlot?.player || null;

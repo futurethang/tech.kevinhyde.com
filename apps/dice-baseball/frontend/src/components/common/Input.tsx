@@ -2,7 +2,7 @@
  * Input Component - Text inputs and select dropdowns
  */
 
-import { type InputHTMLAttributes, type SelectHTMLAttributes, forwardRef } from 'react';
+import { type InputHTMLAttributes, type SelectHTMLAttributes, forwardRef, useId } from 'react';
 
 // ============================================
 // TEXT INPUT
@@ -16,7 +16,8 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ label, error, hint, className = '', ...props }, ref) => {
-    const inputId = props.id || `input-${Math.random().toString(36).slice(2)}`;
+    const generatedId = useId();
+    const inputId = props.id || generatedId;
 
     return (
       <div className="w-full">
@@ -68,7 +69,8 @@ interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
   ({ label, error, options, className = '', ...props }, ref) => {
-    const selectId = props.id || `select-${Math.random().toString(36).slice(2)}`;
+    const generatedId = useId();
+    const selectId = props.id || generatedId;
 
     return (
       <div className="w-full">
