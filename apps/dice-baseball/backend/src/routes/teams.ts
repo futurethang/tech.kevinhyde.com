@@ -326,9 +326,7 @@ router.delete('/:id', authMiddleware, async (req: AuthenticatedRequest, res: Res
 
   await deleteTeam(teamId);
 
-  return res.json({
-    message: 'Team deleted successfully',
-  });
+  return res.status(204).end();
 });
 
 /**
