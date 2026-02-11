@@ -7,6 +7,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
 import type { JWTPayload, ApiError } from '../types/index.js';
+import { createTeam, updateRoster } from '../services/team-service.js';
 
 const router = Router();
 
@@ -85,6 +86,11 @@ router.post('/register', async (req: Request, res: Response<{ user: { id: string
     };
 
     const token = jwt.sign(payload, JWT_SECRET, { expiresIn: TOKEN_EXPIRY });
+
+    // For Quick Dev login (test accounts), create default teams with rosters
+    if (email.includes('test') && email.includes('example.com')) {
+      await createDefaultTeams(id);
+    }
 
     res.status(201).json({
       user: {
@@ -182,6 +188,65 @@ router.post('/login', async (req: Request, res: Response<{ user: { id: string; e
 export function clearUsers(): void {
   users.clear();
   emailIndex.clear();
+}
+
+// ============================================
+// HELPER FUNCTIONS
+// ============================================
+
+/**
+ * Creates default teams with full rosters for quick dev login
+ */
+async function createDefaultTeams(userId: string): Promise<void> {
+  try {
+    // Create Team 1 - All-Stars
+    const team1 = await createTeam(userId, 'All-Stars');
+    
+    // Roster for Team 1
+    const roster1 = [
+      // Position players (batting order 1-9)
+      { position: 'CF', mlbPlayerId: 545361, battingOrder: 1 },  // Mike Trout
+      { position: '2B', mlbPlayerId: 514888, battingOrder: 2 },  // Jose Altuve  
+      { position: 'RF', mlbPlayerId: 660271, battingOrder: 3 },  // Juan Soto
+      { position: '1B', mlbPlayerId: 592450, battingOrder: 4 },  // Freddie Freeman
+      { position: '3B', mlbPlayerId: 571448, battingOrder: 5 },  // Nolan Arenado
+      { position: 'SS', mlbPlayerId: 666971, battingOrder: 6 },  // Bo Bichette
+      { position: 'LF', mlbPlayerId: 665742, battingOrder: 7 },  // Cody Bellinger
+      { position: 'C', mlbPlayerId: 668939, battingOrder: 8 },   // Willson Contreras
+      { position: 'DH', mlbPlayerId: 605141, battingOrder: 9 },  // Mookie Betts
+      // Pitcher (no batting order)
+      { position: 'SP', mlbPlayerId: 543037, battingOrder: null }, // Gerrit Cole
+    ];
+
+    await updateRoster(team1.id, roster1);
+    console.log(`✅ Created team "${team1.name}" for user ${userId}`);
+
+    // Create Team 2 - Legends
+    const team2 = await createTeam(userId, 'Legends');
+    
+    // Roster for Team 2 (different players)
+    const roster2 = [
+      // Position players (batting order 1-9)
+      { position: 'SS', mlbPlayerId: 608070, battingOrder: 1 },  // Trea Turner
+      { position: 'RF', mlbPlayerId: 502671, battingOrder: 2 },  // Alex Bregman  
+      { position: 'CF', mlbPlayerId: 660271, battingOrder: 3 },  // Juan Soto
+      { position: '1B', mlbPlayerId: 519317, battingOrder: 4 },  // Paul Goldschmidt
+      { position: '3B', mlbPlayerId: 592518, battingOrder: 5 },  // Manny Machado
+      { position: 'LF', mlbPlayerId: 592450, battingOrder: 6 },  // Freddie Freeman
+      { position: 'C', mlbPlayerId: 543521, battingOrder: 7 },   // Salvador Perez
+      { position: '2B', mlbPlayerId: 666971, battingOrder: 8 },   // Bo Bichette
+      { position: 'DH', mlbPlayerId: 514888, battingOrder: 9 },  // Jose Altuve
+      // Pitcher (no batting order)
+      { position: 'SP', mlbPlayerId: 605400, battingOrder: null }, // Jacob deGrom
+    ];
+
+    await updateRoster(team2.id, roster2);
+    console.log(`✅ Created team "${team2.name}" for user ${userId}`);
+    
+  } catch (error) {
+    console.error('Error creating default teams:', error);
+    // Don't throw - this is a nice-to-have feature, not critical
+  }
 }
 
 export default router;
