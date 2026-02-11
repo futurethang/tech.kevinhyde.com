@@ -13,11 +13,16 @@ import { createSocketServer } from './socket/index.js';
 export function createApp() {
   const app = express();
 
-  // Security middleware
-  app.use(helmet());
+  // CORS must come before helmet for proper preflight handling
   app.use(cors({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+    origin: process.env.CORS_ORIGIN || ['http://localhost:5173', 'http://localhost:5174'],
     credentials: true,
+  }));
+  
+  // Security middleware with relaxed CSP for development
+  app.use(helmet({
+    contentSecurityPolicy: process.env.NODE_ENV === 'production' ? undefined : false,
+    crossOriginEmbedderPolicy: false,
   }));
 
   // Body parsing

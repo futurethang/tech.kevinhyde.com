@@ -72,14 +72,14 @@ export interface PlayResult {
  * Base probabilities derived from 2d6 dice distribution
  */
 export const BASE_PROBABILITIES: Record<OutcomeType, number> = {
-  homeRun: 0.056, // ~5.5% (rolls: 2, 12)
-  triple: 0.056, // ~5.5% (roll: 3)
-  double: 0.083, // 8.3% (roll: 10)
-  single: 0.222, // 22.2% (rolls: 5, 9)
-  walk: 0.083, // 8.3% (roll: 4)
-  strikeout: 0.056, // ~5.5% (roll: 11)
-  groundOut: 0.278, // 27.8% (rolls: 6, 8)
-  flyOut: 0.166, // ~16.7% (roll: 7) - adjusted to sum to 1.0
+  homeRun: 0.028, // ~2.8% (more realistic)
+  triple: 0.005, // ~0.5% (triples are very rare)
+  double: 0.046, // 4.6% (doubles are less common)
+  single: 0.150, // 15% (singles most common hit)
+  walk: 0.083, // 8.3% (walks unchanged)
+  strikeout: 0.217, // 21.7% (modern game has more Ks)
+  groundOut: 0.278, // 27.8% (ground outs common)
+  flyOut: 0.193, // 19.3% (fly outs common)
 };
 
 /**
@@ -225,8 +225,8 @@ export function applyDiceBias(
   const goodOutcomes: OutcomeType[] = ['homeRun', 'triple', 'double', 'single', 'walk'];
   const badOutcomes: OutcomeType[] = ['strikeout', 'groundOut', 'flyOut'];
 
-  // Calculate how much to shift (max 10% shift for more pronounced dice effect)
-  const shiftAmount = Math.abs(bias) * 0.20;
+  // Calculate how much to shift (max 5% shift for more balanced gameplay)
+  const shiftAmount = Math.abs(bias) * 0.05;
 
   if (bias > 0) {
     // High roll: boost good outcomes

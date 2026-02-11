@@ -297,7 +297,11 @@ export function Game() {
         )}
 
         {/* Scoreboard */}
-        <Scoreboard state={gameState} />
+        <Scoreboard 
+          state={gameState} 
+          homeName={currentGame?.homeTeam?.name || 'Home'}
+          visitorName={currentGame?.visitorTeam?.name || 'Visitor'}
+        />
 
         {/* Matchup Display */}
         <MatchupDisplay
@@ -387,8 +391,17 @@ export function Game() {
 }
 
 // Scoreboard Component
-function Scoreboard({ state }: { state: GameState | null }) {
+function Scoreboard({ state, homeName, visitorName }: { 
+  state: GameState | null;
+  homeName: string;
+  visitorName: string;
+}) {
   if (!state) return null;
+
+  // Truncate team names to fit in scoreboard
+  const truncateName = (name: string, maxLength: number = 10) => {
+    return name.length > maxLength ? name.substring(0, maxLength - 1) + '.' : name;
+  };
 
   return (
     <Card padding="sm">
@@ -396,7 +409,7 @@ function Scoreboard({ state }: { state: GameState | null }) {
         <table className="w-full text-sm font-mono">
           <thead>
             <tr className="text-gray-500">
-              <th className="w-8"></th>
+              <th className="w-24 text-left px-2">Team</th>
               {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => (
                 <th
                   key={i}
@@ -410,7 +423,9 @@ function Scoreboard({ state }: { state: GameState | null }) {
           </thead>
           <tbody>
             <tr>
-              <td className="text-gray-400">V</td>
+              <td className="text-gray-400 px-2" title={visitorName}>
+                {truncateName(visitorName)}
+              </td>
               {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => (
                 <td key={i} className="text-center text-white">
                   {i < state.inning || (i === state.inning && !state.isTopOfInning)
@@ -423,7 +438,9 @@ function Scoreboard({ state }: { state: GameState | null }) {
               </td>
             </tr>
             <tr>
-              <td className="text-gray-400">H</td>
+              <td className="text-gray-400 px-2" title={homeName}>
+                {truncateName(homeName)}
+              </td>
               {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => (
                 <td key={i} className="text-center text-white">
                   {i < state.inning ? '0' : '·'}
