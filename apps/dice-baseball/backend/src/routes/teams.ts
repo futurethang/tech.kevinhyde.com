@@ -109,36 +109,6 @@ router.get('/:id', authMiddleware, async (req: AuthenticatedRequest, res: Respon
 });
 
 /**
- * DELETE /api/teams/:id
- * Delete a team
- */
-router.delete('/:id', authMiddleware, async (req: AuthenticatedRequest, res: Response) => {
-  const userId = req.user!.id;
-  const teamId = req.params.id;
-
-  const team = await getTeamById(teamId);
-
-  if (!team) {
-    const errorResponse: ApiError = {
-      error: 'not_found',
-      message: 'Team not found',
-    };
-    return res.status(404).json(errorResponse);
-  }
-
-  if (team.userId !== userId) {
-    const errorResponse: ApiError = {
-      error: 'forbidden',
-      message: 'You do not own this team',
-    };
-    return res.status(403).json(errorResponse);
-  }
-
-  await deleteTeam(teamId);
-  return res.status(204).send();
-});
-
-/**
  * PUT /api/teams/:id/roster
  * Update entire roster
  */

@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { authMiddleware } from '../middleware/auth.js';
 import { getPlayers, getPlayerById } from '../services/mlb-sync.js';
 import type { ApiError } from '../types/index.js';
+import type { PlayersQuery } from '@dice-baseball/contracts';
 
 const router = Router();
 
@@ -23,17 +24,28 @@ const VALID_POSITIONS = [
 ] as const;
 
 // Valid sort fields
-const VALID_SORT_FIELDS = ['ops', 'avg', 'hr', 'rbi', 'era', 'whip', 'wins'] as const;
+const VALID_SORT_FIELDS = ['ops', 'avg', 'hr', 'rbi', 'era', 'whip', 'wins', 'name'] as const;
 
 // Query validation schema
 const getPlayersQuerySchema = z.object({
   q: z.string().optional(),
+  search: z.string().optional(),
   position: z.enum(VALID_POSITIONS).optional(),
   team: z.string().max(3).optional(),
+  league: z.string().optional(),
   sort: z.enum(VALID_SORT_FIELDS).optional().default('ops'),
   order: z.enum(['asc', 'desc']).optional().default('desc'),
   limit: z.coerce.number().min(1).optional().default(20).transform((val) => Math.min(val, 100)),
   offset: z.coerce.number().min(0).optional().default(0),
+  page: z.coerce.number().min(1).optional(),
+  minOps: z.coerce.number().optional(),
+  maxOps: z.coerce.number().optional(),
+  minEra: z.coerce.number().optional(),
+  maxEra: z.coerce.number().optional(),
+  minHr: z.coerce.number().optional(),
+  maxHr: z.coerce.number().optional(),
+  minRbi: z.coerce.number().optional(),
+  maxRbi: z.coerce.number().optional(),
 });
 
 // Player ID validation
@@ -56,23 +68,37 @@ router.get('/players', authMiddleware, async (req: Request, res: Response<unknow
     return res.status(400).json(errorResponse);
   }
 
-  const { q, position, team, sort, order, limit, offset } = parseResult.data;
+  const parsedQuery = parseResult.data;
+  const effectiveOffset =
+    typeof parsedQuery.page === 'number'
+      ? (parsedQuery.page - 1) * parsedQuery.limit
+      : parsedQuery.offset;
 
-  const result = await getPlayers({
-    search: q,
-    position,
-    team,
-    sort,
-    order,
-    limit,
-    offset,
-  });
+  const query: PlayersQuery = {
+    search: parsedQuery.q ?? parsedQuery.search,
+    position: parsedQuery.position,
+    team: parsedQuery.team,
+    sort: parsedQuery.sort,
+    order: parsedQuery.order,
+    limit: parsedQuery.limit,
+    offset: effectiveOffset,
+    minOps: parsedQuery.minOps,
+    maxOps: parsedQuery.maxOps,
+    minEra: parsedQuery.minEra,
+    maxEra: parsedQuery.maxEra,
+    minHr: parsedQuery.minHr,
+    maxHr: parsedQuery.maxHr,
+    minRbi: parsedQuery.minRbi,
+    maxRbi: parsedQuery.maxRbi,
+  };
+
+  const result = await getPlayers(query);
 
   return res.json({
     players: result.players,
     total: result.total,
-    limit,
-    offset,
+    limit: query.limit,
+    offset: effectiveOffset,
   });
 });
 

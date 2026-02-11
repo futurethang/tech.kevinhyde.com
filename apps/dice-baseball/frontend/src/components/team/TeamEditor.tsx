@@ -156,7 +156,7 @@ export function TeamEditor({ teamId }: TeamEditorProps) {
     
     setSearchLoading(true);
     try {
-      const params: any = { 
+      const params: api.GetPlayersParams = {
         search: searchQuery.trim(), 
         limit: 30,
         sort: showPlayerSearch === 'SP' ? 'era' : 'ops'
@@ -190,7 +190,7 @@ export function TeamEditor({ teamId }: TeamEditorProps) {
     console.log('Loading players for position:', position);
     setSearchLoading(true);
     try {
-      const params: any = { 
+      const params: api.GetPlayersParams = {
         limit: 50, // Show more results by default
         sort: position === 'SP' ? 'era' : 'ops' // Sort by relevant stat
       };

@@ -1,8 +1,11 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+
 import request from 'supertest';
 import { createApp } from '../../server.js';
 import { createTestToken, authHeader } from '../helpers/auth.js';
 import * as teamService from '../../services/team-service.js';
+
+const describeIfNetwork = process.env.SKIP_NETWORK_TESTS === "1" ? describe.skip : describe;
 
 // Mock the team service
 vi.mock('../../services/team-service.js', () => ({
@@ -15,8 +18,8 @@ vi.mock('../../services/team-service.js', () => ({
   updateBattingOrder: vi.fn(),
 }));
 
-describe('POST /api/teams', () => {
-  const app = createApp();
+describeIfNetwork('POST /api/teams', () => {
+  const { app } = createApp();
   const token = createTestToken({ id: 'user-123' });
 
   beforeEach(() => {
@@ -97,8 +100,8 @@ describe('POST /api/teams', () => {
   });
 });
 
-describe('GET /api/teams', () => {
-  const app = createApp();
+describeIfNetwork('GET /api/teams', () => {
+  const { app } = createApp();
   const token = createTestToken({ id: 'user-123' });
 
   beforeEach(() => {
@@ -139,8 +142,8 @@ describe('GET /api/teams', () => {
   });
 });
 
-describe('GET /api/teams/:id', () => {
-  const app = createApp();
+describeIfNetwork('GET /api/teams/:id', () => {
+  const { app } = createApp();
   const token = createTestToken({ id: 'user-123' });
 
   beforeEach(() => {
@@ -195,8 +198,8 @@ describe('GET /api/teams/:id', () => {
   });
 });
 
-describe('PUT /api/teams/:id/roster', () => {
-  const app = createApp();
+describeIfNetwork('PUT /api/teams/:id/roster', () => {
+  const { app } = createApp();
   const token = createTestToken({ id: 'user-123' });
 
   const validRoster = [
@@ -275,8 +278,8 @@ describe('PUT /api/teams/:id/roster', () => {
   });
 });
 
-describe('PUT /api/teams/:id/batting-order', () => {
-  const app = createApp();
+describeIfNetwork('PUT /api/teams/:id/batting-order', () => {
+  const { app } = createApp();
   const token = createTestToken({ id: 'user-123' });
 
   beforeEach(() => {
@@ -353,8 +356,8 @@ describe('PUT /api/teams/:id/batting-order', () => {
   });
 });
 
-describe('DELETE /api/teams/:id', () => {
-  const app = createApp();
+describeIfNetwork('DELETE /api/teams/:id', () => {
+  const { app } = createApp();
   const token = createTestToken({ id: 'user-123' });
 
   beforeEach(() => {

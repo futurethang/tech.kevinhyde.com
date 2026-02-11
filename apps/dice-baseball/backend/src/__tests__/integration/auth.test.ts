@@ -8,11 +8,13 @@ import {
   authHeader,
 } from '../helpers/auth.js';
 
-describe('Auth Middleware', () => {
-  const app = createApp();
+const describeIfNetwork = process.env.SKIP_NETWORK_TESTS === '1' ? describe.skip : describe;
+
+describeIfNetwork('Auth Middleware', () => {
+  const { app } = createApp();
   const protectedEndpoint = '/api/protected';
 
-  describe('with valid token', () => {
+  describeIfNetwork('with valid token', () => {
     it('accepts valid JWT and returns 200', async () => {
       const token = createTestToken();
       const response = await request(app)
@@ -50,7 +52,7 @@ describe('Auth Middleware', () => {
     });
   });
 
-  describe('with missing token', () => {
+  describeIfNetwork('with missing token', () => {
     it('returns 401 when no Authorization header', async () => {
       const response = await request(app).get(protectedEndpoint);
       expect(response.status).toBe(401);
@@ -65,7 +67,7 @@ describe('Auth Middleware', () => {
     });
   });
 
-  describe('with invalid header format', () => {
+  describeIfNetwork('with invalid header format', () => {
     it('returns 401 for missing Bearer prefix', async () => {
       const token = createTestToken();
       const response = await request(app)
@@ -96,7 +98,7 @@ describe('Auth Middleware', () => {
     });
   });
 
-  describe('with invalid token', () => {
+  describeIfNetwork('with invalid token', () => {
     it('rejects token signed with wrong secret', async () => {
       const token = createInvalidToken();
       const response = await request(app)
@@ -125,7 +127,7 @@ describe('Auth Middleware', () => {
     });
   });
 
-  describe('with expired token', () => {
+  describeIfNetwork('with expired token', () => {
     it('rejects expired JWT', async () => {
       const token = createExpiredToken();
       const response = await request(app)

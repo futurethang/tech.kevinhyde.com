@@ -62,11 +62,11 @@ export interface MLBPlayer {
   firstName: string;
   lastName: string;
   primaryPosition: string;
-  currentTeam: string;
-  currentTeamId: number;
+  currentTeam: string | null;
+  currentTeamId: number | null;
   photoUrl?: string;
-  battingStats?: BattingStats;
-  pitchingStats?: PitchingStats;
+  battingStats?: BattingStats | null;
+  pitchingStats?: PitchingStats | null;
   seasonYear?: number;
   isActive: boolean;
   lastUpdated: string;

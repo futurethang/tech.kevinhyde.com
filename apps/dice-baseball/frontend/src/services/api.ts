@@ -3,6 +3,7 @@
  */
 
 import type { User, Team, Game, MLBPlayer, ApiError } from '../types';
+import type { AuthResponse as ContractAuthResponse, AuthUser } from '@dice-baseball/contracts';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
@@ -13,6 +14,17 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 export interface AuthResponse {
   user: User;
   token: string;
+}
+
+function normalizeUser(user: AuthUser): User {
+  return {
+    id: user.id,
+    email: user.email,
+    displayName: user.username,
+    wins: user.wins ?? 0,
+    losses: user.losses ?? 0,
+    createdAt: user.createdAt ?? new Date().toISOString(),
+  };
 }
 
 export async function register(email: string, username: string, password: string): Promise<AuthResponse> {
@@ -30,7 +42,11 @@ export async function register(email: string, username: string, password: string
     throw error;
   }
 
-  return response.json();
+  const data = (await response.json()) as ContractAuthResponse;
+  return {
+    user: normalizeUser(data.user),
+    token: data.token,
+  };
 }
 
 export async function login(email: string, password: string): Promise<AuthResponse> {
@@ -48,7 +64,11 @@ export async function login(email: string, password: string): Promise<AuthRespon
     throw error;
   }
 
-  return response.json();
+  const data = (await response.json()) as ContractAuthResponse;
+  return {
+    user: normalizeUser(data.user),
+    token: data.token,
+  };
 }
 
 // Get token from localStorage (set by auth store)
@@ -127,10 +147,14 @@ export async function getPlayers(
   if (params.position) searchParams.set('position', params.position);
   if (params.team) searchParams.set('team', params.team);
   if (params.league) searchParams.set('league', params.league);
-  if (params.search) searchParams.set('search', params.search);
+  if (params.search) searchParams.set('q', params.search);
   if (params.sort) searchParams.set('sort', params.sort);
-  if (params.page) searchParams.set('page', String(params.page));
   if (params.limit) searchParams.set('limit', String(params.limit));
+  if (params.page && params.limit) {
+    searchParams.set('offset', String((params.page - 1) * params.limit));
+  } else if (params.page) {
+    searchParams.set('page', String(params.page));
+  }
   
   // Stats range filters
   if (params.minOps !== undefined) searchParams.set('minOps', String(params.minOps));

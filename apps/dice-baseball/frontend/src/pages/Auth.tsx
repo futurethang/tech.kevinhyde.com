@@ -22,6 +22,13 @@ export function Auth() {
     password: '',
   });
 
+  function getErrorMessage(err: unknown, fallback: string): string {
+    if (err && typeof err === 'object' && 'message' in err && typeof err.message === 'string') {
+      return err.message;
+    }
+    return fallback;
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -34,8 +41,8 @@ export function Auth() {
       
       setUser(response.user, response.token);
       navigate('/');
-    } catch (err: any) {
-      setError(err.message || 'Authentication failed');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Authentication failed'));
     } finally {
       setLoading(false);
     }
@@ -55,8 +62,8 @@ export function Auth() {
       const response = await register(testEmail, testUsername, 'password123');
       setUser(response.user, response.token);
       navigate('/');
-    } catch (err: any) {
-      setError(err.message || 'Quick login failed');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Quick login failed'));
     } finally {
       setLoading(false);
     }

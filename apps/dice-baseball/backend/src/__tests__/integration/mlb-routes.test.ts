@@ -1,8 +1,11 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+
 import request from 'supertest';
 import { createApp } from '../../server.js';
 import { createTestToken, authHeader } from '../helpers/auth.js';
 import * as mlbService from '../../services/mlb-sync.js';
+
+const describeIfNetwork = process.env.SKIP_NETWORK_TESTS === "1" ? describe.skip : describe;
 
 // Mock the MLB service
 vi.mock('../../services/mlb-sync.js', () => ({
@@ -14,8 +17,8 @@ vi.mock('../../services/mlb-sync.js', () => ({
   buildPhotoUrl: vi.fn((id) => `https://img.mlb.com/people/${id}/headshot`),
 }));
 
-describe('GET /api/mlb/players', () => {
-  const app = createApp();
+describeIfNetwork('GET /api/mlb/players', () => {
+  const { app } = createApp();
   const token = createTestToken();
 
   const mockPlayers = [
@@ -248,8 +251,8 @@ describe('GET /api/mlb/players', () => {
   });
 });
 
-describe('GET /api/mlb/players/:mlbId', () => {
-  const app = createApp();
+describeIfNetwork('GET /api/mlb/players/:mlbId', () => {
+  const { app } = createApp();
   const token = createTestToken();
 
   const mockPlayer = {

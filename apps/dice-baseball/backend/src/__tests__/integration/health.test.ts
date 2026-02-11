@@ -1,9 +1,12 @@
 import { describe, it, expect } from 'vitest';
+
 import request from 'supertest';
 import { createApp } from '../../server.js';
 
-describe('GET /health', () => {
-  const app = createApp();
+const describeIfNetwork = process.env.SKIP_NETWORK_TESTS === "1" ? describe.skip : describe;
+
+describeIfNetwork('GET /health', () => {
+  const { app } = createApp();
 
   it('returns 200 OK', async () => {
     const response = await request(app).get('/health');
@@ -40,8 +43,8 @@ describe('GET /health', () => {
   });
 });
 
-describe('GET /nonexistent', () => {
-  const app = createApp();
+describeIfNetwork('GET /nonexistent', () => {
+  const { app } = createApp();
 
   it('returns 404 for unknown endpoints', async () => {
     const response = await request(app).get('/nonexistent');

@@ -5,11 +5,11 @@
 import { useState, useRef } from 'react';
 import type { DragEvent } from 'react';
 import { Button, Card, CardContent } from '../common';
-import type { RosterSlot } from '../../types';
+import type { MLBPlayer, RosterSlot } from '../../types';
 
 interface BattingOrderEditorProps {
   roster: RosterSlot[];
-  populatedRoster: Record<string, any>;
+  populatedRoster: Record<string, MLBPlayer>;
   onReorder: (newOrder: number[]) => void;
   onSave: () => void;
   disabled?: boolean;

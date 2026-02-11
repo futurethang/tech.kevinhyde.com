@@ -174,16 +174,13 @@ export function calculateBatterModifiers(stats: BatterStats): Record<OutcomeType
  */
 export function calculatePitcherModifiers(stats: PitcherStats): Record<OutcomeType, number> {
   // Handle edge cases: zero/missing stats
-  const era = stats.era || LEAGUE_AVG.era;
   const whip = stats.whip || LEAGUE_AVG.whip;
   const kPer9 = stats.kPer9 || LEAGUE_AVG.kPer9;
   const bbPer9 = stats.bbPer9 || LEAGUE_AVG.bbPer9;
   const hrPer9 = stats.hrPer9 || LEAGUE_AVG.hrPer9;
 
-  // ERA-based overall effectiveness (lower ERA = better suppression)
-  // Clamp ERA minimum to avoid extreme values
-  const clampedEra = Math.max(era, 1.5);
-  const suppressionFactor = LEAGUE_AVG.era / clampedEra;
+  // ERA-based overall effectiveness could be reintroduced as a suppression factor.
+  // For now, WHIP/K/BB/HR are the active pitcher controls.
 
   // WHIP affects hits allowed (lower WHIP = fewer hits)
   const clampedWhip = Math.max(whip, 0.8);

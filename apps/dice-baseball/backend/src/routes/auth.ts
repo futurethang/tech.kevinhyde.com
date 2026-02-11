@@ -8,6 +8,7 @@ import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
 import type { JWTPayload, ApiError } from '../types/index.js';
 import { createTeam, updateRoster } from '../services/team-service.js';
+import type { RosterSlot } from '../services/roster-validation.js';
 
 const router = Router();
 
@@ -92,7 +93,7 @@ router.post('/register', async (req: Request, res: Response<{ user: { id: string
       await createDefaultTeams(id);
     }
 
-    res.status(201).json({
+    return res.status(201).json({
       user: {
         id: user.id,
         email: user.email,
@@ -102,7 +103,7 @@ router.post('/register', async (req: Request, res: Response<{ user: { id: string
     });
   } catch (error) {
     console.error('Register error:', error);
-    res.status(500).json({
+    return res.status(500).json({
       error: 'internal_error',
       message: 'An internal server error occurred',
     });
@@ -164,7 +165,7 @@ router.post('/login', async (req: Request, res: Response<{ user: { id: string; e
 
     const token = jwt.sign(payload, JWT_SECRET, { expiresIn: TOKEN_EXPIRY });
 
-    res.json({
+    return res.json({
       user: {
         id: user.id,
         email: user.email,
@@ -174,7 +175,7 @@ router.post('/login', async (req: Request, res: Response<{ user: { id: string; e
     });
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({
+    return res.status(500).json({
       error: 'internal_error',
       message: 'An internal server error occurred',
     });
@@ -203,7 +204,7 @@ async function createDefaultTeams(userId: string): Promise<void> {
     const team1 = await createTeam(userId, 'All-Stars');
     
     // Roster for Team 1
-    const roster1 = [
+    const roster1: RosterSlot[] = [
       // Position players (batting order 1-9)
       { position: 'CF', mlbPlayerId: 545361, battingOrder: 1 },  // Mike Trout
       { position: '2B', mlbPlayerId: 514888, battingOrder: 2 },  // Jose Altuve  
@@ -225,7 +226,7 @@ async function createDefaultTeams(userId: string): Promise<void> {
     const team2 = await createTeam(userId, 'Legends');
     
     // Roster for Team 2 (different players)
-    const roster2 = [
+    const roster2: RosterSlot[] = [
       // Position players (batting order 1-9)
       { position: 'SS', mlbPlayerId: 608070, battingOrder: 1 },  // Trea Turner
       { position: 'RF', mlbPlayerId: 502671, battingOrder: 2 },  // Alex Bregman  

@@ -3,7 +3,8 @@
  */
 
 import { io, Socket } from 'socket.io-client';
-import type { GameState, PlayResult } from '../types';
+import type { GameState } from '../types';
+import type { ApiError, RollResultEvent } from '@dice-baseball/contracts';
 
 const WS_URL = import.meta.env.VITE_WS_URL || 'http://localhost:3001';
 
@@ -86,7 +87,7 @@ export function connect(): Promise<void> {
       emitLocalEvent('game:state', data);
     });
 
-    socket.on('game:roll-result', (data: PlayResult) => {
+    socket.on('game:roll-result', (data: RollResultEvent) => {
       emitLocalEvent('game:roll-result', data);
     });
 
@@ -102,7 +103,7 @@ export function connect(): Promise<void> {
       emitLocalEvent('opponent:disconnected', data);
     });
 
-    socket.on('error', (data: { error: string; message: string }) => {
+    socket.on('error', (data: ApiError) => {
       emitLocalEvent('error', data);
     });
   });

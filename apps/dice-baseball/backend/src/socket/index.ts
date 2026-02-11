@@ -176,24 +176,18 @@ export function createSocketServer(httpServer: HttpServer): SocketServer {
         const userKey = `${gameId}:${userId}`;
         userToSocket.set(userKey, socket.id);
 
+        let shouldNotifyOpponentConnected = false;
+
         // Cancel any disconnect timer for this user
         const timer = disconnectTimers.get(userKey);
         if (timer) {
           clearTimeout(timer);
           disconnectTimers.delete(userKey);
-
-          // Notify opponent of reconnection
-          const opponentId = getOpponentId(game, userId);
-          if (opponentId) {
-            const opponentSocketId = userToSocket.get(`${gameId}:${opponentId}`);
-            if (opponentSocketId) {
-              io.to(opponentSocketId).emit('opponent:connected', { userId });
-            }
-          }
+          shouldNotifyOpponentConnected = true;
         }
 
         // Notify opponent if they're connected
-        if (opponentId) {
+        if (opponentId && shouldNotifyOpponentConnected) {
           const opponentSocketId = userToSocket.get(`${gameId}:${opponentId}`);
           if (opponentSocketId) {
             console.log(`📡 Notifying opponent ${opponentId} of player connection`);

@@ -6,7 +6,10 @@
  */
 
 import { resolveAtBat, advanceRunners, handleInningLogic, generateDescription } from './game-engine.js';
-import type { GameState, BatterStats, PitcherStats, OutcomeType, PlayResult } from './game-engine.js';
+import type { GameState, BatterStats, PitcherStats, OutcomeType } from './game-engine.js';
+import * as teamService from './team-service.js';
+import { getPlayerById } from './mlb-sync.js';
+import { gameRepository } from '../repositories/game-repository.js';
 
 // ============================================
 // TYPES
@@ -70,14 +73,57 @@ export interface GameEndResult {
   reason?: string;
 }
 
-// ============================================
-// IN-MEMORY STORAGE (for testing/MVP)
-// In production, replace with Supabase/PostgreSQL
-// ============================================
+async function hydrateTeamForGame(teamId: string): Promise<TeamWithRoster> {
+  const team = await teamService.getTeamById(teamId);
+  if (!team) {
+    throw new Error('Team not found');
+  }
 
-const games: Map<string, Game> = new Map();
-const gamesByJoinCode: Map<string, string> = new Map(); // joinCode -> gameId
-const gameMoves: Map<string, Array<{ moveNumber: number; userId: string; data: unknown }>> = new Map();
+  const roster = await Promise.all(
+    (team.roster || []).map(async (slot) => {
+      const player = await getPlayerById(slot.mlbPlayerId);
+      return {
+        ...slot,
+        playerData: player
+          ? {
+              name: player.fullName,
+              battingStats: player.battingStats
+                ? {
+                    avg: player.battingStats.avg,
+                    obp: player.battingStats.obp,
+                    slg: player.battingStats.slg,
+                    ops: player.battingStats.ops,
+                    bb: player.battingStats.walks,
+                    so: player.battingStats.strikeouts,
+                    ab: player.battingStats.atBats,
+                  }
+                : undefined,
+              pitchingStats: player.pitchingStats
+                ? {
+                    era: player.pitchingStats.era,
+                    whip: player.pitchingStats.whip,
+                    kPer9: player.pitchingStats.kPer9,
+                    bbPer9: player.pitchingStats.bbPer9,
+                    hrPer9: player.pitchingStats.hrPer9,
+                  }
+                : undefined,
+            }
+          : undefined,
+      };
+    })
+  );
+
+  return {
+    id: team.id,
+    name: team.name,
+    userId: team.userId,
+    roster,
+    battingOrder: roster
+      .filter((slot) => slot.position !== 'SP' && slot.battingOrder != null)
+      .sort((a, b) => (a.battingOrder ?? 0) - (b.battingOrder ?? 0))
+      .map((slot) => slot.mlbPlayerId),
+  };
+}
 
 // ============================================
 // HELPER FUNCTIONS
@@ -128,7 +174,7 @@ export async function createGame(userId: string, teamId: string): Promise<Game> 
   let joinCode = generateJoinCode();
 
   // Ensure unique join code
-  while (gamesByJoinCode.has(joinCode)) {
+  while (await gameRepository.hasJoinCode(joinCode)) {
     joinCode = generateJoinCode();
   }
 
@@ -141,12 +187,11 @@ export async function createGame(userId: string, teamId: string): Promise<Game> 
     visitorUserId: null,
     status: 'waiting',
     state: createInitialState(),
+    homeTeam: await hydrateTeamForGame(teamId),
     createdAt: new Date().toISOString(),
   };
 
-  games.set(gameId, game);
-  gamesByJoinCode.set(joinCode, gameId);
-  gameMoves.set(gameId, []);
+  await gameRepository.save(game);
 
   return game;
 }
@@ -155,7 +200,7 @@ export async function createGame(userId: string, teamId: string): Promise<Game> 
  * Join an existing game
  */
 export async function joinGame(gameId: string, userId: string, teamId: string): Promise<Game> {
-  const game = games.get(gameId);
+  const game = await gameRepository.getById(gameId);
   if (!game) {
     throw new Error('Game not found');
   }
@@ -164,8 +209,12 @@ export async function joinGame(gameId: string, userId: string, teamId: string): 
   game.visitorTeamId = teamId;
   game.visitorUserId = userId;
   game.status = 'active';
+  game.visitorTeam = await hydrateTeamForGame(teamId);
+  if (!game.homeTeam) {
+    game.homeTeam = await hydrateTeamForGame(game.homeTeamId);
+  }
 
-  games.set(gameId, game);
+  await gameRepository.save(game);
 
   console.log(`🎮 Game ${gameId} activated: ${game.homeUserId} vs ${game.visitorUserId}`);
   return game;
@@ -175,47 +224,34 @@ export async function joinGame(gameId: string, userId: string, teamId: string): 
  * Get game by ID
  */
 export async function getGameById(gameId: string): Promise<Game | null> {
-  return games.get(gameId) || null;
+  return gameRepository.getById(gameId);
 }
 
 /**
  * Get game by join code
  */
 export async function getGameByJoinCode(joinCode: string): Promise<Game | null> {
-  const gameId = gamesByJoinCode.get(joinCode.toUpperCase());
-  if (!gameId) return null;
-  return games.get(gameId) || null;
+  return gameRepository.getByJoinCode(joinCode);
 }
 
 /**
  * Get all active/waiting games for a user
  */
 export async function getUserActiveGames(userId: string): Promise<Game[]> {
-  const userGames: Game[] = [];
-
-  games.forEach((game) => {
-    if (
-      (game.homeUserId === userId || game.visitorUserId === userId) &&
-      (game.status === 'active' || game.status === 'waiting')
-    ) {
-      userGames.push(game);
-    }
-  });
-
-  return userGames;
+  return gameRepository.listActiveByUser(userId);
 }
 
 /**
  * Save game state
  */
 export async function saveGameState(gameId: string, state: GameState): Promise<void> {
-  const game = games.get(gameId);
+  const game = await gameRepository.getById(gameId);
   if (!game) {
     throw new Error('Game not found');
   }
 
   game.state = state;
-  games.set(gameId, game);
+  await gameRepository.save(game);
 }
 
 /**
@@ -227,7 +263,7 @@ export async function recordMove(
   userId: string,
   input: MoveInput
 ): Promise<MoveResult> {
-  const game = games.get(gameId);
+  const game = await gameRepository.getById(gameId);
   if (!game || !game.state) {
     throw new Error('Game not found');
   }
@@ -300,9 +336,9 @@ export async function recordMove(
   const description = generateDescription(outcome, batterName, pitcherName, runsScored);
 
   // Save the move
-  const moves = gameMoves.get(gameId) || [];
-  moves.push({
-    moveNumber: moves.length + 1,
+  const currentMoves = await gameRepository.getMoveCount(gameId);
+  await gameRepository.appendMove(gameId, {
+    moveNumber: currentMoves + 1,
     userId,
     data: {
       diceRolls: input.diceRolls,
@@ -312,11 +348,10 @@ export async function recordMove(
       batterIndex,
     },
   });
-  gameMoves.set(gameId, moves);
 
   // Save game state
   game.state = newState;
-  games.set(gameId, game);
+  await gameRepository.save(game);
 
   return {
     diceRolls: input.diceRolls,
@@ -340,7 +375,7 @@ export async function recordMove(
  * End a game (either by completion or forfeit)
  */
 export async function endGame(gameId: string, winnerId: string): Promise<GameEndResult> {
-  const game = games.get(gameId);
+  const game = await gameRepository.getById(gameId);
   if (!game) {
     throw new Error('Game not found');
   }
@@ -352,10 +387,8 @@ export async function endGame(gameId: string, winnerId: string): Promise<GameEnd
   game.loserId = loserId;
   game.completedAt = new Date().toISOString();
 
-  games.set(gameId, game);
-
-  // Remove from join code map
-  gamesByJoinCode.delete(game.joinCode);
+  await gameRepository.save(game);
+  await gameRepository.removeJoinCode(game.joinCode);
 
   return {
     winnerId,
@@ -369,7 +402,5 @@ export async function endGame(gameId: string, winnerId: string): Promise<GameEnd
  * Clear all games (for testing)
  */
 export function clearAllGames(): void {
-  games.clear();
-  gamesByJoinCode.clear();
-  gameMoves.clear();
+  void gameRepository.clear();
 }

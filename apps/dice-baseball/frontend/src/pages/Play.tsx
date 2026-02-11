@@ -2,7 +2,7 @@
  * Play Page - Create or join a game
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Card, CardContent, Input, Select } from '../components/common';
 import { Header, PageContainer } from '../components/layout/Header';
@@ -19,12 +19,25 @@ export function Play() {
   const [showWaiting, setShowWaiting] = useState(false);
   const [createdGame, setCreatedGame] = useState<Game | null>(null);
   const [error, setError] = useState('');
+  const pollingIntervalRef = useRef<number | null>(null);
+  const pollingTimeoutRef = useRef<number | null>(null);
 
   // Get only complete teams
   const completeTeams = teams.filter((t) => t.rosterComplete);
 
   useEffect(() => {
     loadTeams();
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+      }
+      if (pollingTimeoutRef.current) {
+        clearTimeout(pollingTimeoutRef.current);
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -66,11 +79,21 @@ export function Play() {
   }
 
   async function pollForOpponent(gameId: string) {
-    const interval = setInterval(async () => {
+    if (pollingIntervalRef.current) {
+      clearInterval(pollingIntervalRef.current);
+    }
+    if (pollingTimeoutRef.current) {
+      clearTimeout(pollingTimeoutRef.current);
+    }
+
+    pollingIntervalRef.current = setInterval(async () => {
       try {
         const game = await api.getGameById(gameId);
         if (game.status === 'active') {
-          clearInterval(interval);
+          if (pollingIntervalRef.current) {
+            clearInterval(pollingIntervalRef.current);
+            pollingIntervalRef.current = null;
+          }
           navigate(`/game/${gameId}`);
         }
       } catch {
@@ -79,7 +102,13 @@ export function Play() {
     }, 2000);
 
     // Stop polling after 5 minutes
-    setTimeout(() => clearInterval(interval), 5 * 60 * 1000);
+    pollingTimeoutRef.current = setTimeout(() => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
+      }
+      pollingTimeoutRef.current = null;
+    }, 5 * 60 * 1000);
   }
 
   async function handleJoinGame() {
@@ -139,6 +168,14 @@ export function Play() {
                 variant="ghost"
                 className="mt-6"
                 onClick={() => {
+                  if (pollingIntervalRef.current) {
+                    clearInterval(pollingIntervalRef.current);
+                    pollingIntervalRef.current = null;
+                  }
+                  if (pollingTimeoutRef.current) {
+                    clearTimeout(pollingTimeoutRef.current);
+                    pollingTimeoutRef.current = null;
+                  }
                   setShowWaiting(false);
                   setCreatedGame(null);
                 }}

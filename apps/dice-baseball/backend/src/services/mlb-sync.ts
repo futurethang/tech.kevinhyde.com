@@ -65,6 +65,14 @@ export interface GetPlayersOptions {
   order?: 'asc' | 'desc';
   limit?: number;
   offset?: number;
+  minOps?: number;
+  maxOps?: number;
+  minEra?: number;
+  maxEra?: number;
+  minHr?: number;
+  maxHr?: number;
+  minRbi?: number;
+  maxRbi?: number;
 }
 
 export interface GetPlayersResult {
@@ -233,6 +241,31 @@ export async function getPlayers(options: GetPlayersOptions): Promise<GetPlayers
     players = players.filter(p => p.fullName.toLowerCase().includes(search));
   }
 
+  if (options.minOps !== undefined) {
+    players = players.filter((p) => (p.battingStats?.ops ?? -1) >= options.minOps!);
+  }
+  if (options.maxOps !== undefined) {
+    players = players.filter((p) => (p.battingStats?.ops ?? Number.POSITIVE_INFINITY) <= options.maxOps!);
+  }
+  if (options.minEra !== undefined) {
+    players = players.filter((p) => (p.pitchingStats?.era ?? -1) >= options.minEra!);
+  }
+  if (options.maxEra !== undefined) {
+    players = players.filter((p) => (p.pitchingStats?.era ?? Number.POSITIVE_INFINITY) <= options.maxEra!);
+  }
+  if (options.minHr !== undefined) {
+    players = players.filter((p) => (p.battingStats?.homeRuns ?? -1) >= options.minHr!);
+  }
+  if (options.maxHr !== undefined) {
+    players = players.filter((p) => (p.battingStats?.homeRuns ?? Number.POSITIVE_INFINITY) <= options.maxHr!);
+  }
+  if (options.minRbi !== undefined) {
+    players = players.filter((p) => (p.battingStats?.rbi ?? -1) >= options.minRbi!);
+  }
+  if (options.maxRbi !== undefined) {
+    players = players.filter((p) => (p.battingStats?.rbi ?? Number.POSITIVE_INFINITY) <= options.maxRbi!);
+  }
+
   // Filter to only pitchers when sorting by pitching stats
   const sort = options.sort || 'ops';
   if (sort === 'era' || sort === 'whip' || sort === 'wins') {
@@ -243,6 +276,10 @@ export async function getPlayers(options: GetPlayersOptions): Promise<GetPlayers
   const order = options.order || 'desc';
   players.sort((a, b) => {
     let aVal = 0, bVal = 0;
+    if (sort === 'name') {
+      const nameCompare = a.fullName.localeCompare(b.fullName);
+      return order === 'desc' ? -nameCompare : nameCompare;
+    }
     if (sort === 'ops' || sort === 'avg' || sort === 'hr' || sort === 'rbi') {
       aVal = a.battingStats?.[sort === 'hr' ? 'homeRuns' : sort] ?? 0;
       bVal = b.battingStats?.[sort === 'hr' ? 'homeRuns' : sort] ?? 0;
