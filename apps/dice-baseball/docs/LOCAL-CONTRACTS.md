@@ -45,7 +45,7 @@ Frontend normalization contract:
 - `PUT /api/teams/:id/batting-order` -> `{ message, battingOrder }`
 - `POST /api/teams/:id/duplicate` -> `{ message, team }`
 - `PATCH /api/teams/reorder` -> `{ message, teamIds }`
-- `DELETE /api/teams/:id` -> `{ message }`
+- `DELETE /api/teams/:id` -> `204 No Content`
 
 ### Games
 - `POST /api/games` -> create waiting game

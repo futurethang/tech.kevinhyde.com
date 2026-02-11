@@ -114,6 +114,15 @@ async function fetchWithAuth<T>(
     throw error;
   }
 
+  if (response.status === 204) {
+    return undefined as T;
+  }
+
+  const contentLength = response.headers.get('content-length');
+  if (contentLength === '0') {
+    return undefined as T;
+  }
+
   return response.json();
 }
 
