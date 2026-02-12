@@ -36,3 +36,4 @@ A two-player dice baseball game PWA. Roll dice and play ball!
 
 - Local architecture baseline: `docs/LOCAL-ARCHITECTURE.md`
 - Current REST/socket contracts: `docs/LOCAL-CONTRACTS.md`
+- Visual two-player autoplay harness: `docs/UX-AUTOPLAY.md`
