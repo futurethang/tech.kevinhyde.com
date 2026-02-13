@@ -8,6 +8,7 @@ import authRoutes from './routes/auth.js';
 import mlbRoutes from './routes/mlb.js';
 import teamRoutes from './routes/teams.js';
 import gameRoutes from './routes/games.js';
+import devRoutes from './routes/dev.js';
 import { createSocketServer } from './socket/index.js';
 
 export function createApp() {
@@ -53,6 +54,11 @@ export function createApp() {
 
   // Game routes
   app.use('/api/games', gameRoutes);
+
+  // Dev-only routes for local R&D tooling
+  if (process.env.NODE_ENV !== 'production') {
+    app.use('/api/dev', devRoutes);
+  }
 
   // 404 handler
   app.use((_req: Request, res: Response<ApiError>) => {

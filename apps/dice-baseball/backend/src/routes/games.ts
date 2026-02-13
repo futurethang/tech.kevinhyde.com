@@ -63,8 +63,23 @@ router.post('/', async (req: AuthenticatedRequest, res: Response) => {
       });
     }
 
+    const bodyMode = req.body?.simMode;
+    const bodySeed = req.body?.simSeed;
+    const querySeed = typeof req.query.simSeed === 'string' ? req.query.simSeed : undefined;
+    const headerSeed = req.header('x-sim-seed') ?? undefined;
+    const simMode =
+      bodyMode === 'deterministic' || process.env.GAME_SIM_MODE === 'deterministic'
+        ? 'deterministic'
+        : undefined;
+    const simSeed = [bodySeed, querySeed, headerSeed].find(
+      (value): value is string => typeof value === 'string' && value.length > 0
+    );
+
     // Create the game
-    const game = await gameService.createGame(userId, teamId);
+    const hasSimConfig = simMode === 'deterministic' || Boolean(simSeed);
+    const game = hasSimConfig
+      ? await gameService.createGame(userId, teamId, { mode: simMode, seed: simSeed })
+      : await gameService.createGame(userId, teamId);
 
     return res.status(201).json(game);
   } catch (error) {
@@ -290,7 +305,10 @@ router.post('/:id/move', async (req: AuthenticatedRequest, res: Response) => {
       await gameService.endGame(id, winnerId);
     }
 
-    return res.status(200).json(result);
+    return res.status(200).json({
+      ...result,
+      sim: result.sim,
+    });
   } catch (error) {
     console.error('Error recording move:', error);
     return res.status(500).json({

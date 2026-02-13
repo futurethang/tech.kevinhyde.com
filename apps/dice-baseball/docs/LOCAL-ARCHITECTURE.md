@@ -56,6 +56,8 @@ It is the source of truth for running and hardening two-player gameplay locally 
 - Team and game services now use repository interfaces, so storage can be swapped without changing route/socket logic.
 - Backend build path now uses `backend/tsconfig.build.json` to compile runtime code only (tests/scripts excluded).
 - Backend test script now supports `SKIP_NETWORK_TESTS=1` to run unit tests in bind-restricted environments.
+- Milestone A foundation: deterministic simulation mode with per-game seed/state and turn-index metadata.
+- Dev-only tooling endpoints added under `/api/dev` for state reset and seeded active-game provisioning.
 
 ## Near-Term Evolution Path
 1. Add a durable repository adapter (PostgreSQL/Supabase) implementing existing `TeamRepository` and `GameRepository`.

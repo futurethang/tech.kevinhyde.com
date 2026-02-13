@@ -50,6 +50,12 @@ export interface GameState {
   winner?: string;
 }
 
+export interface SimulationMetadata {
+  mode: 'default' | 'deterministic';
+  seed?: string;
+  turnIndex: number;
+}
+
 export interface RollResultEvent {
   diceRolls: [number, number];
   outcome: 'homeRun' | 'triple' | 'double' | 'single' | 'walk' | 'strikeout' | 'groundOut' | 'flyOut';
@@ -59,13 +65,14 @@ export interface RollResultEvent {
   batter: { mlbId: number; name: string };
   pitcher: { mlbId: number; name: string };
   newState: GameState;
+  sim?: SimulationMetadata;
 }
 
 export interface SocketEventMap {
   'game:join': { gameId: string };
   'game:roll': { gameId: string };
   'game:forfeit': { gameId: string };
-  'game:state': { state: GameState };
+  'game:state': { state: GameState; sim?: SimulationMetadata };
   'game:roll-result': RollResultEvent;
   'game:ended': { winnerId: string; loserId: string; reason: string; finalScore?: [number, number] };
   'opponent:connected': { userId: string };

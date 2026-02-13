@@ -92,13 +92,6 @@ function isUserTurn(
   return userId === game.homeUserId;
 }
 
-/**
- * Roll dice (1-6 each)
- */
-function rollDice(): [number, number] {
-  return [Math.floor(Math.random() * 6) + 1, Math.floor(Math.random() * 6) + 1];
-}
-
 // ============================================
 // SOCKET SERVER FACTORY
 // ============================================
@@ -196,7 +189,7 @@ export function createSocketServer(httpServer: HttpServer): SocketServer {
         }
 
         // Send current game state
-        socket.emit('game:state', { state: game.state });
+        socket.emit('game:state', { state: game.state, sim: game.simulation });
       } catch (error) {
         console.error('Error joining game:', error);
         socket.emit('error', { error: 'internal_error', message: 'Failed to join game' });
@@ -223,7 +216,7 @@ export function createSocketServer(httpServer: HttpServer): SocketServer {
         }
 
         // Roll the dice
-        const diceRolls = rollDice();
+        const diceRolls = await gameService.generateDiceRoll(gameId);
 
         // Record the move
         const result = await gameService.recordMove(gameId, userId, { diceRolls });
@@ -256,6 +249,7 @@ export function createSocketServer(httpServer: HttpServer): SocketServer {
           batter: result.batter,
           pitcher: result.pitcher,
           newState: result.newState,
+          sim: result.sim,
         });
       } catch (error) {
         console.error('Error processing roll:', error);

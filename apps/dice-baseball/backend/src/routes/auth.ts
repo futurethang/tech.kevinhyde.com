@@ -27,6 +27,32 @@ interface StoredUser {
 const users: Map<string, StoredUser> = new Map();
 const emailIndex: Map<string, string> = new Map(); // email -> id
 
+function createTokenForUser(user: StoredUser): string {
+  const payload: JWTPayload = {
+    sub: user.id,
+    email: user.email,
+  };
+
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: TOKEN_EXPIRY });
+}
+
+async function createStoredUser(email: string, username: string, password: string): Promise<StoredUser> {
+  const passwordHash = await bcrypt.hash(password, 10);
+  const id = uuidv4();
+  const user: StoredUser = {
+    id,
+    email: email.toLowerCase(),
+    username,
+    passwordHash,
+    createdAt: new Date(),
+  };
+
+  users.set(id, user);
+  emailIndex.set(user.email, id);
+
+  return user;
+}
+
 // ============================================
 // REGISTER
 // ============================================
@@ -64,33 +90,12 @@ router.post('/register', async (req: Request, res: Response<{ user: { id: string
       });
     }
 
-    // Hash password
-    const passwordHash = await bcrypt.hash(password, 10);
-
-    // Create user
-    const id = uuidv4();
-    const user: StoredUser = {
-      id,
-      email: email.toLowerCase(),
-      username,
-      passwordHash,
-      createdAt: new Date(),
-    };
-
-    users.set(id, user);
-    emailIndex.set(email.toLowerCase(), id);
-
-    // Generate token
-    const payload: JWTPayload = {
-      sub: id,
-      email: user.email,
-    };
-
-    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: TOKEN_EXPIRY });
+    const user = await createStoredUser(email, username, password);
+    const token = createTokenForUser(user);
 
     // For Quick Dev login (test accounts), create default teams with rosters
     if (email.includes('test') && email.includes('example.com')) {
-      await createDefaultTeams(id);
+      await createDefaultTeams(user.id);
     }
 
     return res.status(201).json({
@@ -157,13 +162,7 @@ router.post('/login', async (req: Request, res: Response<{ user: { id: string; e
       });
     }
 
-    // Generate token
-    const payload: JWTPayload = {
-      sub: user.id,
-      email: user.email,
-    };
-
-    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: TOKEN_EXPIRY });
+    const token = createTokenForUser(user);
 
     return res.json({
       user: {
@@ -189,6 +188,32 @@ router.post('/login', async (req: Request, res: Response<{ user: { id: string; e
 export function clearUsers(): void {
   users.clear();
   emailIndex.clear();
+}
+
+export interface DevUserSeed {
+  id: string;
+  email: string;
+  username: string;
+  token: string;
+}
+
+export async function createDevUserWithDefaultTeams(
+  label: string,
+  password: string = 'password123'
+): Promise<DevUserSeed> {
+  const suffix = `${Date.now()}-${Math.floor(Math.random() * 100000)}`;
+  const email = `test-${label}-${suffix}@example.com`;
+  const username = `Dev${label}${suffix.slice(-5)}`;
+
+  const user = await createStoredUser(email, username, password);
+  await createDefaultTeams(user.id);
+
+  return {
+    id: user.id,
+    email: user.email,
+    username: user.username,
+    token: createTokenForUser(user),
+  };
 }
 
 // ============================================

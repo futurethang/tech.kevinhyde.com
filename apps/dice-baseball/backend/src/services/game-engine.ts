@@ -110,8 +110,11 @@ export function clamp(value: number, min: number, max: number): number {
 /**
  * Weighted random selection from probability distribution
  */
-export function weightedRandomSelect(probs: Record<OutcomeType, number>): OutcomeType {
-  const rand = Math.random();
+export function weightedRandomSelect(
+  probs: Record<OutcomeType, number>,
+  randomValue: number = Math.random()
+): OutcomeType {
+  const rand = randomValue;
   let cumulative = 0;
 
   for (const [outcome, prob] of Object.entries(probs)) {
@@ -281,7 +284,8 @@ export function applyDiceBias(
 export function resolveAtBat(
   batter: BatterStats,
   pitcher: PitcherStats,
-  diceRoll: [number, number]
+  diceRoll: [number, number],
+  randomValue: number = Math.random()
 ): OutcomeType {
   // Calculate modified probabilities
   const batterMods = calculateBatterModifiers(batter);
@@ -319,7 +323,7 @@ export function resolveAtBat(
   const biased = applyDiceBias(adjusted, diceBias);
 
   // Weighted random selection
-  return weightedRandomSelect(biased);
+  return weightedRandomSelect(biased, randomValue);
 }
 
 // ============================================
@@ -493,10 +497,11 @@ export function generateDescription(
   outcome: OutcomeType,
   batterName: string,
   pitcherName: string,
-  runsScored: number
+  runsScored: number,
+  randomValue: number = Math.random()
 ): string {
   const templates = DESCRIPTIONS[outcome];
-  const template = templates[Math.floor(Math.random() * templates.length)];
+  const template = templates[Math.floor(randomValue * templates.length)];
 
   let desc = template.replace(/{batter}/g, batterName).replace(/{pitcher}/g, pitcherName);
 

@@ -10,6 +10,7 @@ import type { GameState, BatterStats, PitcherStats, OutcomeType } from './game-e
 import * as teamService from './team-service.js';
 import { getPlayerById } from './mlb-sync.js';
 import { gameRepository } from '../repositories/game-repository.js';
+import { createSeededRng, normalizeSeed } from './simulation-rng.js';
 
 // ============================================
 // TYPES
@@ -30,6 +31,7 @@ export interface Game {
   completedAt?: string;
   winnerId?: string;
   loserId?: string;
+  simulation?: GameSimulation;
 }
 
 export interface TeamWithRoster {
@@ -55,6 +57,21 @@ export interface MoveInput {
   diceRolls: [number, number];
 }
 
+export interface SimulationConfigInput {
+  mode?: 'default' | 'deterministic';
+  seed?: string;
+}
+
+export interface SimulationSnapshot {
+  mode: 'default' | 'deterministic';
+  seed?: string;
+  turnIndex: number;
+}
+
+export interface GameSimulation extends SimulationSnapshot {
+  rngState?: number;
+}
+
 export interface MoveResult {
   diceRolls: [number, number];
   outcome: OutcomeType;
@@ -64,6 +81,7 @@ export interface MoveResult {
   batter: { mlbId: number; name: string };
   pitcher: { mlbId: number; name: string };
   newState: GameState;
+  sim: SimulationSnapshot;
 }
 
 export interface GameEndResult {
@@ -162,6 +180,44 @@ function createInitialState(): GameState {
   };
 }
 
+function createSimulationConfig(input?: SimulationConfigInput): GameSimulation {
+  const requestedMode = input?.mode || process.env.GAME_SIM_MODE || 'default';
+  const mode: 'default' | 'deterministic' =
+    requestedMode === 'deterministic' ? 'deterministic' : 'default';
+
+  if (mode !== 'deterministic') {
+    return { mode: 'default', turnIndex: 0 };
+  }
+
+  const seed = input?.seed || process.env.GAME_SIM_SEED || `seed-${Date.now()}`;
+  const rngState = normalizeSeed(seed);
+  return { mode: 'deterministic', seed, rngState, turnIndex: 0 };
+}
+
+function nextRandom(game: Game): number {
+  if (game.simulation?.mode !== 'deterministic' || !game.simulation.rngState) {
+    return Math.random();
+  }
+
+  const rng = createSeededRng(game.simulation.rngState);
+  const value = rng.next();
+  game.simulation.rngState = rng.currentState();
+  return value;
+}
+
+function simulationSnapshot(game: Game): SimulationSnapshot {
+  const simulation = game.simulation;
+  if (!simulation) {
+    return { mode: 'default', turnIndex: 0 };
+  }
+
+  return {
+    mode: simulation.mode,
+    seed: simulation.seed,
+    turnIndex: simulation.turnIndex,
+  };
+}
+
 // ============================================
 // SERVICE FUNCTIONS
 // ============================================
@@ -169,7 +225,11 @@ function createInitialState(): GameState {
 /**
  * Create a new game session
  */
-export async function createGame(userId: string, teamId: string): Promise<Game> {
+export async function createGame(
+  userId: string,
+  teamId: string,
+  simInput?: SimulationConfigInput
+): Promise<Game> {
   const gameId = generateGameId();
   let joinCode = generateJoinCode();
 
@@ -189,6 +249,7 @@ export async function createGame(userId: string, teamId: string): Promise<Game> 
     state: createInitialState(),
     homeTeam: await hydrateTeamForGame(teamId),
     createdAt: new Date().toISOString(),
+    simulation: createSimulationConfig(simInput),
   };
 
   await gameRepository.save(game);
@@ -301,7 +362,7 @@ export async function recordMove(
   };
 
   // Resolve the at-bat
-  const outcome = resolveAtBat(batterStats, pitcherStats, input.diceRolls);
+  const outcome = resolveAtBat(batterStats, pitcherStats, input.diceRolls, nextRandom(game));
 
   // Advance runners
   const baseState = { bases: state.bases, outs: state.outs };
@@ -333,7 +394,7 @@ export async function recordMove(
   // Generate description
   const batterName = batter?.playerData?.name || 'Batter';
   const pitcherName = pitcher?.playerData?.name || 'Pitcher';
-  const description = generateDescription(outcome, batterName, pitcherName, runsScored);
+  const description = generateDescription(outcome, batterName, pitcherName, runsScored, nextRandom(game));
 
   // Save the move
   const currentMoves = await gameRepository.getMoveCount(gameId);
@@ -349,7 +410,12 @@ export async function recordMove(
     },
   });
 
-  // Save game state
+  if (!game.simulation) {
+    game.simulation = createSimulationConfig();
+  }
+  game.simulation.turnIndex = currentMoves + 1;
+
+  // Save game state + simulation metadata together
   game.state = newState;
   await gameRepository.save(game);
 
@@ -368,7 +434,20 @@ export async function recordMove(
       name: pitcherName,
     },
     newState,
+    sim: simulationSnapshot(game),
   };
+}
+
+export async function generateDiceRoll(gameId: string): Promise<[number, number]> {
+  const game = await gameRepository.getById(gameId);
+  if (!game) {
+    throw new Error('Game not found');
+  }
+
+  const d1 = Math.floor(nextRandom(game) * 6) + 1;
+  const d2 = Math.floor(nextRandom(game) * 6) + 1;
+  await gameRepository.save(game);
+  return [d1, d2];
 }
 
 /**
@@ -401,6 +480,6 @@ export async function endGame(gameId: string, winnerId: string): Promise<GameEnd
 /**
  * Clear all games (for testing)
  */
-export function clearAllGames(): void {
-  void gameRepository.clear();
+export async function clearAllGames(): Promise<void> {
+  await gameRepository.clear();
 }

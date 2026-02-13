@@ -163,3 +163,7 @@ export async function updateBattingOrder(
     battingOrder,
   };
 }
+
+export async function clearAllTeams(): Promise<void> {
+  await teamRepository.clear();
+}
