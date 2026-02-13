@@ -225,7 +225,7 @@ export function Game() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col bg-gray-900">
+      <div className="min-h-screen flex flex-col bg-gray-900" data-testid="game-loading">
         <Header title="LOADING..." />
         <div className="flex-1 flex items-center justify-center">
           <div className="animate-spin h-8 w-8 border-2 border-gray-500 border-t-green-500 rounded-full" />
@@ -236,7 +236,7 @@ export function Game() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex flex-col bg-gray-900">
+      <div className="min-h-screen flex flex-col bg-gray-900" data-testid="game-error">
         <Header title="ERROR" showBack />
         <PageContainer className="flex items-center justify-center">
           <Card className="text-center">
@@ -254,7 +254,7 @@ export function Game() {
   if (gameEnded) {
     const didWin = winner === user?.id;
     return (
-      <div className="min-h-screen flex flex-col bg-gray-900">
+      <div className="min-h-screen flex flex-col bg-gray-900" data-testid="game-over-screen">
         <Header title="GAME OVER" />
         <PageContainer>
           <Card className="w-full max-w-2xl mx-auto">
@@ -276,7 +276,7 @@ export function Game() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-900">
+    <div className="min-h-screen flex flex-col bg-gray-900" data-testid="game-screen">
       {/* Header with inning info */}
       <Header
         title={`${gameState?.isTopOfInning ? '⬆ TOP' : '⬇ BOT'} ${gameState?.inning || 1}`}
@@ -289,6 +289,9 @@ export function Game() {
           </button>
         }
       />
+      <div className="sr-only" data-testid="game-inning-label">
+        {gameState?.isTopOfInning ? 'top' : 'bottom'}-{gameState?.inning || 1}
+      </div>
 
       <div className="flex-1 flex flex-col p-4 max-w-lg mx-auto w-full">
         {/* Opponent Info */}
@@ -334,7 +337,7 @@ export function Game() {
         />
 
         {/* Play Log */}
-        <div className="mt-4 flex-1 overflow-auto">
+        <div className="mt-4 flex-1 overflow-auto" data-testid="game-play-log">
           {playLog.slice(0, 5).map((entry) => (
             <div
               key={entry.id}
@@ -347,7 +350,10 @@ export function Game() {
 
         {/* Connection status */}
         {!opponentConnected && (
-          <div className="fixed bottom-0 left-0 right-0 bg-yellow-500/10 border-t border-yellow-500 p-3 text-center text-yellow-500 text-sm">
+          <div
+            className="fixed bottom-0 left-0 right-0 bg-yellow-500/10 border-t border-yellow-500 p-3 text-center text-yellow-500 text-sm"
+            data-testid="game-opponent-disconnected"
+          >
             ⏳ Opponent disconnected...
             {disconnectTimeout && ` (${Math.ceil(disconnectTimeout / 1000)}s)`}
           </div>
@@ -524,7 +530,7 @@ function RollButton({
 }) {
   if (isRolling) {
     return (
-      <Button size="lg" className="w-full" disabled>
+      <Button size="lg" className="w-full" disabled data-testid="game-roll-button">
         <span className="animate-bounce">🎲</span>
         <span className="ml-2">Rolling...</span>
       </Button>
@@ -549,6 +555,7 @@ function RollButton({
         className={`w-full ${lastOutcome ? outcomeColors[lastOutcome] : ''}`}
         onClick={onRoll}
         disabled={!isMyTurn}
+        data-testid="game-roll-button"
       >
         🎲 {lastRoll[0]} + {lastRoll[1]} = {lastRoll[0] + lastRoll[1]}
       </Button>
@@ -561,6 +568,7 @@ function RollButton({
       className={`w-full ${isMyTurn ? 'animate-pulse' : ''}`}
       onClick={onRoll}
       disabled={!isMyTurn}
+      data-testid="game-roll-button"
     >
       {isMyTurn ? '🎲 ROLL DICE' : 'Waiting for opponent...'}
     </Button>

@@ -61,7 +61,7 @@ export function Home() {
 
         {/* Quick Actions */}
         <div className="space-y-3">
-          <Link to="/play" className="block">
+          <Link to="/play" className="block" data-testid="nav-play-link">
             <Card variant="interactive" className="hover:border-green-500/50">
               <CardContent className="flex items-center gap-4">
                 <span className="text-3xl">🎮</span>
