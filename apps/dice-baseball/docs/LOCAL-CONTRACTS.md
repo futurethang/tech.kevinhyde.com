@@ -55,6 +55,12 @@ Frontend normalization contract:
 - `POST /api/games/:id/move` -> manual move record (REST fallback path)
 - `POST /api/games/:id/forfeit` -> `{ message, winnerId, loserId }`
 
+Simulation controls on create:
+- `POST /api/games` accepts optional deterministic simulation inputs:
+  - body: `simMode: "deterministic"` and/or `simSeed`
+  - query: `simSeed`
+  - header: `x-sim-seed`
+
 Game payload contract:
 - `Game.state` is authoritative state snapshot.
 - Active games should include `homeTeam`/`visitorTeam` snapshots with roster and resolved player data.
@@ -68,8 +74,8 @@ Client -> Server:
 - `game:forfeit` `{ gameId }`
 
 Server -> Client:
-- `game:state` `{ state }`
-- `game:roll-result` `{ diceRolls, outcome, runsScored, outsRecorded, description, batter, pitcher, newState }`
+- `game:state` `{ state, sim? }`
+- `game:roll-result` `{ diceRolls, outcome, runsScored, outsRecorded, description, batter, pitcher, newState, sim? }`
 - `game:ended` `{ winnerId, loserId, reason, finalScore? }`
 - `opponent:connected` `{ userId }`
 - `opponent:disconnected` `{ userId, timeout }`
@@ -78,6 +84,17 @@ Server -> Client:
 Turn contract:
 - Top inning (`isTopOfInning=true`): visitor acts
 - Bottom inning (`isTopOfInning=false`): home acts
+
+Simulation metadata contract:
+- `sim.mode`: `"default"` or `"deterministic"`
+- `sim.seed`: deterministic seed (when active)
+- `sim.turnIndex`: server-side move index for replay traceability
+
+## Dev-Only Contracts
+- `POST /api/dev/reset` -> clears users, teams, games, and socket state
+- `POST /api/dev/seed-game` -> creates two dev users with complete teams and starts an active game
+  - body options: `{ mode?: "deterministic", seed?: string }`
+  - optional header gate when configured: `x-dev-key: <DEV_ADMIN_KEY>`
 
 ## Known Compatibility Rules
 - Frontend must tolerate nullable `currentTeam`/`currentTeamId` in player payloads.

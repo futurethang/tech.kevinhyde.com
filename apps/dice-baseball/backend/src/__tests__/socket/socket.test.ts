@@ -12,6 +12,7 @@ const describeIfNetwork = process.env.SKIP_NETWORK_TESTS === "1" ? describe.skip
 // Mock game service
 vi.mock('../../services/game-service.js', () => ({
   getGameById: vi.fn(),
+  generateDiceRoll: vi.fn(),
   saveGameState: vi.fn(),
   recordMove: vi.fn(),
   endGame: vi.fn(),
@@ -94,6 +95,7 @@ describeIfNetwork('WebSocket Authentication', () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
+    vi.mocked(gameService.generateDiceRoll).mockResolvedValue([4, 4]);
     ctx = await createTestServer();
   });
 
@@ -144,6 +146,7 @@ describeIfNetwork('Game Room Events', () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
+    vi.mocked(gameService.generateDiceRoll).mockResolvedValue([4, 4]);
     ctx = await createTestServer();
   });
 
