@@ -164,6 +164,7 @@ export function Auth() {
                   <button
                     type="button"
                     onClick={handleQuickLogin}
+                    data-testid="auth-quick-login"
                     className="w-full py-2 px-4 bg-green-600/20 text-green-400 border border-green-600/50 rounded hover:bg-green-600/30 transition-colors text-sm font-medium"
                     disabled={loading}
                   >

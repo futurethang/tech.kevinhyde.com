@@ -28,7 +28,7 @@ export default defineConfig({
   ],
   webServer: [
     {
-      command: `CORS_ORIGIN=http://127.0.0.1:${FRONTEND_PORT} PORT=${BACKEND_PORT} npm run dev`,
+      command: `CORS_ORIGIN=http://127.0.0.1:${FRONTEND_PORT} PORT=${BACKEND_PORT} GAME_SIM_MODE=${process.env.E2E_GAME_SIM_MODE ?? 'deterministic'} GAME_SIM_SEED=${process.env.E2E_GAME_SIM_SEED ?? 'playwright-seed'} npm run dev`,
       cwd: '../backend',
       port: BACKEND_PORT,
       reuseExistingServer: true,

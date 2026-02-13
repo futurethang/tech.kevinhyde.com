@@ -151,7 +151,10 @@ export function Play() {
             <CardContent>
               <p className="text-gray-400 mb-4">Share this code with your opponent:</p>
               <div className="bg-gray-900 rounded-lg py-4 px-6 mb-4">
-                <span className="text-3xl font-mono font-bold text-white tracking-widest">
+                <span
+                  className="text-3xl font-mono font-bold text-white tracking-widest"
+                  data-testid="play-created-join-code"
+                >
                   {createdGame.joinCode}
                 </span>
               </div>
@@ -212,6 +215,7 @@ export function Play() {
                 options={completeTeams.map((t) => ({ value: t.id, label: t.name }))}
                 value={selectedTeamId}
                 onChange={(e) => setSelectedTeamId(e.target.value)}
+                data-testid="play-team-select"
               />
             </div>
 
@@ -229,7 +233,7 @@ export function Play() {
                 <p className="text-sm text-gray-400 mb-4">
                   Get a code to share with a friend
                 </p>
-                <Button onClick={handleCreateGame} isLoading={loading}>
+                <Button onClick={handleCreateGame} isLoading={loading} data-testid="play-create-game">
                   Create Game
                 </Button>
               </CardContent>
@@ -245,9 +249,15 @@ export function Play() {
                   value={joinCode}
                   onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
                   maxLength={6}
+                  data-testid="play-join-code-input"
                   className="text-center text-xl tracking-widest font-mono mb-4"
                 />
-                <Button onClick={handleJoinGame} isLoading={loading} disabled={!joinCode.trim()}>
+                <Button
+                  onClick={handleJoinGame}
+                  isLoading={loading}
+                  disabled={!joinCode.trim()}
+                  data-testid="play-join-game"
+                >
                   Join Game
                 </Button>
               </CardContent>
