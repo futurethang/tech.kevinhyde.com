@@ -30,6 +30,7 @@ export function Teams() {
     if (!teamId) {
       loadTeams();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [teamId]);
 
   // If teamId is present, show the team editor

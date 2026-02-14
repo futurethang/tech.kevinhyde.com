@@ -3,7 +3,7 @@
  */
 
 import { Button } from '../common';
-import type { Game, GameState } from '../../types';
+import type { Game, GameState, TeamStats } from '../../types';
 
 interface BoxScoreProps {
   game: Game;
@@ -15,16 +15,23 @@ interface BoxScoreProps {
 }
 
 export function BoxScore({ game, gameState, playLog, didWin, onPlayAgain, onGoHome }: BoxScoreProps) {
-  // Calculate inning-by-inning scores (simplified for now - would need real inning data)
-  const inningScores = {
-    visitor: Array(9).fill(0),
-    home: Array(9).fill(0),
-  };
-
-  // Calculate basic game statistics from play log
-  const gameStats = calculateGameStats(playLog);
   const homeTeamName = game.homeTeam?.name || 'Home Team';
   const visitorTeamName = game.visitorTeam?.name || 'Visitor Team';
+
+  // Use canonical stats when available, fall back to approximation
+  const gameStats = gameState.teamStats
+    ? { visitor: gameState.teamStats[0], home: gameState.teamStats[1] }
+    : calculateGameStats(playLog);
+
+  // Use canonical inning scores when available
+  const hasCanonicalScores = gameState.inningScores && gameState.inningScores.length > 0;
+
+  const getInningScore = (inning: number, teamIdx: 0 | 1): number => {
+    if (hasCanonicalScores && gameState.inningScores && inning <= gameState.inningScores.length) {
+      return gameState.inningScores[inning - 1][teamIdx];
+    }
+    return 0;
+  };
 
   return (
     <div className="space-y-6">
@@ -62,9 +69,10 @@ export function BoxScore({ game, gameState, playLog, didWin, onPlayAgain, onGoHo
                 <td className="py-2 truncate pr-2" title={visitorTeamName}>
                   {visitorTeamName.length > 8 ? visitorTeamName.substring(0, 8) + '...' : visitorTeamName}
                 </td>
-                {inningScores.visitor.map((score, i) => (
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => (
                   <td key={i} className="text-center py-2">
-                    {i < gameState.inning || (i === gameState.inning && !gameState.isTopOfInning) ? score : '·'}
+                    {i <= gameState.inning || (i === gameState.inning && !gameState.isTopOfInning)
+                      ? getInningScore(i, 0) : '·'}
                   </td>
                 ))}
                 <td className="text-center py-2 border-l border-gray-700 font-bold">{gameState.scores[0]}</td>
@@ -75,9 +83,9 @@ export function BoxScore({ game, gameState, playLog, didWin, onPlayAgain, onGoHo
                 <td className="py-2 truncate pr-2" title={homeTeamName}>
                   {homeTeamName.length > 8 ? homeTeamName.substring(0, 8) + '...' : homeTeamName}
                 </td>
-                {inningScores.home.map((score, i) => (
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => (
                   <td key={i} className="text-center py-2">
-                    {i < gameState.inning ? score : '·'}
+                    {i < gameState.inning ? getInningScore(i, 1) : '·'}
                   </td>
                 ))}
                 <td className="text-center py-2 border-l border-gray-700 font-bold">{gameState.scores[1]}</td>
@@ -114,7 +122,7 @@ export function BoxScore({ game, gameState, playLog, didWin, onPlayAgain, onGoHo
               </div>
             </div>
           </div>
-          
+
           <div>
             <h4 className="text-gray-400 font-bold mb-2">{homeTeamName}</h4>
             <div className="space-y-1">
@@ -172,18 +180,19 @@ export function BoxScore({ game, gameState, playLog, didWin, onPlayAgain, onGoHo
   );
 }
 
-// Helper function to calculate game statistics from play log
-function calculateGameStats(playLog: Array<{ outcome: string; runsScored: number }>) {
+// Fallback: approximate game statistics from play log when canonical stats unavailable
+function calculateGameStats(playLog: Array<{ outcome: string; runsScored: number }>): {
+  visitor: TeamStats;
+  home: TeamStats;
+} {
   const stats = {
     visitor: { hits: 0, homeRuns: 0, strikeouts: 0, walks: 0 },
     home: { hits: 0, homeRuns: 0, strikeouts: 0, walks: 0 },
   };
 
-  // Since we don't track which team made each play, we'll distribute evenly
-  // In a real implementation, this would track the actual team for each play
   playLog.forEach((play, index) => {
-    const team = index % 2 === 0 ? 'visitor' : 'home'; // Alternate teams as approximation
-    
+    const team = index % 2 === 0 ? 'visitor' : 'home';
+
     switch (play.outcome) {
       case 'homeRun':
         stats[team].hits++;

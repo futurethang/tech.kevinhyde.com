@@ -228,20 +228,18 @@ async function createDefaultTeams(userId: string): Promise<void> {
     // Create Team 1 - All-Stars
     const team1 = await createTeam(userId, 'All-Stars');
     
-    // Roster for Team 1
+    // Roster for Team 1 — all IDs from SAMPLE_PLAYERS in mlb-sync.ts
     const roster1: RosterSlot[] = [
-      // Position players (batting order 1-9)
       { position: 'CF', mlbPlayerId: 545361, battingOrder: 1 },  // Mike Trout
-      { position: '2B', mlbPlayerId: 514888, battingOrder: 2 },  // Jose Altuve  
-      { position: 'RF', mlbPlayerId: 660271, battingOrder: 3 },  // Juan Soto
-      { position: '1B', mlbPlayerId: 592450, battingOrder: 4 },  // Freddie Freeman
-      { position: '3B', mlbPlayerId: 571448, battingOrder: 5 },  // Nolan Arenado
-      { position: 'SS', mlbPlayerId: 666971, battingOrder: 6 },  // Bo Bichette
-      { position: 'LF', mlbPlayerId: 665742, battingOrder: 7 },  // Cody Bellinger
-      { position: 'C', mlbPlayerId: 668939, battingOrder: 8 },   // Willson Contreras
-      { position: 'DH', mlbPlayerId: 605141, battingOrder: 9 },  // Mookie Betts
-      // Pitcher (no batting order)
-      { position: 'SP', mlbPlayerId: 543037, battingOrder: null }, // Gerrit Cole
+      { position: '2B', mlbPlayerId: 519317, battingOrder: 2 },  // Marcus Semien
+      { position: 'RF', mlbPlayerId: 665742, battingOrder: 3 },  // Juan Soto
+      { position: '1B', mlbPlayerId: 605141, battingOrder: 4 },  // Freddie Freeman
+      { position: '3B', mlbPlayerId: 621566, battingOrder: 5 },  // Jose Ramirez
+      { position: 'SS', mlbPlayerId: 665487, battingOrder: 6 },  // Bobby Witt Jr
+      { position: 'LF', mlbPlayerId: 543685, battingOrder: 7 },  // Christian Yelich
+      { position: 'C', mlbPlayerId: 502054, battingOrder: 8 },   // Salvador Perez
+      { position: 'DH', mlbPlayerId: 608369, battingOrder: 9 },  // Mookie Betts
+      { position: 'SP', mlbPlayerId: 622663, battingOrder: null }, // Tarik Skubal
     ];
 
     await updateRoster(team1.id, roster1);
@@ -250,20 +248,18 @@ async function createDefaultTeams(userId: string): Promise<void> {
     // Create Team 2 - Legends
     const team2 = await createTeam(userId, 'Legends');
     
-    // Roster for Team 2 (different players)
+    // Roster for Team 2 — all IDs from SAMPLE_PLAYERS in mlb-sync.ts
     const roster2: RosterSlot[] = [
-      // Position players (batting order 1-9)
-      { position: 'SS', mlbPlayerId: 608070, battingOrder: 1 },  // Trea Turner
-      { position: 'RF', mlbPlayerId: 502671, battingOrder: 2 },  // Alex Bregman  
-      { position: 'CF', mlbPlayerId: 660271, battingOrder: 3 },  // Juan Soto
-      { position: '1B', mlbPlayerId: 519317, battingOrder: 4 },  // Paul Goldschmidt
-      { position: '3B', mlbPlayerId: 592518, battingOrder: 5 },  // Manny Machado
-      { position: 'LF', mlbPlayerId: 592450, battingOrder: 6 },  // Freddie Freeman
-      { position: 'C', mlbPlayerId: 543521, battingOrder: 7 },   // Salvador Perez
-      { position: '2B', mlbPlayerId: 666971, battingOrder: 8 },   // Bo Bichette
-      { position: 'DH', mlbPlayerId: 514888, battingOrder: 9 },  // Jose Altuve
-      // Pitcher (no batting order)
-      { position: 'SP', mlbPlayerId: 605400, battingOrder: null }, // Jacob deGrom
+      { position: 'SS', mlbPlayerId: 665489, battingOrder: 1 },  // Trea Turner
+      { position: 'RF', mlbPlayerId: 592450, battingOrder: 2 },  // Aaron Judge
+      { position: 'CF', mlbPlayerId: 660271, battingOrder: 3 },  // Shohei Ohtani
+      { position: '1B', mlbPlayerId: 660670, battingOrder: 4 },  // Ronald Acuna Jr
+      { position: '3B', mlbPlayerId: 621566, battingOrder: 5 },  // Jose Ramirez
+      { position: 'LF', mlbPlayerId: 605141, battingOrder: 6 },  // Freddie Freeman
+      { position: 'C', mlbPlayerId: 502054, battingOrder: 7 },   // Salvador Perez
+      { position: '2B', mlbPlayerId: 519317, battingOrder: 8 },  // Marcus Semien
+      { position: 'DH', mlbPlayerId: 608369, battingOrder: 9 },  // Mookie Betts
+      { position: 'SP', mlbPlayerId: 594798, battingOrder: null }, // Jacob deGrom
     ];
 
     await updateRoster(team2.id, roster2);

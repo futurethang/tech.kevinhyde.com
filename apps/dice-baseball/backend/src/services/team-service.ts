@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { RosterSlot } from './roster-validation.js';
+import { validateRoster, validateBattingOrder, type RosterSlot } from './roster-validation.js';
 import { teamRepository } from '../repositories/team-repository.js';
 
 export interface Team {
@@ -106,9 +106,11 @@ export async function updateRoster(teamId: string, roster: RosterSlot[], validat
     throw new Error('Team not found');
   }
   
-  // Update roster and check if complete
+  // Update roster and validate completeness using real validation
   team.roster = roster;
-  team.rosterComplete = roster.length === 10; // 9 position players + 1 pitcher
+  const rosterValid = validateRoster(roster);
+  const battingValid = validateBattingOrder(roster);
+  team.rosterComplete = rosterValid.valid && battingValid.valid;
   team.updatedAt = new Date().toISOString();
   
   // Check if team can be active (has complete roster)

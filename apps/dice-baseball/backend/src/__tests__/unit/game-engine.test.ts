@@ -420,11 +420,9 @@ describe('Game Engine', () => {
       };
 
       for (let i = 0; i < 1000; i++) {
-        const diceRoll: [number, number] = [
-          Math.floor(Math.random() * 6) + 1,
-          Math.floor(Math.random() * 6) + 1,
-        ];
-        const outcome = resolveAtBat(avgBatter, elitePitcher, diceRoll);
+        const d1 = (i % 6) + 1;
+        const d2 = (Math.floor(i / 6) % 6) + 1;
+        const outcome = resolveAtBat(avgBatter, elitePitcher, [d1, d2], (i % 1000) / 1000);
         results[outcome]++;
       }
 
@@ -438,11 +436,9 @@ describe('Game Engine', () => {
       const outcomes = new Set<OutcomeType>();
 
       for (let i = 0; i < 5000; i++) {
-        const diceRoll: [number, number] = [
-          Math.floor(Math.random() * 6) + 1,
-          Math.floor(Math.random() * 6) + 1,
-        ];
-        const outcome = resolveAtBat(mockBatter, mockPitcher, diceRoll);
+        const d1 = (i % 6) + 1;
+        const d2 = (Math.floor(i / 6) % 6) + 1;
+        const outcome = resolveAtBat(mockBatter, mockPitcher, [d1, d2], (i % 1000) / 1000);
         outcomes.add(outcome);
 
         if (outcomes.size === 8) break;
@@ -464,9 +460,9 @@ describe('Game Engine', () => {
         flyOut: 0,
       };
 
-      // Roll only 12s (max dice total)
+      // Roll only 12s (max dice total), use deterministic random values
       for (let i = 0; i < 1000; i++) {
-        const outcome = resolveAtBat(mockBatter, mockPitcher, [6, 6]);
+        const outcome = resolveAtBat(mockBatter, mockPitcher, [6, 6], i / 1000);
         goodOutcomes[outcome]++;
       }
 
@@ -495,9 +491,9 @@ describe('Game Engine', () => {
         flyOut: 0,
       };
 
-      // Roll only 2s (min dice total)
+      // Roll only 2s (min dice total), use deterministic random values
       for (let i = 0; i < 1000; i++) {
-        const outcome = resolveAtBat(mockBatter, mockPitcher, [1, 1]);
+        const outcome = resolveAtBat(mockBatter, mockPitcher, [1, 1], i / 1000);
         badOutcomes[outcome]++;
       }
 
@@ -544,12 +540,12 @@ describe('Game Engine', () => {
         flyOut: 0,
       };
 
+      // Use deterministic dice and random values for stable results
       for (let i = 0; i < 10000; i++) {
-        const diceRoll: [number, number] = [
-          Math.floor(Math.random() * 6) + 1,
-          Math.floor(Math.random() * 6) + 1,
-        ];
-        const outcome = resolveAtBat(leagueAvgBatter, leagueAvgPitcher, diceRoll);
+        const d1 = (i % 6) + 1;
+        const d2 = (Math.floor(i / 6) % 6) + 1;
+        const diceRoll: [number, number] = [d1, d2];
+        const outcome = resolveAtBat(leagueAvgBatter, leagueAvgPitcher, diceRoll, (i % 1000) / 1000);
         results[outcome]++;
       }
 
@@ -592,14 +588,15 @@ describe('Game Engine', () => {
       let highOpsPositive = 0;
       let lowOpsPositive = 0;
 
+      // Use deterministic dice and random values
       for (let i = 0; i < 5000; i++) {
-        const diceRoll: [number, number] = [
-          Math.floor(Math.random() * 6) + 1,
-          Math.floor(Math.random() * 6) + 1,
-        ];
+        const d1 = (i % 6) + 1;
+        const d2 = (Math.floor(i / 6) % 6) + 1;
+        const diceRoll: [number, number] = [d1, d2];
+        const rv = (i % 1000) / 1000;
 
-        const highResult = resolveAtBat(highOpsBatter, avgPitcher, diceRoll);
-        const lowResult = resolveAtBat(lowOpsBatter, avgPitcher, diceRoll);
+        const highResult = resolveAtBat(highOpsBatter, avgPitcher, diceRoll, rv);
+        const lowResult = resolveAtBat(lowOpsBatter, avgPitcher, diceRoll, rv);
 
         if (['homeRun', 'triple', 'double', 'single', 'walk'].includes(highResult)) {
           highOpsPositive++;
@@ -638,14 +635,15 @@ describe('Game Engine', () => {
       let aceHitsAllowed = 0;
       let journeymanHitsAllowed = 0;
 
+      // Use deterministic dice and random values
       for (let i = 0; i < 5000; i++) {
-        const diceRoll: [number, number] = [
-          Math.floor(Math.random() * 6) + 1,
-          Math.floor(Math.random() * 6) + 1,
-        ];
+        const d1 = (i % 6) + 1;
+        const d2 = (Math.floor(i / 6) % 6) + 1;
+        const diceRoll: [number, number] = [d1, d2];
+        const rv = (i % 1000) / 1000;
 
-        const aceResult = resolveAtBat(avgBatter, acePitcher, diceRoll);
-        const journeymanResult = resolveAtBat(avgBatter, journeymanPitcher, diceRoll);
+        const aceResult = resolveAtBat(avgBatter, acePitcher, diceRoll, rv);
+        const journeymanResult = resolveAtBat(avgBatter, journeymanPitcher, diceRoll, rv);
 
         if (['homeRun', 'triple', 'double', 'single'].includes(aceResult)) {
           aceHitsAllowed++;

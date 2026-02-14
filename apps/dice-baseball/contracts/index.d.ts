@@ -39,6 +39,13 @@ export interface PlayersQuery {
   maxRbi?: number;
 }
 
+export interface TeamStats {
+  hits: number;
+  homeRuns: number;
+  strikeouts: number;
+  walks: number;
+}
+
 export interface GameState {
   inning: number;
   isTopOfInning: boolean;
@@ -48,6 +55,8 @@ export interface GameState {
   currentBatterIndex: number;
   isGameOver?: boolean;
   winner?: string;
+  inningScores?: Array<[number, number]>;
+  teamStats?: [TeamStats, TeamStats];
 }
 
 export interface SimulationMetadata {

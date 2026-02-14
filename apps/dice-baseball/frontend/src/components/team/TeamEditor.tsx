@@ -51,6 +51,7 @@ export function TeamEditor({ teamId }: TeamEditorProps) {
 
   useEffect(() => {
     loadTeam();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [teamId]);
 
   // Cleanup timeouts on unmount
@@ -84,6 +85,7 @@ export function TeamEditor({ teamId }: TeamEditorProps) {
         clearTimeout(autoSaveTimeoutRef.current);
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [team, hasUnsavedChanges]);
 
   // Warn before leaving with unsaved changes
