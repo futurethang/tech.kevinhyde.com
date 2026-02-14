@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { getSystemName } from '../data/systems';
 
 // Generate a color based on the game title for variety
 function getColorForTitle(title) {
@@ -32,10 +33,10 @@ export function GameCard({ game, onPlay, isFavorite, onToggleFavorite }) {
   <rect fill="url(#bg)" width="200" height="150"/>
   <circle cx="100" cy="65" r="40" fill="${color}" opacity="0.3"/>
   <text fill="${color}" font-size="48" font-family="system-ui, sans-serif" font-weight="bold" text-anchor="middle" x="100" y="82">${initial}</text>
-  <text fill="#4a4a6a" font-size="10" font-family="system-ui, sans-serif" text-anchor="middle" x="100" y="130">GAME GEAR</text>
+  <text fill="#4a4a6a" font-size="10" font-family="system-ui, sans-serif" text-anchor="middle" x="100" y="130">${getSystemName(game.system).toUpperCase()}</text>
 </svg>
 `);
-  }, [game.title]);
+  }, [game.title, game.system]);
 
   const handleImageError = () => {
     setImageError(true);
@@ -64,7 +65,7 @@ export function GameCard({ game, onPlay, isFavorite, onToggleFavorite }) {
           <div className="absolute inset-0 skeleton" />
         )}
         <img
-          src={imageError ? placeholderImage : game.boxartUrl}
+          src={imageError || !game.boxartUrl ? placeholderImage : game.boxartUrl}
           alt={game.title}
           className={`w-full h-full object-cover transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
           onError={handleImageError}
