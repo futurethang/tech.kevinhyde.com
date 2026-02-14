@@ -1,24 +1,59 @@
-# Game Gear Browser
+# Retro Browser
 
-Browse and play classic Sega Game Gear games directly in your browser. This web application provides a polished retro gaming interface powered by EmulatorJS.
+Browse and play classic retro games directly in your browser. This web application provides a polished retro gaming interface powered by EmulatorJS with multi-system support.
 
 ## Features
 
-- **300+ Game Gear titles** from the TOSEC collection
-- **Real-time search** - Filter games instantly as you type
-- **Filters** - By region (US/EU/JP), year, and publisher
-- **Favorites** - Star games you love, persisted to localStorage
-- **Recently Played** - Quick access to your last 10 games
-- **Fullscreen mode** - Immersive gaming experience
-- **Gamepad support** - Native controller support via EmulatorJS
-- **Keyboard controls** - Arrow keys, Z/X for buttons, Enter for Start
+- **300+ Game Gear titles** from the TOSEC collection (more systems coming)
+- **Multi-system architecture** — ready for NES, SNES, Genesis, Game Boy, GBA, N64
+- **Real-time search** — filter games instantly as you type
+- **Filters** — by system, region (US/EU/JP), year, and publisher
+- **Favorites** — star games you love, persisted to localStorage
+- **Recently Played** — quick access to your last 10 games
+- **Fullscreen mode** — immersive gaming experience
+- **Gamepad / Xbox controller support** — native via EmulatorJS Gamepad API
+- **Keyboard controls** — Arrow keys, Z/X for buttons, Enter for Start
+
+## Architecture
+
+```
+Browser App (React)
+  └─ EmulatorJS iframe (public/emulator.html)
+       └─ ROM fetched via CORS proxy
+            └─ Cloudflare Worker (worker/cors-proxy.js)
+                 └─ Internet Archive
+```
+
+ROMs are fetched from Internet Archive through a user-deployed Cloudflare Worker that adds CORS headers. EmulatorJS runs in a sandboxed iframe to avoid conflicts with the React SPA.
+
+## Setup
+
+### 1. Deploy the CORS Proxy
+
+The included Cloudflare Worker (`worker/cors-proxy.js`) proxies ROM requests to archive.org with CORS headers. Deploy it:
+
+```bash
+npx wrangler deploy worker/cors-proxy.js --name retro-browser-proxy
+```
+
+### 2. Configure the App
+
+1. Run the app (`npm run dev`)
+2. Click the gear icon in the header
+3. Paste your Cloudflare Worker URL (e.g., `https://retro-browser-proxy.your-name.workers.dev`)
+4. Click "Test Connection" to verify
+
+### 3. Play!
+
+Browse the library, click a game, and EmulatorJS handles the rest. Xbox controllers work automatically.
 
 ## Tech Stack
 
 - React 18 + Vite
 - Tailwind CSS
-- EmulatorJS (Game Gear core)
+- EmulatorJS (multi-core: segaGG, nes, snes9x, segaMD, gb, gba, n64)
 - Internet Archive for ROM hosting
+- Cloudflare Workers for CORS proxy
 
 ## Controls
 
@@ -30,25 +65,22 @@ Browse and play classic Sega Game Gear games directly in your browser. This web 
 | Start | Enter | Start |
 | Select | Shift | Select |
 
+EmulatorJS also provides an in-emulator settings menu for remapping controls.
+
 ## Development
 
 ```bash
-# Install dependencies
-pnpm install
-
-# Start dev server
-pnpm dev
-
-# Build for production
-pnpm build
+npm install
+npm run dev
+npm run build
 ```
 
 ## Catalog Generation
 
-The game catalog is generated from the TOSEC naming convention. To regenerate:
+The game catalog is generated from the TOSEC naming convention:
 
 ```bash
-pnpm run generate-catalog
+npm run generate-catalog
 ```
 
 ## Data Sources

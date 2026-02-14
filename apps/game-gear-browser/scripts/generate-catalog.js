@@ -442,6 +442,7 @@ function generateKnownGames() {
 
     return {
       id: parsed.slug + '-' + Math.random().toString(36).substr(2, 5),
+      system: 'gamegear',
       title: parsed.title,
       year: parsed.year,
       publisher: parsed.publisher,

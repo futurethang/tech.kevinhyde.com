@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>EmulatorJS Test</title>
+  <style>
+    body { background: #000; margin: 0; }
+    #game { width: 100vw; height: 100vh; }
+  </style>
+</head>
+<body>
+  <div id="game"></div>
+  <script>
+    window.EJS_player = '#game';
+    window.EJS_core = 'segaGG';
+    window.EJS_gameUrl = 'https://retro-browser-proxy.k-p-hyde.workers.dev/?url=' + encodeURIComponent('https://archive.org/download/game-gear-full-set-usa/Sonic The Hedgehog (World) (v1.1).zip');
+    window.EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
+    window.EJS_color = '#e94560';
+    window.EJS_backgroundColor = '#0a0a12';
+  </script>
+  <script src="https://cdn.emulatorjs.org/stable/data/loader.js"></script>
+</body>
+</html>
