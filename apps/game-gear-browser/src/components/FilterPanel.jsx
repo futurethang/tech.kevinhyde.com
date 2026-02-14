@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { SYSTEMS } from '../data/systems';
 
 export function FilterPanel({
   filters,
@@ -13,6 +14,7 @@ export function FilterPanel({
   const [isExpanded, setIsExpanded] = useState(false);
 
   const hasActiveFilters =
+    filters.system !== 'all' ||
     filters.region !== 'all' ||
     filters.publisher !== 'all' ||
     filters.yearStart ||
@@ -20,6 +22,35 @@ export function FilterPanel({
 
   return (
     <div className="bg-gg-blue rounded-lg border border-gg-accent p-4">
+      {/* System tabs - always visible */}
+      {filterOptions.systems.length > 1 && (
+        <div className="flex flex-wrap gap-2 mb-4">
+          <button
+            onClick={() => onFilterChange('system', 'all')}
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+              filters.system === 'all'
+                ? 'bg-gg-highlight text-white'
+                : 'bg-gg-darker text-gray-400 hover:text-white border border-gg-accent'
+            }`}
+          >
+            All Systems
+          </button>
+          {filterOptions.systems.map(sys => (
+            <button
+              key={sys}
+              onClick={() => onFilterChange('system', sys)}
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                filters.system === sys
+                  ? 'bg-gg-highlight text-white'
+                  : 'bg-gg-darker text-gray-400 hover:text-white border border-gg-accent'
+              }`}
+            >
+              {SYSTEMS[sys]?.name || sys}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Header - always visible */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">

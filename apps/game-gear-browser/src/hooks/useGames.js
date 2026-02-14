@@ -1,43 +1,41 @@
 import { useState, useMemo, useCallback } from 'react';
 import gamesData from '../data/games.json';
 
-/**
- * Hook for managing games data with filtering and sorting
- */
 export function useGames() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState({
+    system: 'all',
     region: 'all',
     yearStart: null,
     yearEnd: null,
     publisher: 'all',
   });
-  const [sortBy, setSortBy] = useState('title'); // title, year, publisher
+  const [sortBy, setSortBy] = useState('title');
 
-  // Get unique publishers and regions for filter options
   const filterOptions = useMemo(() => {
     const publishers = new Set();
     const regions = new Set();
     const years = new Set();
+    const systems = new Set();
 
     gamesData.forEach(game => {
       if (game.publisher) publishers.add(game.publisher);
       if (game.region) regions.add(game.region);
       if (game.year) years.add(game.year);
+      if (game.system) systems.add(game.system);
     });
 
     return {
       publishers: Array.from(publishers).sort(),
       regions: Array.from(regions).sort(),
       years: Array.from(years).sort((a, b) => a - b),
+      systems: Array.from(systems).sort(),
     };
   }, []);
 
-  // Filter and sort games
   const filteredGames = useMemo(() => {
     let result = [...gamesData];
 
-    // Search filter
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase().trim();
       result = result.filter(game =>
@@ -46,12 +44,14 @@ export function useGames() {
       );
     }
 
-    // Region filter
+    if (filters.system !== 'all') {
+      result = result.filter(game => game.system === filters.system);
+    }
+
     if (filters.region !== 'all') {
       result = result.filter(game => game.region === filters.region);
     }
 
-    // Year range filter
     if (filters.yearStart) {
       result = result.filter(game => game.year && game.year >= filters.yearStart);
     }
@@ -59,12 +59,10 @@ export function useGames() {
       result = result.filter(game => game.year && game.year <= filters.yearEnd);
     }
 
-    // Publisher filter
     if (filters.publisher !== 'all') {
       result = result.filter(game => game.publisher === filters.publisher);
     }
 
-    // Sort
     result.sort((a, b) => {
       switch (sortBy) {
         case 'year':
@@ -87,6 +85,7 @@ export function useGames() {
   const resetFilters = useCallback(() => {
     setSearchQuery('');
     setFilters({
+      system: 'all',
       region: 'all',
       yearStart: null,
       yearEnd: null,
