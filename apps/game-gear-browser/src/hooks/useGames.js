@@ -6,32 +6,32 @@ export function useGames() {
   const [filters, setFilters] = useState({
     system: 'all',
     region: 'all',
-    yearStart: null,
-    yearEnd: null,
-    publisher: 'all',
   });
   const [sortBy, setSortBy] = useState('title');
 
-  const filterOptions = useMemo(() => {
-    const publishers = new Set();
-    const regions = new Set();
-    const years = new Set();
-    const systems = new Set();
-
+  // Systems are static — derived from all games
+  const systems = useMemo(() => {
+    const set = new Set();
     gamesData.forEach(game => {
-      if (game.publisher) publishers.add(game.publisher);
-      if (game.region) regions.add(game.region);
-      if (game.year) years.add(game.year);
-      if (game.system) systems.add(game.system);
+      if (game.system) set.add(game.system);
     });
-
-    return {
-      publishers: Array.from(publishers).sort(),
-      regions: Array.from(regions).sort(),
-      years: Array.from(years).sort((a, b) => a - b),
-      systems: Array.from(systems).sort(),
-    };
+    return Array.from(set).sort();
   }, []);
+
+  // Regions are context-sensitive — derived from games matching current system filter
+  const regions = useMemo(() => {
+    const set = new Set();
+    gamesData.forEach(game => {
+      if (filters.system !== 'all' && game.system !== filters.system) return;
+      if (game.region) set.add(game.region);
+    });
+    return Array.from(set).sort();
+  }, [filters.system]);
+
+  const filterOptions = useMemo(() => ({
+    systems,
+    regions,
+  }), [systems, regions]);
 
   const filteredGames = useMemo(() => {
     let result = [...gamesData];
@@ -39,8 +39,7 @@ export function useGames() {
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase().trim();
       result = result.filter(game =>
-        game.title.toLowerCase().includes(query) ||
-        (game.publisher && game.publisher.toLowerCase().includes(query))
+        game.title.toLowerCase().includes(query)
       );
     }
 
@@ -52,23 +51,8 @@ export function useGames() {
       result = result.filter(game => game.region === filters.region);
     }
 
-    if (filters.yearStart) {
-      result = result.filter(game => game.year && game.year >= filters.yearStart);
-    }
-    if (filters.yearEnd) {
-      result = result.filter(game => game.year && game.year <= filters.yearEnd);
-    }
-
-    if (filters.publisher !== 'all') {
-      result = result.filter(game => game.publisher === filters.publisher);
-    }
-
     result.sort((a, b) => {
       switch (sortBy) {
-        case 'year':
-          return (a.year || 9999) - (b.year || 9999);
-        case 'publisher':
-          return (a.publisher || 'ZZZ').localeCompare(b.publisher || 'ZZZ');
         case 'title':
         default:
           return a.title.localeCompare(b.title);
@@ -79,7 +63,20 @@ export function useGames() {
   }, [searchQuery, filters, sortBy]);
 
   const updateFilter = useCallback((key, value) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
+    setFilters(prev => {
+      const next = { ...prev, [key]: value };
+      // When switching systems, reset region if it no longer applies
+      if (key === 'system') {
+        const systemGames = value === 'all'
+          ? gamesData
+          : gamesData.filter(g => g.system === value);
+        const availableRegions = new Set(systemGames.map(g => g.region).filter(Boolean));
+        if (prev.region !== 'all' && !availableRegions.has(prev.region)) {
+          next.region = 'all';
+        }
+      }
+      return next;
+    });
   }, []);
 
   const resetFilters = useCallback(() => {
@@ -87,9 +84,6 @@ export function useGames() {
     setFilters({
       system: 'all',
       region: 'all',
-      yearStart: null,
-      yearEnd: null,
-      publisher: 'all',
     });
     setSortBy('title');
   }, []);

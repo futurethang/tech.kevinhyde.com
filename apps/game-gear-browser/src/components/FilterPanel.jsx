@@ -15,10 +15,7 @@ export function FilterPanel({
 
   const hasActiveFilters =
     filters.system !== 'all' ||
-    filters.region !== 'all' ||
-    filters.publisher !== 'all' ||
-    filters.yearStart ||
-    filters.yearEnd;
+    filters.region !== 'all';
 
   return (
     <div className="bg-gg-blue rounded-lg border border-gg-accent p-4">
@@ -86,8 +83,6 @@ export function FilterPanel({
             className="bg-gg-darker border border-gg-accent rounded px-3 py-1.5 text-sm text-white focus:outline-none focus:border-gg-teal"
           >
             <option value="title">Title A-Z</option>
-            <option value="year">Year</option>
-            <option value="publisher">Publisher</option>
           </select>
         </div>
       </div>
@@ -95,7 +90,7 @@ export function FilterPanel({
       {/* Expanded filter options */}
       {isExpanded && (
         <div className="mt-4 pt-4 border-t border-gg-accent">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Region */}
             <div>
               <label className="block text-sm font-medium text-gray-400 mb-1.5">Region</label>
@@ -107,50 +102,6 @@ export function FilterPanel({
                 <option value="all">All Regions</option>
                 {filterOptions.regions.map((region) => (
                   <option key={region} value={region}>{region}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Publisher */}
-            <div>
-              <label className="block text-sm font-medium text-gray-400 mb-1.5">Publisher</label>
-              <select
-                value={filters.publisher}
-                onChange={(e) => onFilterChange('publisher', e.target.value)}
-                className="w-full bg-gg-darker border border-gg-accent rounded px-3 py-2 text-white focus:outline-none focus:border-gg-teal"
-              >
-                <option value="all">All Publishers</option>
-                {filterOptions.publishers.map((publisher) => (
-                  <option key={publisher} value={publisher}>{publisher}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Year Range */}
-            <div>
-              <label className="block text-sm font-medium text-gray-400 mb-1.5">Year From</label>
-              <select
-                value={filters.yearStart || ''}
-                onChange={(e) => onFilterChange('yearStart', e.target.value ? parseInt(e.target.value) : null)}
-                className="w-full bg-gg-darker border border-gg-accent rounded px-3 py-2 text-white focus:outline-none focus:border-gg-teal"
-              >
-                <option value="">Any</option>
-                {filterOptions.years.map((year) => (
-                  <option key={year} value={year}>{year}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-400 mb-1.5">Year To</label>
-              <select
-                value={filters.yearEnd || ''}
-                onChange={(e) => onFilterChange('yearEnd', e.target.value ? parseInt(e.target.value) : null)}
-                className="w-full bg-gg-darker border border-gg-accent rounded px-3 py-2 text-white focus:outline-none focus:border-gg-teal"
-              >
-                <option value="">Any</option>
-                {filterOptions.years.map((year) => (
-                  <option key={year} value={year}>{year}</option>
                 ))}
               </select>
             </div>

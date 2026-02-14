@@ -59,6 +59,15 @@ const EXCLUDE_PATTERNS = [
 // Regions we want, in priority order
 const PREFERRED_REGIONS = ['USA', 'World', 'USA, Europe', 'Europe'];
 
+// Map raw No-Intro regions to normalized short codes
+const REGION_NORMALIZE = {
+  'USA': 'US',
+  'World': 'World',
+  'USA, Europe': 'US',
+  'Europe': 'EU',
+  'Europe, Hong Kong': 'EU',
+};
+
 function parseNoIntro(filename) {
   const nameWithoutExt = filename.replace(/\.zip$/i, '');
 
@@ -193,7 +202,7 @@ async function main() {
       title: parsed.title,
       year: null,
       publisher: null,
-      region: parsed.region || 'US',
+      region: REGION_NORMALIZE[parsed.region] || 'US',
       language: parsed.language,
       flags: [],
       filename,
