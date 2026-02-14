@@ -1,6 +1,18 @@
 export const SYSTEMS = {
-  gamegear:  { name: 'Game Gear',        core: 'segaGG',  extensions: ['.gg'] },
-  nes:       { name: 'NES',              core: 'nes',     extensions: ['.nes'] },
+  gamegear: {
+    name: 'Game Gear',
+    core: 'segaGG',
+    extensions: ['.gg'],
+    archiveId: 'game-gear-full-set-usa',
+    thumbnailRepo: 'Sega_-_Game_Gear',
+  },
+  nes: {
+    name: 'NES',
+    core: 'nes',
+    extensions: ['.nes'],
+    archiveId: 'ef_nintendo_entertainment_-system_-no-intro_2024-04-23',
+    thumbnailRepo: 'Nintendo_-_Nintendo_Entertainment_System',
+  },
   snes:      { name: 'SNES',             core: 'snes9x',  extensions: ['.smc', '.sfc'] },
   genesis:   { name: 'Genesis',          core: 'segaMD',  extensions: ['.md', '.gen'] },
   gb:        { name: 'Game Boy',         core: 'gb',      extensions: ['.gb'] },

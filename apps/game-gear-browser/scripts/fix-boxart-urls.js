@@ -5,6 +5,11 @@
  *
  * Fetches the real file listing from the libretro-thumbnails GitHub repo and
  * uses fuzzy matching to find the best boxart for each game.
+ *
+ * Usage:
+ *   node scripts/fix-boxart-urls.js                # Process all systems
+ *   node scripts/fix-boxart-urls.js --system nes    # Process only NES games
+ *   node scripts/fix-boxart-urls.js --system gamegear
  */
 
 import fs from 'fs';
@@ -13,8 +18,12 @@ import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const GAMES_PATH = path.join(__dirname, '../src/data/games.json');
-const THUMBNAIL_REPO = 'libretro-thumbnails/Sega_-_Game_Gear';
-const THUMBNAIL_BASE = `https://raw.githubusercontent.com/${THUMBNAIL_REPO}/master/Named_Boxarts/`;
+
+// System thumbnail repos (must match systems.js)
+const SYSTEM_THUMBNAIL_REPOS = {
+  gamegear: 'Sega_-_Game_Gear',
+  nes: 'Nintendo_-_Nintendo_Entertainment_System',
+};
 
 function normalizeForMatch(name) {
   return name
@@ -64,9 +73,9 @@ function scoreMatch(gameTitle, boxartFile) {
   return score - penalty;
 }
 
-async function fetchBoxartList() {
-  console.log('Fetching boxart file list from GitHub...');
-  const url = `https://api.github.com/repos/${THUMBNAIL_REPO}/git/trees/master?recursive=1`;
+async function fetchBoxartList(thumbnailRepo) {
+  console.log(`Fetching boxart file list from libretro-thumbnails/${thumbnailRepo}...`);
+  const url = `https://api.github.com/repos/libretro-thumbnails/${thumbnailRepo}/git/trees/master?recursive=1`;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`GitHub API error: ${res.status}`);
   const data = await res.json();
@@ -137,12 +146,17 @@ function findBestMatch(game, boxartFiles, boxartByBase) {
   return null;
 }
 
-async function main() {
-  const games = JSON.parse(fs.readFileSync(GAMES_PATH, 'utf-8'));
-  const boxartList = await fetchBoxartList();
+async function processSystem(systemId, games) {
+  const thumbnailRepo = SYSTEM_THUMBNAIL_REPOS[systemId];
+  if (!thumbnailRepo) {
+    console.log(`No thumbnail repo configured for system: ${systemId}, skipping.`);
+    return { exact: 0, fuzzy: 0, noMatch: 0, unmatched: [] };
+  }
 
-  console.log(`Found ${boxartList.length} boxart files`);
-  console.log(`Processing ${games.length} games...`);
+  const thumbnailBase = `https://raw.githubusercontent.com/libretro-thumbnails/${thumbnailRepo}/master/Named_Boxarts/`;
+  const boxartList = await fetchBoxartList(thumbnailRepo);
+
+  console.log(`  Found ${boxartList.length} boxart files for ${systemId}`);
 
   // Build lookup structures
   const boxartFiles = new Set(boxartList);
@@ -159,27 +173,57 @@ async function main() {
   for (const game of games) {
     const match = findBestMatch(game, boxartFiles, boxartByBase);
     if (match) {
-      game.boxartUrl = THUMBNAIL_BASE + encodeURIComponent(match.file).replace(/%20/g, '%20');
+      game.boxartUrl = thumbnailBase + encodeURIComponent(match.file).replace(/%20/g, '%20');
       if (match.strategy === 'exact') exact++;
       else fuzzy++;
     } else {
-      // Keep a blank/null boxartUrl so the placeholder renders
       game.boxartUrl = null;
       noMatch++;
       unmatched.push(game.title);
     }
   }
 
-  fs.writeFileSync(GAMES_PATH, JSON.stringify(games, null, 2) + '\n');
+  return { exact, fuzzy, noMatch, unmatched };
+}
 
-  console.log(`\nResults:`);
-  console.log(`  Exact match: ${exact}`);
-  console.log(`  Fuzzy match: ${fuzzy}`);
-  console.log(`  No match:    ${noMatch}`);
-  if (unmatched.length > 0) {
-    console.log(`\nUnmatched games:`);
-    unmatched.forEach(t => console.log(`  - ${t}`));
+async function main() {
+  // Parse --system argument
+  const args = process.argv.slice(2);
+  const systemIdx = args.indexOf('--system');
+  const targetSystem = systemIdx !== -1 ? args[systemIdx + 1] : null;
+
+  const allGames = JSON.parse(fs.readFileSync(GAMES_PATH, 'utf-8'));
+
+  // Determine which systems to process
+  const systemsInData = [...new Set(allGames.map(g => g.system))];
+  const systemsToProcess = targetSystem ? [targetSystem] : systemsInData;
+
+  console.log(`Processing systems: ${systemsToProcess.join(', ')}`);
+  console.log(`Total games in catalog: ${allGames.length}\n`);
+
+  for (const systemId of systemsToProcess) {
+    const systemGames = allGames.filter(g => g.system === systemId);
+    if (systemGames.length === 0) {
+      console.log(`No games found for system: ${systemId}`);
+      continue;
+    }
+
+    console.log(`\nProcessing ${systemId} (${systemGames.length} games)...`);
+    const result = await processSystem(systemId, systemGames);
+
+    console.log(`  Results:`);
+    console.log(`    Exact match: ${result.exact}`);
+    console.log(`    Fuzzy match: ${result.fuzzy}`);
+    console.log(`    No match:    ${result.noMatch}`);
+    if (result.unmatched.length > 0 && result.unmatched.length <= 20) {
+      console.log(`    Unmatched:`);
+      result.unmatched.forEach(t => console.log(`      - ${t}`));
+    } else if (result.unmatched.length > 20) {
+      console.log(`    Unmatched: ${result.unmatched.length} games (too many to list)`);
+    }
   }
+
+  fs.writeFileSync(GAMES_PATH, JSON.stringify(allGames, null, 2) + '\n');
   console.log(`\nUpdated ${GAMES_PATH}`);
 }
 

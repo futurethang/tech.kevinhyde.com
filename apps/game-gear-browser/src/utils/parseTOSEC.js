@@ -46,7 +46,7 @@ const FLAG_DESCRIPTIONS = {
  */
 export function parseTOSEC(filename) {
   // Remove extension
-  const nameWithoutExt = filename.replace(/\.(zip|gg|sms)$/i, '');
+  const nameWithoutExt = filename.replace(/\.(zip|gg|sms|nes)$/i, '');
 
   // Extract flags in square brackets [b], [a], [tr en], etc.
   const flagsMatch = nameWithoutExt.match(/\[([^\]]+)\]/g) || [];
