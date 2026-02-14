@@ -108,9 +108,17 @@ async function fetchWithAuth<T>(
 
   if (!response.ok) {
     const error: ApiError = await response.json().catch(() => ({
-      error: 'unknown_error',
+      error: response.status === 401 ? 'unauthorized' : 'unknown_error',
       message: `HTTP ${response.status}`,
     }));
+
+    // Token expired or invalid — clear auth and redirect
+    if (response.status === 401) {
+      const { useAuthStore } = await import('../stores/authStore');
+      useAuthStore.getState().logout();
+      window.location.href = '/apps/dice-baseball/auth';
+    }
+
     throw error;
   }
 

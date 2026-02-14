@@ -4,6 +4,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { Button, Card, CardContent, Input, ConfirmDialog } from '../common';
 import { Header, PageContainer } from '../layout/Header';
 import { BattingOrderEditor } from './BattingOrderEditor';
@@ -288,12 +289,11 @@ export function TeamEditor({ teamId }: TeamEditorProps) {
       setHasUnsavedChanges(false);
       
       console.log('Complete roster saved successfully!');
-      alert('Team saved successfully! Ready to play!');
+      toast.success('Team saved successfully! Ready to play!');
     } catch (error) {
       console.error('Failed to save complete roster:', error);
       
-      // TODO: Show user-friendly error message/toast
-      alert('Failed to save roster. Please try again.');
+      toast.error('Failed to save roster. Please try again.');
     } finally {
       setSavingPosition(null);
     }
@@ -354,7 +354,7 @@ export function TeamEditor({ teamId }: TeamEditorProps) {
     if (!team) return;
     
     if (!team.rosterComplete) {
-      alert('Please fill all 10 positions before saving.');
+      toast.error('Please fill all 10 positions before saving.');
       return;
     }
     
@@ -377,7 +377,7 @@ export function TeamEditor({ teamId }: TeamEditorProps) {
       console.log('Draft saved successfully!');
     } catch (error) {
       console.error('Failed to save draft:', error);
-      alert('Failed to save draft. Please try again.');
+      toast.error('Failed to save draft. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -417,7 +417,7 @@ export function TeamEditor({ teamId }: TeamEditorProps) {
       console.log('Batting order saved successfully!');
     } catch (error) {
       console.error('Failed to save batting order:', error);
-      alert('Failed to save batting order. Please try again.');
+      toast.error('Failed to save batting order. Please try again.');
     }
   }
 

@@ -5,6 +5,7 @@
 import { useEffect, useState } from 'react';
 import type { DragEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { Button, Card, CardContent, Input, ConfirmDialog } from '../components/common';
 import { Header, PageContainer } from '../components/layout/Header';
 import { TeamEditor } from '../components/team';
@@ -80,7 +81,7 @@ export function Teams() {
       deleteTeamFromStore(teamId);
     } catch (error) {
       console.error('Failed to delete team:', error);
-      alert('Failed to delete team. Please try again.');
+      toast.error('Failed to delete team. Please try again.');
     }
   }
 
@@ -103,7 +104,7 @@ export function Teams() {
       navigate(`/teams/${newTeam.id}`);
     } catch (error) {
       console.error('Failed to duplicate team:', error);
-      alert('Failed to duplicate team. Please try again.');
+      toast.error('Failed to duplicate team. Please try again.');
     } finally {
       setDuplicating(false);
     }
