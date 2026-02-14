@@ -2,7 +2,7 @@
  * Game Page - Live multiplayer game view
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button, Card, CardContent } from '../components/common';
 import { Header, PageContainer } from '../components/layout/Header';
@@ -11,7 +11,10 @@ import { useGameStore } from '../stores/gameStore';
 import { useAuthStore } from '../stores/authStore';
 import * as api from '../services/api';
 import * as socket from '../services/socket';
-import type { GameState, PlayResult, OutcomeType, MLBPlayer, Game } from '../types';
+import type { RollResultEvent } from '@dice-baseball/contracts';
+import type { GameState, OutcomeType, MLBPlayer, Game } from '../types';
+
+const RESULT_HOLD_MS = 450;
 
 export function Game() {
   const { gameId } = useParams<{ gameId: string }>();
@@ -42,20 +45,33 @@ export function Game() {
   const [error, setError] = useState('');
   const [gameEnded, setGameEnded] = useState(false);
   const [winner, setWinner] = useState<string | null>(null);
+  const [isResultHold, setIsResultHold] = useState(false);
+  const holdTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
     let cleanup: (() => void) | undefined;
 
     if (gameId) {
       initializeGame(gameId).then((cleanupFn) => {
+        if (cancelled) {
+          cleanupFn?.();
+          return;
+        }
         cleanup = cleanupFn;
       });
     }
 
     return () => {
+      cancelled = true;
       if (cleanup) {
         cleanup();
       }
+      if (holdTimeoutRef.current) {
+        clearTimeout(holdTimeoutRef.current);
+      }
+      setIsResultHold(false);
+      socket.clearHandlers();
       socket.disconnect();
       resetGame();
     };
@@ -105,6 +121,9 @@ export function Game() {
       await socket.connect();
       setConnected(true);
 
+      // Ensure stale handlers from previous mounts are removed.
+      socket.clearHandlers();
+
       // Register event handlers with cleanup
       const unsubscribeGameState = socket.on<{ state: GameState }>('game:state', ({ state }) => {
         console.log('📊 Game state update received:', {
@@ -113,17 +132,25 @@ export function Game() {
           outs: state.outs
         });
         setGameState(state);
-        // Turn will be updated by useEffect when gameState changes
-        setRolling(false); // Ensure rolling is reset on state updates
       });
 
-      const unsubscribeRollResult = socket.on<PlayResult>('game:roll-result', (result) => {
+      const unsubscribeRollResult = socket.on<RollResultEvent>('game:roll-result', (result) => {
         console.log('🎲 Roll result received:', result.outcome, result.description);
         setLastRoll(result.diceRolls, result.outcome);
         setGameState(result.newState);
         addPlayLogEntry(result);
-        // Turn will be updated by useEffect when gameState changes
-        setRolling(false); // Reset rolling state after result
+
+        // Keep the result state visible briefly before next action affordance.
+        setIsResultHold(true);
+        if (holdTimeoutRef.current) {
+          clearTimeout(holdTimeoutRef.current);
+        }
+        holdTimeoutRef.current = setTimeout(() => {
+          setIsResultHold(false);
+          setRolling(false);
+          holdTimeoutRef.current = null;
+        }, RESULT_HOLD_MS);
+
         setError(''); // Clear any previous errors
       });
 
@@ -211,7 +238,7 @@ export function Game() {
   }
 
   function handleRoll() {
-    if (!gameId || !isMyTurn || isRolling) return;
+    if (!gameId || !isMyTurn || isRolling || isResultHold) return;
     setRolling(true);
     socket.rollDice(gameId);
   }
@@ -276,7 +303,11 @@ export function Game() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-900" data-testid="game-screen">
+    <div
+      className="min-h-[100dvh] flex flex-col bg-gray-900"
+      style={{ overflowAnchor: 'none' }}
+      data-testid="game-screen"
+    >
       {/* Header with inning info */}
       <Header
         title={`${gameState?.isTopOfInning ? '⬆ TOP' : '⬇ BOT'} ${gameState?.inning || 1}`}
@@ -293,7 +324,7 @@ export function Game() {
         {gameState?.isTopOfInning ? 'top' : 'bottom'}-{gameState?.inning || 1}
       </div>
 
-      <div className="flex-1 flex flex-col p-4 max-w-lg mx-auto w-full">
+      <div className="flex-1 p-4 max-w-lg mx-auto w-full pb-6">
         {/* Opponent Info */}
         {currentGame && user && (
           <OpponentInfo game={currentGame} currentUser={user} />
@@ -302,6 +333,7 @@ export function Game() {
         {/* Scoreboard */}
         <Scoreboard 
           state={gameState} 
+          playLog={playLog}
           homeName={currentGame?.homeTeam?.name || 'Home'}
           visitorName={currentGame?.visitorTeam?.name || 'Visitor'}
         />
@@ -316,29 +348,42 @@ export function Game() {
         <Diamond bases={gameState?.bases || [false, false, false]} />
 
         {/* Outs */}
-        <div className="text-center my-4">
-          <span className="text-gray-400">OUTS: </span>
-          <span className="text-xl">
-            {[0, 1, 2].map((i) => (
-              <span key={i} className={i < (gameState?.outs || 0) ? 'text-red-500' : 'text-gray-600'}>
-                ●
-              </span>
+        <div className="my-4 text-center">
+          <span className="text-gray-400 text-sm mr-2">OUTS</span>
+          <span className="inline-flex items-center gap-1 align-middle">
+            {[0, 1].map((i) => (
+              <span
+                key={i}
+                className={`inline-flex h-3 w-3 rounded-full border ${
+                  i < Math.min(gameState?.outs || 0, 2)
+                    ? 'border-red-500 bg-red-500'
+                    : 'border-gray-600 bg-transparent'
+                }`}
+              />
             ))}
           </span>
         </div>
+
+        <TurnStatus
+          isMyTurn={isMyTurn}
+          isRolling={isRolling}
+          isResultHold={isResultHold}
+          opponentConnected={opponentConnected}
+        />
 
         {/* Roll Button */}
         <RollButton
           isMyTurn={isMyTurn}
           isRolling={isRolling}
+          isResultHold={isResultHold}
           lastRoll={lastRoll}
           lastOutcome={lastOutcome}
           onRoll={handleRoll}
         />
 
         {/* Play Log */}
-        <div className="mt-4 flex-1 overflow-auto" data-testid="game-play-log">
-          {playLog.slice(0, 5).map((entry) => (
+        <div className="mt-4" style={{ overflowAnchor: 'none' }} data-testid="game-play-log">
+          {playLog.slice(-3).reverse().map((entry) => (
             <div
               key={entry.id}
               className={`text-sm py-2 border-b border-gray-800 ${getOutcomeColor(entry.outcome)}`}
@@ -372,13 +417,27 @@ export function Game() {
     
     if (!battingTeam?.roster) return null;
     
-    // Get the current batter by batting order
+    // Get the current batter by batting order.
+    // Support both 1-based and 0-based battingOrder values.
     const lineupSpot = (gameState.currentBatterIndex % 9) + 1;
     const currentBatterSlot = battingTeam.roster.find(
-      slot => slot.battingOrder === lineupSpot && slot.position !== 'SP'
+      slot =>
+        slot.position !== 'SP' &&
+        (slot.battingOrder === lineupSpot || slot.battingOrder === lineupSpot - 1)
     );
-    
-    return currentBatterSlot?.player || null;
+    const fallbackBatterSlot = battingTeam.roster.find(slot => slot.position !== 'SP');
+
+    const resolvedBatter = toDisplayPlayer(
+      currentBatterSlot || fallbackBatterSlot,
+      currentBatterSlot?.position || fallbackBatterSlot?.position || 'DH'
+    );
+
+    if (resolvedBatter) {
+      return resolvedBatter;
+    }
+
+    const latest = playLog[playLog.length - 1];
+    return playerFromPlayLog(latest?.batterName, 'DH', latest?.batterStats);
   }
 
   function getCurrentPitcher(): MLBPlayer | null {
@@ -390,16 +449,24 @@ export function Game() {
     
     if (!pitchingTeam?.roster) return null;
     
-    // Find the starting pitcher
+    // Find the starting pitcher, then fall back to any available roster slot.
     const pitcherSlot = pitchingTeam.roster.find(slot => slot.position === 'SP');
-    
-    return pitcherSlot?.player || null;
+    const fallbackPitcherSlot = pitchingTeam.roster[0];
+
+    const resolvedPitcher = toDisplayPlayer(pitcherSlot || fallbackPitcherSlot, 'SP');
+    if (resolvedPitcher) {
+      return resolvedPitcher;
+    }
+
+    const latest = playLog[playLog.length - 1];
+    return playerFromPlayLog(latest?.pitcherName, 'SP', undefined, latest?.pitcherStats);
   }
 }
 
 // Scoreboard Component
-function Scoreboard({ state, homeName, visitorName }: { 
+function Scoreboard({ state, playLog, homeName, visitorName }: { 
   state: GameState | null;
+  playLog: Array<{ inning: number; isTopOfInning: boolean; runsScored: number }>;
   homeName: string;
   visitorName: string;
 }) {
@@ -408,6 +475,35 @@ function Scoreboard({ state, homeName, visitorName }: {
   // Truncate team names to fit in scoreboard
   const truncateName = (name: string, maxLength: number = 10) => {
     return name.length > maxLength ? name.substring(0, maxLength - 1) + '.' : name;
+  };
+
+  const sumRunsForHalf = (inning: number, isTopOfInning: boolean) =>
+    playLog
+      .filter((entry) => entry.inning === inning && entry.isTopOfInning === isTopOfInning)
+      .reduce((sum: number, entry) => sum + entry.runsScored, 0);
+
+  const isHalfComplete = (inning: number, isTopOfInning: boolean) => {
+    if (inning < state.inning) {
+      return true;
+    }
+    if (inning > state.inning) {
+      return false;
+    }
+    return isTopOfInning && !state.isTopOfInning;
+  };
+
+  const renderHalfCell = (inning: number, isTopOfInning: boolean) => {
+    const runs = sumRunsForHalf(inning, isTopOfInning);
+    if (isHalfComplete(inning, isTopOfInning)) {
+      return String(runs);
+    }
+    if (runs > 0) {
+      return String(runs);
+    }
+    if (inning === state.inning && state.isTopOfInning === isTopOfInning) {
+      return isTopOfInning ? '▲' : '▼';
+    }
+    return '·';
   };
 
   return (
@@ -435,9 +531,7 @@ function Scoreboard({ state, homeName, visitorName }: {
               </td>
               {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => (
                 <td key={i} className="text-center text-white">
-                  {i < state.inning || (i === state.inning && !state.isTopOfInning)
-                    ? '0' // Placeholder - would need actual inning scores
-                    : '·'}
+                  {renderHalfCell(i, true)}
                 </td>
               ))}
               <td className="text-center font-bold text-white border-l border-gray-700">
@@ -450,7 +544,7 @@ function Scoreboard({ state, homeName, visitorName }: {
               </td>
               {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => (
                 <td key={i} className="text-center text-white">
-                  {i < state.inning ? '0' : '·'}
+                  {renderHalfCell(i, false)}
                 </td>
               ))}
               <td className="text-center font-bold text-white border-l border-gray-700">
@@ -518,12 +612,14 @@ function Diamond({ bases }: { bases: [boolean, boolean, boolean] }) {
 function RollButton({
   isMyTurn,
   isRolling,
+  isResultHold,
   lastRoll,
   lastOutcome,
   onRoll,
 }: {
   isMyTurn: boolean;
   isRolling: boolean;
+  isResultHold: boolean;
   lastRoll: [number, number] | null;
   lastOutcome: OutcomeType | null;
   onRoll: () => void;
@@ -554,10 +650,10 @@ function RollButton({
         size="lg"
         className={`w-full ${lastOutcome ? outcomeColors[lastOutcome] : ''}`}
         onClick={onRoll}
-        disabled={!isMyTurn}
+        disabled={!isMyTurn || isResultHold}
         data-testid="game-roll-button"
       >
-        🎲 {lastRoll[0]} + {lastRoll[1]} = {lastRoll[0] + lastRoll[1]}
+        {isResultHold ? 'Resolving play...' : `🎲 ${lastRoll[0]} + ${lastRoll[1]} = ${lastRoll[0] + lastRoll[1]}`}
       </Button>
     );
   }
@@ -567,11 +663,63 @@ function RollButton({
       size="lg"
       className={`w-full ${isMyTurn ? 'animate-pulse' : ''}`}
       onClick={onRoll}
-      disabled={!isMyTurn}
+      disabled={!isMyTurn || isResultHold}
       data-testid="game-roll-button"
     >
       {isMyTurn ? '🎲 ROLL DICE' : 'Waiting for opponent...'}
     </Button>
+  );
+}
+
+function TurnStatus({
+  isMyTurn,
+  isRolling,
+  isResultHold,
+  opponentConnected,
+}: {
+  isMyTurn: boolean;
+  isRolling: boolean;
+  isResultHold: boolean;
+  opponentConnected: boolean;
+}) {
+  const status = !opponentConnected
+    ? {
+        className: 'bg-yellow-500/10 border-yellow-500 text-yellow-300',
+        label: 'Connection issue',
+        detail: 'Opponent disconnected. Waiting for reconnection...',
+      }
+    : isRolling
+      ? {
+          className: 'bg-blue-500/10 border-blue-500 text-blue-300',
+          label: 'Play in progress',
+          detail: 'Rolling the dice...',
+        }
+      : isResultHold
+        ? {
+            className: 'bg-indigo-500/10 border-indigo-500 text-indigo-300',
+            label: 'Play resolved',
+            detail: 'Updating the field...',
+          }
+      : isMyTurn
+        ? {
+            className: 'bg-green-500/10 border-green-500 text-green-300',
+            label: 'Your turn',
+            detail: 'Roll the dice to continue the inning.',
+          }
+        : {
+            className: 'bg-gray-700/40 border-gray-600 text-gray-300',
+            label: "Opponent's turn",
+            detail: 'Waiting for opponent action.',
+          };
+
+  return (
+    <div
+      className={`mb-3 rounded-lg border px-3 py-2 ${status.className}`}
+      data-testid="game-turn-status"
+    >
+      <p className="text-sm font-semibold">{status.label}</p>
+      <p className="text-xs opacity-90">{status.detail}</p>
+    </div>
   );
 }
 
@@ -587,4 +735,157 @@ function getOutcomeColor(outcome: OutcomeType): string {
     flyOut: 'text-red-400',
   };
   return colors[outcome] || 'text-gray-400';
+}
+
+function toDisplayPlayer(slot: unknown, fallbackPosition: string): MLBPlayer | null {
+  if (!slot || typeof slot !== 'object') return null;
+
+  const typedSlot = slot as {
+    mlbPlayerId?: number;
+    player?: MLBPlayer;
+    playerData?: {
+      name?: string;
+      battingStats?: {
+        avg?: number;
+        obp?: number;
+        slg?: number;
+        ops?: number;
+        bb?: number;
+        so?: number;
+        ab?: number;
+      };
+      pitchingStats?: {
+        era?: number;
+        whip?: number;
+        kPer9?: number;
+        bbPer9?: number;
+        hrPer9?: number;
+      };
+    };
+  };
+
+  if (typedSlot.player) {
+    return typedSlot.player;
+  }
+
+  const playerData = typedSlot.playerData;
+  const name = playerData?.name;
+  if (!name) return null;
+
+  const [firstName = '', ...rest] = name.split(' ');
+  const lastName = rest.join(' ');
+
+  return {
+    mlbId: typedSlot.mlbPlayerId || 0,
+    fullName: name,
+    firstName,
+    lastName: lastName || firstName,
+    primaryPosition: fallbackPosition,
+    currentTeam: null,
+    currentTeamId: null,
+    isActive: true,
+    lastUpdated: new Date().toISOString(),
+    battingStats: playerData?.battingStats
+      ? {
+          gamesPlayed: 0,
+          atBats: playerData.battingStats.ab ?? 0,
+          runs: 0,
+          hits: 0,
+          doubles: 0,
+          triples: 0,
+          homeRuns: 0,
+          rbi: 0,
+          walks: playerData.battingStats.bb ?? 0,
+          strikeouts: playerData.battingStats.so ?? 0,
+          stolenBases: 0,
+          avg: playerData.battingStats.avg ?? 0,
+          obp: playerData.battingStats.obp ?? 0,
+          slg: playerData.battingStats.slg ?? 0,
+          ops: playerData.battingStats.ops ?? 0,
+        }
+      : null,
+    pitchingStats: playerData?.pitchingStats
+      ? {
+          gamesPlayed: 0,
+          gamesStarted: 0,
+          wins: 0,
+          losses: 0,
+          era: playerData.pitchingStats.era ?? 0,
+          inningsPitched: 0,
+          hits: 0,
+          runs: 0,
+          earnedRuns: 0,
+          homeRuns: 0,
+          walks: 0,
+          strikeouts: 0,
+          whip: playerData.pitchingStats.whip ?? 0,
+          kPer9: playerData.pitchingStats.kPer9 ?? 0,
+          bbPer9: playerData.pitchingStats.bbPer9 ?? 0,
+          hrPer9: playerData.pitchingStats.hrPer9 ?? 0,
+        }
+      : null,
+  };
+}
+
+function playerFromPlayLog(
+  name: string | undefined,
+  position: string,
+  batting?: { avg: number; ops: number },
+  pitching?: { era: number; whip: number; kPer9: number }
+): MLBPlayer | null {
+  if (!name) return null;
+
+  const [firstName = '', ...rest] = name.split(' ');
+  const lastName = rest.join(' ');
+
+  return {
+    mlbId: 0,
+    fullName: name,
+    firstName,
+    lastName: lastName || firstName,
+    primaryPosition: position,
+    currentTeam: null,
+    currentTeamId: null,
+    isActive: true,
+    lastUpdated: new Date().toISOString(),
+    battingStats: batting
+      ? {
+          gamesPlayed: 0,
+          atBats: 0,
+          runs: 0,
+          hits: 0,
+          doubles: 0,
+          triples: 0,
+          homeRuns: 0,
+          rbi: 0,
+          walks: 0,
+          strikeouts: 0,
+          stolenBases: 0,
+          avg: batting.avg,
+          obp: 0,
+          slg: 0,
+          ops: batting.ops,
+        }
+      : null,
+    pitchingStats: pitching
+      ? {
+          gamesPlayed: 0,
+          gamesStarted: 0,
+          wins: 0,
+          losses: 0,
+          era: pitching.era,
+          inningsPitched: 0,
+          hits: 0,
+          runs: 0,
+          earnedRuns: 0,
+          homeRuns: 0,
+          walks: 0,
+          strikeouts: 0,
+          whip: pitching.whip,
+          kPer9: pitching.kPer9,
+          bbPer9: 0,
+          hrPer9: 0,
+        }
+      : null,
+  };
 }

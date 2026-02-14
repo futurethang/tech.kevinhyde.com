@@ -144,9 +144,27 @@ export interface PlayResult {
   runsScored: number;
   outsRecorded: number;
   description: string;
+  playContext: {
+    inning: number;
+    isTopOfInning: boolean;
+  };
   batter: { mlbId: number; name: string };
+  batterStats?: {
+    avg: number;
+    ops: number;
+  };
   pitcher: { mlbId: number; name: string };
+  pitcherStats?: {
+    era: number;
+    whip: number;
+    kPer9: number;
+  };
   newState: GameState;
+  sim?: {
+    mode: 'default' | 'deterministic';
+    seed?: string;
+    turnIndex: number;
+  };
 }
 
 // ============================================

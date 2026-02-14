@@ -16,15 +16,17 @@ export function MatchupDisplay({ batter, pitcher }: MatchupDisplayProps) {
         <div className="flex justify-center gap-8 items-center">
           <div className="text-center">
             <div className="w-16 h-16 rounded-full bg-gray-700 flex items-center justify-center text-2xl mb-2">
-              ⚾
+              {batter ? getPlayerInitials(batter.fullName) : '⚾'}
             </div>
+            {batter && <p className="text-sm text-white font-semibold truncate max-w-28">{batter.fullName}</p>}
             <p className="text-sm text-gray-400">AT BAT</p>
           </div>
           <span className="text-gray-500 text-xl">VS</span>
           <div className="text-center">
             <div className="w-16 h-16 rounded-full bg-gray-700 flex items-center justify-center text-2xl mb-2">
-              ⚾
+              {pitcher ? getPlayerInitials(pitcher.fullName) : '⚾'}
             </div>
+            {pitcher && <p className="text-sm text-white font-semibold truncate max-w-28">{pitcher.fullName}</p>}
             <p className="text-sm text-gray-400">PITCHING</p>
           </div>
         </div>

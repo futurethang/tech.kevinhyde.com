@@ -78,8 +78,21 @@ export interface MoveResult {
   runsScored: number;
   outsRecorded: number;
   description: string;
+  playContext: {
+    inning: number;
+    isTopOfInning: boolean;
+  };
   batter: { mlbId: number; name: string };
+  batterStats: {
+    avg: number;
+    ops: number;
+  };
   pitcher: { mlbId: number; name: string };
+  pitcherStats: {
+    era: number;
+    whip: number;
+    kPer9: number;
+  };
   newState: GameState;
   sim: SimulationSnapshot;
 }
@@ -330,6 +343,10 @@ export async function recordMove(
   }
 
   const state = game.state;
+  const playContext = {
+    inning: state.inning,
+    isTopOfInning: state.isTopOfInning,
+  };
 
   // Determine current batter and pitcher based on inning half
   // Top of inning: visitor batting, home pitching
@@ -342,24 +359,51 @@ export async function recordMove(
   const batter = battingTeam?.roster.find((r) => r.battingOrder === batterIndex + 1);
   const pitcher = pitchingTeam?.roster.find((r) => r.position === 'SP');
 
-  // Default stats if player data not loaded
-  const batterStats: BatterStats = batter?.playerData?.battingStats || {
-    avg: 0.250,
-    obp: 0.320,
-    slg: 0.400,
-    ops: 0.720,
-    bb: 50,
-    so: 100,
-    ab: 500,
-  };
+  const fallbackBatterData =
+    !batter?.playerData && batter?.mlbPlayerId ? await getPlayerById(batter.mlbPlayerId) : null;
+  const fallbackPitcherData =
+    !pitcher?.playerData && pitcher?.mlbPlayerId ? await getPlayerById(pitcher.mlbPlayerId) : null;
 
-  const pitcherStats: PitcherStats = pitcher?.playerData?.pitchingStats || {
-    era: 4.0,
-    whip: 1.3,
-    kPer9: 8.5,
-    bbPer9: 3.0,
-    hrPer9: 1.2,
-  };
+  // Default stats if player data not loaded
+  const batterStats: BatterStats = batter?.playerData?.battingStats
+    || (fallbackBatterData?.battingStats
+      ? {
+          avg: fallbackBatterData.battingStats.avg,
+          obp: fallbackBatterData.battingStats.obp,
+          slg: fallbackBatterData.battingStats.slg,
+          ops: fallbackBatterData.battingStats.ops,
+          bb: fallbackBatterData.battingStats.walks,
+          so: fallbackBatterData.battingStats.strikeouts,
+          ab: fallbackBatterData.battingStats.atBats,
+        }
+      : undefined)
+    || {
+      avg: 0.250,
+      obp: 0.320,
+      slg: 0.400,
+      ops: 0.720,
+      bb: 50,
+      so: 100,
+      ab: 500,
+    };
+
+  const pitcherStats: PitcherStats = pitcher?.playerData?.pitchingStats
+    || (fallbackPitcherData?.pitchingStats
+      ? {
+          era: fallbackPitcherData.pitchingStats.era,
+          whip: fallbackPitcherData.pitchingStats.whip,
+          kPer9: fallbackPitcherData.pitchingStats.kPer9,
+          bbPer9: fallbackPitcherData.pitchingStats.bbPer9,
+          hrPer9: fallbackPitcherData.pitchingStats.hrPer9,
+        }
+      : undefined)
+    || {
+      era: 4.0,
+      whip: 1.3,
+      kPer9: 8.5,
+      bbPer9: 3.0,
+      hrPer9: 1.2,
+    };
 
   // Resolve the at-bat
   const outcome = resolveAtBat(batterStats, pitcherStats, input.diceRolls, nextRandom(game));
@@ -392,8 +436,8 @@ export async function recordMove(
   handleInningLogic(newState);
 
   // Generate description
-  const batterName = batter?.playerData?.name || 'Batter';
-  const pitcherName = pitcher?.playerData?.name || 'Pitcher';
+  const batterName = batter?.playerData?.name || fallbackBatterData?.fullName || `Batter #${batter?.mlbPlayerId ?? '?'}`;
+  const pitcherName = pitcher?.playerData?.name || fallbackPitcherData?.fullName || `Pitcher #${pitcher?.mlbPlayerId ?? '?'}`;
   const description = generateDescription(outcome, batterName, pitcherName, runsScored, nextRandom(game));
 
   // Save the move
@@ -425,13 +469,23 @@ export async function recordMove(
     runsScored,
     outsRecorded,
     description,
+    playContext,
     batter: {
       mlbId: batter?.mlbPlayerId || 0,
       name: batterName,
     },
+    batterStats: {
+      avg: batterStats.avg,
+      ops: batterStats.ops,
+    },
     pitcher: {
       mlbId: pitcher?.mlbPlayerId || 0,
       name: pitcherName,
+    },
+    pitcherStats: {
+      era: pitcherStats.era,
+      whip: pitcherStats.whip,
+      kPer9: pitcherStats.kPer9,
     },
     newState,
     sim: simulationSnapshot(game),

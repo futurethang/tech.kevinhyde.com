@@ -65,3 +65,16 @@ E2E_GAME_SIM_SEED=ux-pass-001 npm run e2e:matrix:headed
 ---
 
 Start by running `npm run e2e:autoplay`, summarize top 5 UX friction points, then propose a prioritized patch plan.
+
+## Current Status (2026-02-14)
+Recent UX iterations already touched:
+- turn-state clarity near roll CTA,
+- half-inning scoreboard rendering,
+- play-log dedupe and commentary format,
+- matchup fallback wiring for batter/pitcher names,
+- compact outs indicator and mobile layout/scroll behavior.
+
+Before new visual polish work, re-validate these known pain points in headed mode:
+1. viewport jumps down to play-log on new entries,
+2. pitcher/batter name reliability in matchup card during active play,
+3. mobile full-page flow (no trapped/static-height panel effect).

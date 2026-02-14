@@ -81,3 +81,22 @@ Core automation hooks are exposed via `data-testid`:
 - `game-opponent-disconnected`
 - `game-inning-label`
 - `game-over-screen`
+
+## UX Polishing Log (2026-02-14)
+Implemented in the current cycle:
+- Added explicit turn-state messaging (`game-turn-status`) near the roll CTA.
+- Replaced fake inning placeholders with computed half-inning run cells (from play log context).
+- Fixed duplicate play-log entries by deduping on deterministic turn index when available.
+- Added name-first play commentary plus color-commentary suffix (`Booth: ...`).
+- Added short roll-result hold (`Resolving play...`) to improve readability pacing.
+- Matchup fallback logic now uses multiple sources:
+  - roster `player`,
+  - roster `playerData`,
+  - latest roll-result batter/pitcher names and stat snapshots.
+- Outs indicator restored to compact mobile form (2-dot fill UI).
+- Game screen layout updated toward full-viewport flow (`100dvh`) with reduced nested scrolling.
+
+Known risk / re-validation checklist:
+- Verify no viewport jump to play-log on new entries across iOS Safari and Android Chrome.
+- Verify pitcher name/stat reliability from first visible roll event onward in all game states.
+- Confirm no static-height/trapped-scroll behavior on small-screen PWA installs.

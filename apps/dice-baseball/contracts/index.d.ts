@@ -62,8 +62,21 @@ export interface RollResultEvent {
   runsScored: number;
   outsRecorded: number;
   description: string;
+  playContext: {
+    inning: number;
+    isTopOfInning: boolean;
+  };
   batter: { mlbId: number; name: string };
+  batterStats: {
+    avg: number;
+    ops: number;
+  };
   pitcher: { mlbId: number; name: string };
+  pitcherStats: {
+    era: number;
+    whip: number;
+    kPer9: number;
+  };
   newState: GameState;
   sim?: SimulationMetadata;
 }

@@ -246,8 +246,11 @@ export function createSocketServer(httpServer: HttpServer): SocketServer {
           runsScored: result.runsScored,
           outsRecorded: result.outsRecorded,
           description: result.description,
+          playContext: result.playContext,
           batter: result.batter,
+          batterStats: result.batterStats,
           pitcher: result.pitcher,
+          pitcherStats: result.pitcherStats,
           newState: result.newState,
           sim: result.sim,
         });
