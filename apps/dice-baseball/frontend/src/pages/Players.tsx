@@ -88,6 +88,7 @@ export function Players() {
 
   useEffect(() => {
     loadPlayers(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedSearch, position, team, league, sort, statsFilters]);
 
   async function loadPlayers(reset = false) {

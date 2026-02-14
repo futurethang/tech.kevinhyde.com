@@ -6,7 +6,7 @@
  */
 
 import { resolveAtBat, advanceRunners, handleInningLogic, generateDescription } from './game-engine.js';
-import type { GameState, BatterStats, PitcherStats, OutcomeType } from './game-engine.js';
+import type { GameState, BatterStats, PitcherStats, OutcomeType, TeamStats } from './game-engine.js';
 import * as teamService from './team-service.js';
 import { getPlayerById } from './mlb-sync.js';
 import { gameRepository } from '../repositories/game-repository.js';
@@ -182,6 +182,10 @@ function generateGameId(): string {
 /**
  * Create initial game state
  */
+function emptyTeamStats(): TeamStats {
+  return { hits: 0, homeRuns: 0, strikeouts: 0, walks: 0 };
+}
+
 function createInitialState(): GameState {
   return {
     inning: 1,
@@ -190,6 +194,8 @@ function createInitialState(): GameState {
     scores: [0, 0],
     bases: [false, false, false],
     currentBatterIndex: 0,
+    inningScores: [[0, 0]],
+    teamStats: [emptyTeamStats(), emptyTeamStats()],
   };
 }
 
@@ -430,6 +436,37 @@ export async function recordMove(
     } else {
       newState.scores = [state.scores[0], state.scores[1] + runsScored];
     }
+  }
+
+  // Track canonical stats
+  const teamIdx = state.isTopOfInning ? 0 : 1;
+
+  // Ensure inningScores array is large enough
+  if (!newState.inningScores) {
+    newState.inningScores = [];
+  }
+  while (newState.inningScores.length < state.inning) {
+    newState.inningScores.push([0, 0]);
+  }
+  if (runsScored > 0) {
+    const inningEntry = newState.inningScores[state.inning - 1];
+    inningEntry[teamIdx] += runsScored;
+  }
+
+  // Ensure teamStats exist
+  if (!newState.teamStats) {
+    newState.teamStats = [emptyTeamStats(), emptyTeamStats()];
+  }
+  const stats = newState.teamStats[teamIdx];
+  if (outcome === 'homeRun') {
+    stats.hits++;
+    stats.homeRuns++;
+  } else if (outcome === 'single' || outcome === 'double' || outcome === 'triple') {
+    stats.hits++;
+  } else if (outcome === 'walk') {
+    stats.walks++;
+  } else if (outcome === 'strikeout') {
+    stats.strikeouts++;
   }
 
   // Handle inning transitions

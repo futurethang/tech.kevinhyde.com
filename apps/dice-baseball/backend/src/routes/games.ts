@@ -10,6 +10,7 @@ import type { AuthenticatedRequest, ApiError } from '../types/index.js';
 import { authMiddleware } from '../middleware/auth.js';
 import * as gameService from '../services/game-service.js';
 import * as teamService from '../services/team-service.js';
+import { validateRoster, validateBattingOrder } from '../services/roster-validation.js';
 
 const router = Router();
 
@@ -55,11 +56,27 @@ router.post('/', async (req: AuthenticatedRequest, res: Response) => {
       });
     }
 
-    // Verify roster is complete
-    if (!team.rosterComplete) {
+    // Verify roster is valid (real validation, not just flag)
+    if (!team.roster || team.roster.length === 0) {
       return res.status(400).json({
         error: 'validation_error',
         message: 'Team roster must be complete to start a game',
+      });
+    }
+
+    const rosterResult = validateRoster(team.roster);
+    if (!rosterResult.valid) {
+      return res.status(400).json({
+        error: 'validation_error',
+        message: `Team roster must be complete to start a game: ${rosterResult.errors[0]}`,
+      });
+    }
+
+    const battingResult = validateBattingOrder(team.roster);
+    if (!battingResult.valid) {
+      return res.status(400).json({
+        error: 'validation_error',
+        message: `Team roster must be complete to start a game: ${battingResult.errors[0]}`,
       });
     }
 
@@ -130,11 +147,27 @@ router.post('/join', async (req: AuthenticatedRequest, res: Response) => {
       });
     }
 
-    // Verify roster is complete
-    if (!team.rosterComplete) {
+    // Verify roster is valid (real validation, not just flag)
+    if (!team.roster || team.roster.length === 0) {
       return res.status(400).json({
         error: 'validation_error',
         message: 'Team roster must be complete to join a game',
+      });
+    }
+
+    const rosterResult = validateRoster(team.roster);
+    if (!rosterResult.valid) {
+      return res.status(400).json({
+        error: 'validation_error',
+        message: `Team roster must be complete to join a game: ${rosterResult.errors[0]}`,
+      });
+    }
+
+    const battingResult = validateBattingOrder(team.roster);
+    if (!battingResult.valid) {
+      return res.status(400).json({
+        error: 'validation_error',
+        message: `Team roster must be complete to join a game: ${battingResult.errors[0]}`,
       });
     }
 
@@ -235,85 +268,6 @@ router.get('/:id', async (req: AuthenticatedRequest, res: Response) => {
     return res.status(500).json({
       error: 'internal_error',
       message: 'Failed to get game',
-    } as ApiError);
-  }
-});
-
-/**
- * POST /api/games/:id/move
- * Record a move (at-bat) in the game
- */
-router.post('/:id/move', async (req: AuthenticatedRequest, res: Response) => {
-  try {
-    const userId = req.user?.id;
-    if (!userId) {
-      return res.status(401).json({ error: 'unauthorized', message: 'Not authenticated' });
-    }
-
-    const { id } = req.params;
-    const { diceRolls } = req.body;
-
-    // Validate dice rolls
-    if (
-      !diceRolls ||
-      !Array.isArray(diceRolls) ||
-      diceRolls.length !== 2 ||
-      !diceRolls.every((d: unknown) => typeof d === 'number' && d >= 1 && d <= 6)
-    ) {
-      return res.status(400).json({
-        error: 'validation_error',
-        message: 'Invalid dice rolls - must be array of 2 numbers between 1-6',
-      });
-    }
-
-    const game = await gameService.getGameById(id);
-
-    if (!game) {
-      return res.status(404).json({
-        error: 'not_found',
-        message: 'Game not found',
-      });
-    }
-
-    // Verify user is a participant
-    if (game.homeUserId !== userId && game.visitorUserId !== userId) {
-      return res.status(403).json({
-        error: 'forbidden',
-        message: 'You are not a participant in this game',
-      });
-    }
-
-    // Verify game is active
-    if (game.status !== 'active') {
-      return res.status(400).json({
-        error: 'game_not_active',
-        message: 'Game is not active',
-      });
-    }
-
-    // Record the move
-    const result = await gameService.recordMove(id, userId, { diceRolls: diceRolls as [number, number] });
-
-    // Save game state
-    await gameService.saveGameState(id, result.newState);
-
-    // Check if game is over
-    if (result.newState.isGameOver) {
-      // Determine winner
-      const [visitorScore, homeScore] = result.newState.scores;
-      const winnerId = homeScore > visitorScore ? game.homeUserId : game.visitorUserId!;
-      await gameService.endGame(id, winnerId);
-    }
-
-    return res.status(200).json({
-      ...result,
-      sim: result.sim,
-    });
-  } catch (error) {
-    console.error('Error recording move:', error);
-    return res.status(500).json({
-      error: 'internal_error',
-      message: 'Failed to record move',
     } as ApiError);
   }
 });
