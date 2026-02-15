@@ -1,5 +1,6 @@
 /**
  * ConfirmDialog - Reusable confirmation dialog component
+ * v5 Topps design: ink-bleed title, token colors
  */
 
 import { Button, Card, CardContent } from './';
@@ -29,22 +30,18 @@ export function ConfirmDialog({
 }: ConfirmDialogProps) {
   if (!isOpen) return null;
 
-  const confirmButtonClass = confirmVariant === 'danger' 
-    ? 'bg-red-600 hover:bg-red-700 focus:ring-red-500' 
-    : '';
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
       <Card className="w-full max-w-md">
         <CardContent>
-          <h3 className="text-lg font-display font-bold text-white mb-3">
+          <h3 className="text-lg font-display font-bold text-[var(--color-text-primary)] mb-3 ink-bleed">
             {title}
           </h3>
-          
-          <p className="text-gray-300 mb-6 leading-relaxed">
+
+          <p className="text-[var(--color-text-secondary)] mb-6 leading-relaxed">
             {message}
           </p>
-          
+
           <div className="flex gap-3">
             <Button
               variant="ghost"
@@ -55,7 +52,8 @@ export function ConfirmDialog({
               {cancelText}
             </Button>
             <Button
-              className={`flex-1 ${confirmButtonClass}`}
+              variant={confirmVariant}
+              className="flex-1"
               onClick={onConfirm}
               disabled={disabled}
             >

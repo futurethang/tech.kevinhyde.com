@@ -1,5 +1,6 @@
 /**
  * Players Page - MLB Player Database browser
+ * v5 Topps design: navy palette, gold accents, token colors
  */
 
 import { useState, useEffect } from 'react';
@@ -35,15 +36,14 @@ interface StatsFilters {
 }
 
 const SORT_OPTIONS = [
-  { value: 'ops', label: 'OPS (High→Low)' },
-  { value: 'avg', label: 'AVG (High→Low)' },
-  { value: 'hr', label: 'HR (High→Low)' },
-  { value: 'rbi', label: 'RBI (High→Low)' },
-  { value: 'era', label: 'ERA (Low→High)' },
-  { value: 'name', label: 'Name (A→Z)' },
+  { value: 'ops', label: 'OPS (High\u2192Low)' },
+  { value: 'avg', label: 'AVG (High\u2192Low)' },
+  { value: 'hr', label: 'HR (High\u2192Low)' },
+  { value: 'rbi', label: 'RBI (High\u2192Low)' },
+  { value: 'era', label: 'ERA (Low\u2192High)' },
+  { value: 'name', label: 'Name (A\u2192Z)' },
 ];
 
-// Debounced search hook
 function useDebounced<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
 
@@ -83,7 +83,6 @@ export function Players() {
     maxRbi: '',
   });
 
-  // Debounce search to avoid hitting API on every keystroke
   const debouncedSearch = useDebounced(search, 300);
 
   useEffect(() => {
@@ -105,7 +104,6 @@ export function Players() {
         sort,
         page: currentPage,
         limit: 20,
-        // Include stats filters
         minOps: statsFilters.minOps ? parseFloat(statsFilters.minOps) : undefined,
         maxOps: statsFilters.maxOps ? parseFloat(statsFilters.maxOps) : undefined,
         minEra: statsFilters.minEra ? parseFloat(statsFilters.minEra) : undefined,
@@ -121,13 +119,11 @@ export function Players() {
       } else {
         setPlayers((prev) => [...prev, ...(result.players || [])]);
       }
-      // Calculate hasMore: if we got a full page and there are more records
       const currentOffset = result.offset || 0;
       const currentLimit = result.limit || 20;
       setHasMore(result.players && result.players.length === currentLimit && result.total > currentOffset + currentLimit);
     } catch (error) {
       console.error('Failed to load players:', error);
-      // On error, ensure players is always an array
       if (reset) {
         setPlayers([]);
       }
@@ -168,13 +164,12 @@ export function Players() {
   }
 
   function handleAddToTeam(player: MLBPlayer) {
-    // TODO: Integrate with team management when that's available
     console.log('Add to team:', player.fullName);
     setSelectedPlayer(null);
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-900">
+    <div className="min-h-screen flex flex-col bg-[var(--color-surface-page)]">
       <Header title="PLAYER DATABASE" showBack />
 
       <PageContainer>
@@ -186,7 +181,7 @@ export function Players() {
             onChange={(e) => setSearch(e.target.value)}
             onClear={() => setSearch('')}
           />
-          
+
           {/* Main Filters Row */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             <Select
@@ -219,21 +214,21 @@ export function Players() {
               className="text-sm"
             >
               {showFilters ? 'Hide' : 'Show'} Stats Filters
-              <svg 
+              <svg
                 className={`ml-2 h-4 w-4 transition-transform ${showFilters ? 'rotate-180' : ''}`}
-                fill="none" 
-                stroke="currentColor" 
+                fill="none"
+                stroke="currentColor"
                 viewBox="0 0 24 24"
               >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </Button>
-            
+
             {(search || position || team || league || Object.values(statsFilters).some(v => v)) && (
               <Button
                 variant="ghost"
                 onClick={clearAllFilters}
-                className="text-sm text-red-400 hover:text-red-300"
+                className="text-sm text-[var(--color-card-red)]"
               >
                 Clear All Filters
               </Button>
@@ -245,14 +240,14 @@ export function Players() {
             <Card>
               <CardContent>
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-white mb-3">Stats Range Filters</h3>
-                  
+                  <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-3 font-display ink-bleed">Stats Range Filters</h3>
+
                   {/* Batting Stats */}
                   <div>
-                    <h4 className="text-sm font-medium text-gray-400 mb-2 uppercase tracking-wide">Batting Stats</h4>
+                    <h4 className="text-sm font-medium text-[var(--color-text-muted)] mb-2 uppercase tracking-wide font-display">Batting Stats</h4>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                       <div>
-                        <label className="block text-xs text-gray-500 mb-1">Min OPS</label>
+                        <label className="block text-xs text-[var(--color-text-dim)] mb-1">Min OPS</label>
                         <Input
                           type="number"
                           step="0.001"
@@ -263,7 +258,7 @@ export function Players() {
                         />
                       </div>
                       <div>
-                        <label className="block text-xs text-gray-500 mb-1">Max OPS</label>
+                        <label className="block text-xs text-[var(--color-text-dim)] mb-1">Max OPS</label>
                         <Input
                           type="number"
                           step="0.001"
@@ -274,7 +269,7 @@ export function Players() {
                         />
                       </div>
                       <div>
-                        <label className="block text-xs text-gray-500 mb-1">Min HR</label>
+                        <label className="block text-xs text-[var(--color-text-dim)] mb-1">Min HR</label>
                         <Input
                           type="number"
                           placeholder="20"
@@ -284,7 +279,7 @@ export function Players() {
                         />
                       </div>
                       <div>
-                        <label className="block text-xs text-gray-500 mb-1">Min RBI</label>
+                        <label className="block text-xs text-[var(--color-text-dim)] mb-1">Min RBI</label>
                         <Input
                           type="number"
                           placeholder="80"
@@ -298,10 +293,10 @@ export function Players() {
 
                   {/* Pitching Stats */}
                   <div>
-                    <h4 className="text-sm font-medium text-gray-400 mb-2 uppercase tracking-wide">Pitching Stats</h4>
+                    <h4 className="text-sm font-medium text-[var(--color-text-muted)] mb-2 uppercase tracking-wide font-display">Pitching Stats</h4>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                       <div>
-                        <label className="block text-xs text-gray-500 mb-1">Min ERA</label>
+                        <label className="block text-xs text-[var(--color-text-dim)] mb-1">Min ERA</label>
                         <Input
                           type="number"
                           step="0.01"
@@ -312,7 +307,7 @@ export function Players() {
                         />
                       </div>
                       <div>
-                        <label className="block text-xs text-gray-500 mb-1">Max ERA</label>
+                        <label className="block text-xs text-[var(--color-text-dim)] mb-1">Max ERA</label>
                         <Input
                           type="number"
                           step="0.01"
@@ -339,9 +334,9 @@ export function Players() {
           </div>
         ) : !players || players.length === 0 ? (
           <div className="text-center py-12">
-            <div className="text-5xl mb-4">🔍</div>
-            <p className="text-gray-400 mb-2">No players found</p>
-            <p className="text-sm text-gray-500">
+            <div className="text-5xl mb-4">&#x1F50D;</div>
+            <p className="text-[var(--color-text-muted)] mb-2">No players found</p>
+            <p className="text-sm text-[var(--color-text-dim)]">
               Try a different search or adjust your filters.
             </p>
           </div>
@@ -355,7 +350,7 @@ export function Players() {
               <button
                 onClick={loadMore}
                 disabled={loading}
-                className="w-full py-3 text-center text-gray-400 hover:text-white transition-colors"
+                className="w-full py-3 text-center text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors"
               >
                 {loading ? 'Loading...' : 'Load more...'}
               </button>
@@ -363,7 +358,7 @@ export function Players() {
           </div>
         )}
       </PageContainer>
-      
+
       {/* Player Detail Modal */}
       <PlayerDetailModal
         player={selectedPlayer}
@@ -383,12 +378,11 @@ function PlayerCard({ player, onClick }: { player: MLBPlayer; onClick: () => voi
     <Card variant="interactive" className="cursor-pointer" onClick={onClick}>
       <CardContent>
         <div className="flex items-start gap-3">
-          {/* Photo placeholder - use actual photo if available */}
           {player.photoUrl ? (
-            <img 
-              src={player.photoUrl} 
+            <img
+              src={player.photoUrl}
               alt={player.fullName}
-              className="w-16 h-16 rounded-lg object-cover"
+              className="w-16 h-16 object-cover"
               onError={(e) => {
                 e.currentTarget.style.display = 'none';
                 const nextEl = e.currentTarget.nextElementSibling as HTMLElement | null;
@@ -396,42 +390,42 @@ function PlayerCard({ player, onClick }: { player: MLBPlayer; onClick: () => voi
               }}
             />
           ) : null}
-          <div className="w-16 h-16 rounded-lg bg-gray-700 flex items-center justify-center text-2xl shrink-0" style={{ display: player.photoUrl ? 'none' : 'flex' }}>
-            ⚾
+          <div className="w-16 h-16 bg-[var(--color-surface-hover)] flex items-center justify-center text-2xl shrink-0" style={{ display: player.photoUrl ? 'none' : 'flex' }}>
+            &#x26BE;
           </div>
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between">
-              <h3 className="font-semibold text-white truncate hover:text-green-400 transition-colors">{player.fullName}</h3>
-              <span className="text-sm font-medium text-green-400 ml-2">{player.primaryPosition}</span>
+              <h3 className="font-semibold text-[var(--color-text-primary)] truncate hover:text-[var(--color-topps-gold)] transition-colors font-display">{player.fullName}</h3>
+              <span className="text-sm font-medium text-[var(--color-topps-gold)] ml-2 font-display">{player.primaryPosition}</span>
             </div>
-            <p className="text-sm text-gray-400">
-              {team ? `${team.city} ${team.name}` : player.currentTeam} • {player.seasonYear || '2024'}
+            <p className="text-sm text-[var(--color-text-muted)]">
+              {team ? `${team.city} ${team.name}` : player.currentTeam} &bull; {player.seasonYear || '2024'}
             </p>
 
             {isPitcher && player.pitchingStats ? (
               <div className="mt-3">
                 <div className="flex gap-4 text-sm">
                   <div>
-                    <span className="text-white font-mono text-lg">
+                    <span className="text-[var(--color-text-primary)] font-mono text-lg">
                       {player.pitchingStats.era.toFixed(2)}
                     </span>
-                    <span className="text-gray-400 ml-1">ERA</span>
+                    <span className="text-[var(--color-text-muted)] ml-1">ERA</span>
                   </div>
                   <div>
-                    <span className="text-white font-mono text-lg">
+                    <span className="text-[var(--color-text-primary)] font-mono text-lg">
                       {player.pitchingStats.whip.toFixed(2)}
                     </span>
-                    <span className="text-gray-400 ml-1">WHIP</span>
+                    <span className="text-[var(--color-text-muted)] ml-1">WHIP</span>
                   </div>
                   <div>
-                    <span className="text-white font-mono text-lg">
+                    <span className="text-[var(--color-text-primary)] font-mono text-lg">
                       {player.pitchingStats.kPer9.toFixed(1)}
                     </span>
-                    <span className="text-gray-400 ml-1">K/9</span>
+                    <span className="text-[var(--color-text-muted)] ml-1">K/9</span>
                   </div>
                 </div>
-                <div className="flex gap-4 mt-2 text-xs text-gray-500">
+                <div className="flex gap-4 mt-2 text-xs text-[var(--color-text-dim)]">
                   <span>{player.pitchingStats.wins}-{player.pitchingStats.losses} W-L</span>
                   <span>{player.pitchingStats.strikeouts} K</span>
                   <span>{player.pitchingStats.inningsPitched.toFixed(1)} IP</span>
@@ -442,25 +436,25 @@ function PlayerCard({ player, onClick }: { player: MLBPlayer; onClick: () => voi
               <div className="mt-3">
                 <div className="flex gap-4 text-sm">
                   <div>
-                    <span className="text-white font-mono text-lg">
+                    <span className="text-[var(--color-text-primary)] font-mono text-lg">
                       {player.battingStats.avg.toFixed(3).substring(1)}
                     </span>
-                    <span className="text-gray-400 ml-1">AVG</span>
+                    <span className="text-[var(--color-text-muted)] ml-1">AVG</span>
                   </div>
                   <div>
-                    <span className="text-white font-mono text-lg">
+                    <span className="text-[var(--color-text-primary)] font-mono text-lg">
                       {player.battingStats.obp.toFixed(3).substring(1)}
                     </span>
-                    <span className="text-gray-400 ml-1">OBP</span>
+                    <span className="text-[var(--color-text-muted)] ml-1">OBP</span>
                   </div>
                   <div>
-                    <span className="text-white font-mono text-lg">
+                    <span className="text-[var(--color-text-primary)] font-mono text-lg">
                       {player.battingStats.ops.toFixed(3)}
                     </span>
-                    <span className="text-gray-400 ml-1">OPS</span>
+                    <span className="text-[var(--color-text-muted)] ml-1">OPS</span>
                   </div>
                 </div>
-                <div className="flex gap-4 mt-2 text-xs text-gray-500">
+                <div className="flex gap-4 mt-2 text-xs text-[var(--color-text-dim)]">
                   <span>{player.battingStats.homeRuns} HR</span>
                   <span>{player.battingStats.rbi} RBI</span>
                   <span>{player.battingStats.runs} R</span>
@@ -481,14 +475,14 @@ function PlayerCardSkeleton() {
     <Card className="animate-pulse">
       <CardContent>
         <div className="flex items-start gap-3">
-          <div className="w-16 h-16 rounded-lg bg-gray-700" />
+          <div className="w-16 h-16 bg-[var(--color-surface-hover)]" />
           <div className="flex-1">
-            <div className="h-5 bg-gray-700 rounded w-3/4 mb-2" />
-            <div className="h-4 bg-gray-700 rounded w-1/2 mb-3" />
+            <div className="h-5 bg-[var(--color-surface-hover)] w-3/4 mb-2" />
+            <div className="h-4 bg-[var(--color-surface-hover)] w-1/2 mb-3" />
             <div className="flex gap-4">
-              <div className="h-4 bg-gray-700 rounded w-16" />
-              <div className="h-4 bg-gray-700 rounded w-16" />
-              <div className="h-4 bg-gray-700 rounded w-16" />
+              <div className="h-4 bg-[var(--color-surface-hover)] w-16" />
+              <div className="h-4 bg-[var(--color-surface-hover)] w-16" />
+              <div className="h-4 bg-[var(--color-surface-hover)] w-16" />
             </div>
           </div>
         </div>

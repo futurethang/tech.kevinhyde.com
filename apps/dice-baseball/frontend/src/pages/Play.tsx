@@ -1,5 +1,6 @@
 /**
  * Play Page - Create or join a game
+ * v5 Topps design: navy palette, gold accents
  */
 
 import { useState, useEffect, useRef } from 'react';
@@ -22,7 +23,6 @@ export function Play() {
   const pollingIntervalRef = useRef<number | null>(null);
   const pollingTimeoutRef = useRef<number | null>(null);
 
-  // Get only complete teams
   const completeTeams = teams.filter((t) => t.rosterComplete);
 
   useEffect(() => {
@@ -69,7 +69,6 @@ export function Play() {
       const game = await api.createGame(selectedTeamId);
       setCreatedGame(game);
       setShowWaiting(true);
-      // Poll for opponent joining
       pollForOpponent(game.id);
     } catch (err: unknown) {
       const errorObj = err as { message?: string };
@@ -102,7 +101,6 @@ export function Play() {
       }
     }, 2000);
 
-    // Stop polling after 5 minutes
     pollingTimeoutRef.current = setTimeout(() => {
       if (pollingIntervalRef.current) {
         clearInterval(pollingIntervalRef.current);
@@ -145,15 +143,15 @@ export function Play() {
 
   if (showWaiting && createdGame) {
     return (
-      <div className="min-h-screen flex flex-col bg-gray-900">
+      <div className="min-h-screen flex flex-col bg-[var(--color-surface-page)]">
         <Header title="WAITING FOR OPPONENT" showBack />
         <PageContainer className="flex items-center justify-center">
           <Card className="text-center">
             <CardContent>
-              <p className="text-gray-400 mb-4">Share this code with your opponent:</p>
-              <div className="bg-gray-900 rounded-lg py-4 px-6 mb-4">
+              <p className="text-[var(--color-text-muted)] mb-4">Share this code with your opponent:</p>
+              <div className="bg-[var(--color-surface-scoreboard)] py-4 px-6 mb-4">
                 <span
-                  className="text-3xl font-mono font-bold text-white tracking-widest"
+                  className="text-3xl font-mono font-bold text-[var(--color-topps-gold)] tracking-widest"
                   data-testid="play-created-join-code"
                 >
                   {createdGame.joinCode}
@@ -161,11 +159,11 @@ export function Play() {
               </div>
               <div className="flex gap-3 justify-center mb-6">
                 <Button size="sm" variant="secondary" onClick={copyJoinCode}>
-                  📋 Copy Code
+                  Copy Code
                 </Button>
               </div>
-              <div className="flex items-center justify-center gap-2 text-gray-400">
-                <div className="animate-spin h-5 w-5 border-2 border-gray-500 border-t-green-500 rounded-full" />
+              <div className="flex items-center justify-center gap-2 text-[var(--color-text-muted)]">
+                <div className="animate-spin h-5 w-5 border-2 border-[var(--color-text-dim)] border-t-[var(--color-topps-gold)]" />
                 <span>Waiting for opponent...</span>
               </div>
               <Button
@@ -194,15 +192,15 @@ export function Play() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-900">
+    <div className="min-h-screen flex flex-col bg-[var(--color-surface-page)]">
       <Header title="PLAY" showBack />
 
       <PageContainer>
         {completeTeams.length === 0 ? (
           <div className="text-center py-12">
-            <div className="text-5xl mb-4">⚾</div>
-            <p className="text-gray-400 mb-4">No complete teams!</p>
-            <p className="text-sm text-gray-500 mb-6">
+            <div className="text-5xl mb-4">&#x26BE;</div>
+            <p className="text-[var(--color-text-muted)] mb-4">No complete teams!</p>
+            <p className="text-sm text-[var(--color-text-dim)] mb-6">
               You need a team with a full roster to play.
             </p>
             <Button onClick={() => navigate('/teams')}>Build a Team</Button>
@@ -221,7 +219,7 @@ export function Play() {
             </div>
 
             {error && (
-              <div className="mb-4 p-3 bg-red-500/10 border border-red-500 rounded-lg text-red-500 text-sm">
+              <div className="mb-4 p-3 bg-[var(--color-card-red)]/10 border border-[var(--color-card-red)] text-[var(--color-card-red)] text-sm">
                 {error}
               </div>
             )}
@@ -229,9 +227,9 @@ export function Play() {
             {/* Create Game */}
             <Card className="mb-4">
               <CardContent className="text-center py-6">
-                <div className="text-3xl mb-2">🔗</div>
-                <h3 className="text-lg font-semibold text-white mb-2">CREATE GAME</h3>
-                <p className="text-sm text-gray-400 mb-4">
+                <div className="text-3xl mb-2">&#x1F517;</div>
+                <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-2 font-display ink-bleed">CREATE GAME</h3>
+                <p className="text-sm text-[var(--color-text-muted)] mb-4">
                   Get a code to share with a friend
                 </p>
                 <Button onClick={handleCreateGame} isLoading={loading} data-testid="play-create-game">
@@ -243,8 +241,8 @@ export function Play() {
             {/* Join Game */}
             <Card>
               <CardContent className="text-center py-6">
-                <div className="text-3xl mb-2">🎫</div>
-                <h3 className="text-lg font-semibold text-white mb-4">JOIN WITH CODE</h3>
+                <div className="text-3xl mb-2">&#x1F3AB;</div>
+                <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-4 font-display ink-bleed">JOIN WITH CODE</h3>
                 <Input
                   placeholder="Enter 6-character code"
                   value={joinCode}

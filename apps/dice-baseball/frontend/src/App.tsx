@@ -51,13 +51,27 @@ function App() {
   return (
     <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
+      {/* Hidden SVG filters for texture system */}
+      <svg width="0" height="0" style={{ position: 'absolute' }}>
+        <defs>
+          <filter id="paper-noise" x="0%" y="0%" width="100%" height="100%">
+            <feTurbulence
+              type="fractalNoise"
+              baseFrequency="0.65"
+              numOctaves={4}
+              stitchTiles="stitch"
+            />
+            <feColorMatrix type="saturate" values="0" />
+          </filter>
+        </defs>
+      </svg>
       <Toaster
         position="top-center"
         toastOptions={{
           duration: 3000,
-          style: { background: '#1f2937', color: '#f3f4f6' },
-          success: { duration: 3000, style: { borderLeft: '4px solid #22c55e' } },
-          error: { duration: 4000, style: { borderLeft: '4px solid #ef4444' } },
+          style: { background: '#16213e', color: '#e8e0d4', borderRadius: 0 },
+          success: { duration: 3000, style: { borderLeft: '4px solid #4caf50' } },
+          error: { duration: 4000, style: { borderLeft: '4px solid #c62828' } },
         }}
       />
       <BrowserRouter basename="/apps/dice-baseball">
@@ -97,6 +111,16 @@ function App() {
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>
+      {/* Global paper grain overlay */}
+      <div
+        className="fixed inset-0 z-[9999] pointer-events-none"
+        style={{
+          opacity: 0.08,
+          mixBlendMode: 'screen',
+          filter: 'url(#paper-noise)',
+          background: '#a09080',
+        }}
+      />
     </ErrorBoundary>
   );
 }

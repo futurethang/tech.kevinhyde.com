@@ -1,5 +1,6 @@
 /**
- * Card Component - Container with dark theme styling
+ * Card Component - Color-block frame system
+ * v5 Topps design: zero radius, grid gap borders, token colors
  */
 
 import { type ReactNode, type HTMLAttributes } from 'react';
@@ -17,16 +18,6 @@ export function Card({
   children,
   ...props
 }: CardProps) {
-  const baseStyles =
-    'rounded-xl border border-gray-700 shadow-lg';
-
-  const variantStyles = {
-    default: 'bg-gray-800',
-    interactive:
-      'bg-gray-800 hover:bg-gray-750 hover:border-gray-600 cursor-pointer transition-colors duration-200',
-    highlighted: 'bg-gray-800 border-green-500/50',
-  };
-
   const paddingStyles = {
     none: '',
     sm: 'p-3',
@@ -34,12 +25,24 @@ export function Card({
     lg: 'p-6',
   };
 
+  const interactiveClasses = variant === 'interactive'
+    ? 'hover:bg-[var(--color-surface-hover)] cursor-pointer transition-colors duration-200 gloss-surface'
+    : '';
+
+  const highlightedClasses = variant === 'highlighted'
+    ? 'gloss-surface aged-edge'
+    : '';
+
   return (
     <div
-      className={`${baseStyles} ${variantStyles[variant]} ${paddingStyles[padding]} ${className}`}
+      className={`bg-black grid gap-[1px] ${className}`}
       {...props}
     >
-      {children}
+      <div
+        className={`bg-[var(--color-surface-card)] ${paddingStyles[padding]} ${interactiveClasses} ${highlightedClasses}`}
+      >
+        {children}
+      </div>
     </div>
   );
 }
@@ -57,9 +60,9 @@ export function CardHeader({ title, subtitle, action }: CardHeaderProps) {
   return (
     <div className="flex items-start justify-between mb-4">
       <div>
-        <h3 className="text-lg font-display font-semibold text-white">{title}</h3>
+        <h3 className="text-lg font-display font-semibold text-[var(--color-text-primary)] ink-bleed">{title}</h3>
         {subtitle && (
-          <p className="text-sm text-gray-400 mt-0.5">{subtitle}</p>
+          <p className="text-sm text-[var(--color-text-muted)] mt-0.5">{subtitle}</p>
         )}
       </div>
       {action && <div>{action}</div>}
@@ -89,7 +92,7 @@ interface CardFooterProps {
 
 export function CardFooter({ children, className = '' }: CardFooterProps) {
   return (
-    <div className={`mt-4 pt-4 border-t border-gray-700 ${className}`}>
+    <div className={`mt-4 pt-4 border-t border-[var(--color-text-dim)] ${className}`}>
       {children}
     </div>
   );
