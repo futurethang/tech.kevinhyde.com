@@ -1,5 +1,6 @@
 /**
  * Auth Page - Login and Registration
+ * v5 Topps design: navy palette, gold accents
  */
 
 import { useState } from 'react';
@@ -15,7 +16,7 @@ export function Auth() {
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   const [formData, setFormData] = useState({
     email: '',
     username: '',
@@ -35,10 +36,10 @@ export function Auth() {
     setLoading(true);
 
     try {
-      const response = mode === 'login' 
+      const response = mode === 'login'
         ? await login(formData.email, formData.password)
         : await register(formData.email, formData.username, formData.password);
-      
+
       setUser(response.user, response.token);
       navigate('/');
     } catch (err: unknown) {
@@ -52,13 +53,12 @@ export function Auth() {
   const handleQuickLogin = async () => {
     setError(null);
     setLoading(true);
-    
+
     try {
-      // Create a test user with timestamp to avoid conflicts
       const timestamp = Date.now();
       const testEmail = `test${timestamp}@example.com`;
       const testUsername = `Player${timestamp.toString().slice(-5)}`;
-      
+
       const response = await register(testEmail, testUsername, 'password123');
       setUser(response.user, response.token);
       navigate('/');
@@ -70,15 +70,21 @@ export function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-900">
-      <Header title="DICE BASEBALL" />
+    <div className="min-h-screen flex flex-col bg-[var(--color-surface-page)]">
+      <Header title="Dice Baseball" />
 
       <PageContainer>
         <div className="max-w-md mx-auto w-full">
           {/* Logo */}
           <div className="text-center mb-8">
-            <div className="text-6xl mb-4">⚾</div>
-            <h2 className="text-2xl font-display font-bold text-white">
+            <div className="text-6xl mb-4">&#x26BE;</div>
+            <h2
+              className="text-2xl font-bold ink-bleed-heavy"
+              style={{
+                fontFamily: 'var(--font-script)',
+                color: 'var(--color-topps-gold)',
+              }}
+            >
               {mode === 'login' ? 'Welcome Back' : 'Create Account'}
             </h2>
           </div>
@@ -87,7 +93,7 @@ export function Auth() {
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-1">
+                  <label className="block text-sm font-medium text-[var(--color-text-muted)] mb-1">
                     Email
                   </label>
                   <Input
@@ -101,7 +107,7 @@ export function Auth() {
 
                 {mode === 'register' && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-400 mb-1">
+                    <label className="block text-sm font-medium text-[var(--color-text-muted)] mb-1">
                       Username
                     </label>
                     <Input
@@ -115,7 +121,7 @@ export function Auth() {
                 )}
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-1">
+                  <label className="block text-sm font-medium text-[var(--color-text-muted)] mb-1">
                     Password
                   </label>
                   <Input
@@ -128,14 +134,14 @@ export function Auth() {
                 </div>
 
                 {error && (
-                  <div className="bg-red-900/20 border border-red-500/50 text-red-400 p-3 rounded text-sm">
+                  <div className="bg-[var(--color-card-red)]/10 border border-[var(--color-card-red)]/50 text-[var(--color-card-red)] p-3 text-sm">
                     {error}
                   </div>
                 )}
 
-                <Button 
-                  type="submit" 
-                  variant="primary" 
+                <Button
+                  type="submit"
+                  variant="primary"
                   className="w-full"
                   disabled={loading}
                 >
@@ -150,25 +156,25 @@ export function Auth() {
                     setMode(mode === 'login' ? 'register' : 'login');
                     setError(null);
                   }}
-                  className="text-sm text-gray-400 hover:text-white transition-colors"
+                  className="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors"
                 >
-                  {mode === 'login' 
-                    ? "Don't have an account? Sign up" 
+                  {mode === 'login'
+                    ? "Don't have an account? Sign up"
                     : "Already have an account? Sign in"}
                 </button>
               </div>
 
               {/* Development Quick Login */}
               {import.meta.env.DEV && (
-                <div className="mt-6 pt-6 border-t border-gray-700">
+                <div className="mt-6 pt-6 border-t border-[var(--color-text-dim)]">
                   <button
                     type="button"
                     onClick={handleQuickLogin}
                     data-testid="auth-quick-login"
-                    className="w-full py-2 px-4 bg-green-600/20 text-green-400 border border-green-600/50 rounded hover:bg-green-600/30 transition-colors text-sm font-medium"
+                    className="w-full py-2 px-4 bg-[var(--color-stadium-green)]/20 text-[var(--color-stadium-green)] border border-[var(--color-stadium-green)]/50 hover:bg-[var(--color-stadium-green)]/30 transition-colors text-sm font-medium"
                     disabled={loading}
                   >
-                    🚀 Quick Dev Login (Creates Test Account)
+                    Quick Dev Login (Creates Test Account)
                   </button>
                 </div>
               )}

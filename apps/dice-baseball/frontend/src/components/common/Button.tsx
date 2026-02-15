@@ -1,11 +1,12 @@
 /**
- * Button Component - Primary, secondary, and danger variants
+ * Button Component - Primary, secondary, danger, ghost, and roll variants
+ * v5 Topps design: zero radius, hard offset shadows, token colors
  */
 
 import { type ButtonHTMLAttributes, type ReactNode } from 'react';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'danger' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'danger' | 'ghost' | 'roll';
   size?: 'sm' | 'md' | 'lg';
   isLoading?: boolean;
   children: ReactNode;
@@ -21,14 +22,19 @@ export function Button({
   ...props
 }: ButtonProps) {
   const baseStyles =
-    'inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed';
+    'inline-flex items-center justify-center font-medium transition-[transform,box-shadow] duration-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--color-surface-page)] disabled:opacity-50 disabled:cursor-not-allowed disabled:translate-x-0 disabled:translate-y-0';
 
   const variantStyles = {
-    primary: 'bg-green-500 text-white hover:bg-green-600 focus:ring-green-500',
+    primary:
+      'bg-[var(--color-stadium-green)] text-white border border-black shadow-[3px_3px_0_var(--color-stadium-green-shadow)] hover:-translate-x-[1px] hover:-translate-y-[1px] hover:shadow-[4px_4px_0_var(--color-stadium-green-shadow)] active:translate-x-[3px] active:translate-y-[3px] active:shadow-[0px_0px_0_var(--color-stadium-green-shadow)] focus:ring-[var(--color-topps-gold)] font-display uppercase tracking-wider',
     secondary:
-      'bg-transparent border-2 border-green-500 text-green-500 hover:bg-green-500/10 focus:ring-green-500',
-    danger: 'bg-red-500 text-white hover:bg-red-600 focus:ring-red-500',
-    ghost: 'bg-transparent text-gray-300 hover:bg-gray-800 focus:ring-gray-500',
+      'bg-transparent border-2 border-[var(--color-topps-gold)] text-[var(--color-topps-gold)] shadow-[3px_3px_0_var(--color-topps-gold-shadow)] hover:-translate-x-[1px] hover:-translate-y-[1px] hover:shadow-[4px_4px_0_var(--color-topps-gold-shadow)] active:translate-x-[3px] active:translate-y-[3px] active:shadow-[0px_0px_0_var(--color-topps-gold-shadow)] focus:ring-[var(--color-topps-gold)] font-display uppercase tracking-wider',
+    danger:
+      'bg-[var(--color-card-red)] text-white border border-black shadow-[3px_3px_0_var(--color-card-red-shadow)] hover:-translate-x-[1px] hover:-translate-y-[1px] hover:shadow-[4px_4px_0_var(--color-card-red-shadow)] active:translate-x-[3px] active:translate-y-[3px] active:shadow-[0px_0px_0_var(--color-card-red-shadow)] focus:ring-[var(--color-topps-gold)] font-display uppercase tracking-wider',
+    ghost:
+      'bg-transparent text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)] focus:ring-[var(--color-topps-gold)]',
+    roll:
+      'bg-[var(--color-topps-gold)] text-[var(--color-surface-page)] border border-black shadow-[5px_5px_0_var(--color-topps-gold-shadow)] hover:-translate-x-[1px] hover:-translate-y-[1px] hover:shadow-[6px_6px_0_var(--color-topps-gold-shadow)] active:translate-x-[3px] active:translate-y-[3px] active:shadow-[0px_0px_0_var(--color-topps-gold-shadow)] focus:ring-[var(--color-topps-gold)] gloss-pulse ink-bleed-heavy',
   };
 
   const sizeStyles = {
@@ -37,9 +43,13 @@ export function Button({
     lg: 'px-6 py-4 text-lg min-h-[56px]',
   };
 
+  const fontOverride = variant === 'roll'
+    ? 'font-[var(--font-script)]'
+    : '';
+
   return (
     <button
-      className={`${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}
+      className={`${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${fontOverride} ${className}`}
       disabled={disabled || isLoading}
       {...props}
     >

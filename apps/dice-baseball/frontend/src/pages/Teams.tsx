@@ -1,5 +1,6 @@
 /**
  * Teams Page - List and manage teams
+ * v5 Topps design: navy palette, gold accents, token colors
  */
 
 import { useEffect, useState } from 'react';
@@ -34,7 +35,6 @@ export function Teams() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [teamId]);
 
-  // If teamId is present, show the team editor
   if (teamId) {
     return <TeamEditor teamId={teamId} />;
   }
@@ -75,7 +75,7 @@ export function Teams() {
   async function confirmDelete() {
     const teamId = deleteConfirm.teamId;
     setDeleteConfirm({ show: false, teamId: '', teamName: '' });
-    
+
     try {
       await api.deleteTeam(teamId);
       deleteTeamFromStore(teamId);
@@ -92,10 +92,10 @@ export function Teams() {
 
   async function confirmDuplicate() {
     if (!duplicateName.trim()) return;
-    
+
     const teamId = duplicateModal.teamId;
     setDuplicating(true);
-    
+
     try {
       const newTeam = await api.duplicateTeam(teamId, duplicateName.trim());
       setTeams([...teams, newTeam]);
@@ -125,29 +125,28 @@ export function Teams() {
 
   function handleDrop(e: DragEvent<HTMLDivElement>, dropTeamId: string) {
     e.preventDefault();
-    
+
     if (!draggedTeam || draggedTeam === dropTeamId) {
       setDraggedTeam(null);
       return;
     }
-    
+
     const dragIndex = teams.findIndex(t => t.id === draggedTeam);
     const dropIndex = teams.findIndex(t => t.id === dropTeamId);
-    
+
     if (dragIndex === -1 || dropIndex === -1) {
       setDraggedTeam(null);
       return;
     }
-    
+
     const newTeams = [...teams];
     const [draggedItem] = newTeams.splice(dragIndex, 1);
     newTeams.splice(dropIndex, 0, draggedItem);
-    
+
     const newOrder = newTeams.map(t => t.id);
     reorderTeams(newOrder);
     setDraggedTeam(null);
-    
-    // Save new order to backend
+
     saveTeamOrder(newOrder);
   }
 
@@ -157,14 +156,13 @@ export function Teams() {
       await api.reorderTeams(teamIds);
     } catch (error) {
       console.error('Failed to save team order:', error);
-      // Silently fail - order is still updated locally
     } finally {
       setReordering(false);
     }
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-900">
+    <div className="min-h-screen flex flex-col bg-[var(--color-surface-page)]">
       <Header
         title="MY TEAMS"
         showBack
@@ -181,17 +179,17 @@ export function Teams() {
             {[1, 2, 3].map((i) => (
               <Card key={i} className="animate-pulse">
                 <CardContent>
-                  <div className="h-5 bg-gray-700 rounded w-1/2 mb-2" />
-                  <div className="h-4 bg-gray-700 rounded w-3/4" />
+                  <div className="h-5 bg-[var(--color-surface-hover)] w-1/2 mb-2" />
+                  <div className="h-4 bg-[var(--color-surface-hover)] w-3/4" />
                 </CardContent>
               </Card>
             ))}
           </div>
         ) : teams.length === 0 ? (
           <div className="text-center py-12">
-            <div className="text-5xl mb-4">⚾</div>
-            <p className="text-gray-400 mb-4">No teams yet!</p>
-            <p className="text-sm text-gray-500 mb-6">
+            <div className="text-5xl mb-4">&#x26BE;</div>
+            <p className="text-[var(--color-text-muted)] mb-4">No teams yet!</p>
+            <p className="text-sm text-[var(--color-text-dim)] mb-6">
               Build your first team to start playing.
             </p>
             <Button onClick={() => setShowNewTeamModal(true)}>+ Create Team</Button>
@@ -199,9 +197,9 @@ export function Teams() {
         ) : (
           <div className="space-y-3">
             {teams.map((team) => (
-              <TeamCard 
-                key={team.id} 
-                team={team} 
+              <TeamCard
+                key={team.id}
+                team={team}
                 onDelete={() => handleDeleteClick(team)}
                 onDuplicate={() => handleDuplicateClick(team)}
                 onDragStart={(e) => handleDragStart(e, team.id)}
@@ -213,7 +211,7 @@ export function Teams() {
             ))}
             {reordering && (
               <div className="text-center py-2">
-                <span className="text-sm text-gray-400">Saving team order...</span>
+                <span className="text-sm text-[var(--color-text-muted)]">Saving team order...</span>
               </div>
             )}
           </div>
@@ -225,7 +223,7 @@ export function Teams() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
           <Card className="w-full max-w-sm">
             <CardContent>
-              <h3 className="text-lg font-display font-bold text-white mb-4">
+              <h3 className="text-lg font-display font-bold text-[var(--color-text-primary)] mb-4 ink-bleed">
                 Create New Team
               </h3>
               <Input
@@ -274,11 +272,11 @@ export function Teams() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
           <Card className="w-full max-w-sm">
             <CardContent>
-              <h3 className="text-lg font-display font-bold text-white mb-4">
+              <h3 className="text-lg font-display font-bold text-[var(--color-text-primary)] mb-4 ink-bleed">
                 Duplicate Team
               </h3>
-              <p className="text-sm text-gray-400 mb-4">
-                Creating a copy of "{duplicateModal.teamName}"
+              <p className="text-sm text-[var(--color-text-muted)] mb-4">
+                Creating a copy of &quot;{duplicateModal.teamName}&quot;
               </p>
               <Input
                 label="New Team Name"
@@ -327,12 +325,12 @@ interface TeamCardProps {
   showReorderControls: boolean;
 }
 
-function TeamCard({ 
-  team, 
-  onDelete, 
-  onDuplicate, 
-  onDragStart, 
-  onDragOver, 
+function TeamCard({
+  team,
+  onDelete,
+  onDuplicate,
+  onDragStart,
+  onDragOver,
   onDrop,
   isDragging,
   showReorderControls
@@ -356,8 +354,8 @@ function TeamCard({
     >
       {/* Drag handle */}
       {showReorderControls && (
-        <div className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">
-          <span className="text-sm">⋮⋮</span>
+        <div className="absolute left-2 top-1/2 transform -translate-y-1/2 text-[var(--color-text-muted)] opacity-0 group-hover:opacity-100 transition-opacity">
+          <span className="text-sm">&#x22EE;&#x22EE;</span>
         </div>
       )}
 
@@ -369,36 +367,36 @@ function TeamCard({
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   {team.isActive && (
-                    <span className="inline-block text-xs text-green-500 font-semibold">
-                      ⭐ ACTIVE
+                    <span className="inline-block text-xs text-[var(--color-topps-gold)] font-semibold font-display">
+                      ACTIVE
                     </span>
                   )}
-                  <span className={`text-xs font-semibold px-2 py-0.5 rounded ${
-                    team.rosterComplete 
-                      ? 'bg-green-600/20 text-green-400 border border-green-600/30'
-                      : 'bg-yellow-600/20 text-yellow-400 border border-yellow-600/30'
+                  <span className={`text-xs font-semibold px-2 py-0.5 font-display ${
+                    team.rosterComplete
+                      ? 'bg-[var(--color-stadium-green)]/20 text-[var(--color-stadium-green)] border border-[var(--color-stadium-green)]/30'
+                      : 'bg-[var(--color-topps-gold)]/20 text-[var(--color-topps-gold)] border border-[var(--color-topps-gold)]/30'
                   }`}>
                     {team.rosterComplete ? 'COMPLETE' : 'DRAFT'}
                   </span>
                 </div>
-                <h3 className="font-semibold text-white text-lg mb-2 truncate">{team.name}</h3>
-                
+                <h3 className="font-semibold text-[var(--color-text-primary)] text-lg mb-2 truncate font-display">{team.name}</h3>
+
                 {/* Roster Status */}
                 <div className="space-y-1">
-                  <div className="flex items-center gap-4 text-sm text-gray-400">
+                  <div className="flex items-center gap-4 text-sm text-[var(--color-text-muted)]">
                     <span>{positionPlayersCount}/9 Position Players</span>
                     <span>{hasPitcher ? '1/1' : '0/1'} Pitcher</span>
                   </div>
-                  
+
                   {positionPlayersCount > 0 && (
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-[var(--color-text-dim)]">
                       Batting Order: {battingOrderComplete}/9 set
                     </div>
                   )}
-                  
+
                   {!team.rosterComplete && rosterCount > 0 && (
-                    <p className="text-xs text-yellow-400 mt-1">
-                      ⚠️ {10 - rosterCount} positions remaining
+                    <p className="text-xs text-[var(--color-topps-gold)] mt-1">
+                      {10 - rosterCount} positions remaining
                     </p>
                   )}
                 </div>
@@ -415,10 +413,10 @@ function TeamCard({
                   e.stopPropagation();
                   onDuplicate();
                 }}
-                className="text-blue-400 hover:text-blue-300 p-1 h-auto"
+                className="text-[var(--color-topps-blue)] hover:text-[var(--color-topps-blue)] p-1 h-auto"
                 title="Duplicate team"
               >
-                📋
+                &#x1F4CB;
               </Button>
               <Button
                 size="sm"
@@ -428,10 +426,10 @@ function TeamCard({
                   e.stopPropagation();
                   onDelete();
                 }}
-                className="text-red-400 hover:text-red-300 p-1 h-auto"
+                className="text-[var(--color-card-red)] hover:text-[var(--color-card-red)] p-1 h-auto"
                 title="Delete team"
               >
-                🗑️
+                &#x1F5D1;&#xFE0F;
               </Button>
             </div>
           </div>
