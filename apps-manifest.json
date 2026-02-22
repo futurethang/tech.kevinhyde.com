@@ -2,12 +2,12 @@
   "apps": [
     {
       "slug": "dice-baseball",
-      "name": "Dice Baseball",
-      "description": "Two-player dice baseball game - roll dice and play ball while waiting in line!",
-      "type": "static",
+      "name": "Dice Baseball V2",
+      "description": "Multiplayer stats-driven baseball game using real MLB player data - create teams and compete online!",
+      "type": "react",
       "status": "live",
-      "createdAt": "2026-01-31",
-      "tags": ["game", "pwa", "sports", "dice"]
+      "createdAt": "2026-02-22",
+      "tags": ["game", "multiplayer", "sports", "mlb", "realtime"]
     },
     {
       "slug": "game-gear-browser",

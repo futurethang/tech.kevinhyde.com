@@ -7,7 +7,7 @@ import { useGameStore } from '../stores/gameStore';
 import { useAuthStore } from '../stores/authStore';
 import * as api from '../services/api';
 import * as socket from '../services/socket';
-import type { RollResultEvent } from '@dice-baseball/contracts';
+import type { RollResultEvent } from '../types/contracts/index.js';
 import type { GameState, Game } from '../types';
 
 const RESULT_HOLD_MS = 450;

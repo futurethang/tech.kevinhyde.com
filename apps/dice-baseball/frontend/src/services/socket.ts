@@ -4,7 +4,7 @@
 
 import { io, Socket } from 'socket.io-client';
 import type { GameState } from '../types';
-import type { ApiError, RollResultEvent } from '@dice-baseball/contracts';
+import type { ApiError, RollResultEvent } from '../types/contracts/index.js';
 
 const WS_URL = import.meta.env.VITE_WS_URL || 'http://localhost:3001';
 

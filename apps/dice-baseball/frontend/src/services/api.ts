@@ -3,7 +3,7 @@
  */
 
 import type { User, Team, Game, MLBPlayer, ApiError } from '../types';
-import type { AuthResponse as ContractAuthResponse, AuthUser } from '@dice-baseball/contracts';
+import type { AuthResponse as ContractAuthResponse, AuthUser } from '../types/contracts/index.js';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 

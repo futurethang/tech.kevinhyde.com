@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { authMiddleware } from '../middleware/auth.js';
 import { getPlayers, getPlayerById } from '../services/mlb-sync.js';
 import type { ApiError } from '../types/index.js';
-import type { PlayersQuery } from '@dice-baseball/contracts';
+import type { PlayersQuery } from '../types/contracts/index';
 
 const router = Router();
 
