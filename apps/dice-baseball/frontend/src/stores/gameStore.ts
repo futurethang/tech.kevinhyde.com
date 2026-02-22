@@ -3,7 +3,7 @@
  */
 
 import { create } from 'zustand';
-import type { RollResultEvent } from '@dice-baseball/contracts';
+import type { RollResultEvent } from '../types/contracts/index.js';
 import type { Game, GameState, OutcomeType } from '../types';
 
 interface PlayLogEntry {
