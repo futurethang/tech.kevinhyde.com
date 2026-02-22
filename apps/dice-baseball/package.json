@@ -5,8 +5,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "cd frontend && npm run build && cd .. && cp -r frontend/dist/* ./dist/",
-    "dev": "cd frontend && npm run dev",
-    "preview": "cd frontend && npm run preview"
+    "build": "cd frontend && npm install && npm run build && cd .. && cp -r frontend/dist/* ./dist/",
+    "dev": "cd frontend && npm install && npm run dev",
+    "preview": "cd frontend && npm install && npm run preview"
   }
 }
