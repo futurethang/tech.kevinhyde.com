@@ -5,12 +5,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "pnpm --filter=frontend dev",
-    "build": "pnpm --filter=frontend build",
-    "preview": "pnpm --filter=frontend preview"
-  },
-  "workspaces": [
-    "frontend",
-    "backend"
-  ]
+    "build": "cd frontend && npm run build && cd .. && cp -r frontend/dist/* ./dist/",
+    "dev": "cd frontend && npm run dev",
+    "preview": "cd frontend && npm run preview"
+  }
 }
