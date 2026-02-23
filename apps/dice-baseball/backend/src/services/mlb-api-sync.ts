@@ -10,7 +10,18 @@ import { supabase } from './supabase.js';
 import type { MLBPlayer } from '../types/contracts/index';
 
 const MLB_API_BASE = 'https://statsapi.mlb.com/api/v1';
-const SEASON = new Date().getFullYear();
+
+// Use the most recent completed season for stats
+// MLB season runs April-October; during off-season (Nov-Mar), use previous year
+function getStatsSeason(): number {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth(); // 0-indexed
+  // If we're before April, the previous year's season is the most recent complete one
+  return month < 3 ? year - 1 : year;
+}
+
+const SEASON = getStatsSeason();
 
 // API Response Types
 interface MLBApiPlayer {
@@ -133,9 +144,12 @@ export class MLBApiSyncService {
   private async fetchTeamRoster(teamId: number, teamName: string): Promise<MLBApiPlayer[]> {
     const response = await fetch(`${MLB_API_BASE}/teams/${teamId}/roster?rosterType=active`);
     const data = await response.json();
-    
-    return data.roster.map((entry: any) => ({
+
+    return (data.roster || []).map((entry: any) => ({
       ...entry.person,
+      // Position is on the roster entry, not inside entry.person
+      primaryPosition: entry.position,
+      jerseyNumber: entry.jerseyNumber,
       currentTeam: { id: teamId, name: teamName }
     }));
   }
@@ -160,30 +174,69 @@ export class MLBApiSyncService {
   }
   
   /**
+   * Parse first and last name from fullName if individual fields are missing
+   */
+  private parsePlayerName(apiPlayer: MLBApiPlayer): { firstName: string; lastName: string } {
+    // Use API fields if available
+    if (apiPlayer.firstName && apiPlayer.lastName) {
+      return {
+        firstName: apiPlayer.firstName,
+        lastName: apiPlayer.lastName
+      };
+    }
+    
+    // Parse from fullName if individual fields are missing
+    const fullName = apiPlayer.fullName || '';
+    const nameParts = fullName.trim().split(' ');
+    
+    if (nameParts.length >= 2) {
+      return {
+        firstName: nameParts[0],
+        lastName: nameParts.slice(1).join(' ')
+      };
+    }
+    
+    // Fallback for single names or empty
+    return {
+      firstName: nameParts[0] || 'Unknown',
+      lastName: nameParts[0] || 'Player'
+    };
+  }
+
+  /**
    * Sync a single player to the database
    */
   private async syncPlayer(apiPlayer: MLBApiPlayer): Promise<void> {
     try {
-      // Determine player type and fetch appropriate stats
-      const position = apiPlayer.primaryPosition?.code || 'DH';
-      const isPitcher = position === 'P';
-      
-      // Fetch stats based on position
-      const battingData = !isPitcher ? 
+      // Use position abbreviation (e.g. "SS", "CF", "SP") not numeric code
+      const positionAbbrev = apiPlayer.primaryPosition?.abbreviation || 'DH';
+      const positionCode = apiPlayer.primaryPosition?.code || '';
+
+      // Pitchers have code "1" or abbreviation "P"/"SP"/"RP"
+      const isPitcher = positionCode === '1' || positionAbbrev === 'P';
+
+      // Map generic "P" to "SP" for starting pitchers (most roster pitchers)
+      const position = positionAbbrev === 'P' ? 'SP' : positionAbbrev;
+
+      // Fetch stats based on position — fetch both for two-way players
+      const battingData = !isPitcher ?
         await this.fetchPlayerStats(apiPlayer.id, 'hitting') : null;
-      const pitchingData = isPitcher ? 
+      const pitchingData = isPitcher ?
         await this.fetchPlayerStats(apiPlayer.id, 'pitching') : null;
-      
+
+      // Parse name components
+      const { firstName, lastName } = this.parsePlayerName(apiPlayer);
+
       // Transform to our format
       const player: Partial<MLBPlayer> = {
         mlbId: apiPlayer.id,
         fullName: apiPlayer.fullName,
-        firstName: apiPlayer.firstName,
-        lastName: apiPlayer.lastName,
+        firstName,
+        lastName,
         primaryPosition: position,
         jerseyNumber: apiPlayer.jerseyNumber,
         currentTeam: apiPlayer.currentTeam?.name || null,
-        isActive: apiPlayer.active,
+        isActive: apiPlayer.active ?? true,
         photoUrl: `https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:67:current.png/w_213,q_auto:best/v1/people/${apiPlayer.id}/headshot/67/current`,
         height: apiPlayer.height,
         weight: apiPlayer.weight,
@@ -192,7 +245,7 @@ export class MLBApiSyncService {
         battingStats: battingData ? this.extractBattingStats(battingData) : null,
         pitchingStats: pitchingData ? this.extractPitchingStats(pitchingData) : null
       };
-      
+
       // Upsert to database
       await supabase.upsertMLBPlayer(player);
     } catch (error) {

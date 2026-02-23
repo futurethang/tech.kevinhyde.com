@@ -142,9 +142,52 @@ interface Database {
   };
 }
 
+// Team abbreviation -> full MLB API name mapping
+// The MLB API stores full team names (e.g. "New York Yankees") but the frontend filters by abbreviation ("NYY")
+const TEAM_ABBREV_TO_NAME: Record<string, string> = {
+  'NYY': 'New York Yankees',
+  'BOS': 'Boston Red Sox',
+  'TB': 'Tampa Bay Rays',
+  'BAL': 'Baltimore Orioles',
+  'TOR': 'Toronto Blue Jays',
+  'CLE': 'Cleveland Guardians',
+  'MIN': 'Minnesota Twins',
+  'CWS': 'Chicago White Sox',
+  'DET': 'Detroit Tigers',
+  'KC': 'Kansas City Royals',
+  'HOU': 'Houston Astros',
+  'TEX': 'Texas Rangers',
+  'OAK': 'Oakland Athletics',
+  'LAA': 'Los Angeles Angels',
+  'SEA': 'Seattle Mariners',
+  'ATL': 'Atlanta Braves',
+  'MIA': 'Miami Marlins',
+  'NYM': 'New York Mets',
+  'PHI': 'Philadelphia Phillies',
+  'WSH': 'Washington Nationals',
+  'MIL': 'Milwaukee Brewers',
+  'CHC': 'Chicago Cubs',
+  'CIN': 'Cincinnati Reds',
+  'PIT': 'Pittsburgh Pirates',
+  'STL': 'St. Louis Cardinals',
+  'AZ': 'Arizona Diamondbacks',
+  'COL': 'Colorado Rockies',
+  'LAD': 'Los Angeles Dodgers',
+  'SD': 'San Diego Padres',
+  'SF': 'San Francisco Giants',
+};
+
+const AL_ABBREVS = ['NYY','BOS','TB','BAL','TOR','CLE','MIN','CWS','DET','KC','HOU','TEX','OAK','LAA','SEA'];
+const NL_ABBREVS = ['ATL','MIA','NYM','PHI','WSH','MIL','CHC','CIN','PIT','STL','AZ','COL','LAD','SD','SF'];
+
+function getTeamNamesForLeague(league: string): string[] {
+  const abbrevs = league === 'AL' ? AL_ABBREVS : league === 'NL' ? NL_ABBREVS : [];
+  return abbrevs.map(a => TEAM_ABBREV_TO_NAME[a]).filter(Boolean);
+}
+
 class SupabaseService {
   private client: SupabaseClient<Database>;
-  
+
   constructor() {
     const supabaseUrl = process.env.SUPABASE_URL;
     const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
@@ -262,39 +305,111 @@ class SupabaseService {
   async getMLBPlayers(filters?: {
     position?: string;
     team?: string;
+    league?: string;
     search?: string;
+    sort?: string;
+    order?: 'asc' | 'desc';
     limit?: number;
     offset?: number;
-  }): Promise<MLBPlayer[]> {
+    minOps?: number;
+    maxOps?: number;
+    minEra?: number;
+    maxEra?: number;
+    minHr?: number;
+    maxHr?: number;
+    minRbi?: number;
+    maxRbi?: number;
+  }): Promise<{ players: MLBPlayer[]; total: number }> {
+    // Build the main query
     let query = this.client
       .from('mlb_players')
-      .select('*')
+      .select('*', { count: 'exact' })
       .eq('is_active', true);
-    
+
+    // Apply filters
     if (filters?.position) {
       query = query.eq('primary_position', filters.position);
     }
-    
+
+    // Team filter: translate abbreviation to full team name stored in DB
     if (filters?.team) {
-      query = query.eq('current_team', filters.team);
+      const teamName = TEAM_ABBREV_TO_NAME[filters.team] || filters.team;
+      query = query.eq('current_team', teamName);
     }
-    
+
+    // League filter: get all team names for the league and use IN filter
+    if (filters?.league && !filters?.team) {
+      const leagueTeamNames = getTeamNamesForLeague(filters.league);
+      if (leagueTeamNames.length > 0) {
+        query = query.in('current_team', leagueTeamNames);
+      }
+    }
+
     if (filters?.search) {
       query = query.ilike('full_name', `%${filters.search}%`);
     }
-    
-    if (filters?.limit) {
+
+    // Stats filters - use -> (JSON accessor, preserves numeric type for comparison)
+    // NOT ->> (text accessor, would do text comparison: "9" > "30")
+    if (filters?.minOps !== undefined) {
+      query = query.gte('batting_stats->ops', filters.minOps);
+    }
+    if (filters?.maxOps !== undefined) {
+      query = query.lte('batting_stats->ops', filters.maxOps);
+    }
+    if (filters?.minEra !== undefined) {
+      query = query.gte('pitching_stats->era', filters.minEra);
+    }
+    if (filters?.maxEra !== undefined) {
+      query = query.lte('pitching_stats->era', filters.maxEra);
+    }
+    if (filters?.minHr !== undefined) {
+      query = query.gte('batting_stats->homeRuns', filters.minHr);
+    }
+    if (filters?.maxHr !== undefined) {
+      query = query.lte('batting_stats->homeRuns', filters.maxHr);
+    }
+    if (filters?.minRbi !== undefined) {
+      query = query.gte('batting_stats->rbi', filters.minRbi);
+    }
+    if (filters?.maxRbi !== undefined) {
+      query = query.lte('batting_stats->rbi', filters.maxRbi);
+    }
+
+    // Sorting - use -> for JSONB (preserves numeric type)
+    const sort = filters?.sort || 'ops';
+    const order = filters?.order || 'desc';
+
+    if (sort === 'name') {
+      query = query.order('full_name', { ascending: order === 'asc' });
+    } else if (sort === 'ops' || sort === 'avg' || sort === 'hr' || sort === 'rbi') {
+      const field = sort === 'hr' ? 'homeRuns' : sort;
+      query = query.order(`batting_stats->${field}`, {
+        ascending: order === 'asc',
+        nullsFirst: false,
+      });
+    } else if (sort === 'era' || sort === 'whip' || sort === 'wins') {
+      query = query.order(`pitching_stats->${sort}`, {
+        ascending: order === 'asc',
+        nullsFirst: false,
+      });
+    }
+
+    // Pagination
+    if (filters?.offset !== undefined && filters?.limit !== undefined) {
+      query = query.range(filters.offset, filters.offset + filters.limit - 1);
+    } else if (filters?.limit) {
       query = query.limit(filters.limit);
     }
-    
-    if (filters?.offset) {
-      query = query.range(filters.offset, filters.offset + (filters?.limit || 50) - 1);
-    }
-    
-    const { data, error } = await query;
-    
+
+    const { data, error, count } = await query;
+
     if (error) throw error;
-    return (data || []).map(this.mapToMLBPlayer);
+
+    return {
+      players: (data || []).map(this.mapToMLBPlayer),
+      total: count || 0
+    };
   }
   
   async getMLBPlayerById(mlbId: number): Promise<MLBPlayer | null> {

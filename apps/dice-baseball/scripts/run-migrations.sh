@@ -4,8 +4,8 @@
 
 set -e
 
-SUPABASE_URL="https://snfrilawqmervqtkvqnq.supabase.co"
-SUPABASE_SERVICE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNuZnJpbGF3cW1lcnZxdGt2cW5xIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTc4NDI3NCwiZXhwIjoyMDg3MzYwMjc0fQ.m4_n1d6BF9mew7HwMQl4TXeHAGgPd2p10eRK0h_gYNw"
+SUPABASE_URL="${SUPABASE_URL:?Error: SUPABASE_URL environment variable is required}"
+SUPABASE_SERVICE_KEY="${SUPABASE_SERVICE_KEY:?Error: SUPABASE_SERVICE_KEY environment variable is required}"
 
 echo "🗄️ Running Database Migrations for Supabase project: dice-baseball"
 echo ""

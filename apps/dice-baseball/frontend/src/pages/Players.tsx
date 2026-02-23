@@ -96,12 +96,14 @@ export function Players() {
     setLoading(true);
 
     try {
+      const order = (sort === 'era' || sort === 'whip' || sort === 'name') ? 'asc' : 'desc';
       const result = await api.getPlayers({
         search: debouncedSearch || undefined,
         position: position || undefined,
         team: team || undefined,
         league: league || undefined,
         sort,
+        order,
         page: currentPage,
         limit: 20,
         minOps: statsFilters.minOps ? parseFloat(statsFilters.minOps) : undefined,
@@ -400,7 +402,7 @@ function PlayerCard({ player, onClick }: { player: MLBPlayer; onClick: () => voi
               <span className="text-sm font-medium text-[var(--color-topps-gold)] ml-2 font-display">{player.primaryPosition}</span>
             </div>
             <p className="text-sm text-[var(--color-text-muted)]">
-              {team ? `${team.city} ${team.name}` : player.currentTeam} &bull; {player.seasonYear || '2024'}
+              {team ? `${team.city} ${team.name}` : player.currentTeam} &bull; {player.seasonYear || '2025'}
             </p>
 
             {isPitcher && player.pitchingStats ? (

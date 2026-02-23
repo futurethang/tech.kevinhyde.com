@@ -144,6 +144,7 @@ export interface GetPlayersParams {
   league?: string;
   search?: string;
   sort?: string;
+  order?: 'asc' | 'desc';
   page?: number;
   limit?: number;
   // Stats range filters
@@ -166,6 +167,7 @@ export async function getPlayers(
   if (params.league) searchParams.set('league', params.league);
   if (params.search) searchParams.set('q', params.search);
   if (params.sort) searchParams.set('sort', params.sort);
+  if (params.order) searchParams.set('order', params.order);
   if (params.limit) searchParams.set('limit', String(params.limit));
   if (params.page && params.limit) {
     searchParams.set('offset', String((params.page - 1) * params.limit));

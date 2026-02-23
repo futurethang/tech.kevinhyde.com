@@ -78,6 +78,7 @@ router.get('/players', authMiddleware, async (req: Request, res: Response<unknow
     search: parsedQuery.q ?? parsedQuery.search,
     position: parsedQuery.position,
     team: parsedQuery.team,
+    league: parsedQuery.league,
     sort: parsedQuery.sort,
     order: parsedQuery.order,
     limit: parsedQuery.limit,

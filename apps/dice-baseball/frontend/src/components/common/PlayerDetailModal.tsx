@@ -101,7 +101,7 @@ export function PlayerDetailModal({ player, isOpen, onClose, onAddToTeam }: Play
                 <div>
                   <h2 className="text-2xl font-bold text-white">{player.fullName}</h2>
                   <p className="text-gray-400">
-                    {player.primaryPosition} • {team ? `${team.city} ${team.name}` : player.currentTeam} • {player.seasonYear || '2024'}
+                    {player.primaryPosition} • {team ? `${team.city} ${team.name}` : player.currentTeam} • {player.seasonYear || '2025'}
                   </p>
                 </div>
               </div>
