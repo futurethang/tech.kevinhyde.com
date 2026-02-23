@@ -1,0 +1,157 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.6;
+  color: #e0e0e0;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* --- Demo page layout --- */
+
+.demo-page {
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 24px 16px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.demo-header {
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.demo-header h1 {
+  font-size: 28px;
+  font-weight: 800;
+  color: #ffc844;
+  letter-spacing: -0.5px;
+}
+
+.demo-subtitle {
+  font-size: 14px;
+  color: rgba(255,255,255,0.5);
+  margin-top: 4px;
+}
+
+/* --- Stage area --- */
+
+.demo-stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 16px 0 8px;
+}
+
+/* --- Result display --- */
+
+.demo-result {
+  text-align: center;
+  animation: result-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  margin-bottom: 16px;
+}
+
+@keyframes result-pop {
+  0% { opacity: 0; transform: scale(0.5) translateY(10px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.demo-result-icon {
+  font-size: 48px;
+  line-height: 1;
+}
+
+.demo-result-text {
+  font-size: 22px;
+  font-weight: 800;
+  color: #ffc844;
+  margin-top: 4px;
+}
+
+.demo-result-power {
+  font-size: 13px;
+  color: rgba(255,255,255,0.4);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- History --- */
+
+.demo-history {
+  width: 100%;
+  margin-top: 12px;
+}
+
+.demo-history h3 {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: rgba(255,255,255,0.3);
+  margin-bottom: 8px;
+}
+
+.demo-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.demo-history-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.demo-history-item:first-child {
+  background: rgba(255,200,68,0.08);
+}
+
+.demo-history-emoji {
+  font-size: 18px;
+  width: 28px;
+  text-align: center;
+}
+
+.demo-history-label {
+  flex: 1;
+  font-weight: 600;
+}
+
+.demo-history-pwr {
+  font-variant-numeric: tabular-nums;
+  color: rgba(255,255,255,0.4);
+  font-size: 13px;
+}
+
+/* --- Footer --- */
+
+.demo-footer {
+  margin-top: auto;
+  padding-top: 32px;
+  text-align: center;
+}
+
+.demo-footer p {
+  font-size: 12px;
+  color: rgba(255,255,255,0.3);
+  line-height: 1.6;
+}
+
+.demo-footer code {
+  background: rgba(255,255,255,0.08);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+}
