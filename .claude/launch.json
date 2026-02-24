@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "retro-browser",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@tech/retro-browser", "dev"],
+      "port": 5173
+    }
+  ]
+}

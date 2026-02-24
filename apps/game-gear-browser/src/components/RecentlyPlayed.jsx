@@ -1,3 +1,29 @@
+import { useThumbnail } from '../hooks/useThumbnail';
+
+function RecentlyPlayedItem({ game, onPlay }) {
+  const { src } = useThumbnail(game);
+
+  return (
+    <button
+      onClick={() => onPlay(game)}
+      className="flex-shrink-0 group"
+    >
+      <div className="w-24 h-18 bg-gg-darker rounded overflow-hidden border border-gg-accent group-hover:border-gg-teal transition-colors">
+        {src && (
+          <img
+            src={src}
+            alt={game.title}
+            className="w-full h-full object-cover"
+          />
+        )}
+      </div>
+      <p className="mt-1 text-xs text-gray-400 group-hover:text-white truncate w-24 text-center transition-colors">
+        {game.title}
+      </p>
+    </button>
+  );
+}
+
 export function RecentlyPlayed({ games, onPlay, onClear }) {
   if (games.length === 0) return null;
 
@@ -19,25 +45,7 @@ export function RecentlyPlayed({ games, onPlay, onClear }) {
       </div>
       <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1">
         {games.map((game) => (
-          <button
-            key={game.id}
-            onClick={() => onPlay(game)}
-            className="flex-shrink-0 group"
-          >
-            <div className="w-24 h-18 bg-gg-darker rounded overflow-hidden border border-gg-accent group-hover:border-gg-teal transition-colors">
-              <img
-                src={game.boxartUrl}
-                alt={game.title}
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  e.target.style.display = 'none';
-                }}
-              />
-            </div>
-            <p className="mt-1 text-xs text-gray-400 group-hover:text-white truncate w-24 text-center transition-colors">
-              {game.title}
-            </p>
-          </button>
+          <RecentlyPlayedItem key={game.id} game={game} onPlay={onPlay} />
         ))}
       </div>
     </div>

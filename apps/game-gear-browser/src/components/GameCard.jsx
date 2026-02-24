@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { getSystemName } from '../data/systems';
+import { useThumbnail } from '../hooks/useThumbnail';
 
 // Generate a color based on the game title for variety
 function getColorForTitle(title) {
@@ -15,7 +16,7 @@ function getColorForTitle(title) {
 }
 
 export function GameCard({ game, onPlay, isFavorite, onToggleFavorite }) {
-  const [imageError, setImageError] = useState(false);
+  const { src: resolvedThumb, loaded: thumbResolved } = useThumbnail(game);
   const [imageLoaded, setImageLoaded] = useState(false);
 
   // Generate placeholder SVG with game's initial
@@ -38,10 +39,8 @@ export function GameCard({ game, onPlay, isFavorite, onToggleFavorite }) {
 `);
   }, [game.title, game.system]);
 
-  const handleImageError = () => {
-    setImageError(true);
-    setImageLoaded(true);
-  };
+  // Determine image source: resolved thumbnail, or placeholder if all fallbacks exhausted
+  const imageSrc = resolvedThumb || (thumbResolved ? placeholderImage : null);
 
   const handleImageLoad = () => {
     setImageLoaded(true);
@@ -64,14 +63,15 @@ export function GameCard({ game, onPlay, isFavorite, onToggleFavorite }) {
         {!imageLoaded && (
           <div className="absolute inset-0 skeleton" />
         )}
-        <img
-          src={imageError || !game.boxartUrl ? placeholderImage : game.boxartUrl}
-          alt={game.title}
-          className={`w-full h-full object-cover transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
-          onError={handleImageError}
-          onLoad={handleImageLoad}
-          loading="lazy"
-        />
+        {imageSrc && (
+          <img
+            src={imageSrc}
+            alt={game.title}
+            className={`w-full h-full object-cover transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+            onLoad={handleImageLoad}
+            loading="lazy"
+          />
+        )}
 
         {/* Overlay on hover */}
         <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
