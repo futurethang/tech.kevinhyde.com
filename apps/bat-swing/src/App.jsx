@@ -27,8 +27,8 @@ function App() {
 
       {lastPower !== null && (
         <div className="demo-result" key={swings[0]?.id}>
-          <div className="demo-result-icon">{swings[0]?.result.emoji}</div>
-          <div className="demo-result-text">{swings[0]?.result.label}</div>
+          <div className="demo-result-icon">{swings[0]?.result?.emoji}</div>
+          <div className="demo-result-text">{swings[0]?.result?.label}</div>
           <div className="demo-result-power">
             {Math.round(lastPower * 100)}% power
           </div>

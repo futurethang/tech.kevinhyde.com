@@ -28,11 +28,19 @@ export default function BatSwing({
   const [phase, setPhase] = useState('idle') // idle | pulling | swinging | resetting
   const startY = useRef(null)
   const containerRef = useRef(null)
-  const animFrame = useRef(null)
+  const timeouts = useRef([])
+  const lastTickRef = useRef(0)
 
   // Vibrate helper (progressive as tension builds)
   const vibrate = useCallback((ms) => {
     if (navigator.vibrate) navigator.vibrate(ms)
+  }, [])
+
+  // Safe setTimeout that gets cleaned up on unmount
+  const safeTimeout = useCallback((fn, ms) => {
+    const id = setTimeout(fn, ms)
+    timeouts.current.push(id)
+    return id
   }, [])
 
   // --- Pointer handlers ---
@@ -41,6 +49,7 @@ export default function BatSwing({
       if (disabled || phase !== 'idle') return
       e.preventDefault()
       startY.current = e.clientY
+      lastTickRef.current = 0
       setPhase('pulling')
       setPullRatio(0)
       containerRef.current?.setPointerCapture(e.pointerId)
@@ -57,13 +66,13 @@ export default function BatSwing({
       setPullRatio(ratio)
 
       // Haptic ticks at 25%, 50%, 75%, 100%
-      const prevTick = Math.floor((pullRatio) * 4)
       const newTick = Math.floor(ratio * 4)
-      if (newTick > prevTick && newTick > 0) {
+      if (newTick > lastTickRef.current && newTick > 0) {
         vibrate(newTick * 15)
       }
+      lastTickRef.current = newTick
     },
-    [phase, pullRatio, vibrate],
+    [phase, vibrate],
   )
 
   const handlePointerUp = useCallback(
@@ -71,18 +80,19 @@ export default function BatSwing({
       if (phase !== 'pulling') return
       e.preventDefault()
       startY.current = null
+      lastTickRef.current = 0
 
       if (pullRatio >= threshold) {
         // Fire!
         setPhase('swinging')
         vibrate(80)
 
-        setTimeout(() => {
+        safeTimeout(() => {
           onSwing?.(pullRatio)
           vibrate(150)
           setPhase('resetting')
 
-          setTimeout(() => {
+          safeTimeout(() => {
             setPhase('idle')
             setPullRatio(0)
           }, RESET_DURATION_MS)
@@ -90,28 +100,29 @@ export default function BatSwing({
       } else {
         // Not enough pull - spring back
         setPhase('resetting')
-        setTimeout(() => {
+        safeTimeout(() => {
           setPhase('idle')
           setPullRatio(0)
         }, RESET_DURATION_MS)
       }
     },
-    [phase, pullRatio, threshold, vibrate, onSwing],
+    [phase, pullRatio, threshold, vibrate, onSwing, safeTimeout],
   )
 
   const handlePointerCancel = useCallback(() => {
     startY.current = null
+    lastTickRef.current = 0
     setPhase('resetting')
-    setTimeout(() => {
+    safeTimeout(() => {
       setPhase('idle')
       setPullRatio(0)
     }, RESET_DURATION_MS)
-  }, [])
+  }, [safeTimeout])
 
-  // Cleanup
+  // Cleanup all pending timeouts on unmount
   useEffect(() => {
     return () => {
-      if (animFrame.current) cancelAnimationFrame(animFrame.current)
+      timeouts.current.forEach(clearTimeout)
     }
   }, [])
 
@@ -170,7 +181,6 @@ export default function BatSwing({
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerCancel}
-      touch-action="none"
     >
       {/* Tension ring */}
       <div
