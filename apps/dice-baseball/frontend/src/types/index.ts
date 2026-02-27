@@ -20,42 +20,56 @@ export interface User {
 // ============================================
 
 export interface BattingStats {
+  gamesPlayed: number;
+  atBats: number;
+  runs: number;
+  hits: number;
+  doubles: number;
+  triples: number;
+  homeRuns: number;
+  rbi: number;
+  walks: number;
+  strikeouts: number;
+  stolenBases: number;
   avg: number;
   obp: number;
   slg: number;
   ops: number;
-  hr: number;
-  rbi: number;
-  bb: number;
-  so: number;
-  ab: number;
-  hits: number;
-  games: number;
-  sb?: number;
 }
 
 export interface PitchingStats {
+  gamesPlayed: number;
+  gamesStarted: number;
+  wins: number;
+  losses: number;
   era: number;
+  inningsPitched: number;
+  hits: number;
+  runs: number;
+  earnedRuns: number;
+  homeRuns: number;
+  walks: number;
+  strikeouts: number;
   whip: number;
   kPer9: number;
   bbPer9: number;
   hrPer9: number;
-  wins: number;
-  losses: number;
-  strikeouts: number;
-  inningsPitched: number;
-  games: number;
-  gamesStarted: number;
 }
 
 export interface MLBPlayer {
   mlbId: number;
-  name: string;
-  team: string;
-  position: string;
-  imageUrl?: string;
-  battingStats?: BattingStats;
-  pitchingStats?: PitchingStats;
+  fullName: string;
+  firstName: string;
+  lastName: string;
+  primaryPosition: string;
+  currentTeam: string | null;
+  currentTeamId: number | null;
+  photoUrl?: string;
+  battingStats?: BattingStats | null;
+  pitchingStats?: PitchingStats | null;
+  seasonYear?: number;
+  isActive: boolean;
+  lastUpdated: string;
   salary?: number;
 }
 
@@ -98,6 +112,13 @@ export type OutcomeType =
   | 'groundOut'
   | 'flyOut';
 
+export interface TeamStats {
+  hits: number;
+  homeRuns: number;
+  strikeouts: number;
+  walks: number;
+}
+
 export interface GameState {
   inning: number;
   isTopOfInning: boolean;
@@ -107,6 +128,8 @@ export interface GameState {
   currentBatterIndex: number;
   isGameOver?: boolean;
   winner?: string;
+  inningScores?: Array<[number, number]>; // per-inning [visitor, home] runs
+  teamStats?: [TeamStats, TeamStats]; // [visitor, home]
 }
 
 export interface Game {
@@ -130,9 +153,27 @@ export interface PlayResult {
   runsScored: number;
   outsRecorded: number;
   description: string;
+  playContext: {
+    inning: number;
+    isTopOfInning: boolean;
+  };
   batter: { mlbId: number; name: string };
+  batterStats?: {
+    avg: number;
+    ops: number;
+  };
   pitcher: { mlbId: number; name: string };
+  pitcherStats?: {
+    era: number;
+    whip: number;
+    kPer9: number;
+  };
   newState: GameState;
+  sim?: {
+    mode: 'default' | 'deterministic';
+    seed?: string;
+    turnIndex: number;
+  };
 }
 
 // ============================================

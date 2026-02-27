@@ -1,3 +1,6 @@
 export { Button } from './Button';
 export { Card, CardHeader, CardContent, CardFooter } from './Card';
 export { Input, Select, SearchInput } from './Input';
+export { ConfirmDialog } from './ConfirmDialog';
+export { PlayerDetailModal } from './PlayerDetailModal';
+export { ErrorBoundary } from './ErrorBoundary';

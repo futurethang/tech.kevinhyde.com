@@ -34,12 +34,20 @@ export const useAuthStore = create<AuthState>()(
           isLoading: false,
         }),
 
-      logout: () =>
+      logout: () => {
         set({
           user: null,
           token: null,
           isAuthenticated: false,
-        }),
+        });
+        // Clear related stores to avoid stale data
+        import('../stores/teamStore').then(({ useTeamStore }) => {
+          useTeamStore.getState().setTeams([]);
+        }).catch(() => {});
+        import('../stores/gameStore').then(({ useGameStore }) => {
+          useGameStore.getState().resetGame();
+        }).catch(() => {});
+      },
 
       setLoading: (loading) => set({ isLoading: loading }),
     }),

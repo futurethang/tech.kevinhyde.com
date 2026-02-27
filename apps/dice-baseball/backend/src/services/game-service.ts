@@ -6,7 +6,11 @@
  */
 
 import { resolveAtBat, advanceRunners, handleInningLogic, generateDescription } from './game-engine.js';
-import type { GameState, BatterStats, PitcherStats, OutcomeType, PlayResult } from './game-engine.js';
+import type { GameState, BatterStats, PitcherStats, OutcomeType, TeamStats } from './game-engine.js';
+import * as teamService from './team-service.js';
+import { getPlayerById } from './mlb-sync.js';
+import { gameRepository } from '../repositories/game-repository.js';
+import { createSeededRng, normalizeSeed } from './simulation-rng.js';
 
 // ============================================
 // TYPES
@@ -27,6 +31,7 @@ export interface Game {
   completedAt?: string;
   winnerId?: string;
   loserId?: string;
+  simulation?: GameSimulation;
 }
 
 export interface TeamWithRoster {
@@ -52,15 +57,44 @@ export interface MoveInput {
   diceRolls: [number, number];
 }
 
+export interface SimulationConfigInput {
+  mode?: 'default' | 'deterministic';
+  seed?: string;
+}
+
+export interface SimulationSnapshot {
+  mode: 'default' | 'deterministic';
+  seed?: string;
+  turnIndex: number;
+}
+
+export interface GameSimulation extends SimulationSnapshot {
+  rngState?: number;
+}
+
 export interface MoveResult {
   diceRolls: [number, number];
   outcome: OutcomeType;
   runsScored: number;
   outsRecorded: number;
   description: string;
+  playContext: {
+    inning: number;
+    isTopOfInning: boolean;
+  };
   batter: { mlbId: number; name: string };
+  batterStats: {
+    avg: number;
+    ops: number;
+  };
   pitcher: { mlbId: number; name: string };
+  pitcherStats: {
+    era: number;
+    whip: number;
+    kPer9: number;
+  };
   newState: GameState;
+  sim: SimulationSnapshot;
 }
 
 export interface GameEndResult {
@@ -70,14 +104,57 @@ export interface GameEndResult {
   reason?: string;
 }
 
-// ============================================
-// IN-MEMORY STORAGE (for testing/MVP)
-// In production, replace with Supabase/PostgreSQL
-// ============================================
+async function hydrateTeamForGame(teamId: string): Promise<TeamWithRoster> {
+  const team = await teamService.getTeamById(teamId);
+  if (!team) {
+    throw new Error('Team not found');
+  }
 
-const games: Map<string, Game> = new Map();
-const gamesByJoinCode: Map<string, string> = new Map(); // joinCode -> gameId
-const gameMoves: Map<string, Array<{ moveNumber: number; userId: string; data: unknown }>> = new Map();
+  const roster = await Promise.all(
+    (team.roster || []).map(async (slot) => {
+      const player = await getPlayerById(slot.mlbPlayerId);
+      return {
+        ...slot,
+        playerData: player
+          ? {
+              name: player.fullName,
+              battingStats: player.battingStats
+                ? {
+                    avg: player.battingStats.avg,
+                    obp: player.battingStats.obp,
+                    slg: player.battingStats.slg,
+                    ops: player.battingStats.ops,
+                    bb: player.battingStats.walks,
+                    so: player.battingStats.strikeouts,
+                    ab: player.battingStats.atBats,
+                  }
+                : undefined,
+              pitchingStats: player.pitchingStats
+                ? {
+                    era: player.pitchingStats.era,
+                    whip: player.pitchingStats.whip,
+                    kPer9: player.pitchingStats.kPer9,
+                    bbPer9: player.pitchingStats.bbPer9,
+                    hrPer9: player.pitchingStats.hrPer9,
+                  }
+                : undefined,
+            }
+          : undefined,
+      };
+    })
+  );
+
+  return {
+    id: team.id,
+    name: team.name,
+    userId: team.userId,
+    roster,
+    battingOrder: roster
+      .filter((slot) => slot.position !== 'SP' && slot.battingOrder != null)
+      .sort((a, b) => (a.battingOrder ?? 0) - (b.battingOrder ?? 0))
+      .map((slot) => slot.mlbPlayerId),
+  };
+}
 
 // ============================================
 // HELPER FUNCTIONS
@@ -105,6 +182,10 @@ function generateGameId(): string {
 /**
  * Create initial game state
  */
+function emptyTeamStats(): TeamStats {
+  return { hits: 0, homeRuns: 0, strikeouts: 0, walks: 0 };
+}
+
 function createInitialState(): GameState {
   return {
     inning: 1,
@@ -113,6 +194,46 @@ function createInitialState(): GameState {
     scores: [0, 0],
     bases: [false, false, false],
     currentBatterIndex: 0,
+    inningScores: [[0, 0]],
+    teamStats: [emptyTeamStats(), emptyTeamStats()],
+  };
+}
+
+function createSimulationConfig(input?: SimulationConfigInput): GameSimulation {
+  const requestedMode = input?.mode || process.env.GAME_SIM_MODE || 'default';
+  const mode: 'default' | 'deterministic' =
+    requestedMode === 'deterministic' ? 'deterministic' : 'default';
+
+  if (mode !== 'deterministic') {
+    return { mode: 'default', turnIndex: 0 };
+  }
+
+  const seed = input?.seed || process.env.GAME_SIM_SEED || `seed-${Date.now()}`;
+  const rngState = normalizeSeed(seed);
+  return { mode: 'deterministic', seed, rngState, turnIndex: 0 };
+}
+
+function nextRandom(game: Game): number {
+  if (game.simulation?.mode !== 'deterministic' || !game.simulation.rngState) {
+    return Math.random();
+  }
+
+  const rng = createSeededRng(game.simulation.rngState);
+  const value = rng.next();
+  game.simulation.rngState = rng.currentState();
+  return value;
+}
+
+function simulationSnapshot(game: Game): SimulationSnapshot {
+  const simulation = game.simulation;
+  if (!simulation) {
+    return { mode: 'default', turnIndex: 0 };
+  }
+
+  return {
+    mode: simulation.mode,
+    seed: simulation.seed,
+    turnIndex: simulation.turnIndex,
   };
 }
 
@@ -123,12 +244,16 @@ function createInitialState(): GameState {
 /**
  * Create a new game session
  */
-export async function createGame(userId: string, teamId: string): Promise<Game> {
+export async function createGame(
+  userId: string,
+  teamId: string,
+  simInput?: SimulationConfigInput
+): Promise<Game> {
   const gameId = generateGameId();
   let joinCode = generateJoinCode();
 
   // Ensure unique join code
-  while (gamesByJoinCode.has(joinCode)) {
+  while (await gameRepository.hasJoinCode(joinCode)) {
     joinCode = generateJoinCode();
   }
 
@@ -141,12 +266,12 @@ export async function createGame(userId: string, teamId: string): Promise<Game> 
     visitorUserId: null,
     status: 'waiting',
     state: createInitialState(),
+    homeTeam: await hydrateTeamForGame(teamId),
     createdAt: new Date().toISOString(),
+    simulation: createSimulationConfig(simInput),
   };
 
-  games.set(gameId, game);
-  gamesByJoinCode.set(joinCode, gameId);
-  gameMoves.set(gameId, []);
+  await gameRepository.save(game);
 
   return game;
 }
@@ -155,17 +280,23 @@ export async function createGame(userId: string, teamId: string): Promise<Game> 
  * Join an existing game
  */
 export async function joinGame(gameId: string, userId: string, teamId: string): Promise<Game> {
-  const game = games.get(gameId);
+  const game = await gameRepository.getById(gameId);
   if (!game) {
     throw new Error('Game not found');
   }
 
+  // Update game with visitor info
   game.visitorTeamId = teamId;
   game.visitorUserId = userId;
   game.status = 'active';
+  game.visitorTeam = await hydrateTeamForGame(teamId);
+  if (!game.homeTeam) {
+    game.homeTeam = await hydrateTeamForGame(game.homeTeamId);
+  }
 
-  games.set(gameId, game);
+  await gameRepository.save(game);
 
+  console.log(`🎮 Game ${gameId} activated: ${game.homeUserId} vs ${game.visitorUserId}`);
   return game;
 }
 
@@ -173,47 +304,34 @@ export async function joinGame(gameId: string, userId: string, teamId: string): 
  * Get game by ID
  */
 export async function getGameById(gameId: string): Promise<Game | null> {
-  return games.get(gameId) || null;
+  return gameRepository.getById(gameId);
 }
 
 /**
  * Get game by join code
  */
 export async function getGameByJoinCode(joinCode: string): Promise<Game | null> {
-  const gameId = gamesByJoinCode.get(joinCode.toUpperCase());
-  if (!gameId) return null;
-  return games.get(gameId) || null;
+  return gameRepository.getByJoinCode(joinCode);
 }
 
 /**
  * Get all active/waiting games for a user
  */
 export async function getUserActiveGames(userId: string): Promise<Game[]> {
-  const userGames: Game[] = [];
-
-  games.forEach((game) => {
-    if (
-      (game.homeUserId === userId || game.visitorUserId === userId) &&
-      (game.status === 'active' || game.status === 'waiting')
-    ) {
-      userGames.push(game);
-    }
-  });
-
-  return userGames;
+  return gameRepository.listActiveByUser(userId);
 }
 
 /**
  * Save game state
  */
 export async function saveGameState(gameId: string, state: GameState): Promise<void> {
-  const game = games.get(gameId);
+  const game = await gameRepository.getById(gameId);
   if (!game) {
     throw new Error('Game not found');
   }
 
   game.state = state;
-  games.set(gameId, game);
+  await gameRepository.save(game);
 }
 
 /**
@@ -225,12 +343,16 @@ export async function recordMove(
   userId: string,
   input: MoveInput
 ): Promise<MoveResult> {
-  const game = games.get(gameId);
+  const game = await gameRepository.getById(gameId);
   if (!game || !game.state) {
     throw new Error('Game not found');
   }
 
   const state = game.state;
+  const playContext = {
+    inning: state.inning,
+    isTopOfInning: state.isTopOfInning,
+  };
 
   // Determine current batter and pitcher based on inning half
   // Top of inning: visitor batting, home pitching
@@ -243,27 +365,54 @@ export async function recordMove(
   const batter = battingTeam?.roster.find((r) => r.battingOrder === batterIndex + 1);
   const pitcher = pitchingTeam?.roster.find((r) => r.position === 'SP');
 
-  // Default stats if player data not loaded
-  const batterStats: BatterStats = batter?.playerData?.battingStats || {
-    avg: 0.250,
-    obp: 0.320,
-    slg: 0.400,
-    ops: 0.720,
-    bb: 50,
-    so: 100,
-    ab: 500,
-  };
+  const fallbackBatterData =
+    !batter?.playerData && batter?.mlbPlayerId ? await getPlayerById(batter.mlbPlayerId) : null;
+  const fallbackPitcherData =
+    !pitcher?.playerData && pitcher?.mlbPlayerId ? await getPlayerById(pitcher.mlbPlayerId) : null;
 
-  const pitcherStats: PitcherStats = pitcher?.playerData?.pitchingStats || {
-    era: 4.0,
-    whip: 1.3,
-    kPer9: 8.5,
-    bbPer9: 3.0,
-    hrPer9: 1.2,
-  };
+  // Default stats if player data not loaded
+  const batterStats: BatterStats = batter?.playerData?.battingStats
+    || (fallbackBatterData?.battingStats
+      ? {
+          avg: fallbackBatterData.battingStats.avg,
+          obp: fallbackBatterData.battingStats.obp,
+          slg: fallbackBatterData.battingStats.slg,
+          ops: fallbackBatterData.battingStats.ops,
+          bb: fallbackBatterData.battingStats.walks,
+          so: fallbackBatterData.battingStats.strikeouts,
+          ab: fallbackBatterData.battingStats.atBats,
+        }
+      : undefined)
+    || {
+      avg: 0.250,
+      obp: 0.320,
+      slg: 0.400,
+      ops: 0.720,
+      bb: 50,
+      so: 100,
+      ab: 500,
+    };
+
+  const pitcherStats: PitcherStats = pitcher?.playerData?.pitchingStats
+    || (fallbackPitcherData?.pitchingStats
+      ? {
+          era: fallbackPitcherData.pitchingStats.era,
+          whip: fallbackPitcherData.pitchingStats.whip,
+          kPer9: fallbackPitcherData.pitchingStats.kPer9,
+          bbPer9: fallbackPitcherData.pitchingStats.bbPer9,
+          hrPer9: fallbackPitcherData.pitchingStats.hrPer9,
+        }
+      : undefined)
+    || {
+      era: 4.0,
+      whip: 1.3,
+      kPer9: 8.5,
+      bbPer9: 3.0,
+      hrPer9: 1.2,
+    };
 
   // Resolve the at-bat
-  const outcome = resolveAtBat(batterStats, pitcherStats, input.diceRolls);
+  const outcome = resolveAtBat(batterStats, pitcherStats, input.diceRolls, nextRandom(game));
 
   // Advance runners
   const baseState = { bases: state.bases, outs: state.outs };
@@ -289,18 +438,49 @@ export async function recordMove(
     }
   }
 
+  // Track canonical stats
+  const teamIdx = state.isTopOfInning ? 0 : 1;
+
+  // Ensure inningScores array is large enough
+  if (!newState.inningScores) {
+    newState.inningScores = [];
+  }
+  while (newState.inningScores.length < state.inning) {
+    newState.inningScores.push([0, 0]);
+  }
+  if (runsScored > 0) {
+    const inningEntry = newState.inningScores[state.inning - 1];
+    inningEntry[teamIdx] += runsScored;
+  }
+
+  // Ensure teamStats exist
+  if (!newState.teamStats) {
+    newState.teamStats = [emptyTeamStats(), emptyTeamStats()];
+  }
+  const stats = newState.teamStats[teamIdx];
+  if (outcome === 'homeRun') {
+    stats.hits++;
+    stats.homeRuns++;
+  } else if (outcome === 'single' || outcome === 'double' || outcome === 'triple') {
+    stats.hits++;
+  } else if (outcome === 'walk') {
+    stats.walks++;
+  } else if (outcome === 'strikeout') {
+    stats.strikeouts++;
+  }
+
   // Handle inning transitions
   handleInningLogic(newState);
 
   // Generate description
-  const batterName = batter?.playerData?.name || 'Batter';
-  const pitcherName = pitcher?.playerData?.name || 'Pitcher';
-  const description = generateDescription(outcome, batterName, pitcherName, runsScored);
+  const batterName = batter?.playerData?.name || fallbackBatterData?.fullName || `Batter #${batter?.mlbPlayerId ?? '?'}`;
+  const pitcherName = pitcher?.playerData?.name || fallbackPitcherData?.fullName || `Pitcher #${pitcher?.mlbPlayerId ?? '?'}`;
+  const description = generateDescription(outcome, batterName, pitcherName, runsScored, nextRandom(game));
 
   // Save the move
-  const moves = gameMoves.get(gameId) || [];
-  moves.push({
-    moveNumber: moves.length + 1,
+  const currentMoves = await gameRepository.getMoveCount(gameId);
+  await gameRepository.appendMove(gameId, {
+    moveNumber: currentMoves + 1,
     userId,
     data: {
       diceRolls: input.diceRolls,
@@ -310,11 +490,15 @@ export async function recordMove(
       batterIndex,
     },
   });
-  gameMoves.set(gameId, moves);
 
-  // Save game state
+  if (!game.simulation) {
+    game.simulation = createSimulationConfig();
+  }
+  game.simulation.turnIndex = currentMoves + 1;
+
+  // Save game state + simulation metadata together
   game.state = newState;
-  games.set(gameId, game);
+  await gameRepository.save(game);
 
   return {
     diceRolls: input.diceRolls,
@@ -322,23 +506,46 @@ export async function recordMove(
     runsScored,
     outsRecorded,
     description,
+    playContext,
     batter: {
       mlbId: batter?.mlbPlayerId || 0,
       name: batterName,
+    },
+    batterStats: {
+      avg: batterStats.avg,
+      ops: batterStats.ops,
     },
     pitcher: {
       mlbId: pitcher?.mlbPlayerId || 0,
       name: pitcherName,
     },
+    pitcherStats: {
+      era: pitcherStats.era,
+      whip: pitcherStats.whip,
+      kPer9: pitcherStats.kPer9,
+    },
     newState,
+    sim: simulationSnapshot(game),
   };
+}
+
+export async function generateDiceRoll(gameId: string): Promise<[number, number]> {
+  const game = await gameRepository.getById(gameId);
+  if (!game) {
+    throw new Error('Game not found');
+  }
+
+  const d1 = Math.floor(nextRandom(game) * 6) + 1;
+  const d2 = Math.floor(nextRandom(game) * 6) + 1;
+  await gameRepository.save(game);
+  return [d1, d2];
 }
 
 /**
  * End a game (either by completion or forfeit)
  */
 export async function endGame(gameId: string, winnerId: string): Promise<GameEndResult> {
-  const game = games.get(gameId);
+  const game = await gameRepository.getById(gameId);
   if (!game) {
     throw new Error('Game not found');
   }
@@ -350,10 +557,8 @@ export async function endGame(gameId: string, winnerId: string): Promise<GameEnd
   game.loserId = loserId;
   game.completedAt = new Date().toISOString();
 
-  games.set(gameId, game);
-
-  // Remove from join code map
-  gamesByJoinCode.delete(game.joinCode);
+  await gameRepository.save(game);
+  await gameRepository.removeJoinCode(game.joinCode);
 
   return {
     winnerId,
@@ -366,8 +571,6 @@ export async function endGame(gameId: string, winnerId: string): Promise<GameEnd
 /**
  * Clear all games (for testing)
  */
-export function clearAllGames(): void {
-  games.clear();
-  gamesByJoinCode.clear();
-  gameMoves.clear();
+export async function clearAllGames(): Promise<void> {
+  await gameRepository.clear();
 }

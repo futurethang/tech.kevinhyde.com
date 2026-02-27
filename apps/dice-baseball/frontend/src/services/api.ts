@@ -2,7 +2,8 @@
  * API Service - REST API client for Dice Baseball backend
  */
 
-import type { User, Team, Game, MLBPlayer, PaginatedResponse, ApiError } from '../types';
+import type { User, Team, Game, MLBPlayer, ApiError } from '../types';
+import type { AuthResponse as ContractAuthResponse, AuthUser } from '../types/contracts/index.js';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
@@ -13,6 +14,17 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 export interface AuthResponse {
   user: User;
   token: string;
+}
+
+function normalizeUser(user: AuthUser): User {
+  return {
+    id: user.id,
+    email: user.email,
+    displayName: user.username,
+    wins: user.wins ?? 0,
+    losses: user.losses ?? 0,
+    createdAt: user.createdAt ?? new Date().toISOString(),
+  };
 }
 
 export async function register(email: string, username: string, password: string): Promise<AuthResponse> {
@@ -30,7 +42,11 @@ export async function register(email: string, username: string, password: string
     throw error;
   }
 
-  return response.json();
+  const data = (await response.json()) as ContractAuthResponse;
+  return {
+    user: normalizeUser(data.user),
+    token: data.token,
+  };
 }
 
 export async function login(email: string, password: string): Promise<AuthResponse> {
@@ -48,7 +64,11 @@ export async function login(email: string, password: string): Promise<AuthRespon
     throw error;
   }
 
-  return response.json();
+  const data = (await response.json()) as ContractAuthResponse;
+  return {
+    user: normalizeUser(data.user),
+    token: data.token,
+  };
 }
 
 // Get token from localStorage (set by auth store)
@@ -88,10 +108,27 @@ async function fetchWithAuth<T>(
 
   if (!response.ok) {
     const error: ApiError = await response.json().catch(() => ({
-      error: 'unknown_error',
+      error: response.status === 401 ? 'unauthorized' : 'unknown_error',
       message: `HTTP ${response.status}`,
     }));
+
+    // Token expired or invalid — clear auth and redirect
+    if (response.status === 401) {
+      const { useAuthStore } = await import('../stores/authStore');
+      useAuthStore.getState().logout();
+      window.location.href = '/apps/dice-baseball/auth';
+    }
+
     throw error;
+  }
+
+  if (response.status === 204) {
+    return undefined as T;
+  }
+
+  const contentLength = response.headers.get('content-length');
+  if (contentLength === '0') {
+    return undefined as T;
   }
 
   return response.json();
@@ -104,22 +141,49 @@ async function fetchWithAuth<T>(
 export interface GetPlayersParams {
   position?: string;
   team?: string;
+  league?: string;
   search?: string;
   sort?: string;
+  order?: 'asc' | 'desc';
   page?: number;
   limit?: number;
+  // Stats range filters
+  minOps?: number;
+  maxOps?: number;
+  minEra?: number;
+  maxEra?: number;
+  minHr?: number;
+  maxHr?: number;
+  minRbi?: number;
+  maxRbi?: number;
 }
 
 export async function getPlayers(
   params: GetPlayersParams = {}
-): Promise<PaginatedResponse<MLBPlayer>> {
+): Promise<{ players: MLBPlayer[]; total: number; limit: number; offset: number }> {
   const searchParams = new URLSearchParams();
   if (params.position) searchParams.set('position', params.position);
   if (params.team) searchParams.set('team', params.team);
-  if (params.search) searchParams.set('search', params.search);
+  if (params.league) searchParams.set('league', params.league);
+  if (params.search) searchParams.set('q', params.search);
   if (params.sort) searchParams.set('sort', params.sort);
-  if (params.page) searchParams.set('page', String(params.page));
+  if (params.order) searchParams.set('order', params.order);
   if (params.limit) searchParams.set('limit', String(params.limit));
+  if (params.page && params.limit) {
+    searchParams.set('offset', String((params.page - 1) * params.limit));
+  } else if (params.page) {
+    searchParams.set('page', String(params.page));
+  }
+  
+  // Stats range filters
+  if (params.minOps !== undefined) searchParams.set('minOps', String(params.minOps));
+  if (params.maxOps !== undefined) searchParams.set('maxOps', String(params.maxOps));
+  if (params.minEra !== undefined) searchParams.set('minEra', String(params.minEra));
+  if (params.maxEra !== undefined) searchParams.set('maxEra', String(params.maxEra));
+  if (params.minHr !== undefined) searchParams.set('minHr', String(params.minHr));
+  if (params.maxHr !== undefined) searchParams.set('maxHr', String(params.maxHr));
+  if (params.minRbi !== undefined) searchParams.set('minRbi', String(params.minRbi));
+  if (params.maxRbi !== undefined) searchParams.set('maxRbi', String(params.maxRbi));
 
   const query = searchParams.toString();
   return fetchWithAuth(`/mlb/players${query ? `?${query}` : ''}`);
@@ -170,6 +234,30 @@ export async function updateBattingOrder(
 
 export async function deleteTeam(teamId: string): Promise<void> {
   await fetchWithAuth(`/teams/${teamId}`, { method: 'DELETE' });
+}
+
+export async function saveTeamDraft(
+  teamId: string,
+  slots: Array<{ position: string; mlbPlayerId: number; battingOrder: number | null }>
+): Promise<{ message: string }> {
+  return fetchWithAuth(`/teams/${teamId}/draft`, {
+    method: 'PUT',
+    body: JSON.stringify({ slots }),
+  });
+}
+
+export async function duplicateTeam(teamId: string, newName: string): Promise<Team> {
+  return fetchWithAuth(`/teams/${teamId}/duplicate`, {
+    method: 'POST',
+    body: JSON.stringify({ name: newName }),
+  });
+}
+
+export async function reorderTeams(teamIds: string[]): Promise<{ message: string }> {
+  return fetchWithAuth('/teams/reorder', {
+    method: 'PATCH',
+    body: JSON.stringify({ teamIds }),
+  });
 }
 
 // ============================================

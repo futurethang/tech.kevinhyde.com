@@ -2,7 +2,8 @@
  * Game Engine Service - Dice Baseball V2
  * Stats-weighted outcome calculations for at-bats
  *
- * Phase 4: TDD Implementation
+ * Data-driven outcomes registry: adding a new outcome requires only
+ * adding a single entry to the OUTCOMES object below.
  */
 
 // ============================================
@@ -42,6 +43,13 @@ export interface BaseState {
   outs: number;
 }
 
+export interface TeamStats {
+  hits: number;
+  homeRuns: number;
+  strikeouts: number;
+  walks: number;
+}
+
 export interface GameState {
   inning: number;
   isTopOfInning: boolean;
@@ -51,6 +59,8 @@ export interface GameState {
   currentBatterIndex: number;
   isGameOver?: boolean;
   winner?: string;
+  inningScores?: Array<[number, number]>; // per-inning [visitor, home] runs
+  teamStats?: [TeamStats, TeamStats]; // [visitor, home]
 }
 
 export interface PlayResult {
@@ -65,22 +75,197 @@ export interface PlayResult {
 }
 
 // ============================================
-// CONSTANTS
+// OUTCOME DEFINITION & REGISTRY
+// ============================================
+
+interface BatterModifierContext {
+  hitModifier: number;
+  powerModifier: number;
+  disciplineModifier: number;
+}
+
+interface PitcherModifierContext {
+  whipModifier: number;
+  kModifier: number;
+  bbModifier: number;
+  hrModifier: number;
+}
+
+export interface OutcomeDefinition {
+  baseProbability: number;
+  isPositive: boolean;
+  batterModifier: (ctx: BatterModifierContext) => number;
+  pitcherModifier: (ctx: PitcherModifierContext) => number;
+  advanceRunners: (bases: [boolean, boolean, boolean]) => { newBases: [boolean, boolean, boolean]; runsScored: number };
+  descriptions: string[];
+}
+
+/**
+ * Central outcomes registry. To add a new outcome:
+ * 1. Add it to OutcomeType union
+ * 2. Add an entry here with all fields
+ * That's it - no other files need to change.
+ */
+export const OUTCOMES: Record<OutcomeType, OutcomeDefinition> = {
+  homeRun: {
+    baseProbability: 0.028,
+    isPositive: true,
+    batterModifier: (ctx) => clamp(ctx.powerModifier * 1.2, 0.3, 2.5),
+    pitcherModifier: (ctx) => clamp(ctx.hrModifier, 0.4, 2.0),
+    advanceRunners: (bases) => ({
+      newBases: [false, false, false] as [boolean, boolean, boolean],
+      runsScored: 1 + bases.filter((b) => b).length,
+    }),
+    descriptions: [
+      '{batter} crushes one! Home run!',
+      '{batter} goes yard! It\'s outta here!',
+      'Swing and a drive! {batter} with a homer!',
+      '{batter} deposits one in the seats!',
+    ],
+  },
+
+  triple: {
+    baseProbability: 0.005,
+    isPositive: true,
+    batterModifier: (ctx) => clamp(ctx.powerModifier, 0.3, 2.0),
+    pitcherModifier: (ctx) => clamp(1 / (ctx.whipModifier * 0.8), 0.5, 1.5),
+    advanceRunners: (bases) => ({
+      newBases: [false, false, true] as [boolean, boolean, boolean],
+      runsScored: bases.filter((b) => b).length,
+    }),
+    descriptions: [
+      '{batter} triples into the gap!',
+      '{batter} legs out a triple!',
+      'Off the wall! {batter} with a triple!',
+    ],
+  },
+
+  double: {
+    baseProbability: 0.046,
+    isPositive: true,
+    batterModifier: (ctx) => clamp(ctx.hitModifier * ctx.powerModifier, 0.4, 1.8),
+    pitcherModifier: (ctx) => clamp(1 / (ctx.whipModifier * 0.9), 0.5, 1.5),
+    advanceRunners: (bases) => {
+      let runs = 0;
+      if (bases[2]) runs++;
+      if (bases[1]) runs++;
+      const newThird = bases[0];
+      return { newBases: [false, true, newThird] as [boolean, boolean, boolean], runsScored: runs };
+    },
+    descriptions: [
+      '{batter} doubles down the line!',
+      '{batter} rips one for extra bases!',
+      'Off the wall! {batter} with a double!',
+    ],
+  },
+
+  single: {
+    baseProbability: 0.150,
+    isPositive: true,
+    batterModifier: (ctx) => clamp(ctx.hitModifier, 0.5, 1.5),
+    pitcherModifier: (ctx) => clamp(1 / ctx.whipModifier, 0.5, 1.5),
+    advanceRunners: (bases) => {
+      let runs = 0;
+      if (bases[2]) runs++;
+      return {
+        newBases: [true, bases[0], bases[1]] as [boolean, boolean, boolean],
+        runsScored: runs,
+      };
+    },
+    descriptions: [
+      '{batter} singles through the infield.',
+      '{batter} pokes one into the outfield.',
+      'Base hit for {batter}!',
+      '{batter} with a seeing-eye single.',
+    ],
+  },
+
+  walk: {
+    baseProbability: 0.083,
+    isPositive: true,
+    batterModifier: (ctx) => clamp(ctx.disciplineModifier, 0.5, 2.0),
+    pitcherModifier: (ctx) => clamp(ctx.bbModifier, 0.5, 1.8),
+    advanceRunners: (bases) => {
+      let runs = 0;
+      if (bases[0] && bases[1] && bases[2]) {
+        runs++;
+      }
+      if (bases[0] && bases[1]) {
+        return { newBases: [true, true, true] as [boolean, boolean, boolean], runsScored: runs };
+      }
+      if (bases[0]) {
+        return { newBases: [true, true, bases[2]] as [boolean, boolean, boolean], runsScored: runs };
+      }
+      return { newBases: [true, bases[1], bases[2]] as [boolean, boolean, boolean], runsScored: runs };
+    },
+    descriptions: [
+      '{batter} works a walk.',
+      'Ball four. {batter} takes first.',
+      '{pitcher} can\'t find the zone. Walk.',
+    ],
+  },
+
+  strikeout: {
+    baseProbability: 0.217,
+    isPositive: false,
+    batterModifier: (ctx) => clamp(1 / (ctx.disciplineModifier || 1), 0.5, 2.0),
+    pitcherModifier: (ctx) => clamp(ctx.kModifier, 0.6, 1.8),
+    advanceRunners: (bases) => ({
+      newBases: [...bases] as [boolean, boolean, boolean],
+      runsScored: 0,
+    }),
+    descriptions: [
+      '{batter} goes down swinging!',
+      'Struck out looking! {pitcher} gets {batter}.',
+      '{pitcher} blows it by {batter}. K!',
+      'Swing and a miss! That\'s strike three!',
+    ],
+  },
+
+  groundOut: {
+    baseProbability: 0.278,
+    isPositive: false,
+    batterModifier: () => 1.0,
+    pitcherModifier: () => 1.0,
+    advanceRunners: (bases) => ({
+      newBases: [...bases] as [boolean, boolean, boolean],
+      runsScored: 0,
+    }),
+    descriptions: [
+      '{batter} grounds out to short.',
+      'Easy grounder, and {batter} is out.',
+      '{batter} rolls one to the infield. Out.',
+    ],
+  },
+
+  flyOut: {
+    baseProbability: 0.193,
+    isPositive: false,
+    batterModifier: (ctx) => clamp(ctx.powerModifier, 0.7, 1.3),
+    pitcherModifier: () => 1.0,
+    advanceRunners: (bases) => ({
+      newBases: [...bases] as [boolean, boolean, boolean],
+      runsScored: 0,
+    }),
+    descriptions: [
+      '{batter} flies out to center.',
+      'Can of corn. {batter} is out.',
+      '{batter} skies one to left. Caught.',
+    ],
+  },
+};
+
+// ============================================
+// CONSTANTS (derived from registry)
 // ============================================
 
 /**
- * Base probabilities derived from 2d6 dice distribution
+ * Base probabilities derived from 2d6 dice distribution.
+ * Exported for backward compatibility - values come from OUTCOMES registry.
  */
-export const BASE_PROBABILITIES: Record<OutcomeType, number> = {
-  homeRun: 0.056, // ~5.5% (rolls: 2, 12)
-  triple: 0.056, // ~5.5% (roll: 3)
-  double: 0.083, // 8.3% (roll: 10)
-  single: 0.222, // 22.2% (rolls: 5, 9)
-  walk: 0.083, // 8.3% (roll: 4)
-  strikeout: 0.056, // ~5.5% (roll: 11)
-  groundOut: 0.278, // 27.8% (rolls: 6, 8)
-  flyOut: 0.166, // ~16.7% (roll: 7) - adjusted to sum to 1.0
-};
+export const BASE_PROBABILITIES: Record<OutcomeType, number> = Object.fromEntries(
+  Object.entries(OUTCOMES).map(([key, def]) => [key, def.baseProbability])
+) as Record<OutcomeType, number>;
 
 /**
  * League average constants (approximate 2024 values)
@@ -110,8 +295,11 @@ export function clamp(value: number, min: number, max: number): number {
 /**
  * Weighted random selection from probability distribution
  */
-export function weightedRandomSelect(probs: Record<OutcomeType, number>): OutcomeType {
-  const rand = Math.random();
+export function weightedRandomSelect(
+  probs: Record<OutcomeType, number>,
+  randomValue: number = Math.random()
+): OutcomeType {
+  const rand = randomValue;
   let cumulative = 0;
 
   for (const [outcome, prob] of Object.entries(probs)) {
@@ -130,84 +318,72 @@ export function weightedRandomSelect(probs: Record<OutcomeType, number>): Outcom
 // ============================================
 
 /**
+ * Build batter modifier context from stats
+ */
+function buildBatterContext(stats: BatterStats): BatterModifierContext {
+  const ab = stats.ab || 1;
+  const ops = stats.ops || LEAGUE_AVG.ops;
+  const slg = stats.slg || LEAGUE_AVG.slg;
+
+  const hitModifier = ops / LEAGUE_AVG.ops;
+  const powerModifier = slg / LEAGUE_AVG.slg;
+
+  const walkRate = stats.bb / ab || 0.08;
+  const strikeoutRate = stats.so / ab || 0.2;
+  const normalizedWalkRate = walkRate / 0.08 || 1;
+  const normalizedKRate = strikeoutRate / 0.2 || 1;
+  const disciplineModifier = normalizedKRate > 0 ? normalizedWalkRate / normalizedKRate : 1;
+
+  return { hitModifier, powerModifier, disciplineModifier };
+}
+
+/**
+ * Build pitcher modifier context from stats
+ */
+function buildPitcherContext(stats: PitcherStats): PitcherModifierContext {
+  const whip = stats.whip || LEAGUE_AVG.whip;
+  const kPer9 = stats.kPer9 || LEAGUE_AVG.kPer9;
+  const bbPer9 = stats.bbPer9 || LEAGUE_AVG.bbPer9;
+  const hrPer9 = stats.hrPer9 || LEAGUE_AVG.hrPer9;
+
+  const clampedWhip = Math.max(whip, 0.8);
+  const whipModifier = LEAGUE_AVG.whip / clampedWhip;
+  const kModifier = kPer9 / LEAGUE_AVG.kPer9;
+  const bbModifier = bbPer9 / LEAGUE_AVG.bbPer9;
+  const hrModifier = hrPer9 / LEAGUE_AVG.hrPer9;
+
+  return { whipModifier, kModifier, bbModifier, hrModifier };
+}
+
+/**
  * Calculate batter modifiers based on stats
  * Returns modifiers where 1.0 = league average
  * >1.0 = better than average (more hits, walks)
  * <1.0 = worse than average (fewer hits, walks)
  */
 export function calculateBatterModifiers(stats: BatterStats): Record<OutcomeType, number> {
-  // Handle edge case: zero at-bats
-  const ab = stats.ab || 1;
-  const ops = stats.ops || LEAGUE_AVG.ops;
-  const slg = stats.slg || LEAGUE_AVG.slg;
+  const ctx = buildBatterContext(stats);
+  const result = {} as Record<OutcomeType, number>;
 
-  // OPS-based overall hitting ability (1.0 = league average)
-  const hitModifier = ops / LEAGUE_AVG.ops;
+  for (const [key, def] of Object.entries(OUTCOMES) as [OutcomeType, OutcomeDefinition][]) {
+    result[key] = def.batterModifier(ctx);
+  }
 
-  // Power for extra-base hits (1.0 = league average)
-  const powerModifier = slg / LEAGUE_AVG.slg;
-
-  // Plate discipline
-  const walkRate = stats.bb / ab || 0.08;
-  const strikeoutRate = stats.so / ab || 0.2;
-
-  // Avoid division by zero - normalized to league average rates
-  const normalizedWalkRate = walkRate / 0.08 || 1;
-  const normalizedKRate = strikeoutRate / 0.2 || 1;
-  const disciplineModifier = normalizedKRate > 0 ? normalizedWalkRate / normalizedKRate : 1;
-
-  return {
-    // For league average (hitModifier = 1.0), single should be ~1.0
-    single: clamp(hitModifier, 0.5, 1.5),
-    double: clamp(hitModifier * powerModifier, 0.4, 1.8),
-    triple: clamp(powerModifier, 0.3, 2.0),
-    homeRun: clamp(powerModifier * 1.2, 0.3, 2.5),
-    walk: clamp(disciplineModifier, 0.5, 2.0),
-    strikeout: clamp(1 / (disciplineModifier || 1), 0.5, 2.0),
-    groundOut: 1.0,
-    flyOut: clamp(powerModifier, 0.7, 1.3),
-  };
+  return result;
 }
 
 /**
  * Calculate pitcher modifiers based on stats
  */
 export function calculatePitcherModifiers(stats: PitcherStats): Record<OutcomeType, number> {
-  // Handle edge cases: zero/missing stats
-  const era = stats.era || LEAGUE_AVG.era;
-  const whip = stats.whip || LEAGUE_AVG.whip;
-  const kPer9 = stats.kPer9 || LEAGUE_AVG.kPer9;
-  const bbPer9 = stats.bbPer9 || LEAGUE_AVG.bbPer9;
-  const hrPer9 = stats.hrPer9 || LEAGUE_AVG.hrPer9;
+  const ctx = buildPitcherContext(stats);
+  const result = {} as Record<OutcomeType, number>;
 
-  // ERA-based overall effectiveness (lower ERA = better suppression)
-  // Clamp ERA minimum to avoid extreme values
-  const clampedEra = Math.max(era, 1.5);
-  const suppressionFactor = LEAGUE_AVG.era / clampedEra;
+  for (const [key, def] of Object.entries(OUTCOMES) as [OutcomeType, OutcomeDefinition][]) {
+    result[key] = def.pitcherModifier(ctx);
+  }
 
-  // WHIP affects hits allowed (lower WHIP = fewer hits)
-  const clampedWhip = Math.max(whip, 0.8);
-  const whipModifier = LEAGUE_AVG.whip / clampedWhip;
-
-  // Strikeout ability
-  const kModifier = kPer9 / LEAGUE_AVG.kPer9;
-
-  // Walk tendency
-  const bbModifier = bbPer9 / LEAGUE_AVG.bbPer9;
-
-  // Home run tendency
-  const hrModifier = hrPer9 / LEAGUE_AVG.hrPer9;
-
-  return {
-    single: clamp(1 / whipModifier, 0.5, 1.5),
-    double: clamp(1 / (whipModifier * 0.9), 0.5, 1.5),
-    triple: clamp(1 / (whipModifier * 0.8), 0.5, 1.5),
-    homeRun: clamp(hrModifier, 0.4, 2.0),
-    walk: clamp(bbModifier, 0.5, 1.8),
-    strikeout: clamp(kModifier, 0.6, 1.8),
-    groundOut: 1.0,
-    flyOut: 1.0,
-  };
+  return result;
 }
 
 // ============================================
@@ -222,11 +398,15 @@ export function applyDiceBias(
   bias: number
 ): Record<OutcomeType, number> {
   const result = { ...probs };
-  const goodOutcomes: OutcomeType[] = ['homeRun', 'triple', 'double', 'single', 'walk'];
-  const badOutcomes: OutcomeType[] = ['strikeout', 'groundOut', 'flyOut'];
+  const goodOutcomes = (Object.entries(OUTCOMES) as [OutcomeType, OutcomeDefinition][])
+    .filter(([, def]) => def.isPositive)
+    .map(([key]) => key);
+  const badOutcomes = (Object.entries(OUTCOMES) as [OutcomeType, OutcomeDefinition][])
+    .filter(([, def]) => !def.isPositive)
+    .map(([key]) => key);
 
-  // Calculate how much to shift (max 10% shift for more pronounced dice effect)
-  const shiftAmount = Math.abs(bias) * 0.20;
+  // Calculate how much to shift (max 5% shift for more balanced gameplay)
+  const shiftAmount = Math.abs(bias) * 0.05;
 
   if (bias > 0) {
     // High roll: boost good outcomes
@@ -284,26 +464,24 @@ export function applyDiceBias(
 export function resolveAtBat(
   batter: BatterStats,
   pitcher: PitcherStats,
-  diceRoll: [number, number]
+  diceRoll: [number, number],
+  randomValue: number = Math.random()
 ): OutcomeType {
   // Calculate modified probabilities
   const batterMods = calculateBatterModifiers(batter);
   const pitcherMods = calculatePitcherModifiers(pitcher);
 
   const adjusted: Record<OutcomeType, number> = {} as Record<OutcomeType, number>;
-  const positiveOutcomes: OutcomeType[] = ['single', 'double', 'triple', 'homeRun', 'walk'];
 
-  for (const outcome of Object.keys(BASE_PROBABILITIES) as OutcomeType[]) {
-    const base = BASE_PROBABILITIES[outcome];
+  for (const [key, def] of Object.entries(OUTCOMES) as [OutcomeType, OutcomeDefinition][]) {
+    const base = def.baseProbability;
 
-    if (positiveOutcomes.includes(outcome)) {
+    if (def.isPositive) {
       // Good outcomes: batter helps (>1), good pitcher suppresses (<1)
-      // Good pitcher with pitcherMods < 1 reduces probability
-      adjusted[outcome] = base * batterMods[outcome] * pitcherMods[outcome];
+      adjusted[key] = base * batterMods[key] * pitcherMods[key];
     } else {
       // Bad outcomes: good batter reduces, good pitcher increases
-      // For strikeouts, pitcherMods.strikeout > 1 for high-K pitchers
-      adjusted[outcome] = base * (1 / batterMods[outcome]) * pitcherMods[outcome];
+      adjusted[key] = base * (1 / batterMods[key]) * pitcherMods[key];
     }
   }
 
@@ -314,15 +492,14 @@ export function resolveAtBat(
   }
 
   // Use dice roll to bias the selection
-  // Higher dice totals favor better outcomes
   const diceTotal = diceRoll[0] + diceRoll[1];
-  const diceBias = (diceTotal - 7) / 10; // Range: -0.5 to +0.5
+  const diceBias = (diceTotal - 7) / 10;
 
   // Apply bias
   const biased = applyDiceBias(adjusted, diceBias);
 
   // Weighted random selection
-  return weightedRandomSelect(biased);
+  return weightedRandomSelect(biased, randomValue);
 }
 
 // ============================================
@@ -336,60 +513,11 @@ export function advanceRunners(
   currentState: BaseState,
   outcome: OutcomeType
 ): { newBases: [boolean, boolean, boolean]; runsScored: number } {
-  const bases = [...currentState.bases] as [boolean, boolean, boolean];
-  let runs = 0;
-
-  switch (outcome) {
-    case 'homeRun':
-      // Everyone scores
-      runs = 1 + bases.filter((b) => b).length;
-      return { newBases: [false, false, false], runsScored: runs };
-
-    case 'triple':
-      // All runners score, batter to 3rd
-      runs = bases.filter((b) => b).length;
-      return { newBases: [false, false, true], runsScored: runs };
-
-    case 'double':
-      // Runners advance 2, batter to 2nd
-      if (bases[2]) runs++; // 3rd scores
-      if (bases[1]) runs++; // 2nd scores
-      const newThird = bases[0]; // 1st to 3rd
-      return { newBases: [false, true, newThird], runsScored: runs };
-
-    case 'single':
-      // Runners advance 1, batter to 1st
-      if (bases[2]) runs++; // 3rd scores
-      return {
-        newBases: [true, bases[0], bases[1]],
-        runsScored: runs,
-      };
-
-    case 'walk':
-      // Forced advances only
-      if (bases[0] && bases[1] && bases[2]) {
-        runs++; // Bases loaded, run scores
-      }
-      if (bases[0] && bases[1]) {
-        // First and second occupied, force to third
-        return { newBases: [true, true, true], runsScored: runs };
-      }
-      if (bases[0]) {
-        // Only first occupied, force to second
-        return { newBases: [true, true, bases[2]], runsScored: runs };
-      }
-      // Just batter to first
-      return { newBases: [true, bases[1], bases[2]], runsScored: runs };
-
-    case 'strikeout':
-    case 'groundOut':
-    case 'flyOut':
-      // No advancement (simplified for V2)
-      return { newBases: bases, runsScored: 0 };
-
-    default:
-      return { newBases: bases, runsScored: 0 };
+  const def = OUTCOMES[outcome];
+  if (!def) {
+    return { newBases: [...currentState.bases] as [boolean, boolean, boolean], runsScored: 0 };
   }
+  return def.advanceRunners(currentState.bases);
 }
 
 // ============================================
@@ -417,15 +545,10 @@ export function handleInningLogic(state: GameState): void {
     if (state.isTopOfInning) {
       // Switch to bottom of inning
       state.isTopOfInning = false;
-
-      // Check if home team already won (ahead after top of 9+)
-      // This scenario shouldn't happen - home batting with lead ends game
     } else {
       // End of full inning
-      // Check for game end conditions
       if (state.inning >= 9) {
         if (visitorScore !== homeScore) {
-          // Not tied, game over
           state.isGameOver = true;
           return;
         }
@@ -443,52 +566,6 @@ export function handleInningLogic(state: GameState): void {
 // PLAY DESCRIPTION GENERATOR
 // ============================================
 
-const DESCRIPTIONS: Record<OutcomeType, string[]> = {
-  homeRun: [
-    '{batter} crushes one! Home run!',
-    '{batter} goes yard! It\'s outta here!',
-    'Swing and a drive! {batter} with a homer!',
-    '{batter} deposits one in the seats!',
-  ],
-  triple: [
-    '{batter} triples into the gap!',
-    '{batter} legs out a triple!',
-    'Off the wall! {batter} with a triple!',
-  ],
-  double: [
-    '{batter} doubles down the line!',
-    '{batter} rips one for extra bases!',
-    'Off the wall! {batter} with a double!',
-  ],
-  single: [
-    '{batter} singles through the infield.',
-    '{batter} pokes one into the outfield.',
-    'Base hit for {batter}!',
-    '{batter} with a seeing-eye single.',
-  ],
-  walk: [
-    '{batter} works a walk.',
-    'Ball four. {batter} takes first.',
-    '{pitcher} can\'t find the zone. Walk.',
-  ],
-  strikeout: [
-    '{batter} goes down swinging!',
-    'Struck out looking! {pitcher} gets {batter}.',
-    '{pitcher} blows it by {batter}. K!',
-    'Swing and a miss! That\'s strike three!',
-  ],
-  groundOut: [
-    '{batter} grounds out to short.',
-    'Easy grounder, and {batter} is out.',
-    '{batter} rolls one to the infield. Out.',
-  ],
-  flyOut: [
-    '{batter} flies out to center.',
-    'Can of corn. {batter} is out.',
-    '{batter} skies one to left. Caught.',
-  ],
-};
-
 /**
  * Generate a play-by-play description for an outcome
  */
@@ -496,10 +573,12 @@ export function generateDescription(
   outcome: OutcomeType,
   batterName: string,
   pitcherName: string,
-  runsScored: number
+  runsScored: number,
+  randomValue: number = Math.random()
 ): string {
-  const templates = DESCRIPTIONS[outcome];
-  const template = templates[Math.floor(Math.random() * templates.length)];
+  const def = OUTCOMES[outcome];
+  const templates = def.descriptions;
+  const template = templates[Math.floor(randomValue * templates.length)];
 
   let desc = template.replace(/{batter}/g, batterName).replace(/{pitcher}/g, pitcherName);
 

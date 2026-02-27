@@ -92,13 +92,6 @@ function isUserTurn(
   return userId === game.homeUserId;
 }
 
-/**
- * Roll dice (1-6 each)
- */
-function rollDice(): [number, number] {
-  return [Math.floor(Math.random() * 6) + 1, Math.floor(Math.random() * 6) + 1];
-}
-
 // ============================================
 // SOCKET SERVER FACTORY
 // ============================================
@@ -159,6 +152,10 @@ export function createSocketServer(httpServer: HttpServer): SocketServer {
           return;
         }
 
+        // Check if this is the first time both players are connected
+        const opponentId = getOpponentId(game, userId);
+        console.log(`🎮 Player ${userId} joining game ${gameId}. Status: ${game.status}, OpponentId: ${opponentId}`);
+
         // Join the socket.io room
         socket.join(gameId);
         socket.gameId = gameId;
@@ -172,24 +169,27 @@ export function createSocketServer(httpServer: HttpServer): SocketServer {
         const userKey = `${gameId}:${userId}`;
         userToSocket.set(userKey, socket.id);
 
+        let shouldNotifyOpponentConnected = false;
+
         // Cancel any disconnect timer for this user
         const timer = disconnectTimers.get(userKey);
         if (timer) {
           clearTimeout(timer);
           disconnectTimers.delete(userKey);
+          shouldNotifyOpponentConnected = true;
+        }
 
-          // Notify opponent of reconnection
-          const opponentId = getOpponentId(game, userId);
-          if (opponentId) {
-            const opponentSocketId = userToSocket.get(`${gameId}:${opponentId}`);
-            if (opponentSocketId) {
-              io.to(opponentSocketId).emit('opponent:connected', { userId });
-            }
+        // Notify opponent if they're connected
+        if (opponentId && shouldNotifyOpponentConnected) {
+          const opponentSocketId = userToSocket.get(`${gameId}:${opponentId}`);
+          if (opponentSocketId) {
+            console.log(`📡 Notifying opponent ${opponentId} of player connection`);
+            io.to(opponentSocketId).emit('opponent:connected', { userId });
           }
         }
 
         // Send current game state
-        socket.emit('game:state', { state: game.state });
+        socket.emit('game:state', { state: game.state, sim: game.simulation });
       } catch (error) {
         console.error('Error joining game:', error);
         socket.emit('error', { error: 'internal_error', message: 'Failed to join game' });
@@ -216,7 +216,7 @@ export function createSocketServer(httpServer: HttpServer): SocketServer {
         }
 
         // Roll the dice
-        const diceRolls = rollDice();
+        const diceRolls = await gameService.generateDiceRoll(gameId);
 
         // Record the move
         const result = await gameService.recordMove(gameId, userId, { diceRolls });
@@ -246,9 +246,13 @@ export function createSocketServer(httpServer: HttpServer): SocketServer {
           runsScored: result.runsScored,
           outsRecorded: result.outsRecorded,
           description: result.description,
+          playContext: result.playContext,
           batter: result.batter,
+          batterStats: result.batterStats,
           pitcher: result.pitcher,
+          pitcherStats: result.pitcherStats,
           newState: result.newState,
+          sim: result.sim,
         });
       } catch (error) {
         console.error('Error processing roll:', error);

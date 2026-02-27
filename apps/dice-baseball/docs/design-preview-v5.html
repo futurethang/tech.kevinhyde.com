@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dice Baseball V2 — Visual Direction v5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Pacifico&family=Doto:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #1a1a2e;
+    color: #e8e0d4;
+    padding: 2rem;
+    line-height: 1.5;
+  }
+  h1, h2, h3, h4 { font-family: 'Oswald', sans-serif; text-transform: uppercase; }
+  .section { margin-bottom: 3rem; }
+  .section-title {
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    color: #8a8070;
+    margin-bottom: 1rem;
+    font-family: 'Inter', sans-serif;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .note-box {
+    background: #1a2744;
+    border-left: 4px solid #E9D447;
+    padding: 0.65rem 0.85rem;
+    margin: 1rem 0;
+    font-size: 0.8rem;
+    color: #c8b89a;
+  }
+  .comparison {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 1rem;
+  }
+  .comparison-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #8a8070;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+
+  /* ============ TOPPS COLOR-BLOCK CARD FRAME ============ */
+  .card-frame {
+    display: grid;
+    background: #000;
+    gap: 1px;
+    width: 280px;
+  }
+  .card-frame-griffey {
+    grid-template-columns: 14px 1fr 14px;
+    grid-template-rows: 14px auto auto auto;
+  }
+  .frame-top-left { background: #3D8AC5; position: relative; overflow: hidden; }
+  .frame-top { background: #3D8AC5; position: relative; overflow: hidden; }
+  .frame-top-right { background: #E9D447; }
+  .frame-left { background: #3D8AC5; position: relative; overflow: hidden; }
+  .frame-right { background: #E9D447; }
+  .frame-bottom-left { background: #E9D447; }
+
+  .frame-top-left::after,
+  .frame-top::after,
+  .frame-left::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.2) 1px, transparent 1px);
+    background-size: 4px 4px;
+  }
+
+  .frame-content {
+    background: #16213e;
+    min-height: 0;
+  }
+
+  .frame-nameplate {
+    grid-column: 1 / -1;
+    background: #CE632A;
+    padding: 0.3rem 0.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .frame-nameplate h3 {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    color: #fff;
+    font-size: 0.9rem;
+    letter-spacing: 0.04em;
+  }
+
+  .card-photo {
+    height: 90px;
+    background: #2a3a5c;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .card-photo::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(0,0,0,0.25) 1px, transparent 1px);
+    background-size: 4px 4px;
+    pointer-events: none;
+  }
+  .card-photo .initials {
+    width: 52px;
+    height: 52px;
+    background: #3D8AC5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #fff;
+    border: 3px solid #E9D447;
+    border-radius: 50%;
+    position: relative;
+    z-index: 1;
+  }
+  .card-photo::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 30px;
+    background-image: radial-gradient(circle, #16213e 1px, transparent 1px);
+    background-size: 3px 3px;
+    mask-image: linear-gradient(to bottom, transparent, black);
+    -webkit-mask-image: linear-gradient(to bottom, transparent, black);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .card-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    background: #16213e;
+  }
+  .stat-cell {
+    text-align: center;
+    padding: 0.35rem 0;
+    border-right: 1px solid #2a2a4a;
+  }
+  .stat-cell:last-child { border-right: none; }
+  .stat-label {
+    font-size: 0.55rem;
+    color: #8a8070;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+  }
+  .stat-value {
+    font-size: 0.95rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500;
+    color: #e8e0d4;
+  }
+
+  .pos-badge {
+    background: #E9D447;
+    color: #000;
+    font-size: 0.6rem;
+    font-weight: 700;
+    padding: 0.1rem 0.4rem;
+    font-family: 'Oswald', sans-serif;
+    letter-spacing: 0.05em;
+  }
+
+  /* ============ DONRUSS VARIANT ============ */
+  .card-frame-donruss {
+    grid-template-columns: 16px 1fr;
+    grid-template-rows: auto auto auto auto;
+    width: 280px;
+  }
+  .donruss-side { background: #1a2744; position: relative; overflow: hidden; }
+  .donruss-side::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+    background-size: 3px 3px;
+  }
+
+  /* ============ RECORD BREAKER / ALL STAR CARD ============ */
+  .card-frame-special {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto auto;
+    width: 280px;
+  }
+  .special-banner {
+    background: #c62828;
+    padding: 0.3rem 0.6rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .special-banner::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.12) 1px, transparent 1px);
+    background-size: 4px 4px;
+  }
+  .special-banner h2 {
+    font-family: 'Pacifico', cursive;
+    color: #E9D447;
+    font-size: 1.3rem;
+    text-transform: none;
+    position: relative;
+    z-index: 1;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.4);
+  }
+
+  /* ============ SCOREBOARD ============ */
+  .scoreboard {
+    background: #000;
+    display: grid;
+    gap: 1px;
+    grid-template-rows: auto auto;
+    max-width: 480px;
+  }
+  .scoreboard-header {
+    background: #c62828;
+    padding: 0.35rem 0.65rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .scoreboard-header span {
+    font-family: 'Oswald', sans-serif;
+    color: #fff;
+    font-size: 0.8rem;
+    letter-spacing: 0.06em;
+    font-weight: 700;
+  }
+  .scoreboard-body {
+    background: #0a0a14;
+    padding: 0;
+  }
+  .scoreboard-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .scoreboard-table th {
+    color: #5a5a6a;
+    font-weight: 500;
+    padding: 0.3rem 0.3rem;
+    text-align: center;
+    font-size: 0.6rem;
+    font-family: 'Inter', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid #1a1a2e;
+  }
+  .scoreboard-table td {
+    padding: 0.35rem 0.25rem;
+    text-align: center;
+    font-family: 'Doto', monospace;
+    font-weight: 600;
+    font-size: 1.15rem;
+    color: #E9D447;
+    letter-spacing: 0.03em;
+  }
+  .scoreboard-table td:first-child {
+    text-align: left;
+    padding-left: 0.6rem;
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: #c8b89a;
+  }
+  .scoreboard-table .current { color: #4caf50; text-shadow: 0 0 8px rgba(76,175,80,0.4); }
+  .scoreboard-table .dim { color: #2a2a3a; }
+  .scoreboard-table .total-col {
+    border-left: 3px solid #E9D447;
+    font-weight: 800;
+    font-size: 1.3rem;
+    color: #E9D447;
+    text-shadow: 0 0 10px rgba(233,212,71,0.35);
+  }
+
+  /* ============ BUTTONS — HARD SHADOW / ZERO RADIUS ============ */
+  .button-row { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; }
+  .btn {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    border: none;
+    border-radius: 0;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+  }
+  .btn-lg { padding: 0.7rem 1.75rem; font-size: 1rem; min-height: 48px; }
+  .btn-md { padding: 0.55rem 1.1rem; font-size: 0.85rem; min-height: 44px; }
+  .btn-sm { padding: 0.35rem 0.7rem; font-size: 0.7rem; min-height: 34px; }
+  .btn-primary {
+    background: #4caf50;
+    color: #fff;
+    box-shadow: 4px 4px 0 #2e7d32;
+    border: 1px solid #000;
+  }
+  .btn-primary:hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 #2e7d32; }
+  .btn-primary:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 #2e7d32; }
+  .btn-roll {
+    background: #E9D447;
+    color: #1a1a2e;
+    box-shadow: 5px 5px 0 #B0A030;
+    border: 1px solid #000;
+    font-family: 'Pacifico', cursive;
+    font-size: 1.15rem;
+    padding: 0.85rem 2.25rem;
+    min-height: 56px;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-roll:hover { transform: translate(-2px, -2px); box-shadow: 7px 7px 0 #B0A030; }
+  .btn-roll:active { transform: translate(4px, 4px); box-shadow: 1px 1px 0 #B0A030; }
+  .btn-secondary {
+    background: transparent;
+    color: #E9D447;
+    border: 2px solid #E9D447;
+    box-shadow: 3px 3px 0 #B0A030;
+  }
+  .btn-secondary:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 #B0A030; }
+  .btn-secondary:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 #B0A030; }
+  .btn-danger {
+    background: #c62828;
+    color: #fff;
+    border: 1px solid #000;
+    box-shadow: 3px 3px 0 #8e0000;
+  }
+  .btn-danger:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 #8e0000; }
+  .btn-danger:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 #8e0000; }
+
+  /* ============ OUTCOME BADGES ============ */
+  .badge-row { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+  .outcome-badge {
+    font-family: 'Pacifico', cursive;
+    font-size: 0.7rem;
+    padding: 0.2rem 0.55rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    border: 1px solid #000;
+    text-transform: none;
+  }
+  .badge-hr { background: #E9D447; color: #000; box-shadow: 2px 2px 0 #B0A030; }
+  .badge-triple { background: #2e7d32; color: #fff; box-shadow: 2px 2px 0 #1b5e20; }
+  .badge-double { background: #388e3c; color: #fff; box-shadow: 2px 2px 0 #2e7d32; }
+  .badge-single { background: #4caf50; color: #fff; box-shadow: 2px 2px 0 #388e3c; }
+  .badge-walk { background: #3D8AC5; color: #fff; box-shadow: 2px 2px 0 #2A6B9E; }
+  .badge-k { background: #c62828; color: #fff; box-shadow: 2px 2px 0 #8e0000; }
+  .badge-out { background: #4a3425; color: #c8b89a; box-shadow: 2px 2px 0 #2d1f14; border-color: #2d1f14; }
+
+  /* ============ CODE BLOCK ============ */
+  .code-block {
+    background: #0a0a14;
+    padding: 1rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: #c8b89a;
+    overflow-x: auto;
+    white-space: pre;
+    line-height: 1.7;
+  }
+  .code-comment { color: #5a5a6a; }
+  .code-prop { color: #E9D447; }
+  .code-val { color: #4caf50; }
+
+  /* ============================================================
+     v5 TEXTURE SYSTEM — FIXED FOR DARK BACKGROUNDS
+     ============================================================
+
+     v4 problems diagnosed:
+     - Paper grain: mix-blend-mode: overlay with white on dark
+       is mathematically invisible (overlay darkens darks)
+     - Stipple: same overlay-on-dark issue at 1.5% opacity
+     - Edge wear: black inset shadows on dark bg = dark on dark
+     - Ink bleed: feDisplacementMap shifts pixels = glitch artifact
+
+     v5 fixes:
+     - PAPER GRAIN: switch to mix-blend-mode: screen (always
+       lightens), use warm gray source, bump to 8% opacity
+     - STIPPLE: screen blend at 5% opacity
+     - EDGE WEAR: warm-tinted radial gradient vignette instead
+       of black inset shadows. Visible as color shift, not darkness.
+     - INK BLEED: drop all feDisplacementMap. Text-shadow only
+       approach with boosted values. Add warm box-shadow "bleed"
+       on color block edges.
+     - GLOSS: add CSS animation for mobile (no hover needed),
+       gloss-pulse variant for CTA buttons like Roll Dice
+  */
+
+  /* --- 1. PAPER GRAIN (global overlay) ---
+     WHY screen WORKS on dark:
+     Screen formula: result = 1 - (1 - base)(1 - blend)
+     With dark base (~0.1) and light noise at 8% opacity,
+     the noise dots lighten the surface just enough to read
+     as paper fiber. Overlay would have made them invisible.
+  */
+  .paper-grain {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: none;
+    opacity: 0.08;
+    mix-blend-mode: screen;
+    filter: url(#paper-noise);
+    background: #a09080; /* warm gray — warm fibers, not sterile white */
+  }
+
+  /* --- 2. CARD STOCK STIPPLE (secondary grain layer) ---
+     Two offset dot grids at different sizes prevent
+     visible tiling. Screen blend ensures visibility on dark.
+  */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 9998;
+    pointer-events: none;
+    opacity: 0.05;
+    background-image:
+      radial-gradient(circle, #c8b89a 0.5px, transparent 0.5px),
+      radial-gradient(circle, #c8b89a 0.3px, transparent 0.3px);
+    background-size: 7px 7px, 5px 5px;
+    background-position: 0 0, 2.5px 2.5px;
+    mix-blend-mode: screen;
+  }
+
+  /* --- 3. INK BLEED — TEXT ONLY (no displacement maps) ---
+     Warm brown text-shadow at sub-pixel offsets.
+     On dark backgrounds, the shadow color needs to be
+     lighter than the bg so it's actually visible as a
+     warm haze around letterforms.
+  */
+  .ink-bleed {
+    text-shadow:
+      0 0 1px rgba(180, 140, 90, 0.25),
+      0.4px 0.3px 1px rgba(160, 120, 70, 0.18);
+  }
+  .ink-bleed-heavy {
+    text-shadow:
+      0 0 1.5px rgba(180, 140, 90, 0.35),
+      0.5px 0.4px 1.5px rgba(160, 120, 70, 0.25),
+      -0.3px 0.3px 1px rgba(170, 130, 80, 0.15);
+  }
+  /* Ink bleed for surfaces — warm glow on color block edges */
+  .ink-bleed-edge {
+    box-shadow: 0 0 3px rgba(160, 120, 70, 0.12);
+  }
+
+  /* --- 4. GLOSS REFLECTION --- */
+  .gloss-surface {
+    position: relative;
+    overflow: hidden;
+  }
+  .gloss-surface::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      115deg,
+      transparent 0%,
+      transparent 40%,
+      rgba(255, 255, 255, 0.04) 42%,
+      rgba(255, 255, 255, 0.08) 45%,
+      rgba(255, 255, 255, 0.04) 48%,
+      transparent 50%,
+      transparent 100%
+    );
+    mix-blend-mode: overlay;
+    pointer-events: none;
+    z-index: 10;
+    transition: background-position 0.6s ease;
+    background-size: 200% 200%;
+    background-position: 100% 0%;
+  }
+  /* Desktop: gloss moves on hover */
+  .gloss-surface:hover::after {
+    background-position: 0% 100%;
+  }
+
+  /* Foil variant for special/premium cards */
+  .gloss-foil::after {
+    background: linear-gradient(
+      115deg,
+      transparent 0%,
+      transparent 35%,
+      rgba(255, 255, 255, 0.06) 38%,
+      rgba(255, 255, 255, 0.12) 42%,
+      rgba(233, 212, 71, 0.08) 46%,
+      rgba(255, 255, 255, 0.06) 50%,
+      transparent 52%,
+      transparent 100%
+    );
+    background-size: 200% 200%;
+    background-position: 100% 0%;
+  }
+
+  /* v5 NEW: Gloss sweep animation for mobile + CTA buttons */
+  @keyframes gloss-sweep {
+    0%, 100% { background-position: 100% 0%; }
+    50% { background-position: 0% 100%; }
+  }
+
+  /* On touch devices (no hover), auto-animate the gloss */
+  @media (hover: none) {
+    .gloss-surface::after {
+      animation: gloss-sweep 5s ease-in-out infinite;
+    }
+  }
+
+  /* Attention-grabbing pulse for CTA buttons (Roll Dice) */
+  .gloss-pulse {
+    position: relative;
+    overflow: hidden;
+  }
+  .gloss-pulse::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      105deg,
+      transparent 0%,
+      transparent 35%,
+      rgba(255, 255, 255, 0.08) 38%,
+      rgba(255, 255, 255, 0.15) 42%,
+      rgba(255, 255, 255, 0.08) 46%,
+      transparent 49%,
+      transparent 100%
+    );
+    background-size: 250% 250%;
+    background-position: 100% 0%;
+    pointer-events: none;
+    z-index: 1;
+    animation: gloss-sweep 3s ease-in-out infinite;
+  }
+
+  /* --- 5. EDGE WEAR (warm vignette, NOT black shadow) ---
+     On dark backgrounds, darkening edges is invisible.
+     Instead: warm-tinted radial gradient lighter in center,
+     darker/cooler at edges. Reads as "handled card" wear
+     through color temperature shift, not luminance shift.
+  */
+  .aged-edge {
+    position: relative;
+  }
+  .aged-edge::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    pointer-events: none;
+    background: radial-gradient(
+      ellipse at 50% 50%,
+      transparent 50%,
+      rgba(0, 0, 0, 0.12) 85%,
+      rgba(0, 0, 0, 0.2) 100%
+    );
+    /* Warm inner glow to make vignette visible by contrast */
+    box-shadow:
+      inset 0 0 30px rgba(180, 140, 90, 0.06),
+      inset 0 0 60px rgba(0, 0, 0, 0.08);
+  }
+
+  /* Stronger variant for special/premium cards */
+  .aged-edge-heavy::before {
+    background: radial-gradient(
+      ellipse at 50% 50%,
+      rgba(180, 140, 90, 0.04) 30%,
+      transparent 55%,
+      rgba(0, 0, 0, 0.15) 80%,
+      rgba(0, 0, 0, 0.25) 100%
+    );
+    box-shadow:
+      inset 0 0 25px rgba(180, 140, 90, 0.08),
+      inset 0 0 50px rgba(0, 0, 0, 0.12);
+  }
+
+  /* ============ TEXTURE DEMO PANELS ============ */
+  .texture-demo {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  .texture-panel {
+    height: 140px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .texture-panel-label {
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.85rem;
+    color: #e8e0d4;
+    z-index: 2;
+    position: relative;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+</style>
+</head>
+<body>
+
+<!-- SVG Filters — hidden, referenced by CSS filter: url(#...) -->
+<svg width="0" height="0" style="position: absolute;">
+  <defs>
+    <!-- Paper grain noise — generates procedural fiber texture -->
+    <filter id="paper-noise" x="0%" y="0%" width="100%" height="100%">
+      <feTurbulence
+        type="fractalNoise"
+        baseFrequency="0.65"
+        numOctaves="4"
+        stitchTiles="stitch"
+        result="noise"
+      />
+      <feColorMatrix
+        type="saturate"
+        values="0"
+        in="noise"
+        result="gray-noise"
+      />
+    </filter>
+  </defs>
+</svg>
+
+<!-- Global paper grain overlay -->
+<div class="paper-grain"></div>
+
+<!-- ============ TITLE ============ -->
+<div style="margin-bottom: 3rem;">
+  <h1 style="font-family: 'Pacifico', cursive; font-size: 2.2rem; color: #E9D447; margin-bottom: 0.25rem; text-transform: none;" class="ink-bleed-heavy">Dice Baseball</h1>
+  <p style="color: #8a8070; font-size: 0.8rem;">Visual Direction v5 — Texture Fixes + Griffey Color Tokens (#3D8AC5 / #CE632A / #E9D447)</p>
+  <p style="color: #5a5a6a; font-size: 0.7rem; margin-top: 0.25rem;">
+    <a href="design-preview-v4.html" style="color: #5a5a6a;">v4</a> &middot;
+    <a href="design-preview-v3.html" style="color: #5a5a6a;">v3</a> &middot;
+    <a href="design-preview-v2-archived.html" style="color: #5a5a6a;">v2</a> &middot;
+    <a href="design-preview-v1.html" style="color: #5a5a6a;">v1</a>
+  </p>
+</div>
+
+<!-- ============ WHAT CHANGED v4 → v5 ============ -->
+<div class="section">
+  <div class="section-title">v4 → v5 Changes (Bug Fixes)</div>
+  <div class="note-box">
+    <strong style="color: #E9D447;">Paper grain FIX:</strong> Changed from mix-blend-mode: overlay (invisible on dark) to <strong>screen</strong> (always lightens). Warm gray (#a09080) source instead of white. Opacity bumped from 3.5% to 8%. Now visible as subtle warm fibers across all dark surfaces.<br>
+    <strong style="color: #E9D447;">Stipple FIX:</strong> Same screen blend fix. Opacity from 1.5% to 5%. Warm dot color (#c8b89a) instead of cool white.<br>
+    <strong style="color: #E9D447;">Edge wear FIX:</strong> Replaced invisible black inset shadows with warm radial-gradient vignette. Lighter warm center, darker cooler edges — visible as temperature shift on dark backgrounds, not just darkness.<br>
+    <strong style="color: #E9D447;">Ink bleed FIX:</strong> Dropped ALL SVG feDisplacementMap filters (caused glitch/pixel-shift artifacts). Text-shadow only, with colors adjusted brighter so they're visible against dark backgrounds. Added .ink-bleed-edge for warm glow on color block surfaces.<br>
+    <strong style="color: #E9D447;">Gloss MOBILE:</strong> Added @keyframes gloss-sweep animation. Uses @media (hover: none) to auto-animate on touch devices. New .gloss-pulse class for CTA buttons (Roll Dice) that sweeps continuously on all devices.
+  </div>
+</div>
+
+<!-- ============ WHY v4 FAILED ============ -->
+<div class="section">
+  <div class="section-title">Why v4 Textures Were Invisible — The Blend Mode Problem</div>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: #000; margin-top: 0.5rem;">
+    <div style="background: #16213e; padding: 1rem;">
+      <div class="comparison-label" style="color: #c62828;">v4: overlay on dark = invisible</div>
+      <p style="font-size: 0.75rem; color: #c8b89a; margin-top: 0.4rem;">Overlay formula: if base &lt; 0.5 → result = 2 &times; base &times; blend. Our base is ~0.1 (deep navy), blend is white at 3.5% opacity ≈ 0.035. Result: 2 &times; 0.1 &times; 0.035 = 0.007. Essentially zero — the noise was mathematically erased by the blend math.</p>
+    </div>
+    <div style="background: #16213e; padding: 1rem;">
+      <div class="comparison-label" style="color: #4caf50;">v5: screen on dark = visible</div>
+      <p style="font-size: 0.75rem; color: #c8b89a; margin-top: 0.4rem;">Screen formula: result = 1 - (1 - base)(1 - blend). Same base ~0.1, warm gray at 8% ≈ 0.05. Result: 1 - (0.9)(0.95) = 0.145. That's a visible 4.5% luminance lift on the noise peaks — enough to read as texture without being heavy-handed.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============ TECHNIQUE BREAKDOWN (FIXED) ============ -->
+<div class="section">
+  <div class="section-title">Texture Techniques — Fixed for Dark Palette</div>
+
+  <div class="texture-demo">
+    <!-- 1. Paper Grain — FIXED -->
+    <div>
+      <div class="comparison-label">1. Paper Grain — screen blend @ 8%</div>
+      <div class="texture-panel" style="background: #16213e;">
+        <div style="position: absolute; inset: 0; filter: url(#paper-noise); background: #a09080; opacity: 0.08; mix-blend-mode: screen;"></div>
+        <span class="texture-panel-label">Paper Grain</span>
+      </div>
+      <div style="font-size: 0.6rem; color: #5a5a6a; margin-top: 0.3rem;">feTurbulence → desaturate → warm gray source → screen @ 8%</div>
+    </div>
+
+    <!-- 1b. Grain intensity comparison -->
+    <div>
+      <div class="comparison-label">Grain intensity: 4% / 8% / 15%</div>
+      <div style="display: flex; gap: 1px; background: #000; margin-top: 0.5rem; height: 140px;">
+        <div style="flex: 1; background: #16213e; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+          <div style="position: absolute; inset: 0; filter: url(#paper-noise); background: #a09080; opacity: 0.04; mix-blend-mode: screen;"></div>
+          <span style="font-size: 0.6rem; color: #8a8070; z-index: 1; font-family: Inter;">4%</span>
+        </div>
+        <div style="flex: 1; background: #16213e; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+          <div style="position: absolute; inset: 0; filter: url(#paper-noise); background: #a09080; opacity: 0.08; mix-blend-mode: screen;"></div>
+          <span style="font-size: 0.6rem; color: #8a8070; z-index: 1; font-family: Inter;">8% ✓</span>
+        </div>
+        <div style="flex: 1; background: #16213e; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+          <div style="position: absolute; inset: 0; filter: url(#paper-noise); background: #a09080; opacity: 0.15; mix-blend-mode: screen;"></div>
+          <span style="font-size: 0.6rem; color: #8a8070; z-index: 1; font-family: Inter;">15%</span>
+        </div>
+      </div>
+      <div style="font-size: 0.6rem; color: #5a5a6a; margin-top: 0.3rem;">8% is the sweet spot — present but not distracting. Tune to taste.</div>
+    </div>
+
+    <!-- 2. Card Stock Stipple — FIXED -->
+    <div>
+      <div class="comparison-label">2. Card Stock Stipple — screen blend @ 5%</div>
+      <div class="texture-panel" style="background: #16213e;">
+        <div style="position: absolute; inset: 0; opacity: 0.05; background-image: radial-gradient(circle, #c8b89a 0.5px, transparent 0.5px), radial-gradient(circle, #c8b89a 0.3px, transparent 0.3px); background-size: 7px 7px, 5px 5px; background-position: 0 0, 2.5px 2.5px; mix-blend-mode: screen;"></div>
+        <span class="texture-panel-label">Card Stipple</span>
+      </div>
+      <div style="font-size: 0.6rem; color: #5a5a6a; margin-top: 0.3rem;">Warm-toned dots (#c8b89a), offset grids, screen blend</div>
+    </div>
+
+    <!-- 3. Ink Bleed — FIXED (text-shadow only) -->
+    <div>
+      <div class="comparison-label">3. Ink Bleed — text-shadow only (no displacement)</div>
+      <div class="texture-panel" style="background: #16213e;">
+        <div style="display: flex; flex-direction: column; gap: 0.75rem; z-index: 1;">
+          <div>
+            <span style="font-size: 0.5rem; color: #5a5a6a;">Clean:</span><br>
+            <span style="font-family: 'Oswald'; font-weight: 700; font-size: 1.1rem; color: #e8e0d4; text-transform: uppercase; letter-spacing: 0.04em;">KEN GRIFFEY JR.</span>
+          </div>
+          <div>
+            <span style="font-size: 0.5rem; color: #5a5a6a;">With ink bleed:</span><br>
+            <span class="ink-bleed-heavy" style="font-family: 'Oswald'; font-weight: 700; font-size: 1.1rem; color: #e8e0d4; text-transform: uppercase; letter-spacing: 0.04em;">KEN GRIFFEY JR.</span>
+          </div>
+        </div>
+      </div>
+      <div style="font-size: 0.6rem; color: #5a5a6a; margin-top: 0.3rem;">Warm text-shadow (brighter tones for dark bg visibility). No SVG filters.</div>
+    </div>
+
+    <!-- 4. Gloss — hover -->
+    <div>
+      <div class="comparison-label">4. Gloss Reflection (hover me)</div>
+      <div class="texture-panel gloss-surface" style="background: #3D8AC5;">
+        <span class="texture-panel-label">Hover for Gloss</span>
+      </div>
+      <div style="font-size: 0.6rem; color: #5a5a6a; margin-top: 0.3rem;">Desktop: slides on hover. Mobile: auto-animates via @media (hover: none)</div>
+    </div>
+
+    <!-- 5. Gloss Pulse — CTA -->
+    <div>
+      <div class="comparison-label">5. Gloss Pulse — CTA Attention (always animates)</div>
+      <div class="texture-panel gloss-pulse" style="background: #E9D447;">
+        <span class="texture-panel-label" style="color: #1a1a2e; font-family: 'Pacifico', cursive; text-transform: none; font-size: 1.2rem;">Roll Dice</span>
+      </div>
+      <div style="font-size: 0.6rem; color: #5a5a6a; margin-top: 0.3rem;">Continuous 3s sweep. Draws eye to primary action without being annoying.</div>
+    </div>
+
+    <!-- 6. Edge Wear — FIXED -->
+    <div>
+      <div class="comparison-label">6. Edge Wear — warm vignette (not black shadow)</div>
+      <div style="display: flex; gap: 1px; background: #000; margin-top: 0.5rem; height: 140px;">
+        <div style="flex: 1; background: #16213e; position: relative; display: flex; align-items: center; justify-content: center;">
+          <span style="font-size: 0.55rem; color: #5a5a6a; z-index: 2; position: relative;">No wear</span>
+        </div>
+        <div style="flex: 1; background: #16213e; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+          <div style="position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 50%, transparent 50%, rgba(0,0,0,0.12) 85%, rgba(0,0,0,0.2) 100%); box-shadow: inset 0 0 30px rgba(180,140,90,0.06), inset 0 0 60px rgba(0,0,0,0.08);"></div>
+          <span style="font-size: 0.55rem; color: #5a5a6a; z-index: 2; position: relative;">Standard</span>
+        </div>
+        <div style="flex: 1; background: #16213e; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+          <div style="position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 50%, rgba(180,140,90,0.04) 30%, transparent 55%, rgba(0,0,0,0.15) 80%, rgba(0,0,0,0.25) 100%); box-shadow: inset 0 0 25px rgba(180,140,90,0.08), inset 0 0 50px rgba(0,0,0,0.12);"></div>
+          <span style="font-size: 0.55rem; color: #5a5a6a; z-index: 2; position: relative;">Heavy</span>
+        </div>
+      </div>
+      <div style="font-size: 0.6rem; color: #5a5a6a; margin-top: 0.3rem;">Warm center + cool edges = visible temperature shift. Heavy variant for premium cards.</div>
+    </div>
+
+    <!-- 7. All Layers Combined -->
+    <div>
+      <div class="comparison-label">7. All Layers Combined (hover me)</div>
+      <div class="texture-panel gloss-surface aged-edge" style="background: #16213e;">
+        <div style="position: absolute; inset: 0; filter: url(#paper-noise); background: #a09080; opacity: 0.08; mix-blend-mode: screen; z-index: 0;"></div>
+        <div style="position: absolute; inset: 0; opacity: 0.05; background-image: radial-gradient(circle, #c8b89a 0.5px, transparent 0.5px), radial-gradient(circle, #c8b89a 0.3px, transparent 0.3px); background-size: 7px 7px, 5px 5px; background-position: 0 0, 2.5px 2.5px; mix-blend-mode: screen; z-index: 0;"></div>
+        <span class="texture-panel-label ink-bleed-heavy" style="font-size: 1rem;">All Layers</span>
+      </div>
+      <div style="font-size: 0.6rem; color: #5a5a6a; margin-top: 0.3rem;">Grain + stipple + ink bleed + gloss + edge wear. Each subtle, convincing together.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ CARDS WITH TEXTURE ============ -->
+<div class="section">
+  <div class="section-title">Cards — With Fixed Texture Applied</div>
+  <div style="display: flex; gap: 1.5rem; flex-wrap: wrap; align-items: flex-start; margin-top: 1rem;">
+
+    <!-- Griffey with texture -->
+    <div>
+      <div class="comparison-label">Griffey Style + Gloss + Edge Wear</div>
+      <div class="card-frame card-frame-griffey gloss-surface aged-edge" style="margin-top: 0.5rem;">
+        <div class="frame-top-left"></div>
+        <div class="frame-top" style="display: flex; align-items: center; padding-left: 0.3rem;">
+          <span style="font-family: 'Pacifico', cursive; color: #fff; font-size: 0.65rem; text-shadow: 1px 1px 0 rgba(0,0,0,0.4); z-index: 1; position: relative;" class="ink-bleed">Mariners</span>
+        </div>
+        <div class="frame-top-right"></div>
+        <div class="frame-left"></div>
+        <div class="frame-content">
+          <div class="card-photo">
+            <div class="initials">KG</div>
+          </div>
+          <div class="card-stats">
+            <div class="stat-cell"><div class="stat-label">AVG</div><div class="stat-value">.328</div></div>
+            <div class="stat-cell"><div class="stat-label">HR</div><div class="stat-value">40</div></div>
+            <div class="stat-cell"><div class="stat-label">RBI</div><div class="stat-value">118</div></div>
+            <div class="stat-cell"><div class="stat-label">OPS</div><div class="stat-value">1.024</div></div>
+          </div>
+        </div>
+        <div class="frame-right"></div>
+        <div class="frame-nameplate">
+          <h3 class="ink-bleed">KEN GRIFFEY, JR.</h3>
+          <span class="pos-badge">CF</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Record Breaker with foil gloss -->
+    <div>
+      <div class="comparison-label">"Record Breaker" + Foil Gloss + Heavy Wear</div>
+      <div class="card-frame card-frame-special gloss-surface gloss-foil aged-edge-heavy" style="margin-top: 0.5rem;">
+        <div class="special-banner">
+          <h2 style="font-family: 'Pacifico', cursive; text-transform: none;" class="ink-bleed-heavy">Record Breaker</h2>
+        </div>
+        <div class="card-photo" style="height: 80px;">
+          <div class="initials" style="background: #c62828; border-color: #E9D447;">NR</div>
+        </div>
+        <div style="background: #16213e; padding: 0.15rem 0.5rem; font-size: 0.6rem; color: #8a8070; text-align: center; font-family: Inter; letter-spacing: 0.06em; text-transform: uppercase;">Texas Rangers &bull; SP</div>
+        <div class="frame-nameplate" style="background: #c62828;">
+          <h3 class="ink-bleed">NOLAN RYAN</h3>
+          <span class="pos-badge" style="background: #E9D447; color: #000;">SP</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Donruss with texture -->
+    <div>
+      <div class="comparison-label">Donruss Style + Subtle Gloss</div>
+      <div class="card-frame card-frame-donruss gloss-surface aged-edge" style="margin-top: 0.5rem;">
+        <div class="donruss-side" style="grid-row: 1 / -1;"></div>
+        <div style="background: #1a2744; padding: 0.35rem 0.6rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #c62828;">
+          <span style="font-family: 'Oswald'; font-weight: 700; color: #E9D447; font-size: 0.9rem; letter-spacing: 0.04em;" class="ink-bleed">JOSE CANSECO</span>
+          <span class="pos-badge" style="background: #c62828; color: #fff;">OF</span>
+        </div>
+        <div class="card-photo" style="height: 80px;">
+          <div class="initials" style="background: #2e7d32; border-color: #c62828;">JC</div>
+        </div>
+        <div style="background: #16213e; padding: 0.15rem 0.5rem; font-size: 0.6rem; color: #8a8070; text-align: center; font-family: Inter; letter-spacing: 0.06em; text-transform: uppercase; border-top: 2px solid #2a2a4a;">Oakland Athletics &bull; #33</div>
+        <div class="card-stats">
+          <div class="stat-cell"><div class="stat-label">AVG</div><div class="stat-value">.307</div></div>
+          <div class="stat-cell"><div class="stat-label">HR</div><div class="stat-value">42</div></div>
+          <div class="stat-cell"><div class="stat-label">RBI</div><div class="stat-value">124</div></div>
+          <div class="stat-cell"><div class="stat-label">OPS</div><div class="stat-value">.960</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SCOREBOARD WITH TEXTURE ============ -->
+<div class="section">
+  <div class="section-title">Scoreboard — With Paper Grain + Edge Wear</div>
+  <div class="scoreboard aged-edge" style="margin-top: 1rem;">
+    <div class="scoreboard-header">
+      <span class="ink-bleed">⬆ TOP 5</span>
+      <span style="font-size: 0.65rem; opacity: 0.9;">1 OUT</span>
+    </div>
+    <div class="scoreboard-body">
+      <table class="scoreboard-table">
+        <thead>
+          <tr>
+            <th style="text-align: left; padding-left: 0.6rem;">TEAM</th>
+            <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th>
+            <th class="total-col">R</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="ink-bleed">MARINERS</td>
+            <td>0</td><td>2</td><td>0</td><td>1</td>
+            <td class="current">▲</td>
+            <td class="dim">&middot;</td><td class="dim">&middot;</td><td class="dim">&middot;</td><td class="dim">&middot;</td>
+            <td class="total-col">3</td>
+          </tr>
+          <tr>
+            <td class="ink-bleed">RED SOX</td>
+            <td>1</td><td>0</td><td>0</td><td>3</td>
+            <td class="dim">&middot;</td>
+            <td class="dim">&middot;</td><td class="dim">&middot;</td><td class="dim">&middot;</td><td class="dim">&middot;</td>
+            <td class="total-col">4</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ============ BUTTONS ============ -->
+<div class="section">
+  <div class="section-title">Buttons — Roll Dice with Gloss Pulse</div>
+  <div class="note-box">
+    The Roll Dice button now has .gloss-pulse — a continuous gloss sweep animation that draws the eye on both desktop and mobile. Other buttons use ink-bleed text only. On touch devices, all .gloss-surface cards also auto-animate via @media (hover: none).
+  </div>
+  <div class="button-row" style="margin-top: 1rem; margin-bottom: 1rem;">
+    <button class="btn btn-roll gloss-pulse ink-bleed-heavy">🎲 Roll Dice</button>
+  </div>
+  <div class="button-row" style="margin-bottom: 1rem;">
+    <button class="btn btn-lg btn-primary ink-bleed">CREATE TEAM</button>
+    <button class="btn btn-md btn-secondary ink-bleed">JOIN GAME</button>
+    <button class="btn btn-sm btn-danger ink-bleed">FORFEIT</button>
+  </div>
+</div>
+
+<!-- ============ OUTCOME BADGES ============ -->
+<div class="section">
+  <div class="section-title">Outcome Badges</div>
+  <div class="badge-row" style="margin-top: 0.5rem;">
+    <span class="outcome-badge badge-hr">💥 Home Run</span>
+    <span class="outcome-badge badge-triple">Triple</span>
+    <span class="outcome-badge badge-double">Double</span>
+    <span class="outcome-badge badge-single">Single</span>
+    <span class="outcome-badge badge-walk">Walk</span>
+    <span class="outcome-badge badge-k">🔥 Strikeout</span>
+    <span class="outcome-badge badge-out">Ground Out</span>
+    <span class="outcome-badge badge-out">Fly Out</span>
+  </div>
+</div>
+
+<!-- ============ SIDE-BY-SIDE COMPARISON ============ -->
+<div class="section">
+  <div class="section-title">Side by Side — Clean vs Textured (v5 fixed)</div>
+  <div style="display: flex; gap: 2rem; flex-wrap: wrap; align-items: flex-start; margin-top: 1rem;">
+    <div>
+      <div class="comparison-label">Clean (no texture)</div>
+      <div style="background: #16213e; padding: 1.5rem; width: 260px; position: relative;">
+        <div style="font-family: 'Pacifico', cursive; color: #E9D447; font-size: 1.4rem; margin-bottom: 0.4rem;">Home Run!</div>
+        <div style="font-family: 'Oswald'; color: #e8e0d4; font-weight: 700; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.3rem;">KEN GRIFFEY, JR.</div>
+        <div style="font-family: 'JetBrains Mono'; color: #c8b89a; font-size: 0.85rem;">.328 AVG &bull; 40 HR</div>
+        <div style="font-family: 'Doto', monospace; font-weight: 800; font-size: 2rem; color: #E9D447; margin-top: 0.5rem;">4 - 6</div>
+      </div>
+    </div>
+    <div>
+      <div class="comparison-label">v5 — With fixed texture layers</div>
+      <div style="background: #16213e; padding: 1.5rem; width: 260px; position: relative;" class="gloss-surface aged-edge">
+        <div style="position: absolute; inset: 0; filter: url(#paper-noise); background: #a09080; opacity: 0.08; mix-blend-mode: screen; z-index: 0;"></div>
+        <div style="position: absolute; inset: 0; opacity: 0.05; background-image: radial-gradient(circle, #c8b89a 0.5px, transparent 0.5px), radial-gradient(circle, #c8b89a 0.3px, transparent 0.3px); background-size: 7px 7px, 5px 5px; background-position: 0 0, 2.5px 2.5px; mix-blend-mode: screen; z-index: 0;"></div>
+        <div style="position: relative; z-index: 1;">
+          <div style="font-family: 'Pacifico', cursive; color: #E9D447; font-size: 1.4rem; margin-bottom: 0.4rem;" class="ink-bleed-heavy">Home Run!</div>
+          <div style="font-family: 'Oswald'; color: #e8e0d4; font-weight: 700; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.3rem;" class="ink-bleed">KEN GRIFFEY, JR.</div>
+          <div style="font-family: 'JetBrains Mono'; color: #c8b89a; font-size: 0.85rem;">.328 AVG &bull; 40 HR</div>
+          <div style="font-family: 'Doto', monospace; font-weight: 800; font-size: 2rem; color: #E9D447; margin-top: 0.5rem;">4 - 6</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MOBILE GLOSS STRATEGY ============ -->
+<div class="section">
+  <div class="section-title">Mobile Gloss Strategy</div>
+  <div style="background: #000; display: grid; grid-template-columns: 1fr 1fr; gap: 1px;">
+    <div style="background: #16213e; padding: 1rem;">
+      <h4 style="color: #E9D447; font-size: 0.8rem; margin-bottom: 0.4rem; font-family: 'Pacifico', cursive; text-transform: none;">CSS Fallback (implemented)</h4>
+      <p style="font-size: 0.75rem; color: #c8b89a;">@media (hover: none) triggers a slow 5-second CSS animation sweep on all .gloss-surface elements. Works everywhere, zero JS. The .gloss-pulse class sweeps faster (3s) for CTA buttons regardless of device.</p>
+    </div>
+    <div style="background: #16213e; padding: 1rem;">
+      <h4 style="color: #E9D447; font-size: 0.8rem; margin-bottom: 0.4rem; font-family: 'Pacifico', cursive; text-transform: none;">PWA Gyroscope (future)</h4>
+      <p style="font-size: 0.75rem; color: #c8b89a;">DeviceOrientationEvent API maps phone tilt to gloss gradient position. The ::after pseudo-element's background-position is updated via CSS custom property. Requires HTTPS + user permission gesture. Progressive: falls back to CSS animation if gyro unavailable.</p>
+    </div>
+  </div>
+  <div class="note-box">
+    <strong style="color: #E9D447;">Gyroscope implementation sketch:</strong> Listen to deviceorientation event → map gamma (-45° to 45°) and beta (0° to 90°) to CSS custom properties --gloss-x and --gloss-y → use them in the gradient's background-position. JS updates a CSS variable, CSS handles the rendering. Approx. 15 lines of code.
+  </div>
+</div>
+
+<!-- ============ IMPLEMENTATION REFERENCE ============ -->
+<div class="section">
+  <div class="section-title">Implementation Reference — For Claude Code</div>
+
+  <div style="margin-bottom: 1.5rem;">
+    <div class="comparison-label" style="margin-bottom: 0.5rem;">1. SVG Filter (one filter only — just paper noise)</div>
+    <div class="code-block"><span class="code-comment">/* Place once in App.tsx or index.html — hidden SVG */</span>
+&lt;svg width="0" height="0" style="position: absolute"&gt;
+  &lt;defs&gt;
+    &lt;filter id="<span class="code-prop">paper-noise</span>"&gt;
+      &lt;feTurbulence type="<span class="code-val">fractalNoise</span>"
+        baseFrequency="<span class="code-val">0.65</span>" numOctaves="<span class="code-val">4</span>"
+        stitchTiles="<span class="code-val">stitch</span>" /&gt;
+      &lt;feColorMatrix type="<span class="code-val">saturate</span>" values="<span class="code-val">0</span>" /&gt;
+    &lt;/filter&gt;
+  &lt;/defs&gt;
+&lt;/svg&gt;
+
+<span class="code-comment">/* NOTE: No feDisplacementMap filters. They cause
+   visible pixel-shift glitches at any scale. Dropped. */</span></div>
+  </div>
+
+  <div style="margin-bottom: 1.5rem;">
+    <div class="comparison-label" style="margin-bottom: 0.5rem;">2. Paper Grain Overlay (global, add once)</div>
+    <div class="code-block"><span class="code-comment">/* CRITICAL: use screen blend, NOT overlay.
+   Overlay is invisible on dark backgrounds.
+   Screen always lightens → noise is visible. */</span>
+.<span class="code-prop">paper-grain</span> {
+  position: <span class="code-val">fixed</span>;
+  inset: <span class="code-val">0</span>;
+  z-index: <span class="code-val">9999</span>;
+  pointer-events: <span class="code-val">none</span>;
+  opacity: <span class="code-val">0.08</span>;
+  mix-blend-mode: <span class="code-val">screen</span>;
+  filter: <span class="code-val">url(#paper-noise)</span>;
+  background: <span class="code-val">#a09080</span>; <span class="code-comment">/* warm gray, not white */</span>
+}</div>
+  </div>
+
+  <div style="margin-bottom: 1.5rem;">
+    <div class="comparison-label" style="margin-bottom: 0.5rem;">3. Card Stipple (body::after)</div>
+    <div class="code-block">body::after {
+  content: <span class="code-val">''</span>;
+  position: <span class="code-val">fixed</span>;
+  inset: <span class="code-val">0</span>;
+  z-index: <span class="code-val">9998</span>;
+  pointer-events: <span class="code-val">none</span>;
+  opacity: <span class="code-val">0.05</span>;
+  background-image:
+    <span class="code-val">radial-gradient(circle, #c8b89a 0.5px, transparent 0.5px)</span>,
+    <span class="code-val">radial-gradient(circle, #c8b89a 0.3px, transparent 0.3px)</span>;
+  background-size: <span class="code-val">7px 7px, 5px 5px</span>;
+  background-position: <span class="code-val">0 0, 2.5px 2.5px</span>;
+  mix-blend-mode: <span class="code-val">screen</span>;
+}</div>
+  </div>
+
+  <div style="margin-bottom: 1.5rem;">
+    <div class="comparison-label" style="margin-bottom: 0.5rem;">4. Ink Bleed (text-shadow only)</div>
+    <div class="code-block"><span class="code-comment">/* Use BRIGHT warm tones — dark bg needs visible shadow color */</span>
+.<span class="code-prop">ink-bleed</span> {
+  text-shadow:
+    <span class="code-val">0 0 1px rgba(180, 140, 90, 0.25)</span>,
+    <span class="code-val">0.4px 0.3px 1px rgba(160, 120, 70, 0.18)</span>;
+}
+.<span class="code-prop">ink-bleed-heavy</span> {
+  text-shadow:
+    <span class="code-val">0 0 1.5px rgba(180, 140, 90, 0.35)</span>,
+    <span class="code-val">0.5px 0.4px 1.5px rgba(160, 120, 70, 0.25)</span>,
+    <span class="code-val">-0.3px 0.3px 1px rgba(170, 130, 80, 0.15)</span>;
+}</div>
+  </div>
+
+  <div style="margin-bottom: 1.5rem;">
+    <div class="comparison-label" style="margin-bottom: 0.5rem;">5. Gloss + Mobile Animation</div>
+    <div class="code-block">@keyframes <span class="code-prop">gloss-sweep</span> {
+  0%, 100% { background-position: <span class="code-val">100% 0%</span>; }
+  50% { background-position: <span class="code-val">0% 100%</span>; }
+}
+
+<span class="code-comment">/* Touch devices: auto-animate all gloss surfaces */</span>
+@media (<span class="code-prop">hover: none</span>) {
+  .<span class="code-prop">gloss-surface</span>::after {
+    animation: <span class="code-val">gloss-sweep 5s ease-in-out infinite</span>;
+  }
+}
+
+<span class="code-comment">/* CTA buttons: always animate (draws eye) */</span>
+.<span class="code-prop">gloss-pulse</span>::after {
+  animation: <span class="code-val">gloss-sweep 3s ease-in-out infinite</span>;
+}</div>
+  </div>
+
+  <div style="margin-bottom: 1.5rem;">
+    <div class="comparison-label" style="margin-bottom: 0.5rem;">6. Edge Wear (warm vignette)</div>
+    <div class="code-block"><span class="code-comment">/* WARM vignette — not just black shadows.
+   On dark bg, darken-only is invisible.
+   Warm center glow creates visible contrast. */</span>
+.<span class="code-prop">aged-edge</span>::before {
+  content: <span class="code-val">''</span>;
+  position: <span class="code-val">absolute</span>;
+  inset: <span class="code-val">0</span>;
+  z-index: <span class="code-val">5</span>;
+  pointer-events: <span class="code-val">none</span>;
+  background: <span class="code-val">radial-gradient(
+    ellipse at 50% 50%,
+    transparent 50%,
+    rgba(0, 0, 0, 0.12) 85%,
+    rgba(0, 0, 0, 0.2) 100%
+  )</span>;
+  box-shadow:
+    <span class="code-val">inset 0 0 30px rgba(180, 140, 90, 0.06)</span>,
+    <span class="code-val">inset 0 0 60px rgba(0, 0, 0, 0.08)</span>;
+}</div>
+  </div>
+
+  <div>
+    <div class="comparison-label" style="margin-bottom: 0.5rem;">7. Full Utility Class Reference</div>
+    <div style="background: #0a0a14; padding: 1rem; font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: #c8b89a;">
+      <div style="color: #8a8070;">/* v5 Texture utility classes */</div>
+      <div>.paper-grain &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— global overlay, add once at app root</div>
+      <div>.ink-bleed &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— subtle warm text-shadow (headings, labels)</div>
+      <div>.ink-bleed-heavy &nbsp;— stronger bleed (celebration text, banners)</div>
+      <div>.ink-bleed-edge &nbsp;&nbsp;— warm glow on surface edges (box-shadow)</div>
+      <div>.gloss-surface &nbsp;&nbsp;&nbsp;— diagonal gloss, hover on desktop, auto on mobile</div>
+      <div>.gloss-foil &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— gold-tinted foil variant for special cards</div>
+      <div>.gloss-pulse &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— continuous gloss sweep for CTA buttons</div>
+      <div>.aged-edge &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— warm vignette simulating handled-card wear</div>
+      <div>.aged-edge-heavy &nbsp;— stronger vignette for premium/special cards</div>
+      <br>
+      <div style="color: #8a8070;">/* Key rule: screen blend on dark backgrounds */</div>
+      <div style="color: #8a8070;">/* Never use overlay for texture on dark surfaces */</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

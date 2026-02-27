@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dice Baseball V2 — Visual Direction v3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Pacifico&family=Doto:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #1a1a2e;
+    color: #e8e0d4;
+    padding: 2rem;
+    line-height: 1.5;
+  }
+  h1, h2, h3, h4 { font-family: 'Oswald', sans-serif; text-transform: uppercase; }
+  .section { margin-bottom: 3rem; }
+  .section-title {
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    color: #8a8070;
+    margin-bottom: 1rem;
+    font-family: 'Inter', sans-serif;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .note-box {
+    background: #1a2744;
+    border-left: 4px solid #d4a843;
+    padding: 0.65rem 0.85rem;
+    margin: 1rem 0;
+    font-size: 0.8rem;
+    color: #c8b89a;
+  }
+  .comparison {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 1rem;
+  }
+  .comparison-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #8a8070;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+
+  /* ============ COLOR PALETTE SWATCHES ============ */
+  .palette-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 0.5rem;
+  }
+  .swatch {
+    overflow: hidden;
+    background: #000;
+  }
+  .swatch-color { height: 65px; }
+  .swatch-info { padding: 0.35rem 0.5rem; background: #16213e; }
+  .swatch-name { font-size: 0.7rem; font-weight: 600; color: #e8e0d4; }
+  .swatch-hex { font-size: 0.6rem; font-family: 'JetBrains Mono', monospace; color: #8a8070; }
+
+  /* ============ TOPPS COLOR-BLOCK CARD FRAME ============
+     The "border" is NOT a CSS border. It's colored panel divs
+     inside a black container. The black background bleeds through
+     2px gaps to create the thin black stroke separating panels.
+     This matches how actual Topps cards are printed.
+  */
+  .card-frame {
+    display: grid;
+    background: #000;
+    gap: 1px;
+    width: 280px;
+  }
+
+  /* Griffey-style: blue left/top L-shape, yellow right strip */
+  .card-frame-griffey {
+    grid-template-columns: 14px 1fr 14px;
+    grid-template-rows: 14px auto auto auto;
+  }
+  .frame-top-left { background: #1565c0; position: relative; overflow: hidden; }
+  .frame-top { background: #1565c0; position: relative; overflow: hidden; }
+  .frame-top-right { background: #d4a843; }
+  .frame-left { background: #1565c0; position: relative; overflow: hidden; }
+  .frame-right { background: #d4a843; }
+  .frame-bottom-left { background: #d4a843; }
+
+  /* Halftone dots on the blue panels */
+  .frame-top-left::after,
+  .frame-top::after,
+  .frame-left::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.2) 1px, transparent 1px);
+    background-size: 4px 4px;
+  }
+
+  .frame-content {
+    background: #16213e;
+    min-height: 0;
+  }
+
+  /* Name plate at bottom spanning full width */
+  .frame-nameplate {
+    grid-column: 1 / -1;
+    background: #e65100;
+    padding: 0.3rem 0.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .frame-nameplate h3 {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    color: #fff;
+    font-size: 0.9rem;
+    letter-spacing: 0.04em;
+  }
+
+  /* Team name banner inside content area */
+  .card-team-banner {
+    background: #e65100;
+    padding: 0.15rem 0.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .card-team-banner span {
+    font-family: 'Pacifico', cursive;
+    color: #fff;
+    font-size: 1rem;
+    position: relative;
+    z-index: 1;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.3);
+  }
+
+  /* Photo area with halftone overlay */
+  .card-photo {
+    height: 90px;
+    background: #2a3a5c;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .card-photo::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(0,0,0,0.25) 1px, transparent 1px);
+    background-size: 4px 4px;
+    pointer-events: none;
+  }
+  .card-photo .initials {
+    width: 52px;
+    height: 52px;
+    background: #1565c0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #fff;
+    border: 3px solid #d4a843;
+    border-radius: 50%;
+    position: relative;
+    z-index: 1;
+  }
+  /* Dot-fade at bottom of photo */
+  .card-photo::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 30px;
+    background-image: radial-gradient(circle, #16213e 1px, transparent 1px);
+    background-size: 3px 3px;
+    mask-image: linear-gradient(to bottom, transparent, black);
+    -webkit-mask-image: linear-gradient(to bottom, transparent, black);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Stats area */
+  .card-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    background: #16213e;
+  }
+  .stat-cell {
+    text-align: center;
+    padding: 0.35rem 0;
+    border-right: 1px solid #2a2a4a;
+  }
+  .stat-cell:last-child { border-right: none; }
+  .stat-label {
+    font-size: 0.55rem;
+    color: #8a8070;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+  }
+  .stat-value {
+    font-size: 0.95rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500;
+    color: #e8e0d4;
+  }
+
+  /* Position badge */
+  .pos-badge {
+    background: #d4a843;
+    color: #000;
+    font-size: 0.6rem;
+    font-weight: 700;
+    padding: 0.1rem 0.4rem;
+    font-family: 'Oswald', sans-serif;
+    letter-spacing: 0.05em;
+  }
+
+  /* ============ DONRUSS VARIANT ============ */
+  .card-frame-donruss {
+    grid-template-columns: 16px 1fr;
+    grid-template-rows: auto auto auto auto;
+    width: 280px;
+  }
+  .donruss-side { background: #1a2744; position: relative; overflow: hidden; }
+  .donruss-side::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+    background-size: 3px 3px;
+  }
+
+  /* ============ RECORD BREAKER / ALL STAR CARD ============ */
+  .card-frame-special {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto auto;
+    width: 280px;
+  }
+  .special-banner {
+    background: #c62828;
+    padding: 0.3rem 0.6rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .special-banner::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.12) 1px, transparent 1px);
+    background-size: 4px 4px;
+  }
+  .special-banner h2 {
+    font-family: 'Pacifico', cursive;
+    color: #d4a843;
+    font-size: 1.3rem;
+    text-transform: none;
+    position: relative;
+    z-index: 1;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.4);
+  }
+
+  /* ============ SCOREBOARD ============ */
+  .scoreboard {
+    background: #000;
+    display: grid;
+    gap: 1px;
+    grid-template-rows: auto auto;
+    max-width: 480px;
+  }
+  .scoreboard-header {
+    background: #c62828;
+    padding: 0.35rem 0.65rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .scoreboard-header span {
+    font-family: 'Oswald', sans-serif;
+    color: #fff;
+    font-size: 0.8rem;
+    letter-spacing: 0.06em;
+    font-weight: 700;
+  }
+  .scoreboard-body {
+    background: #0a0a14;
+    padding: 0;
+  }
+  .scoreboard-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .scoreboard-table th {
+    color: #5a5a6a;
+    font-weight: 500;
+    padding: 0.3rem 0.3rem;
+    text-align: center;
+    font-size: 0.6rem;
+    font-family: 'Inter', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid #1a1a2e;
+  }
+  .scoreboard-table td {
+    padding: 0.35rem 0.25rem;
+    text-align: center;
+    font-family: 'Doto', monospace;
+    font-weight: 600;
+    font-size: 1.15rem;
+    color: #d4a843;
+    letter-spacing: 0.03em;
+  }
+  .scoreboard-table td:first-child {
+    text-align: left;
+    padding-left: 0.6rem;
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: #c8b89a;
+  }
+  .scoreboard-table .current { color: #4caf50; text-shadow: 0 0 8px rgba(76,175,80,0.4); }
+  .scoreboard-table .dim { color: #2a2a3a; }
+  .scoreboard-table .total-col {
+    border-left: 3px solid #d4a843;
+    font-weight: 800;
+    font-size: 1.3rem;
+    color: #d4a843;
+    text-shadow: 0 0 10px rgba(212,168,67,0.35);
+  }
+
+  /* ============ BUTTONS — HARD SHADOW / ZERO RADIUS ============ */
+  .button-row { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; }
+  .btn {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    border: none;
+    border-radius: 0;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+  }
+  .btn-lg { padding: 0.7rem 1.75rem; font-size: 1rem; min-height: 48px; }
+  .btn-md { padding: 0.55rem 1.1rem; font-size: 0.85rem; min-height: 44px; }
+  .btn-sm { padding: 0.35rem 0.7rem; font-size: 0.7rem; min-height: 34px; }
+  .btn-primary {
+    background: #4caf50;
+    color: #fff;
+    box-shadow: 4px 4px 0 #2e7d32;
+    border: 1px solid #000;
+  }
+  .btn-primary:hover { transform: translate(-1px, -1px); box-shadow: 5px 5px 0 #2e7d32; }
+  .btn-primary:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 #2e7d32; }
+  .btn-roll {
+    background: #d4a843;
+    color: #1a1a2e;
+    box-shadow: 5px 5px 0 #8a6d1b;
+    border: 1px solid #000;
+    font-family: 'Pacifico', cursive;
+    font-size: 1.15rem;
+    padding: 0.85rem 2.25rem;
+    min-height: 56px;
+    letter-spacing: 0.02em;
+    text-transform: none;
+  }
+  .btn-roll:hover { transform: translate(-2px, -2px); box-shadow: 7px 7px 0 #8a6d1b; }
+  .btn-roll:active { transform: translate(4px, 4px); box-shadow: 1px 1px 0 #8a6d1b; }
+  .btn-secondary {
+    background: transparent;
+    color: #d4a843;
+    border: 2px solid #d4a843;
+    box-shadow: 3px 3px 0 #8a6d1b;
+  }
+  .btn-secondary:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 #8a6d1b; }
+  .btn-secondary:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 #8a6d1b; }
+  .btn-danger {
+    background: #c62828;
+    color: #fff;
+    border: 1px solid #000;
+    box-shadow: 3px 3px 0 #8e0000;
+  }
+  .btn-danger:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 #8e0000; }
+  .btn-danger:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 #8e0000; }
+
+  /* ============ OUTCOME BADGES ============ */
+  .badge-row { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+  .outcome-badge {
+    font-family: 'Pacifico', cursive;
+    font-size: 0.7rem;
+    padding: 0.2rem 0.55rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    border: 1px solid #000;
+    text-transform: none;
+  }
+  .badge-hr { background: #d4a843; color: #000; box-shadow: 2px 2px 0 #8a6d1b; }
+  .badge-triple { background: #2e7d32; color: #fff; box-shadow: 2px 2px 0 #1b5e20; }
+  .badge-double { background: #388e3c; color: #fff; box-shadow: 2px 2px 0 #2e7d32; }
+  .badge-single { background: #4caf50; color: #fff; box-shadow: 2px 2px 0 #388e3c; }
+  .badge-walk { background: #1565c0; color: #fff; box-shadow: 2px 2px 0 #0d47a1; }
+  .badge-k { background: #c62828; color: #fff; box-shadow: 2px 2px 0 #8e0000; }
+  .badge-out { background: #4a3425; color: #c8b89a; box-shadow: 2px 2px 0 #2d1f14; border-color: #2d1f14; }
+
+  /* ============ FONT SHOWCASE ============ */
+  .font-showcase {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    padding: 1.25rem;
+    background: #000;
+  }
+  .font-showcase > div {
+    background: #16213e;
+    padding: 0.75rem 1rem;
+  }
+  .font-sample {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+  }
+  .font-label {
+    font-size: 0.6rem;
+    font-family: 'JetBrains Mono', monospace;
+    color: #8a8070;
+    min-width: 110px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  /* ============ V1 COMPARISON ============ */
+  .current-card {
+    background: #1f2937;
+    border: 1px solid #374151;
+    border-radius: 12px;
+    padding: 1rem;
+  }
+  .current-card h3 { color: #fff; font-size: 0.9rem; margin-bottom: 0.5rem; }
+  .current-card .cv-stat-value { color: #d1d5db; font-size: 0.8rem; font-family: 'JetBrains Mono', monospace; }
+  .current-card .cv-stat-label { color: #6b7280; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.05em; }
+</style>
+</head>
+<body>
+
+<!-- ============ TITLE ============ -->
+<div style="margin-bottom: 3rem;">
+  <h1 style="font-family: 'Pacifico', cursive; font-size: 2.2rem; color: #d4a843; margin-bottom: 0.25rem; text-transform: none;">Dice Baseball</h1>
+  <p style="color: #8a8070; font-size: 0.8rem;">Visual Direction v3 — Color-Block Frames / Doto Scoreboard / Pacifico Script / Zero Radius</p>
+  <p style="color: #5a5a6a; font-size: 0.7rem; margin-top: 0.25rem;">
+    <a href="design-preview-v2-archived.html" style="color: #5a5a6a;">v2</a> &middot;
+    <a href="design-preview-v1.html" style="color: #5a5a6a;">v1</a>
+  </p>
+</div>
+
+<!-- ============ WHAT CHANGED v2 → v3 ============ -->
+<div class="section">
+  <div class="section-title">v2 → v3 Changes</div>
+  <div class="note-box">
+    <strong style="color: #d4a843;">Borders → Color blocks:</strong> CSS borders replaced with actual colored panel divs inside a black container. A 1px grid gap lets the black show through as a uniform slim stroke between panels — no doubling at junctions. Zero border-radius on everything.<br>
+    <strong style="color: #d4a843;">VT323/Monoton → Doto:</strong> Proper dot-matrix font for scoreboard. Heavy weight (800-900) for big scores, medium (600) for inning numbers.<br>
+    <strong style="color: #d4a843;">Righteous → Pacifico:</strong> Brush script for celebration text, badges, and the Roll Dice button. Matches the jersey/card script style ("All Star", "Mariners" lettering).<br>
+    <strong style="color: #d4a843;">Radius:</strong> Was 2px, now literally 0. Only exception: player avatar circles (intentional contrast).
+  </div>
+</div>
+
+<!-- ============ TYPOGRAPHY ============ -->
+<div class="section">
+  <div class="section-title">Font Stack v3</div>
+  <div class="font-showcase">
+    <div>
+      <div class="font-sample">
+        <div class="font-label">Pacifico<br><span style="color: #d4a843;">script display</span></div>
+        <div style="font-family: 'Pacifico', cursive; font-size: 2rem; color: #d4a843;">Home Run!</div>
+      </div>
+    </div>
+    <div>
+      <div class="font-sample">
+        <div class="font-label">Pacifico<br><span style="color: #5a5a6a;">team name</span></div>
+        <div style="font-family: 'Pacifico', cursive; font-size: 1.4rem; color: #fff; text-shadow: 2px 2px 0 rgba(0,0,0,0.3);">Mariners</div>
+      </div>
+    </div>
+    <div>
+      <div class="font-sample">
+        <div class="font-label">Pacifico<br><span style="color: #c62828;">celebration</span></div>
+        <div style="font-family: 'Pacifico', cursive; font-size: 1.2rem; color: #c62828; text-shadow: 1px 1px 0 rgba(0,0,0,0.3);">Record Breaker</div>
+      </div>
+    </div>
+    <div>
+      <div class="font-sample">
+        <div class="font-label">Oswald 700<br><span style="color: #5a5a6a;">names/headers</span></div>
+        <div style="font-family: 'Oswald'; font-weight: 700; font-size: 1.3rem; color: #e8e0d4; text-transform: uppercase; letter-spacing: 0.04em;">KEN GRIFFEY JR.</div>
+      </div>
+    </div>
+    <div>
+      <div class="font-sample">
+        <div class="font-label">Oswald 600<br><span style="color: #5a5a6a;">subheading</span></div>
+        <div style="font-family: 'Oswald'; font-weight: 600; font-size: 0.95rem; color: #c8b89a; text-transform: uppercase; letter-spacing: 0.05em;">Top of the 5th &bull; 1 Out</div>
+      </div>
+    </div>
+    <div>
+      <div class="font-sample">
+        <div class="font-label">Doto 800<br><span style="color: #d4a843;">big score</span></div>
+        <div style="font-family: 'Doto', monospace; font-weight: 800; font-size: 3rem; color: #d4a843; letter-spacing: 0.08em; text-shadow: 0 0 12px rgba(212,168,67,0.3);">4 - 6</div>
+      </div>
+    </div>
+    <div>
+      <div class="font-sample">
+        <div class="font-label">Doto 600<br><span style="color: #d4a843;">inning scores</span></div>
+        <div style="font-family: 'Doto', monospace; font-weight: 600; font-size: 1.4rem; color: #d4a843; letter-spacing: 0.06em;">0 2 0 1 3 <span style="color: #2a2a3a;">&middot; &middot; &middot; &middot;</span></div>
+      </div>
+    </div>
+    <div>
+      <div class="font-sample">
+        <div class="font-label">Inter<br><span style="color: #5a5a6a;">body text</span></div>
+        <div style="font-family: 'Inter'; font-size: 0.9rem; color: #c8b89a;">The batter steps up with runners on first and third.</div>
+      </div>
+    </div>
+    <div>
+      <div class="font-sample">
+        <div class="font-label">JetBrains Mono<br><span style="color: #5a5a6a;">stat numbers</span></div>
+        <div style="font-family: 'JetBrains Mono'; font-size: 1rem; font-weight: 500; color: #e8e0d4;">.328 &nbsp; 40 HR &nbsp; 118 RBI &nbsp; 1.024 OPS</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ COLOR-BLOCK FRAME EXPLAINED ============ -->
+<div class="section">
+  <div class="section-title">Color-Block Frame Technique</div>
+  <div class="note-box">
+    Inspired directly by the Griffey Jr. Topps card. The "border" isn't a CSS border — it's colored &lt;div&gt; panels arranged in a CSS grid. The container has a black background, and 1px grid gaps let the black show through as a uniform slim stroke. Because grid gap is shared space (not per-element borders), there's no doubling where panels meet — every junction is exactly 1px. The blue panels get halftone dot overlays.
+  </div>
+  <div style="display: flex; gap: 1.5rem; flex-wrap: wrap; margin-top: 1rem; align-items: flex-start;">
+    <!-- Annotated diagram -->
+    <div style="width: 280px;">
+      <div class="comparison-label">Anatomy (Griffey-style)</div>
+      <div style="display: grid; grid-template-columns: 14px 1fr 14px; grid-template-rows: 14px 60px 40px; gap: 1px; background: #000; margin-top: 0.5rem;">
+        <div style="background: #1565c0; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;">
+          <div style="position: absolute; inset: 0; background-image: radial-gradient(circle, rgba(255,255,255,0.2) 1px, transparent 1px); background-size: 4px 4px;"></div>
+        </div>
+        <div style="background: #1565c0; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;">
+          <span style="font-size: 0.5rem; color: rgba(255,255,255,0.6); z-index: 1; font-family: Inter;">BLUE + HALFTONE</span>
+          <div style="position: absolute; inset: 0; background-image: radial-gradient(circle, rgba(255,255,255,0.2) 1px, transparent 1px); background-size: 4px 4px;"></div>
+        </div>
+        <div style="background: #d4a843; display: flex; align-items: center; justify-content: center;">
+          <span style="font-size: 0.4rem; color: #000; font-family: Inter; writing-mode: vertical-lr;">G</span>
+        </div>
+        <div style="background: #1565c0; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;">
+          <div style="position: absolute; inset: 0; background-image: radial-gradient(circle, rgba(255,255,255,0.2) 1px, transparent 1px); background-size: 4px 4px;"></div>
+        </div>
+        <div style="background: #16213e; display: flex; align-items: center; justify-content: center;">
+          <span style="font-size: 0.6rem; color: #8a8070; font-family: Inter;">CONTENT</span>
+        </div>
+        <div style="background: #d4a843; display: flex; align-items: center; justify-content: center;">
+          <span style="font-size: 0.4rem; color: #000; font-family: Inter; writing-mode: vertical-lr;">GOLD</span>
+        </div>
+        <div style="background: #e65100; grid-column: 1 / -1; padding: 0.2rem 0.5rem; display: flex; align-items: center;">
+          <span style="font-size: 0.5rem; color: #fff; font-family: Inter;">NAMEPLATE (orange, full width)</span>
+        </div>
+      </div>
+      <div style="font-size: 0.6rem; color: #5a5a6a; margin-top: 0.4rem;">Black container bg + 1px grid gap = uniform slim stroke (no doubling)</div>
+    </div>
+
+    <!-- Actual rendered card -->
+    <div style="width: 280px;">
+      <div class="comparison-label">Rendered — Griffey style</div>
+      <div class="card-frame card-frame-griffey" style="margin-top: 0.5rem;">
+        <div class="frame-top-left"></div>
+        <div class="frame-top" style="display: flex; align-items: center; padding-left: 0.3rem;">
+          <span style="font-family: 'Pacifico', cursive; color: #fff; font-size: 0.65rem; text-shadow: 1px 1px 0 rgba(0,0,0,0.4); z-index: 1; position: relative;">Mariners</span>
+        </div>
+        <div class="frame-top-right"></div>
+        <div class="frame-left"></div>
+        <div class="frame-content">
+          <div class="card-photo">
+            <div class="initials">KG</div>
+          </div>
+          <div class="card-stats">
+            <div class="stat-cell"><div class="stat-label">AVG</div><div class="stat-value">.328</div></div>
+            <div class="stat-cell"><div class="stat-label">HR</div><div class="stat-value">40</div></div>
+            <div class="stat-cell"><div class="stat-label">RBI</div><div class="stat-value">118</div></div>
+            <div class="stat-cell"><div class="stat-label">OPS</div><div class="stat-value">1.024</div></div>
+          </div>
+        </div>
+        <div class="frame-right"></div>
+        <div class="frame-nameplate">
+          <h3>KEN GRIFFEY, JR.</h3>
+          <span class="pos-badge">CF</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ CARD VARIANTS ============ -->
+<div class="section">
+  <div class="section-title">Card Variants</div>
+  <div style="display: flex; gap: 1.5rem; flex-wrap: wrap; align-items: flex-start;">
+
+    <!-- Donruss variant: dark navy side block -->
+    <div>
+      <div class="comparison-label">Donruss style (navy side block)</div>
+      <div class="card-frame card-frame-donruss" style="margin-top: 0.5rem;">
+        <div class="donruss-side" style="grid-row: 1 / -1;"></div>
+        <div style="background: #1a2744; padding: 0.35rem 0.6rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #c62828;">
+          <span style="font-family: 'Oswald'; font-weight: 700; color: #d4a843; font-size: 0.9rem; letter-spacing: 0.04em;">JOSE CANSECO</span>
+          <span class="pos-badge" style="background: #c62828; color: #fff;">OF</span>
+        </div>
+        <div class="card-photo" style="height: 80px;">
+          <div class="initials" style="background: #2e7d32; border-color: #c62828;">JC</div>
+        </div>
+        <div style="background: #16213e; padding: 0.15rem 0.5rem; font-size: 0.6rem; color: #8a8070; text-align: center; font-family: Inter; letter-spacing: 0.06em; text-transform: uppercase; border-top: 2px solid #2a2a4a;">Oakland Athletics &bull; #33</div>
+        <div class="card-stats">
+          <div class="stat-cell"><div class="stat-label">AVG</div><div class="stat-value">.307</div></div>
+          <div class="stat-cell"><div class="stat-label">HR</div><div class="stat-value">42</div></div>
+          <div class="stat-cell"><div class="stat-label">RBI</div><div class="stat-value">124</div></div>
+          <div class="stat-cell"><div class="stat-label">OPS</div><div class="stat-value">.960</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- "Record Breaker" / special card -->
+    <div>
+      <div class="comparison-label">"Record Breaker" special card</div>
+      <div class="card-frame card-frame-special" style="margin-top: 0.5rem;">
+        <div class="special-banner">
+          <h2 style="font-family: 'Pacifico', cursive; text-transform: none;">Record Breaker</h2>
+        </div>
+        <div class="card-photo" style="height: 80px;">
+          <div class="initials" style="background: #c62828; border-color: #d4a843;">NR</div>
+        </div>
+        <div style="background: #16213e; padding: 0.15rem 0.5rem; font-size: 0.6rem; color: #8a8070; text-align: center; font-family: Inter; letter-spacing: 0.06em; text-transform: uppercase;">Texas Rangers &bull; SP</div>
+        <div class="frame-nameplate" style="background: #c62828;">
+          <h3>NOLAN RYAN</h3>
+          <span class="pos-badge" style="background: #d4a843; color: #000;">SP</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Current (v0) for comparison -->
+    <div>
+      <div class="comparison-label">Current app (v0)</div>
+      <div class="current-card" style="width: 280px; margin-top: 0.5rem;">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
+          <div style="width: 48px; height: 48px; border-radius: 50%; background: #2563eb; display: flex; align-items: center; justify-content: center; font-family: 'Oswald'; color: #fff; font-weight: 700;">KG</div>
+          <div>
+            <h3>Ken Griffey Jr.</h3>
+            <p style="font-size: 0.7rem; color: #6b7280;">CF &bull; Seattle Mariners</p>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 0.5rem; text-align: center;">
+          <div><div class="cv-stat-label">AVG</div><div class="cv-stat-value">.328</div></div>
+          <div><div class="cv-stat-label">HR</div><div class="cv-stat-value">40</div></div>
+          <div><div class="cv-stat-label">RBI</div><div class="cv-stat-value">118</div></div>
+          <div><div class="cv-stat-label">OPS</div><div class="cv-stat-value">1.024</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SCOREBOARD ============ -->
+<div class="section">
+  <div class="section-title">Scoreboard — Doto Dot Matrix</div>
+  <div class="note-box">
+    All score numbers in Doto at weight 600. The dots of the font evoke incandescent stadium bulbs. Gold color + subtle glow on totals. The outer container uses the same black-background + 1px gap technique as the card frames.
+  </div>
+  <div class="scoreboard" style="margin-top: 1rem;">
+    <div class="scoreboard-header">
+      <span>⬆ TOP 5</span>
+      <span style="font-size: 0.65rem; opacity: 0.9;">1 OUT</span>
+    </div>
+    <div class="scoreboard-body">
+      <table class="scoreboard-table">
+        <thead>
+          <tr>
+            <th style="text-align: left; padding-left: 0.6rem;">TEAM</th>
+            <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th>
+            <th class="total-col">R</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>MARINERS</td>
+            <td>0</td><td>2</td><td>0</td><td>1</td>
+            <td class="current">▲</td>
+            <td class="dim">&middot;</td><td class="dim">&middot;</td><td class="dim">&middot;</td><td class="dim">&middot;</td>
+            <td class="total-col">3</td>
+          </tr>
+          <tr>
+            <td>RED SOX</td>
+            <td>1</td><td>0</td><td>0</td><td>3</td>
+            <td class="dim">&middot;</td>
+            <td class="dim">&middot;</td><td class="dim">&middot;</td><td class="dim">&middot;</td><td class="dim">&middot;</td>
+            <td class="total-col">4</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div style="margin-top: 1.5rem;">
+    <div class="comparison-label">Hero Score Display (Doto 800)</div>
+    <div style="background: #000; display: inline-flex; gap: 1px; margin-top: 0.5rem;">
+      <div style="background: #0a0a14; padding: 1rem 1.5rem; display: flex; align-items: center; gap: 1.5rem;">
+        <div style="text-align: center;">
+          <div style="font-family: 'Oswald'; font-size: 0.6rem; color: #8a8070; letter-spacing: 0.12em; margin-bottom: 0.15rem;">MARINERS</div>
+          <div style="font-family: 'Doto', monospace; font-weight: 800; font-size: 3rem; color: #d4a843; text-shadow: 0 0 14px rgba(212,168,67,0.3); letter-spacing: 0.05em;">3</div>
+        </div>
+        <div style="text-align: center;">
+          <div style="font-family: 'Oswald'; color: #c62828; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em;">TOP 5</div>
+          <div style="font-family: 'Doto', monospace; font-weight: 400; font-size: 0.8rem; color: #5a5a6a; margin-top: 0.15rem;">1 OUT</div>
+        </div>
+        <div style="text-align: center;">
+          <div style="font-family: 'Oswald'; font-size: 0.6rem; color: #8a8070; letter-spacing: 0.12em; margin-bottom: 0.15rem;">RED SOX</div>
+          <div style="font-family: 'Doto', monospace; font-weight: 800; font-size: 3rem; color: #d4a843; text-shadow: 0 0 14px rgba(212,168,67,0.3); letter-spacing: 0.05em;">4</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ HEADER ============ -->
+<div class="section">
+  <div class="section-title">App Header</div>
+  <div class="comparison">
+    <div>
+      <div class="comparison-label">Current (rounded, gray)</div>
+      <div style="background: rgba(17,24,39,0.95); border-bottom: 1px solid #1f2937; padding: 0 1rem; height: 52px; display: flex; align-items: center; justify-content: space-between; border-radius: 8px 8px 0 0;">
+        <span style="font-family: 'Oswald'; font-size: 1.05rem; color: #fff;">DICE BASEBALL</span>
+        <span style="font-size: 1.2rem;">⚾</span>
+      </div>
+    </div>
+    <div>
+      <div class="comparison-label">Proposed (color-blocked, hard edge)</div>
+      <div style="display: grid; grid-template-columns: 1fr; gap: 0; background: #000; max-width: 480px;">
+        <div style="background: #1a2744; padding: 0 1rem; height: 52px; display: flex; align-items: center; justify-content: space-between;">
+          <span style="font-family: 'Pacifico', cursive; color: #d4a843; font-size: 1.15rem;">Dice Baseball</span>
+          <span style="font-size: 1.3rem;">⚾</span>
+        </div>
+        <div style="background: #c62828; height: 4px;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ BUTTONS ============ -->
+<div class="section">
+  <div class="section-title">Buttons — Zero Radius / Hard Shadow / Black Stroke</div>
+  <div class="note-box">
+    All buttons now have border-radius: 0 and a 1px solid black stroke (matching the slim uniform strokes on the card frames). Pacifico on the Roll button for that script feel. Shadow compresses on press.
+  </div>
+  <div class="button-row" style="margin-top: 1rem; margin-bottom: 1rem;">
+    <button class="btn btn-roll">🎲 Roll Dice</button>
+  </div>
+  <div class="button-row" style="margin-bottom: 1rem;">
+    <button class="btn btn-lg btn-primary">CREATE TEAM</button>
+    <button class="btn btn-md btn-secondary">JOIN GAME</button>
+    <button class="btn btn-sm btn-danger">FORFEIT</button>
+  </div>
+  <!-- Press states -->
+  <div style="margin-top: 1rem;">
+    <div class="comparison-label">Button press states</div>
+    <div style="display: flex; gap: 2rem; margin-top: 0.5rem; align-items: center;">
+      <div style="text-align: center;">
+        <div style="font-size: 0.55rem; color: #8a8070; margin-bottom: 0.3rem;">DEFAULT</div>
+        <div style="display: inline-block; background: #d4a843; color: #1a1a2e; font-family: 'Pacifico'; padding: 0.5rem 1.25rem; border: 1px solid #000; box-shadow: 5px 5px 0 #8a6d1b; font-size: 0.9rem;">Roll</div>
+      </div>
+      <div style="text-align: center;">
+        <div style="font-size: 0.55rem; color: #8a8070; margin-bottom: 0.3rem;">HOVER</div>
+        <div style="display: inline-block; background: #d4a843; color: #1a1a2e; font-family: 'Pacifico'; padding: 0.5rem 1.25rem; border: 1px solid #000; box-shadow: 7px 7px 0 #8a6d1b; font-size: 0.9rem; transform: translate(-2px, -2px);">Roll</div>
+      </div>
+      <div style="text-align: center;">
+        <div style="font-size: 0.55rem; color: #8a8070; margin-bottom: 0.3rem;">PRESSED</div>
+        <div style="display: inline-block; background: #d4a843; color: #1a1a2e; font-family: 'Pacifico'; padding: 0.5rem 1.25rem; border: 1px solid #000; box-shadow: 1px 1px 0 #8a6d1b; font-size: 0.9rem; transform: translate(4px, 4px);">Roll</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ OUTCOME BADGES ============ -->
+<div class="section">
+  <div class="section-title">Outcome Badges</div>
+  <div class="badge-row" style="margin-top: 0.5rem;">
+    <span class="outcome-badge badge-hr">💥 Home Run</span>
+    <span class="outcome-badge badge-triple">Triple</span>
+    <span class="outcome-badge badge-double">Double</span>
+    <span class="outcome-badge badge-single">Single</span>
+    <span class="outcome-badge badge-walk">Walk</span>
+    <span class="outcome-badge badge-k">🔥 Strikeout</span>
+    <span class="outcome-badge badge-out">Ground Out</span>
+    <span class="outcome-badge badge-out">Fly Out</span>
+  </div>
+</div>
+
+<!-- ============ HALFTONE PATTERNS ============ -->
+<div class="section">
+  <div class="section-title">Halftone / Dither Patterns</div>
+  <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 0.5rem;">
+    <div style="width: 180px;">
+      <div class="comparison-label">Halftone on blue panel</div>
+      <div style="width: 180px; height: 70px; background: #1565c0; position: relative; overflow: hidden;">
+        <div style="position: absolute; inset: 0; background-image: radial-gradient(circle, rgba(255,255,255,0.2) 1px, transparent 1px); background-size: 4px 4px;"></div>
+      </div>
+    </div>
+    <div style="width: 180px;">
+      <div class="comparison-label">Halftone on red banner</div>
+      <div style="width: 180px; height: 70px; background: #c62828; position: relative; overflow: hidden;">
+        <div style="position: absolute; inset: 0; background-image: radial-gradient(circle, rgba(255,255,255,0.12) 1px, transparent 1px); background-size: 4px 4px;"></div>
+      </div>
+    </div>
+    <div style="width: 180px;">
+      <div class="comparison-label">Dot-fade (photo edge)</div>
+      <div style="width: 180px; height: 70px; background: #2a3a5c; position: relative; overflow: hidden;">
+        <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 50px; background-image: radial-gradient(circle, #16213e 1px, transparent 1px); background-size: 3px 3px; mask-image: linear-gradient(to bottom, transparent, black); -webkit-mask-image: linear-gradient(to bottom, transparent, black);"></div>
+      </div>
+    </div>
+    <div style="width: 180px;">
+      <div class="comparison-label">Cross-hatch on gold</div>
+      <div style="width: 180px; height: 70px; background: #d4a843; position: relative; overflow: hidden;">
+        <div style="position: absolute; inset: 0; background-image: repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 3px), repeating-linear-gradient(-45deg, transparent, transparent 2px, rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 3px);"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ DESIGN PRINCIPLES ============ -->
+<div class="section">
+  <div class="section-title">Design Principles — v3 Summary</div>
+  <div style="background: #000; display: grid; grid-template-columns: 1fr 1fr; gap: 1px;">
+    <div style="background: #16213e; padding: 1rem;">
+      <h4 style="color: #d4a843; font-size: 0.8rem; margin-bottom: 0.4rem; font-family: 'Pacifico', cursive; text-transform: none;">Color Blocks, Not Borders</h4>
+      <p style="font-size: 0.75rem; color: #c8b89a;">Frames are structural color panels in a CSS grid. 1px grid gap on a black container = uniform slim stroke everywhere, no doubling at junctions. Not CSS border properties.</p>
+    </div>
+    <div style="background: #16213e; padding: 1rem;">
+      <h4 style="color: #d4a843; font-size: 0.8rem; margin-bottom: 0.4rem; font-family: 'Pacifico', cursive; text-transform: none;">Zero Radius, Always</h4>
+      <p style="font-size: 0.75rem; color: #c8b89a;">border-radius: 0 on everything. Cards, buttons, badges, inputs, containers. Only exception: player avatar circles (intentional focal contrast).</p>
+    </div>
+    <div style="background: #16213e; padding: 1rem;">
+      <h4 style="color: #d4a843; font-size: 0.8rem; margin-bottom: 0.4rem; font-family: 'Pacifico', cursive; text-transform: none;">Halftone, Not Gradient</h4>
+      <p style="font-size: 0.75rem; color: #c8b89a;">Dot patterns and stipple textures where transition is needed. No smooth CSS gradients anywhere. References the offset printing on actual baseball cards.</p>
+    </div>
+    <div style="background: #16213e; padding: 1rem;">
+      <h4 style="color: #d4a843; font-size: 0.8rem; margin-bottom: 0.4rem; font-family: 'Pacifico', cursive; text-transform: none;">Script = Celebration</h4>
+      <p style="font-size: 0.75rem; color: #c8b89a;">Pacifico for big moments and display text (Home Run!, team banners, Roll Dice). Oswald for structural elements (player names, headings). The font shift IS the reward.</p>
+    </div>
+    <div style="background: #16213e; padding: 1rem;">
+      <h4 style="color: #d4a843; font-size: 0.8rem; margin-bottom: 0.4rem; font-family: 'Pacifico', cursive; text-transform: none;">Dot Matrix Scoreboard</h4>
+      <p style="font-size: 0.75rem; color: #c8b89a;">Doto at weight 600-800 for all score numbers. The dot construction of the font plus the gold color and glow sells the vintage stadium marquee.</p>
+    </div>
+    <div style="background: #16213e; padding: 1rem;">
+      <h4 style="color: #d4a843; font-size: 0.8rem; margin-bottom: 0.4rem; font-family: 'Pacifico', cursive; text-transform: none;">Hard Shadow Physics</h4>
+      <p style="font-size: 0.75rem; color: #c8b89a;">Interactive elements have solid offset shadows that compress on press and expand on hover. The physical metaphor makes tapping feel consequential.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============ FONT STACK REFERENCE ============ -->
+<div class="section">
+  <div class="section-title">Font Stack Reference — For Claude Code</div>
+  <div style="background: #0a0a14; padding: 1rem; font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: #c8b89a;">
+    <div style="color: #8a8070;">/* Google Fonts import */</div>
+    <div>Pacifico &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;— script display, celebrations, team banners, roll button</div>
+    <div>Oswald 500-700 — player names, headings, structural labels (uppercase)</div>
+    <div>Doto 400-900 &nbsp;&nbsp;— scoreboard numbers, score displays (dot-matrix)</div>
+    <div>Inter 400-700 &nbsp;— body text, descriptions, UI labels</div>
+    <div>JetBrains Mono — stat numbers, tabular data</div>
+    <br>
+    <div style="color: #8a8070;">/* Tailwind @theme tokens */</div>
+    <div>--font-script: &nbsp;'Pacifico', cursive;</div>
+    <div>--font-display: 'Oswald', sans-serif;</div>
+    <div>--font-score: &nbsp;&nbsp;'Doto', monospace;</div>
+    <div>--font-body: &nbsp;&nbsp;&nbsp;'Inter', sans-serif;</div>
+    <div>--font-mono: &nbsp;&nbsp;&nbsp;'JetBrains Mono', monospace;</div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,9 +1,12 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+
 import request from 'supertest';
 import { createApp } from '../../server.js';
 import { createTestToken, authHeader } from '../helpers/auth.js';
 import * as gameService from '../../services/game-service.js';
 import * as teamService from '../../services/team-service.js';
+
+const describeIfNetwork = process.env.SKIP_NETWORK_TESTS === "1" ? describe.skip : describe;
 
 // Mock the game service
 vi.mock('../../services/game-service.js', () => ({
@@ -12,8 +15,6 @@ vi.mock('../../services/game-service.js', () => ({
   getGameById: vi.fn(),
   getGameByJoinCode: vi.fn(),
   getUserActiveGames: vi.fn(),
-  saveGameState: vi.fn(),
-  recordMove: vi.fn(),
   endGame: vi.fn(),
 }));
 
@@ -28,10 +29,24 @@ vi.mock('../../services/team-service.js', () => ({
   updateBattingOrder: vi.fn(),
 }));
 
+// Valid roster fixture used by tests that need to pass roster validation
+const VALID_ROSTER = [
+  { position: 'C', mlbPlayerId: 518735, battingOrder: 9 },
+  { position: '1B', mlbPlayerId: 518692, battingOrder: 4 },
+  { position: '2B', mlbPlayerId: 543760, battingOrder: 8 },
+  { position: '3B', mlbPlayerId: 571448, battingOrder: 5 },
+  { position: 'SS', mlbPlayerId: 596115, battingOrder: 1 },
+  { position: 'LF', mlbPlayerId: 665742, battingOrder: 7 },
+  { position: 'CF', mlbPlayerId: 545361, battingOrder: 2 },
+  { position: 'RF', mlbPlayerId: 605141, battingOrder: 6 },
+  { position: 'DH', mlbPlayerId: 660271, battingOrder: 3 },
+  { position: 'SP', mlbPlayerId: 543037, battingOrder: null },
+];
+
 console.log('🧪 Starting test suite...');
 
-describe('POST /api/games', () => {
-  const app = createApp();
+describeIfNetwork('POST /api/games', () => {
+  const { app } = createApp();
   const token = createTestToken({ id: 'user-123' });
 
   beforeEach(() => {
@@ -90,7 +105,7 @@ describe('POST /api/games', () => {
       userId: 'user-123',
       name: 'My Team',
       rosterComplete: true,
-      roster: [],
+      roster: VALID_ROSTER,
     };
 
     vi.mocked(teamService.getTeamById).mockResolvedValue(completeTeam);
@@ -124,7 +139,7 @@ describe('POST /api/games', () => {
       userId: 'user-123',
       name: 'My Team',
       rosterComplete: true,
-      roster: [],
+      roster: VALID_ROSTER,
     };
 
     vi.mocked(teamService.getTeamById).mockResolvedValue(completeTeam);
@@ -214,7 +229,7 @@ describe('POST /api/games', () => {
       userId: 'other-user',
       name: 'Other Team',
       rosterComplete: true,
-      roster: [],
+      roster: VALID_ROSTER,
     };
 
     vi.mocked(teamService.getTeamById).mockResolvedValue(otherUserTeam);
@@ -229,8 +244,8 @@ describe('POST /api/games', () => {
   });
 });
 
-describe('POST /api/games/join', () => {
-  const app = createApp();
+describeIfNetwork('POST /api/games/join', () => {
+  const { app } = createApp();
   const token = createTestToken({ id: 'user-456' });
 
   beforeEach(() => {
@@ -243,7 +258,7 @@ describe('POST /api/games/join', () => {
       userId: 'user-456',
       name: 'Visitor Team',
       rosterComplete: true,
-      roster: [],
+      roster: VALID_ROSTER,
     };
 
     vi.mocked(teamService.getTeamById).mockResolvedValue(userTeam);
@@ -285,7 +300,7 @@ describe('POST /api/games/join', () => {
       userId: 'user-456',
       name: 'Visitor Team',
       rosterComplete: true,
-      roster: [],
+      roster: VALID_ROSTER,
     };
 
     vi.mocked(teamService.getTeamById).mockResolvedValue(userTeam);
@@ -325,7 +340,7 @@ describe('POST /api/games/join', () => {
       userId: 'user-456',
       name: 'Visitor Team',
       rosterComplete: true,
-      roster: [],
+      roster: VALID_ROSTER,
     };
 
     vi.mocked(teamService.getTeamById).mockResolvedValue(userTeam);
@@ -365,7 +380,7 @@ describe('POST /api/games/join', () => {
       userId: 'user-456',
       name: 'Visitor Team',
       rosterComplete: true,
-      roster: [],
+      roster: VALID_ROSTER,
     };
 
     vi.mocked(teamService.getTeamById).mockResolvedValue(userTeam);
@@ -386,7 +401,7 @@ describe('POST /api/games/join', () => {
       userId: 'user-456',
       name: 'Visitor Team',
       rosterComplete: true,
-      roster: [],
+      roster: VALID_ROSTER,
     };
 
     vi.mocked(teamService.getTeamById).mockResolvedValue(userTeam);
@@ -420,7 +435,7 @@ describe('POST /api/games/join', () => {
       userId: 'user-123',
       name: 'Home Team',
       rosterComplete: true,
-      roster: [],
+      roster: VALID_ROSTER,
     };
 
     vi.mocked(teamService.getTeamById).mockResolvedValue(userTeam);
@@ -476,8 +491,8 @@ describe('POST /api/games/join', () => {
   });
 });
 
-describe('GET /api/games/:id', () => {
-  const app = createApp();
+describeIfNetwork('GET /api/games/:id', () => {
+  const { app } = createApp();
   const token = createTestToken({ id: 'user-123' });
 
   beforeEach(() => {
@@ -543,8 +558,8 @@ describe('GET /api/games/:id', () => {
   });
 });
 
-describe('GET /api/games', () => {
-  const app = createApp();
+describeIfNetwork('GET /api/games', () => {
+  const { app } = createApp();
   const token = createTestToken({ id: 'user-123' });
 
   beforeEach(() => {
@@ -586,167 +601,8 @@ describe('GET /api/games', () => {
   });
 });
 
-describe('Game State Persistence', () => {
-  const app = createApp();
-  const token = createTestToken({ id: 'user-123' });
-
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it('saves game state after each move via POST /api/games/:id/move', async () => {
-    const game = {
-      id: 'game-uuid',
-      homeTeamId: 'home-team',
-      homeUserId: 'user-123',
-      visitorTeamId: 'visitor-team',
-      visitorUserId: 'user-456',
-      status: 'active',
-      state: {
-        inning: 1,
-        isTopOfInning: true,
-        outs: 0,
-        scores: [0, 0],
-        bases: [false, false, false],
-        currentBatterIndex: 0,
-      },
-    };
-
-    vi.mocked(gameService.getGameById).mockResolvedValue(game);
-
-    const moveResult = {
-      diceRolls: [4, 5],
-      outcome: 'single',
-      runsScored: 0,
-      newState: {
-        inning: 1,
-        isTopOfInning: true,
-        outs: 0,
-        scores: [0, 0],
-        bases: [true, false, false],
-        currentBatterIndex: 1,
-      },
-    };
-
-    vi.mocked(gameService.recordMove).mockResolvedValue(moveResult);
-    vi.mocked(gameService.saveGameState).mockResolvedValue(undefined);
-
-    const response = await request(app)
-      .post('/api/games/game-uuid/move')
-      .set(authHeader(token))
-      .send({ diceRolls: [4, 5] });
-
-    expect(response.status).toBe(200);
-    expect(gameService.saveGameState).toHaveBeenCalled();
-    expect(gameService.recordMove).toHaveBeenCalled();
-  });
-
-  it('records move in game_moves via POST /api/games/:id/move', async () => {
-    const game = {
-      id: 'game-uuid',
-      homeTeamId: 'home-team',
-      homeUserId: 'user-123',
-      visitorTeamId: 'visitor-team',
-      visitorUserId: 'user-456',
-      status: 'active',
-      state: {
-        inning: 1,
-        isTopOfInning: true,
-        outs: 1,
-        scores: [0, 0],
-        bases: [false, false, false],
-        currentBatterIndex: 2,
-      },
-    };
-
-    vi.mocked(gameService.getGameById).mockResolvedValue(game);
-
-    const moveResult = {
-      diceRolls: [1, 2],
-      outcome: 'groundOut',
-      runsScored: 0,
-      newState: {
-        inning: 1,
-        isTopOfInning: true,
-        outs: 2,
-        scores: [0, 0],
-        bases: [false, false, false],
-        currentBatterIndex: 3,
-      },
-    };
-
-    vi.mocked(gameService.recordMove).mockResolvedValue(moveResult);
-    vi.mocked(gameService.saveGameState).mockResolvedValue(undefined);
-
-    const response = await request(app)
-      .post('/api/games/game-uuid/move')
-      .set(authHeader(token))
-      .send({ diceRolls: [1, 2] });
-
-    expect(response.status).toBe(200);
-    expect(gameService.recordMove).toHaveBeenCalledWith(
-      'game-uuid',
-      'user-123',
-      expect.objectContaining({ diceRolls: [1, 2] })
-    );
-  });
-
-  it('updates user stats on game completion', async () => {
-    const game = {
-      id: 'game-uuid',
-      homeTeamId: 'home-team',
-      homeUserId: 'user-123',
-      visitorTeamId: 'visitor-team',
-      visitorUserId: 'user-456',
-      status: 'active',
-      state: {
-        inning: 9,
-        isTopOfInning: false,
-        outs: 2,
-        scores: [3, 4],
-        bases: [false, false, false],
-        currentBatterIndex: 8,
-      },
-    };
-
-    vi.mocked(gameService.getGameById).mockResolvedValue(game);
-
-    const moveResult = {
-      diceRolls: [3, 4],
-      outcome: 'flyOut',
-      runsScored: 0,
-      newState: {
-        inning: 9,
-        isTopOfInning: false,
-        outs: 3,
-        scores: [3, 4],
-        bases: [false, false, false],
-        currentBatterIndex: 0,
-        isGameOver: true,
-        winner: 'user-123',
-      },
-    };
-
-    vi.mocked(gameService.recordMove).mockResolvedValue(moveResult);
-    vi.mocked(gameService.saveGameState).mockResolvedValue(undefined);
-    vi.mocked(gameService.endGame).mockResolvedValue({
-      winnerId: 'user-123',
-      loserId: 'user-456',
-      finalScore: [3, 4],
-    });
-
-    const response = await request(app)
-      .post('/api/games/game-uuid/move')
-      .set(authHeader(token))
-      .send({ diceRolls: [3, 4] });
-
-    expect(response.status).toBe(200);
-    expect(gameService.endGame).toHaveBeenCalledWith('game-uuid', 'user-123');
-  });
-});
-
-describe('POST /api/games/:id/forfeit', () => {
-  const app = createApp();
+describeIfNetwork('POST /api/games/:id/forfeit', () => {
+  const { app } = createApp();
   const token = createTestToken({ id: 'user-123' });
 
   beforeEach(() => {

@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, afterAll, vi } from 'vitest';
+
 import { createServer, type Server as HttpServer } from 'http';
 import { Server as SocketServer } from 'socket.io';
 import { io as ioc, type Socket as ClientSocket } from 'socket.io-client';
@@ -6,9 +7,12 @@ import { createTestToken, createExpiredToken, createInvalidToken } from '../help
 import { createSocketServer, type GameSocket } from '../../socket/index.js';
 import * as gameService from '../../services/game-service.js';
 
+const describeIfNetwork = process.env.SKIP_NETWORK_TESTS === "1" ? describe.skip : describe;
+
 // Mock game service
 vi.mock('../../services/game-service.js', () => ({
   getGameById: vi.fn(),
+  generateDiceRoll: vi.fn(),
   saveGameState: vi.fn(),
   recordMove: vi.fn(),
   endGame: vi.fn(),
@@ -86,11 +90,12 @@ function waitForConnection(socket: ClientSocket, timeout = 2000): Promise<void> 
   });
 }
 
-describe('WebSocket Authentication', () => {
+describeIfNetwork('WebSocket Authentication', () => {
   let ctx: TestContext;
 
   beforeEach(async () => {
     vi.clearAllMocks();
+    vi.mocked(gameService.generateDiceRoll).mockResolvedValue([4, 4]);
     ctx = await createTestServer();
   });
 
@@ -136,11 +141,12 @@ describe('WebSocket Authentication', () => {
   });
 });
 
-describe('Game Room Events', () => {
+describeIfNetwork('Game Room Events', () => {
   let ctx: TestContext;
 
   beforeEach(async () => {
     vi.clearAllMocks();
+    vi.mocked(gameService.generateDiceRoll).mockResolvedValue([4, 4]);
     ctx = await createTestServer();
   });
 
@@ -148,7 +154,7 @@ describe('Game Room Events', () => {
     await ctx.cleanup();
   });
 
-  describe('game:join', () => {
+  describeIfNetwork('game:join', () => {
     it('joins game room and receives state', async () => {
       const token = createTestToken({ id: 'user-123' });
       const client = createTestClient(token);
@@ -223,7 +229,7 @@ describe('Game Room Events', () => {
     });
   });
 
-  describe('game:roll', () => {
+  describeIfNetwork('game:roll', () => {
     it('processes roll when player turn', async () => {
       const tokenHome = createTestToken({ id: 'user-123' });
       const clientHome = createTestClient(tokenHome);
@@ -442,7 +448,7 @@ describe('Game Room Events', () => {
     });
   });
 
-  describe('game:forfeit', () => {
+  describeIfNetwork('game:forfeit', () => {
     it('ends game with opponent as winner', async () => {
       const token = createTestToken({ id: 'user-123' });
       const client = createTestClient(token);
@@ -540,7 +546,7 @@ describe('Game Room Events', () => {
   });
 });
 
-describe('Disconnection Handling', () => {
+describeIfNetwork('Disconnection Handling', () => {
   let ctx: TestContext;
 
   beforeEach(async () => {

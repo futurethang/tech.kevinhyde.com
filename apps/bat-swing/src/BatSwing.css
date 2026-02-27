@@ -1,0 +1,351 @@
+/* =============================================
+   BatSwing Component Styles
+   Portable - just import this CSS alongside the component.
+   ============================================= */
+
+.bat-swing-container {
+  position: relative;
+  width: 280px;
+  height: 340px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  border-radius: 24px;
+  background: radial-gradient(ellipse at 50% 80%, rgba(255,255,255,0.04) 0%, transparent 70%);
+}
+
+.bat-swing-container:active {
+  cursor: grabbing;
+}
+
+.bat-swing-disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* Shake animation for high tension */
+.bat-swing-shake {
+  animation: bat-shake 60ms infinite alternate;
+}
+
+@keyframes bat-shake {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(var(--shake-intensity, 2px), calc(var(--shake-intensity, 2px) * -0.5)); }
+  50% { transform: translate(calc(var(--shake-intensity, 2px) * -1), var(--shake-intensity, 2px)); }
+  75% { transform: translate(var(--shake-intensity, 2px), var(--shake-intensity, 2px)); }
+  100% { transform: translate(calc(var(--shake-intensity, 2px) * -0.5), calc(var(--shake-intensity, 2px) * -1)); }
+}
+
+/* --- Tension ring --- */
+.bat-swing-ring {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  border: 3px solid hsl(120, 80%, 55%);
+  pointer-events: none;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(1);
+  margin-top: -50px;
+  margin-left: -100px;
+}
+
+/* --- Batter figure --- */
+.bat-swing-figure {
+  position: relative;
+  width: 120px;
+  height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bat-swing-batter {
+  position: relative;
+  width: 60px;
+  height: 180px;
+}
+
+/* Head */
+.batter-head {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #d4a574;
+  z-index: 3;
+}
+
+.batter-helmet {
+  position: absolute;
+  top: -3px;
+  left: -4px;
+  width: 38px;
+  height: 22px;
+  border-radius: 18px 18px 4px 4px;
+  background: #2a3a5c;
+  z-index: 4;
+}
+
+/* Torso */
+.batter-torso {
+  position: absolute;
+  top: 30px;
+  left: 50%;
+  transform-origin: bottom center;
+  width: 44px;
+  height: 65px;
+  margin-left: -22px;
+  background: linear-gradient(180deg, #2a3a5c 0%, #1e2d4a 100%);
+  border-radius: 8px 8px 4px 4px;
+  z-index: 2;
+}
+
+/* Arms + Bat assembly */
+.batter-arms {
+  position: absolute;
+  top: 8px;
+  right: -10px;
+  width: 110px;
+  height: 14px;
+  transform-origin: 10px 7px; /* pivot at shoulder */
+  z-index: 5;
+}
+
+.bat-handle {
+  position: absolute;
+  left: 14px;
+  top: 3px;
+  width: 50px;
+  height: 8px;
+  background: linear-gradient(90deg, #8B6914, #a37b1e);
+  border-radius: 3px;
+}
+
+.bat-barrel {
+  position: absolute;
+  left: 58px;
+  top: -1px;
+  width: 48px;
+  height: 16px;
+  background: linear-gradient(90deg, #a37b1e, #c4943a 40%, #d4a44a 60%, #c4943a);
+  border-radius: 4px 10px 10px 4px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+.bat-knob {
+  position: absolute;
+  left: 8px;
+  top: 2px;
+  width: 10px;
+  height: 10px;
+  background: #6b4f0e;
+  border-radius: 50%;
+}
+
+/* "Hands" on the handle - represented by arm nubs */
+.batter-arms::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 0;
+  width: 16px;
+  height: 14px;
+  background: #d4a574;
+  border-radius: 6px;
+  z-index: 1;
+}
+
+/* Legs */
+.batter-legs {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 44px;
+  margin-left: -22px;
+  height: 85px;
+  z-index: 1;
+}
+
+.batter-leg {
+  position: absolute;
+  bottom: 0;
+  width: 16px;
+  height: 80px;
+  background: linear-gradient(180deg, #3a3a3a, #2a2a2a);
+  border-radius: 4px 4px 6px 6px;
+  transform-origin: top center;
+}
+
+.batter-leg-front {
+  left: 4px;
+}
+
+.batter-leg-back {
+  right: 4px;
+}
+
+/* Feet/cleats */
+.batter-leg::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: -2px;
+  width: 22px;
+  height: 10px;
+  background: #1a1a1a;
+  border-radius: 4px;
+}
+
+/* --- Speed lines --- */
+.bat-swing-speed-lines {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  z-index: 10;
+  margin-top: -40px;
+}
+
+.bat-swing-speed-line {
+  position: absolute;
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, rgba(255,200,50,0.8), transparent);
+  border-radius: 2px;
+  transform-origin: left center;
+  transform: rotate(var(--line-angle, 0deg)) translateX(40px);
+  animation: speed-line-burst 350ms var(--line-delay, 0ms) ease-out forwards;
+  opacity: 0;
+}
+
+@keyframes speed-line-burst {
+  0% {
+    opacity: 0;
+    width: 20px;
+    transform: rotate(var(--line-angle, 0deg)) translateX(30px);
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    width: 80px;
+    transform: rotate(var(--line-angle, 0deg)) translateX(100px);
+  }
+}
+
+/* --- Impact flash --- */
+.bat-swing-flash {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 160px;
+  height: 160px;
+  margin-top: -120px;
+  margin-left: -80px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,220,80,0.6) 0%, rgba(255,150,30,0.3) 40%, transparent 70%);
+  pointer-events: none;
+  z-index: 9;
+  animation: impact-flash 400ms ease-out forwards;
+}
+
+@keyframes impact-flash {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  15% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.8);
+  }
+}
+
+/* --- Instruction text --- */
+.bat-swing-instruction {
+  position: absolute;
+  bottom: 20px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 0.5px;
+  transition: opacity 0.3s, transform 0.3s;
+  pointer-events: none;
+
+  /* Subtle bounce animation */
+  animation: instruction-bob 2s ease-in-out infinite;
+}
+
+@keyframes instruction-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(5px); }
+}
+
+/* --- Power meter --- */
+.bat-swing-power-meter {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.bat-swing-power-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: rgba(255,255,255,0.5);
+}
+
+.bat-swing-power-bar-track {
+  width: 100px;
+  height: 6px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.bat-swing-power-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.05s linear;
+}
+
+.bat-swing-power-value {
+  font-size: 14px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  min-width: 36px;
+}
+
+/* --- Children content slot --- */
+.bat-swing-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 0;
+}

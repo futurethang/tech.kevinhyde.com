@@ -1,8 +1,9 @@
 /**
  * Input Component - Text inputs and select dropdowns
+ * v5 Topps design: zero radius, dark navy surface, gold focus ring
  */
 
-import { type InputHTMLAttributes, type SelectHTMLAttributes, forwardRef } from 'react';
+import { type InputHTMLAttributes, type SelectHTMLAttributes, forwardRef, useId } from 'react';
 
 // ============================================
 // TEXT INPUT
@@ -16,14 +17,15 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ label, error, hint, className = '', ...props }, ref) => {
-    const inputId = props.id || `input-${Math.random().toString(36).slice(2)}`;
+    const generatedId = useId();
+    const inputId = props.id || generatedId;
 
     return (
       <div className="w-full">
         {label && (
           <label
             htmlFor={inputId}
-            className="block text-sm font-medium text-gray-300 mb-1.5"
+            className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1.5"
           >
             {label}
           </label>
@@ -33,21 +35,21 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           id={inputId}
           className={`
             w-full px-4 py-3 min-h-[48px]
-            bg-gray-800 border rounded-lg
-            text-white placeholder-gray-500
+            bg-[var(--color-surface-card)] border
+            text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)]
             transition-colors duration-200
-            focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent
+            focus:outline-none focus:ring-2 focus:ring-[var(--color-topps-gold)] focus:border-transparent
             disabled:opacity-50 disabled:cursor-not-allowed
-            ${error ? 'border-red-500' : 'border-gray-600 hover:border-gray-500'}
+            ${error ? 'border-[var(--color-card-red)]' : 'border-[var(--color-text-dim)] hover:border-[var(--color-text-muted)]'}
             ${className}
           `}
           {...props}
         />
         {error && (
-          <p className="mt-1.5 text-sm text-red-500">{error}</p>
+          <p className="mt-1.5 text-sm text-[var(--color-card-red)]">{error}</p>
         )}
         {hint && !error && (
-          <p className="mt-1.5 text-sm text-gray-500">{hint}</p>
+          <p className="mt-1.5 text-sm text-[var(--color-text-muted)]">{hint}</p>
         )}
       </div>
     );
@@ -68,14 +70,15 @@ interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
   ({ label, error, options, className = '', ...props }, ref) => {
-    const selectId = props.id || `select-${Math.random().toString(36).slice(2)}`;
+    const generatedId = useId();
+    const selectId = props.id || generatedId;
 
     return (
       <div className="w-full">
         {label && (
           <label
             htmlFor={selectId}
-            className="block text-sm font-medium text-gray-300 mb-1.5"
+            className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1.5"
           >
             {label}
           </label>
@@ -85,17 +88,17 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           id={selectId}
           className={`
             w-full px-4 py-3 min-h-[48px]
-            bg-gray-800 border rounded-lg
-            text-white
+            bg-[var(--color-surface-card)] border
+            text-[var(--color-text-primary)]
             transition-colors duration-200
-            focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent
+            focus:outline-none focus:ring-2 focus:ring-[var(--color-topps-gold)] focus:border-transparent
             disabled:opacity-50 disabled:cursor-not-allowed
             appearance-none cursor-pointer
-            ${error ? 'border-red-500' : 'border-gray-600 hover:border-gray-500'}
+            ${error ? 'border-[var(--color-card-red)]' : 'border-[var(--color-text-dim)] hover:border-[var(--color-text-muted)]'}
             ${className}
           `}
           style={{
-            backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+            backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%238a8070' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
             backgroundPosition: 'right 0.75rem center',
             backgroundRepeat: 'no-repeat',
             backgroundSize: '1.25rem 1.25rem',
@@ -110,7 +113,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           ))}
         </select>
         {error && (
-          <p className="mt-1.5 text-sm text-red-500">{error}</p>
+          <p className="mt-1.5 text-sm text-[var(--color-card-red)]">{error}</p>
         )}
       </div>
     );
@@ -132,7 +135,7 @@ export function SearchInput({ onClear, value, className = '', ...props }: Search
     <div className="relative w-full">
       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
         <svg
-          className="h-5 w-5 text-gray-500"
+          className="h-5 w-5 text-[var(--color-text-muted)]"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -150,11 +153,11 @@ export function SearchInput({ onClear, value, className = '', ...props }: Search
         value={value}
         className={`
           w-full pl-10 pr-10 py-3 min-h-[48px]
-          bg-gray-800 border border-gray-600 rounded-lg
-          text-white placeholder-gray-500
+          bg-[var(--color-surface-card)] border border-[var(--color-text-dim)]
+          text-[var(--color-text-primary)] placeholder-[var(--color-text-muted)]
           transition-colors duration-200
-          hover:border-gray-500
-          focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent
+          hover:border-[var(--color-text-muted)]
+          focus:outline-none focus:ring-2 focus:ring-[var(--color-topps-gold)] focus:border-transparent
           ${className}
         `}
         {...props}
@@ -163,7 +166,7 @@ export function SearchInput({ onClear, value, className = '', ...props }: Search
         <button
           type="button"
           onClick={onClear}
-          className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-300"
+          className="absolute inset-y-0 right-0 pr-3 flex items-center text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]"
         >
           <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path

@@ -1,21 +1,29 @@
-import express, { type Express, type Request, type Response, type NextFunction } from 'express';
+import express, { type Request, type Response, type NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import { createServer } from 'http';
 import type { HealthResponse, ApiError } from './types/index.js';
 import { authMiddleware } from './middleware/auth.js';
 import authRoutes from './routes/auth.js';
 import mlbRoutes from './routes/mlb.js';
 import teamRoutes from './routes/teams.js';
 import gameRoutes from './routes/games.js';
+import devRoutes from './routes/dev.js';
+import { createSocketServer } from './socket/index.js';
 
-export function createApp(): Express {
+export function createApp() {
   const app = express();
 
-  // Security middleware
-  app.use(helmet());
+  // CORS must come before helmet for proper preflight handling
   app.use(cors({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+    origin: process.env.CORS_ORIGIN || ['http://localhost:5173', 'http://localhost:5174'],
     credentials: true,
+  }));
+  
+  // Security middleware with relaxed CSP for development
+  app.use(helmet({
+    contentSecurityPolicy: process.env.NODE_ENV === 'production' ? undefined : false,
+    crossOriginEmbedderPolicy: false,
   }));
 
   // Body parsing
@@ -47,6 +55,11 @@ export function createApp(): Express {
   // Game routes
   app.use('/api/games', gameRoutes);
 
+  // Dev-only routes for local R&D tooling
+  if (process.env.NODE_ENV !== 'production') {
+    app.use('/api/dev', devRoutes);
+  }
+
   // 404 handler
   app.use((_req: Request, res: Response<ApiError>) => {
     res.status(404).json({
@@ -64,5 +77,11 @@ export function createApp(): Express {
     });
   });
 
-  return app;
+  // Create HTTP server
+  const httpServer = createServer(app);
+  
+  // Initialize WebSocket server
+  const io = createSocketServer(httpServer);
+
+  return { app, httpServer, io };
 }

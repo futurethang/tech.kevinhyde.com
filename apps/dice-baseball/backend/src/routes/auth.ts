@@ -7,6 +7,8 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
 import type { JWTPayload, ApiError } from '../types/index.js';
+import { createTeam, updateRoster } from '../services/team-service.js';
+import type { RosterSlot } from '../services/roster-validation.js';
 
 const router = Router();
 
@@ -24,6 +26,32 @@ interface StoredUser {
 
 const users: Map<string, StoredUser> = new Map();
 const emailIndex: Map<string, string> = new Map(); // email -> id
+
+function createTokenForUser(user: StoredUser): string {
+  const payload: JWTPayload = {
+    sub: user.id,
+    email: user.email,
+  };
+
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: TOKEN_EXPIRY });
+}
+
+async function createStoredUser(email: string, username: string, password: string): Promise<StoredUser> {
+  const passwordHash = await bcrypt.hash(password, 10);
+  const id = uuidv4();
+  const user: StoredUser = {
+    id,
+    email: email.toLowerCase(),
+    username,
+    passwordHash,
+    createdAt: new Date(),
+  };
+
+  users.set(id, user);
+  emailIndex.set(user.email, id);
+
+  return user;
+}
 
 // ============================================
 // REGISTER
@@ -62,31 +90,15 @@ router.post('/register', async (req: Request, res: Response<{ user: { id: string
       });
     }
 
-    // Hash password
-    const passwordHash = await bcrypt.hash(password, 10);
+    const user = await createStoredUser(email, username, password);
+    const token = createTokenForUser(user);
 
-    // Create user
-    const id = uuidv4();
-    const user: StoredUser = {
-      id,
-      email: email.toLowerCase(),
-      username,
-      passwordHash,
-      createdAt: new Date(),
-    };
+    // For Quick Dev login (test accounts), create default teams with rosters
+    if (email.includes('test') && email.includes('example.com')) {
+      await createDefaultTeams(user.id);
+    }
 
-    users.set(id, user);
-    emailIndex.set(email.toLowerCase(), id);
-
-    // Generate token
-    const payload: JWTPayload = {
-      sub: id,
-      email: user.email,
-    };
-
-    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: TOKEN_EXPIRY });
-
-    res.status(201).json({
+    return res.status(201).json({
       user: {
         id: user.id,
         email: user.email,
@@ -96,7 +108,7 @@ router.post('/register', async (req: Request, res: Response<{ user: { id: string
     });
   } catch (error) {
     console.error('Register error:', error);
-    res.status(500).json({
+    return res.status(500).json({
       error: 'internal_error',
       message: 'An internal server error occurred',
     });
@@ -150,15 +162,9 @@ router.post('/login', async (req: Request, res: Response<{ user: { id: string; e
       });
     }
 
-    // Generate token
-    const payload: JWTPayload = {
-      sub: user.id,
-      email: user.email,
-    };
+    const token = createTokenForUser(user);
 
-    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: TOKEN_EXPIRY });
-
-    res.json({
+    return res.json({
       user: {
         id: user.id,
         email: user.email,
@@ -168,7 +174,7 @@ router.post('/login', async (req: Request, res: Response<{ user: { id: string; e
     });
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({
+    return res.status(500).json({
       error: 'internal_error',
       message: 'An internal server error occurred',
     });
@@ -182,6 +188,87 @@ router.post('/login', async (req: Request, res: Response<{ user: { id: string; e
 export function clearUsers(): void {
   users.clear();
   emailIndex.clear();
+}
+
+export interface DevUserSeed {
+  id: string;
+  email: string;
+  username: string;
+  token: string;
+}
+
+export async function createDevUserWithDefaultTeams(
+  label: string,
+  password: string = 'password123'
+): Promise<DevUserSeed> {
+  const suffix = `${Date.now()}-${Math.floor(Math.random() * 100000)}`;
+  const email = `test-${label}-${suffix}@example.com`;
+  const username = `Dev${label}${suffix.slice(-5)}`;
+
+  const user = await createStoredUser(email, username, password);
+  await createDefaultTeams(user.id);
+
+  return {
+    id: user.id,
+    email: user.email,
+    username: user.username,
+    token: createTokenForUser(user),
+  };
+}
+
+// ============================================
+// HELPER FUNCTIONS
+// ============================================
+
+/**
+ * Creates default teams with full rosters for quick dev login
+ */
+async function createDefaultTeams(userId: string): Promise<void> {
+  try {
+    // Create Team 1 - All-Stars
+    const team1 = await createTeam(userId, 'All-Stars');
+    
+    // Roster for Team 1 — all IDs from SAMPLE_PLAYERS in mlb-sync.ts
+    const roster1: RosterSlot[] = [
+      { position: 'CF', mlbPlayerId: 545361, battingOrder: 1 },  // Mike Trout
+      { position: '2B', mlbPlayerId: 519317, battingOrder: 2 },  // Marcus Semien
+      { position: 'RF', mlbPlayerId: 665742, battingOrder: 3 },  // Juan Soto
+      { position: '1B', mlbPlayerId: 605141, battingOrder: 4 },  // Freddie Freeman
+      { position: '3B', mlbPlayerId: 621566, battingOrder: 5 },  // Jose Ramirez
+      { position: 'SS', mlbPlayerId: 665487, battingOrder: 6 },  // Bobby Witt Jr
+      { position: 'LF', mlbPlayerId: 543685, battingOrder: 7 },  // Christian Yelich
+      { position: 'C', mlbPlayerId: 502054, battingOrder: 8 },   // Salvador Perez
+      { position: 'DH', mlbPlayerId: 608369, battingOrder: 9 },  // Mookie Betts
+      { position: 'SP', mlbPlayerId: 622663, battingOrder: null }, // Tarik Skubal
+    ];
+
+    await updateRoster(team1.id, roster1);
+    console.log(`✅ Created team "${team1.name}" for user ${userId}`);
+
+    // Create Team 2 - Legends
+    const team2 = await createTeam(userId, 'Legends');
+    
+    // Roster for Team 2 — all IDs from SAMPLE_PLAYERS in mlb-sync.ts
+    const roster2: RosterSlot[] = [
+      { position: 'SS', mlbPlayerId: 665489, battingOrder: 1 },  // Trea Turner
+      { position: 'RF', mlbPlayerId: 592450, battingOrder: 2 },  // Aaron Judge
+      { position: 'CF', mlbPlayerId: 660271, battingOrder: 3 },  // Shohei Ohtani
+      { position: '1B', mlbPlayerId: 660670, battingOrder: 4 },  // Ronald Acuna Jr
+      { position: '3B', mlbPlayerId: 621566, battingOrder: 5 },  // Jose Ramirez
+      { position: 'LF', mlbPlayerId: 605141, battingOrder: 6 },  // Freddie Freeman
+      { position: 'C', mlbPlayerId: 502054, battingOrder: 7 },   // Salvador Perez
+      { position: '2B', mlbPlayerId: 519317, battingOrder: 8 },  // Marcus Semien
+      { position: 'DH', mlbPlayerId: 608369, battingOrder: 9 },  // Mookie Betts
+      { position: 'SP', mlbPlayerId: 594798, battingOrder: null }, // Jacob deGrom
+    ];
+
+    await updateRoster(team2.id, roster2);
+    console.log(`✅ Created team "${team2.name}" for user ${userId}`);
+    
+  } catch (error) {
+    console.error('Error creating default teams:', error);
+    // Don't throw - this is a nice-to-have feature, not critical
+  }
 }
 
 export default router;

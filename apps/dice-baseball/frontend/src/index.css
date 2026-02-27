@@ -1,42 +1,49 @@
 @import 'tailwindcss';
 
-/* Custom theme configuration for Tailwind v4 */
 @theme {
-  /* Colors */
-  --color-green-900: #0f2417;
-  --color-green-800: #1a3d28;
-  --color-green-700: #1e5631;
-  --color-green-600: #2d7a47;
-  --color-green-500: #3d9b5d;
-  --color-green-400: #4fb871;
-  --color-green-300: #6dd58f;
+  /* ===== SURFACES (dark navy palette) ===== */
+  --color-surface-page: #1a1a2e;
+  --color-surface-card: #16213e;
+  --color-surface-elevated: #1a2744;
+  --color-surface-hover: #2a3a5c;
+  --color-surface-scoreboard: #0a0a14;
 
-  --color-brown-900: #2d1f14;
-  --color-brown-800: #4a3425;
-  --color-brown-700: #6b4d36;
-  --color-brown-600: #8b6848;
-  --color-brown-500: #a67c52;
+  /* ===== ACCENTS (Griffey-card sampled) ===== */
+  --color-topps-gold: #E9D447;
+  --color-topps-gold-shadow: #B0A030;
+  --color-topps-blue: #3D8AC5;
+  --color-topps-blue-shadow: #2A6B9E;
+  --color-card-red: #c62828;
+  --color-card-red-shadow: #8e0000;
+  --color-nameplate-orange: #CE632A;
+  --color-stadium-green: #4caf50;
+  --color-stadium-green-shadow: #2e7d32;
 
-  --color-baseball-red: #c9302c;
-  --color-baseball-red-dark: #a02622;
+  /* ===== TEXT ===== */
+  --color-text-primary: #e8e0d4;
+  --color-text-secondary: #c8b89a;
+  --color-text-muted: #8a8070;
+  --color-text-dim: #5a5a6a;
+  --color-text-dirt: #4a3425;
 
-  --color-gold: #fbbf24;
-
-  /* Fonts */
+  /* ===== TYPOGRAPHY ===== */
+  --font-script: 'Pacifico', cursive;
   --font-display: 'Oswald', sans-serif;
+  --font-score: 'Doto', monospace;
   --font-body: 'Inter', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 }
 
 /* Base styles */
 body {
-  @apply bg-gray-900 text-gray-100 min-h-screen;
+  @apply min-h-screen;
   font-family: var(--font-body);
-  margin: 0;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
+  background-color: var(--color-surface-page);
+  color: var(--color-text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-synthesis: none;
 }
 
 #root {
@@ -46,6 +53,8 @@ body {
 /* Typography */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .font-display {
@@ -68,7 +77,8 @@ button, a, [role="button"] {
 
 /* Focus styles for accessibility */
 :focus-visible {
-  @apply outline-2 outline-offset-2 outline-green-500;
+  outline: 2px solid var(--color-topps-gold);
+  outline-offset: 2px;
 }
 
 /* Custom scrollbar for dark theme */
@@ -78,13 +88,143 @@ button, a, [role="button"] {
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-gray-800;
+  background: var(--color-surface-card);
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-gray-600 rounded-full;
+  background: var(--color-text-dim);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-gray-500;
+  background: var(--color-text-muted);
+}
+
+/* ===== v5 TEXTURE UTILITIES ===== */
+
+/* Ink bleed — warm text-shadow for print feel */
+.ink-bleed {
+  text-shadow:
+    0 0 1px rgba(180, 140, 90, 0.25),
+    0.4px 0.3px 1px rgba(160, 120, 70, 0.18);
+}
+.ink-bleed-heavy {
+  text-shadow:
+    0 0 1.5px rgba(180, 140, 90, 0.35),
+    0.5px 0.4px 1.5px rgba(160, 120, 70, 0.25),
+    -0.3px 0.3px 1px rgba(170, 130, 80, 0.15);
+}
+
+/* Gloss reflection — diagonal light band on cards */
+.gloss-surface {
+  position: relative;
+  overflow: hidden;
+}
+.gloss-surface::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 0%, transparent 40%,
+    rgba(255,255,255,0.04) 42%,
+    rgba(255,255,255,0.08) 45%,
+    rgba(255,255,255,0.04) 48%,
+    transparent 50%, transparent 100%
+  );
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  z-index: 10;
+  background-size: 200% 200%;
+  background-position: 100% 0%;
+  transition: background-position 0.6s ease;
+}
+.gloss-surface:hover::after {
+  background-position: 0% 100%;
+}
+
+/* Foil variant — gold tint for premium/special cards */
+.gloss-foil::after {
+  background: linear-gradient(
+    115deg,
+    transparent 35%,
+    rgba(255,255,255,0.06) 38%,
+    rgba(255,255,255,0.12) 42%,
+    rgba(233,212,71,0.08) 46%,
+    rgba(255,255,255,0.06) 50%,
+    transparent 52%
+  );
+  background-size: 200% 200%;
+  background-position: 100% 0%;
+}
+
+/* Mobile gloss animation (no hover on touch) */
+@keyframes gloss-sweep {
+  0%, 100% { background-position: 100% 0%; }
+  50% { background-position: 0% 100%; }
+}
+@media (hover: none) {
+  .gloss-surface::after {
+    animation: gloss-sweep 5s ease-in-out infinite;
+  }
+}
+
+/* Gloss pulse — CTA attention animation (always plays) */
+.gloss-pulse {
+  position: relative;
+  overflow: hidden;
+}
+.gloss-pulse::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 35%,
+    rgba(255,255,255,0.08) 38%,
+    rgba(255,255,255,0.15) 42%,
+    rgba(255,255,255,0.08) 46%,
+    transparent 49%
+  );
+  background-size: 250% 250%;
+  background-position: 100% 0%;
+  pointer-events: none;
+  z-index: 1;
+  animation: gloss-sweep 3s ease-in-out infinite;
+}
+
+/* Edge wear — warm vignette on cards */
+.aged-edge {
+  position: relative;
+}
+.aged-edge::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at 50% 50%,
+    transparent 50%,
+    rgba(0,0,0,0.12) 85%,
+    rgba(0,0,0,0.2) 100%
+  );
+  box-shadow:
+    inset 0 0 30px rgba(180,140,90,0.06),
+    inset 0 0 60px rgba(0,0,0,0.08);
+}
+
+/* Card stipple — secondary page-level grain */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image:
+    radial-gradient(circle, #c8b89a 0.5px, transparent 0.5px),
+    radial-gradient(circle, #c8b89a 0.3px, transparent 0.3px);
+  background-size: 7px 7px, 5px 5px;
+  background-position: 0 0, 2.5px 2.5px;
+  mix-blend-mode: screen;
 }
