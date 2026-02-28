@@ -1,0 +1,23 @@
+{
+  "name": "baseball-effects-workbench",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev:workbench": "vite --config workbench/vite.config.js",
+    "build:workbench": "vite build --config workbench/vite.config.js",
+    "preview": "vite preview --config workbench/vite.config.js"
+  },
+  "dependencies": {
+    "gsap": "^3.12.7",
+    "howler": "^2.2.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "vite": "^6.0.0"
+  }
+}
