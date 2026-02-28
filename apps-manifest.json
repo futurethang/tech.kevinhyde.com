@@ -1,6 +1,15 @@
 {
   "apps": [
     {
+      "slug": "baseball-effects-workbench",
+      "name": "Baseball FX Tester",
+      "description": "Mobile testing PWA for baseball game effects — haptics, animations, and sounds",
+      "type": "react",
+      "status": "wip",
+      "createdAt": "2026-02-28",
+      "tags": ["tool", "pwa", "animation", "mobile"]
+    },
+    {
       "slug": "bat-swing",
       "name": "Bat Swing",
       "description": "Pull-back-and-release baseball bat swing interaction - a portable kinetic UI component demo",
