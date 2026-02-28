@@ -4,9 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "dev": "vite --config pwa/vite.config.js",
+    "build": "vite build --config pwa/vite.config.js",
+    "preview": "vite preview --config pwa/vite.config.js",
     "dev:workbench": "vite --config workbench/vite.config.js",
-    "build:workbench": "vite build --config workbench/vite.config.js",
-    "preview": "vite preview --config workbench/vite.config.js"
+    "build:workbench": "vite build --config workbench/vite.config.js"
   },
   "dependencies": {
     "gsap": "^3.12.7",
@@ -18,6 +20,7 @@
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^4.3.4",
-    "vite": "^6.0.0"
+    "vite": "^6.0.0",
+    "vite-plugin-pwa": "^0.21.1"
   }
 }
