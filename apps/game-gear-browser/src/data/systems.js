@@ -13,7 +13,13 @@ export const SYSTEMS = {
     archiveId: 'ef_nintendo_entertainment_-system_-no-intro_2024-04-23',
     thumbnailRepo: 'Nintendo_-_Nintendo_Entertainment_System',
   },
-  snes:      { name: 'SNES',             core: 'snes9x',  extensions: ['.smc', '.sfc'] },
+  snes: {
+    name: 'SNES',
+    core: 'snes9x',
+    extensions: ['.smc', '.sfc'],
+    archiveId: 'snesromsetcompleate',
+    thumbnailRepo: 'Nintendo_-_Super_Nintendo_Entertainment_System',
+  },
   genesis: {
     name: 'Genesis',
     core: 'segaMD',
@@ -23,7 +29,13 @@ export const SYSTEMS = {
   },
   gb:        { name: 'Game Boy',         core: 'gb',      extensions: ['.gb'] },
   gba:       { name: 'Game Boy Advance', core: 'gba',     extensions: ['.gba'] },
-  n64:       { name: 'Nintendo 64',      core: 'n64',     extensions: ['.n64', '.z64'] },
+  n64: {
+    name: 'Nintendo 64',
+    core: 'n64',
+    extensions: ['.n64', '.z64'],
+    archiveId: 'roms-bestset-nintendo-64',
+    thumbnailRepo: 'Nintendo_-_Nintendo_64',
+  },
 };
 
 export function getCoreForSystem(systemId) {
