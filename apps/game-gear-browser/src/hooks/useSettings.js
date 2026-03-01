@@ -3,6 +3,8 @@ import { useCallback, useMemo } from 'react';
 
 const SETTINGS_KEY = 'retro-browser-settings';
 
+export const DEFAULT_CORS_PROXY_URL = 'https://retro-browser-proxy.k-p-hyde.workers.dev';
+
 const DEFAULT_SETTINGS = {
   corsProxyUrl: '',
   romBaseUrl: '',
@@ -15,20 +17,26 @@ export function useSettings() {
     setSettings(prev => ({ ...prev, [key]: value }));
   }, [setSettings]);
 
-  const getProxiedUrl = useCallback((originalUrl) => {
-    if (!settings.corsProxyUrl) return originalUrl;
-    const proxy = settings.corsProxyUrl.replace(/\/+$/, '');
-    return `${proxy}/?url=${encodeURIComponent(originalUrl)}`;
+  // Use the user's custom proxy if set, otherwise fall back to the built-in default
+  const effectiveProxyUrl = useMemo(() => {
+    return settings.corsProxyUrl || DEFAULT_CORS_PROXY_URL;
   }, [settings.corsProxyUrl]);
 
-  const isConfigured = useMemo(() => {
-    return Boolean(settings.corsProxyUrl);
-  }, [settings.corsProxyUrl]);
+  const getProxiedUrl = useCallback((originalUrl) => {
+    const proxy = effectiveProxyUrl.replace(/\/+$/, '');
+    return `${proxy}/?url=${encodeURIComponent(originalUrl)}`;
+  }, [effectiveProxyUrl]);
+
+  const isConfigured = true;
+
+  const isUsingCustomProxy = Boolean(settings.corsProxyUrl);
 
   return {
     settings,
     updateSetting,
     getProxiedUrl,
     isConfigured,
+    isUsingCustomProxy,
+    effectiveProxyUrl,
   };
 }

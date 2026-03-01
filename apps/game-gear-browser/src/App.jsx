@@ -22,19 +22,15 @@ function App() {
 
   const { favorites, toggleFavorite, isFavorite } = useFavorites();
   const { recentlyPlayed, addToRecent, clearRecent } = useRecentlyPlayed();
-  const { settings, updateSetting, getProxiedUrl, isConfigured } = useSettings();
+  const { settings, updateSetting, getProxiedUrl, isConfigured, isUsingCustomProxy, effectiveProxyUrl } = useSettings();
 
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
 
   const handlePlay = useCallback((game) => {
-    if (!isConfigured) {
-      setShowSettings(true);
-      return;
-    }
     addToRecent(game);
     launchEmulator(game, getProxiedUrl);
-  }, [isConfigured, getProxiedUrl, addToRecent]);
+  }, [getProxiedUrl, addToRecent]);
 
   const displayedGames = showFavoritesOnly
     ? games.filter(game => favorites.includes(game.id))
@@ -73,11 +69,7 @@ function App() {
               {/* Settings button */}
               <button
                 onClick={() => setShowSettings(true)}
-                className={`p-2 rounded-lg border transition-colors ${
-                  isConfigured
-                    ? 'border-gg-accent text-gray-400 hover:text-white hover:border-gg-teal'
-                    : 'border-yellow-600 text-yellow-400 hover:text-yellow-300 animate-pulse'
-                }`}
+                className="p-2 rounded-lg border transition-colors border-gg-accent text-gray-400 hover:text-white hover:border-gg-teal"
                 title="Settings"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -116,23 +108,6 @@ function App() {
           </div>
         </div>
       </header>
-
-      {/* Setup banner */}
-      {!isConfigured && (
-        <div className="bg-yellow-900/30 border-b border-yellow-800">
-          <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-            <p className="text-yellow-300 text-sm">
-              Configure a CORS proxy in Settings to enable game playback.
-            </p>
-            <button
-              onClick={() => setShowSettings(true)}
-              className="text-sm px-3 py-1 rounded bg-yellow-800 text-yellow-200 hover:bg-yellow-700 transition-colors"
-            >
-              Setup
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Main content */}
       <main className="max-w-7xl mx-auto px-4 py-6">
@@ -203,6 +178,8 @@ function App() {
           settings={settings}
           onUpdateSetting={updateSetting}
           isConfigured={isConfigured}
+          isUsingCustomProxy={isUsingCustomProxy}
+          effectiveProxyUrl={effectiveProxyUrl}
           onClose={() => setShowSettings(false)}
         />
       )}
