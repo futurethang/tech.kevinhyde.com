@@ -1,13 +1,13 @@
 import { useState } from 'react';
+import { DEFAULT_CORS_PROXY_URL } from '../hooks/useSettings';
 
-export function SettingsPanel({ settings, onUpdateSetting, isConfigured, onClose }) {
+export function SettingsPanel({ settings, onUpdateSetting, isConfigured, isUsingCustomProxy, effectiveProxyUrl, onClose }) {
   const [testStatus, setTestStatus] = useState(null); // null | 'testing' | 'success' | 'error'
 
   const handleTestConnection = async () => {
-    if (!settings.corsProxyUrl) return;
     setTestStatus('testing');
     try {
-      const proxy = settings.corsProxyUrl.replace(/\/+$/, '');
+      const proxy = effectiveProxyUrl.replace(/\/+$/, '');
       const testUrl = `${proxy}/?url=${encodeURIComponent('https://archive.org/metadata/Sega_Game_Gear_TOSEC_2012_04_13')}`;
       const res = await fetch(testUrl, { method: 'GET', signal: AbortSignal.timeout(10000) });
       if (res.ok) {
@@ -41,24 +41,26 @@ export function SettingsPanel({ settings, onUpdateSetting, isConfigured, onClose
           {/* CORS Proxy URL */}
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-1.5">
-              CORS Proxy URL
+              CORS Proxy URL (optional override)
             </label>
             <input
               type="url"
               value={settings.corsProxyUrl}
               onChange={e => onUpdateSetting('corsProxyUrl', e.target.value)}
-              placeholder="https://your-worker.workers.dev"
+              placeholder={DEFAULT_CORS_PROXY_URL}
               className="w-full bg-gg-darker border border-gg-accent rounded px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-gg-teal text-sm"
             />
             <p className="text-xs text-gray-500 mt-1">
-              Deploy the included Cloudflare Worker and paste the URL here.
+              {isUsingCustomProxy
+                ? 'Using your custom CORS proxy.'
+                : 'A built-in proxy is active. You can optionally deploy your own Cloudflare Worker and enter its URL here.'}
             </p>
 
             {/* Test Connection */}
             <div className="flex items-center gap-3 mt-2">
               <button
                 onClick={handleTestConnection}
-                disabled={!settings.corsProxyUrl || testStatus === 'testing'}
+                disabled={testStatus === 'testing'}
                 className="text-sm px-3 py-1 rounded bg-gg-darker border border-gg-accent text-gray-300 hover:text-white hover:border-gg-teal disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
                 {testStatus === 'testing' ? 'Testing...' : 'Test Connection'}
@@ -90,10 +92,10 @@ export function SettingsPanel({ settings, onUpdateSetting, isConfigured, onClose
           </div>
 
           {/* Status */}
-          <div className={`rounded-lg px-4 py-3 text-sm ${isConfigured ? 'bg-green-900/20 border border-green-800 text-green-300' : 'bg-yellow-900/20 border border-yellow-800 text-yellow-300'}`}>
-            {isConfigured
-              ? 'CORS proxy is configured. Games are ready to play!'
-              : 'Set a CORS proxy URL above to enable game playback. Browse the library without it.'}
+          <div className="rounded-lg px-4 py-3 text-sm bg-green-900/20 border border-green-800 text-green-300">
+            {isUsingCustomProxy
+              ? 'Using your custom CORS proxy. Games are ready to play!'
+              : 'Using built-in CORS proxy. Games are ready to play!'}
           </div>
         </div>
       </div>

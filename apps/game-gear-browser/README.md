@@ -24,28 +24,20 @@ Browser App (React)
                  └─ Internet Archive
 ```
 
-ROMs are fetched from Internet Archive through a user-deployed Cloudflare Worker that adds CORS headers. EmulatorJS runs in a sandboxed iframe to avoid conflicts with the React SPA.
+ROMs are fetched from Internet Archive through a Cloudflare Worker CORS proxy that adds the necessary headers. A built-in proxy is included so the app works out of the box. EmulatorJS runs in a sandboxed iframe to avoid conflicts with the React SPA.
 
 ## Setup
 
-### 1. Deploy the CORS Proxy
+No configuration needed — just open the app and play! The built-in CORS proxy handles ROM fetching from Internet Archive automatically.
 
-The included Cloudflare Worker (`worker/cors-proxy.js`) proxies ROM requests to archive.org with CORS headers. Deploy it:
+### Custom CORS Proxy (optional)
 
-```bash
-npx wrangler deploy worker/cors-proxy.js --name retro-browser-proxy
-```
+If you want to use your own Cloudflare Worker proxy instead of the built-in one:
 
-### 2. Configure the App
-
-1. Run the app (`npm run dev`)
-2. Click the gear icon in the header
-3. Paste your Cloudflare Worker URL (e.g., `https://retro-browser-proxy.your-name.workers.dev`)
+1. Deploy the included worker: `npx wrangler deploy worker/cors-proxy.js --name retro-browser-proxy`
+2. Click the gear icon in the app header
+3. Paste your Worker URL (e.g., `https://retro-browser-proxy.your-name.workers.dev`)
 4. Click "Test Connection" to verify
-
-### 3. Play!
-
-Browse the library, click a game, and EmulatorJS handles the rest. Xbox controllers work automatically.
 
 ## Tech Stack
 
