@@ -4,6 +4,8 @@ The game offers three tiers of play depth. Players choose their tier per session
 
 Records are tracked across all tiers. Wins are wins.
 
+**See also:** [`TIER-ARCHITECTURE.md`](./TIER-ARCHITECTURE.md) for the developer-facing implementation patterns (feature gating, data model, migration path).
+
 ---
 
 ## Tier 1: Arcade Mode
