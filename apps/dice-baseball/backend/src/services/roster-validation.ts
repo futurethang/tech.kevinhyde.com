@@ -4,6 +4,8 @@
  * Validates team rosters and batting orders for Dice Baseball.
  */
 
+import type { TierProfile } from '../../contracts/tier.js';
+
 export const REQUIRED_POSITIONS = [
   'C',
   '1B',
@@ -152,6 +154,32 @@ export function validateBattingOrderArray(order: string[]): ValidationResult {
   if (order.length !== uniquePositions.size) {
     errors.push('Duplicate positions in batting order');
   }
+
+  return {
+    valid: errors.length === 0,
+    errors,
+  };
+}
+
+/**
+ * Validate roster size against tier requirements.
+ * Standard validateRoster() checks positions; this adds tier-specific size check.
+ */
+export function validateRosterForTier(roster: RosterSlot[], rules: TierProfile): ValidationResult {
+  const errors: string[] = [];
+
+  if (roster.length !== rules.rosterSize) {
+    errors.push(`Roster must have exactly ${rules.rosterSize} players for ${rules.tier} mode, found ${roster.length}`);
+  }
+
+  // For standard roster sizes (10), delegate to existing validation
+  if (rules.rosterSize === 10) {
+    const baseResult = validateRoster(roster);
+    errors.push(...baseResult.errors);
+  }
+
+  // For expanded rosters (25, manager mode), additional position checks needed
+  // Stub: just check size for now, full position validation when manager mode ships
 
   return {
     valid: errors.length === 0,

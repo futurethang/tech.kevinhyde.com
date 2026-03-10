@@ -8,7 +8,7 @@ import { useAuthStore } from '../stores/authStore';
 import * as api from '../services/api';
 import * as socket from '../services/socket';
 import type { RollResultEvent } from '../types/contracts/index.js';
-import type { GameState, Game } from '../types';
+import type { GameState, GameTier, TierProfile, Game } from '../types';
 
 const RESULT_HOLD_MS = 450;
 
@@ -17,6 +17,7 @@ export function useGameSession(gameId: string | undefined) {
 
   const setGame = useGameStore((s) => s.setGame);
   const setGameState = useGameStore((s) => s.setGameState);
+  const setTierAndRules = useGameStore((s) => s.setTierAndRules);
   const addPlayLogEntry = useGameStore((s) => s.addPlayLogEntry);
   const setConnected = useGameStore((s) => s.setConnected);
   const setMyTurn = useGameStore((s) => s.setMyTurn);
@@ -73,8 +74,11 @@ export function useGameSession(gameId: string | undefined) {
         socket.clearHandlers();
 
         const unsubs = [
-          socket.on<{ state: GameState }>('game:state', ({ state }) => {
+          socket.on<{ state: GameState; tier?: GameTier; rules?: TierProfile }>('game:state', ({ state, tier, rules }) => {
             setGameState(state);
+            if (tier && rules) {
+              setTierAndRules(tier, rules);
+            }
           }),
           socket.on<RollResultEvent>('game:roll-result', (result) => {
             setLastRoll(result.diceRolls, result.outcome);

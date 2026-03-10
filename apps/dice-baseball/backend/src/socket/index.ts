@@ -188,8 +188,8 @@ export function createSocketServer(httpServer: HttpServer): SocketServer {
           }
         }
 
-        // Send current game state
-        socket.emit('game:state', { state: game.state, sim: game.simulation });
+        // Send current game state (includes tier and rules for frontend gating)
+        socket.emit('game:state', { state: game.state, sim: game.simulation, tier: game.tier, rules: game.rules });
       } catch (error) {
         console.error('Error joining game:', error);
         socket.emit('error', { error: 'internal_error', message: 'Failed to join game' });

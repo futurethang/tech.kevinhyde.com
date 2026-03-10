@@ -6,11 +6,12 @@
  */
 
 import { resolveAtBat, advanceRunners, handleInningLogic, generateDescription } from './game-engine.js';
-import type { GameState, BatterStats, PitcherStats, OutcomeType, TeamStats } from './game-engine.js';
+import type { GameState, BatterStats, PitcherStats, OutcomeType, TeamStats, GameContext } from './game-engine.js';
 import * as teamService from './team-service.js';
 import { getPlayerById } from './mlb-sync.js';
 import { gameRepository } from '../repositories/game-repository.js';
 import { createSeededRng, normalizeSeed } from './simulation-rng.js';
+import { type GameTier, type TierProfile, TIER_PROFILES } from '../../contracts/tier.js';
 
 // ============================================
 // TYPES
@@ -19,6 +20,8 @@ import { createSeededRng, normalizeSeed } from './simulation-rng.js';
 export interface Game {
   id: string;
   joinCode: string;
+  tier: GameTier;
+  rules: TierProfile;
   homeTeamId: string;
   homeUserId: string;
   visitorTeamId: string | null;
@@ -247,7 +250,8 @@ function simulationSnapshot(game: Game): SimulationSnapshot {
 export async function createGame(
   userId: string,
   teamId: string,
-  simInput?: SimulationConfigInput
+  simInput?: SimulationConfigInput,
+  tier: GameTier = 'arcade'
 ): Promise<Game> {
   const gameId = generateGameId();
   let joinCode = generateJoinCode();
@@ -257,9 +261,13 @@ export async function createGame(
     joinCode = generateJoinCode();
   }
 
+  const rules = TIER_PROFILES[tier];
+
   const game: Game = {
     id: gameId,
     joinCode,
+    tier,
+    rules,
     homeTeamId: teamId,
     homeUserId: userId,
     visitorTeamId: null,
@@ -411,8 +419,15 @@ export async function recordMove(
       hrPer9: 1.2,
     };
 
-  // Resolve the at-bat
-  const outcome = resolveAtBat(batterStats, pitcherStats, input.diceRolls, nextRandom(game));
+  // Build game context for tier-specific modifiers
+  const gameContext: GameContext = {
+    pitcherAtBatCount: state.currentBatterIndex, // rough proxy: total at-bats faced
+    outs: state.outs,
+    runners: state.bases,
+  };
+
+  // Resolve the at-bat (passes rules for tier-gated modifiers)
+  const outcome = resolveAtBat(batterStats, pitcherStats, input.diceRolls, nextRandom(game), game.rules, gameContext);
 
   // Advance runners
   const baseState = { bases: state.bases, outs: state.outs };

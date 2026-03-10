@@ -5,7 +5,7 @@
  */
 
 import { useParams, useNavigate } from 'react-router-dom';
-import { Button, Card, CardContent } from '../components/common';
+import { Button, Card, CardContent, FeatureGate } from '../components/common';
 import { Header, PageContainer } from '../components/layout/Header';
 import { MatchupDisplay, OpponentInfo, BoxScore, Scoreboard, Diamond } from '../components/game';
 import { useGameStore } from '../stores/gameStore';
@@ -22,6 +22,7 @@ export function Game() {
   const {
     currentGame,
     gameState,
+    rules,
     playLog,
     isMyTurn,
     opponentConnected,
@@ -138,6 +139,13 @@ export function Game() {
             ))}
           </span>
         </div>
+
+        {/* Manager-mode features: gated by tier rules */}
+        <FeatureGate rules={rules ?? undefined} feature="allowPitchingChanges">
+          <div className="mb-3 border border-[var(--color-text-dim)] px-3 py-2 text-sm text-[var(--color-text-muted)]">
+            Pitching changes available (Manager Mode)
+          </div>
+        </FeatureGate>
 
         <TurnStatus
           isMyTurn={isMyTurn}
