@@ -4,3 +4,4 @@ export { Input, Select, SearchInput } from './Input';
 export { ConfirmDialog } from './ConfirmDialog';
 export { PlayerDetailModal } from './PlayerDetailModal';
 export { ErrorBoundary } from './ErrorBoundary';
+export { FeatureGate } from './FeatureGate';

@@ -1,3 +1,29 @@
+// ============================================
+// TIER TYPES
+// ============================================
+
+export type GameTier = 'arcade' | 'teamBuilder' | 'manager';
+
+export interface TierProfile {
+  tier: GameTier;
+  teamSource: 'preset' | 'custom';
+  salaryCap: number | null;
+  rosterSize: number;
+  allowBattingOrderEdit: boolean;
+  allowPinchHitters: boolean;
+  pinchHitLimit: number | null;
+  allowPitchingChanges: boolean;
+  allowDefensiveSubstitutions: boolean;
+  enablePitcherFatigue: boolean;
+  enablePlatoonSplits: boolean;
+  enableSituationalModifiers: boolean;
+  allowWagers: boolean;
+}
+
+// ============================================
+// API TYPES
+// ============================================
+
 export interface ApiError {
   error: string;
   message: string;
@@ -76,6 +102,8 @@ export interface GameSession {
   id: string;
   joinCode?: string | null;
   status: 'waiting' | 'active' | 'paused' | 'completed' | 'abandoned';
+  tier: GameTier;
+  rules: TierProfile;
   homeUserId?: string | null;
   homeTeamId?: string | null;
   homeReady: boolean;

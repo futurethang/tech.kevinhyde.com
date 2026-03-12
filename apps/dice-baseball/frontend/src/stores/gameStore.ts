@@ -4,7 +4,7 @@
 
 import { create } from 'zustand';
 import type { RollResultEvent } from '../types/contracts/index.js';
-import type { Game, GameState, OutcomeType } from '../types';
+import type { Game, GameState, GameTier, TierProfile, OutcomeType } from '../types';
 
 interface PlayLogEntry {
   id: string;
@@ -32,6 +32,8 @@ interface GameStoreState {
   // Current game
   currentGame: Game | null;
   gameState: GameState | null;
+  tier: GameTier | null;
+  rules: TierProfile | null;
   playLog: PlayLogEntry[];
 
   // Connection state
@@ -48,6 +50,7 @@ interface GameStoreState {
   // Actions
   setGame: (game: Game) => void;
   setGameState: (state: GameState) => void;
+  setTierAndRules: (tier: GameTier, rules: TierProfile) => void;
   addPlayLogEntry: (result: RollResultEvent) => void;
   clearPlayLog: () => void;
 
@@ -65,6 +68,8 @@ interface GameStoreState {
 export const useGameStore = create<GameStoreState>((set) => ({
   currentGame: null,
   gameState: null,
+  tier: null,
+  rules: null,
   playLog: [],
 
   isConnected: false,
@@ -79,6 +84,8 @@ export const useGameStore = create<GameStoreState>((set) => ({
   setGame: (game) => set({ currentGame: game, gameState: game.state || null }),
 
   setGameState: (state) => set({ gameState: state }),
+
+  setTierAndRules: (tier, rules) => set({ tier, rules }),
 
   addPlayLogEntry: (result) =>
     set((state) => {
@@ -130,6 +137,8 @@ export const useGameStore = create<GameStoreState>((set) => ({
     set({
       currentGame: null,
       gameState: null,
+      tier: null,
+      rules: null,
       playLog: [],
       isConnected: false,
       isMyTurn: false,

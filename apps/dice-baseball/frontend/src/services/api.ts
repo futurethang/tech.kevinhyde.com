@@ -2,7 +2,7 @@
  * API Service - REST API client for Dice Baseball backend
  */
 
-import type { User, Team, Game, MLBPlayer, ApiError } from '../types';
+import type { User, Team, Game, MLBPlayer, ApiError, GameTier } from '../types';
 import type { AuthResponse as ContractAuthResponse, AuthUser } from '../types/contracts/index.js';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
@@ -264,10 +264,10 @@ export async function reorderTeams(teamIds: string[]): Promise<{ message: string
 // GAMES API
 // ============================================
 
-export async function createGame(teamId: string): Promise<Game> {
+export async function createGame(teamId: string, tier: GameTier = 'arcade'): Promise<Game> {
   return fetchWithAuth('/games', {
     method: 'POST',
-    body: JSON.stringify({ teamId }),
+    body: JSON.stringify({ teamId, tier }),
   });
 }
 

@@ -1,6 +1,13 @@
 import { defineConfig } from 'vitest/config';
+import path from 'path';
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      '../../contracts/tier.js': path.resolve(__dirname, '../contracts/tier.ts'),
+      '../../../contracts/tier.js': path.resolve(__dirname, '../contracts/tier.ts'),
+    },
+  },
   test: {
     globals: true,
     environment: 'node',

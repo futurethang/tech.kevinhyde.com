@@ -6,9 +6,23 @@
  * adding a single entry to the OUTCOMES object below.
  */
 
+import type { TierProfile } from '../../contracts/tier.js';
+
 // ============================================
 // TYPES
 // ============================================
+
+/**
+ * Context for tier-specific engine modifiers (fatigue, platoon, situational).
+ * Only relevant when the corresponding TierProfile flags are enabled.
+ */
+export interface GameContext {
+  pitcherAtBatCount: number;
+  batterHandedness?: 'L' | 'R';
+  pitcherHandedness?: 'L' | 'R';
+  outs: number;
+  runners: [boolean, boolean, boolean];
+}
 
 export type OutcomeType =
   | 'homeRun'
@@ -465,7 +479,9 @@ export function resolveAtBat(
   batter: BatterStats,
   pitcher: PitcherStats,
   diceRoll: [number, number],
-  randomValue: number = Math.random()
+  randomValue: number = Math.random(),
+  rules?: TierProfile,
+  gameContext?: GameContext
 ): OutcomeType {
   // Calculate modified probabilities
   const batterMods = calculateBatterModifiers(batter);
@@ -485,6 +501,22 @@ export function resolveAtBat(
     }
   }
 
+  // Apply tier-specific modifiers (stubs - return 1.0 for now)
+  if (rules && gameContext) {
+    if (rules.enablePitcherFatigue) {
+      const fatigueMod = calculateFatigueModifier(gameContext.pitcherAtBatCount);
+      // Fatigue makes pitcher worse: boost positive outcomes
+      for (const [key, def] of Object.entries(OUTCOMES) as [OutcomeType, OutcomeDefinition][]) {
+        if (def.isPositive) {
+          adjusted[key] *= fatigueMod;
+        }
+      }
+    }
+    // Platoon splits and situational modifiers: stubs for future implementation
+    // if (rules.enablePlatoonSplits) { ... }
+    // if (rules.enableSituationalModifiers) { ... }
+  }
+
   // Normalize to sum to 1.0
   const total = Object.values(adjusted).reduce((a, b) => a + b, 0);
   for (const key of Object.keys(adjusted) as OutcomeType[]) {
@@ -500,6 +532,18 @@ export function resolveAtBat(
 
   // Weighted random selection
   return weightedRandomSelect(biased, randomValue);
+}
+
+/**
+ * Calculate pitcher fatigue modifier based on at-bats faced.
+ * Returns 1.0 (no fatigue) for low counts, scaling up for higher counts.
+ * A value > 1.0 means the pitcher is fatigued (positive outcomes more likely).
+ *
+ * Stub implementation - returns 1.0 until Manager Mode is fully built.
+ */
+export function calculateFatigueModifier(_pitcherAtBatCount: number): number {
+  // TODO: Implement fatigue curve when Manager Mode is active
+  return 1.0;
 }
 
 // ============================================

@@ -83,8 +83,11 @@ All specifications are in the `docs/` folder:
 | `API.md` | REST endpoints, WebSocket events, request/response formats |
 | `SERVICES.md` | Backend services, MLB sync cron, game engine, stats weighting algorithms |
 | `UI-SPECS.md` | Screen layouts, component specs, design system, animations |
+| `EXPERIENCE-TIERS.md` | Player-facing tier framework: Arcade, Team Builder, Manager Mode |
+| `TIER-ARCHITECTURE.md` | Developer guide for feature gating, data model, migration path |
+| `FUTURE-ROADMAP.md` | Prioritized feature backlog aligned to tier delivery phases |
 
-**Read the relevant doc before implementing any feature.**
+**Read the relevant doc before implementing any feature.** For any tier-specific work, read `TIER-ARCHITECTURE.md` first — it defines the patterns that prevent refactors.
 
 ---
 

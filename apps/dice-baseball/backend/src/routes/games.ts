@@ -11,6 +11,7 @@ import { authMiddleware } from '../middleware/auth.js';
 import * as gameService from '../services/game-service.js';
 import * as teamService from '../services/team-service.js';
 import { validateRoster, validateBattingOrder } from '../services/roster-validation.js';
+import { isValidTier, type GameTier } from '../../contracts/tier.js';
 
 const router = Router();
 
@@ -28,7 +29,10 @@ router.post('/', async (req: AuthenticatedRequest, res: Response) => {
       return res.status(401).json({ error: 'unauthorized', message: 'Not authenticated' });
     }
 
-    const { teamId } = req.body;
+    const { teamId, tier: requestedTier } = req.body;
+
+    // Validate tier (optional, defaults to 'arcade')
+    const tier: GameTier = requestedTier && isValidTier(requestedTier) ? requestedTier : 'arcade';
 
     // Validate team ID
     if (!teamId) {
@@ -95,8 +99,8 @@ router.post('/', async (req: AuthenticatedRequest, res: Response) => {
     // Create the game
     const hasSimConfig = simMode === 'deterministic' || Boolean(simSeed);
     const game = hasSimConfig
-      ? await gameService.createGame(userId, teamId, { mode: simMode, seed: simSeed })
-      : await gameService.createGame(userId, teamId);
+      ? await gameService.createGame(userId, teamId, { mode: simMode, seed: simSeed }, tier)
+      : await gameService.createGame(userId, teamId, undefined, tier);
 
     return res.status(201).json(game);
   } catch (error) {

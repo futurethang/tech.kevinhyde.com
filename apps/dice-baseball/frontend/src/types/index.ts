@@ -97,6 +97,76 @@ export interface Team {
 }
 
 // ============================================
+// TIER TYPES
+// ============================================
+
+export type GameTier = 'arcade' | 'teamBuilder' | 'manager';
+
+export interface TierProfile {
+  tier: GameTier;
+  teamSource: 'preset' | 'custom';
+  salaryCap: number | null;
+  rosterSize: number;
+  allowBattingOrderEdit: boolean;
+  allowPinchHitters: boolean;
+  pinchHitLimit: number | null;
+  allowPitchingChanges: boolean;
+  allowDefensiveSubstitutions: boolean;
+  enablePitcherFatigue: boolean;
+  enablePlatoonSplits: boolean;
+  enableSituationalModifiers: boolean;
+  allowWagers: boolean;
+}
+
+export const TIER_PROFILES: Record<GameTier, TierProfile> = {
+  arcade: {
+    tier: 'arcade',
+    teamSource: 'preset',
+    salaryCap: null,
+    rosterSize: 10,
+    allowBattingOrderEdit: false,
+    allowPinchHitters: false,
+    pinchHitLimit: null,
+    allowPitchingChanges: false,
+    allowDefensiveSubstitutions: false,
+    enablePitcherFatigue: false,
+    enablePlatoonSplits: false,
+    enableSituationalModifiers: false,
+    allowWagers: false,
+  },
+  teamBuilder: {
+    tier: 'teamBuilder',
+    teamSource: 'custom',
+    salaryCap: 250_000_000,
+    rosterSize: 10,
+    allowBattingOrderEdit: true,
+    allowPinchHitters: true,
+    pinchHitLimit: 3,
+    allowPitchingChanges: false,
+    allowDefensiveSubstitutions: false,
+    enablePitcherFatigue: false,
+    enablePlatoonSplits: false,
+    enableSituationalModifiers: false,
+    allowWagers: false,
+  },
+  manager: {
+    tier: 'manager',
+    teamSource: 'custom',
+    salaryCap: 180_000_000,
+    rosterSize: 25,
+    allowBattingOrderEdit: true,
+    allowPinchHitters: true,
+    pinchHitLimit: null,
+    allowPitchingChanges: true,
+    allowDefensiveSubstitutions: true,
+    enablePitcherFatigue: true,
+    enablePlatoonSplits: true,
+    enableSituationalModifiers: true,
+    allowWagers: true,
+  },
+};
+
+// ============================================
 // GAME TYPES
 // ============================================
 
@@ -135,6 +205,8 @@ export interface GameState {
 export interface Game {
   id: string;
   joinCode: string;
+  tier?: GameTier;
+  rules?: TierProfile;
   homeTeamId: string;
   homeUserId: string;
   visitorTeamId: string | null;

@@ -96,7 +96,7 @@ describeIfNetwork('POST /api/games', () => {
     expect(response.status).toBe(201);
     expect(response.body.joinCode).toBe('ABC123');
     expect(response.body.status).toBe('waiting');
-    expect(gameService.createGame).toHaveBeenCalledWith('user-123', 'team-uuid');
+    expect(gameService.createGame).toHaveBeenCalledWith('user-123', 'team-uuid', undefined, 'arcade');
   });
 
   it('sets creator as home team', async () => {
@@ -675,6 +675,117 @@ describeIfNetwork('POST /api/games/:id/forfeit', () => {
 
     expect(response.status).toBe(400);
     expect(response.body.error).toBe('game_not_active');
+  });
+});
+
+describeIfNetwork('POST /api/games with tier', () => {
+  const { app } = createApp();
+  const token = createTestToken({ id: 'user-123' });
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('passes tier to createGame when specified', async () => {
+    const completeTeam = {
+      id: 'team-uuid',
+      userId: 'user-123',
+      name: 'My Team',
+      rosterComplete: true,
+      roster: VALID_ROSTER,
+    };
+
+    vi.mocked(teamService.getTeamById).mockResolvedValue(completeTeam);
+
+    const newGame = {
+      id: 'game-uuid',
+      joinCode: 'TIR123',
+      tier: 'teamBuilder',
+      homeTeamId: 'team-uuid',
+      homeUserId: 'user-123',
+      visitorTeamId: null,
+      visitorUserId: null,
+      status: 'waiting',
+      createdAt: '2025-01-20T10:00:00Z',
+    };
+
+    vi.mocked(gameService.createGame).mockResolvedValue(newGame);
+
+    const response = await request(app)
+      .post('/api/games')
+      .set(authHeader(token))
+      .send({ teamId: 'team-uuid', tier: 'teamBuilder' });
+
+    expect(response.status).toBe(201);
+    expect(gameService.createGame).toHaveBeenCalledWith('user-123', 'team-uuid', undefined, 'teamBuilder');
+  });
+
+  it('defaults to arcade when tier is not specified', async () => {
+    const completeTeam = {
+      id: 'team-uuid',
+      userId: 'user-123',
+      name: 'My Team',
+      rosterComplete: true,
+      roster: VALID_ROSTER,
+    };
+
+    vi.mocked(teamService.getTeamById).mockResolvedValue(completeTeam);
+
+    const newGame = {
+      id: 'game-uuid',
+      joinCode: 'DEF456',
+      tier: 'arcade',
+      homeTeamId: 'team-uuid',
+      homeUserId: 'user-123',
+      visitorTeamId: null,
+      visitorUserId: null,
+      status: 'waiting',
+      createdAt: '2025-01-20T10:00:00Z',
+    };
+
+    vi.mocked(gameService.createGame).mockResolvedValue(newGame);
+
+    const response = await request(app)
+      .post('/api/games')
+      .set(authHeader(token))
+      .send({ teamId: 'team-uuid' });
+
+    expect(response.status).toBe(201);
+    expect(gameService.createGame).toHaveBeenCalledWith('user-123', 'team-uuid', undefined, 'arcade');
+  });
+
+  it('defaults to arcade for invalid tier value', async () => {
+    const completeTeam = {
+      id: 'team-uuid',
+      userId: 'user-123',
+      name: 'My Team',
+      rosterComplete: true,
+      roster: VALID_ROSTER,
+    };
+
+    vi.mocked(teamService.getTeamById).mockResolvedValue(completeTeam);
+
+    const newGame = {
+      id: 'game-uuid',
+      joinCode: 'INV789',
+      tier: 'arcade',
+      homeTeamId: 'team-uuid',
+      homeUserId: 'user-123',
+      visitorTeamId: null,
+      visitorUserId: null,
+      status: 'waiting',
+      createdAt: '2025-01-20T10:00:00Z',
+    };
+
+    vi.mocked(gameService.createGame).mockResolvedValue(newGame);
+
+    const response = await request(app)
+      .post('/api/games')
+      .set(authHeader(token))
+      .send({ teamId: 'team-uuid', tier: 'invalidTier' });
+
+    expect(response.status).toBe(201);
+    expect(gameService.createGame).toHaveBeenCalledWith('user-123', 'team-uuid', undefined, 'arcade');
   });
 });
 

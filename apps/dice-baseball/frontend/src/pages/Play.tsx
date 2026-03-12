@@ -9,13 +9,14 @@ import { Button, Card, CardContent, Input, Select } from '../components/common';
 import { Header, PageContainer } from '../components/layout/Header';
 import { useTeamStore } from '../stores/teamStore';
 import * as api from '../services/api';
-import type { Game } from '../types';
+import type { Game, GameTier } from '../types';
 
 export function Play() {
   const navigate = useNavigate();
   const { teams, setTeams } = useTeamStore();
   const [joinCode, setJoinCode] = useState('');
   const [selectedTeamId, setSelectedTeamId] = useState('');
+  const [selectedTier, setSelectedTier] = useState<GameTier>('arcade');
   const [loading, setLoading] = useState(false);
   const [showWaiting, setShowWaiting] = useState(false);
   const [createdGame, setCreatedGame] = useState<Game | null>(null);
@@ -66,7 +67,7 @@ export function Play() {
     setError('');
 
     try {
-      const game = await api.createGame(selectedTeamId);
+      const game = await api.createGame(selectedTeamId, selectedTier);
       setCreatedGame(game);
       setShowWaiting(true);
       pollForOpponent(game.id);
@@ -216,6 +217,26 @@ export function Play() {
                 onChange={(e) => setSelectedTeamId(e.target.value)}
                 data-testid="play-team-select"
               />
+            </div>
+
+            {/* Tier Selection */}
+            <div className="mb-6">
+              <Select
+                label="Game Mode"
+                options={[
+                  { value: 'arcade', label: 'Arcade' },
+                  { value: 'teamBuilder', label: 'Team Builder' },
+                  { value: 'manager', label: 'Manager Mode' },
+                ]}
+                value={selectedTier}
+                onChange={(e) => setSelectedTier(e.target.value as GameTier)}
+                data-testid="play-tier-select"
+              />
+              <p className="text-xs text-[var(--color-text-dim)] mt-1">
+                {selectedTier === 'arcade' && 'Quick play with preset teams. No roster management needed.'}
+                {selectedTier === 'teamBuilder' && 'Build your own team with a $250M salary cap. Limited substitutions.'}
+                {selectedTier === 'manager' && 'Full control: 25-player roster, pitching changes, defensive subs, and wagers.'}
+              </p>
             </div>
 
             {error && (
