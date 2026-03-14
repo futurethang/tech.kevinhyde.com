@@ -1,0 +1,20 @@
+rules_version = '2';
+
+// ─────────────────────────────────────────────────────────────────
+// Firestore Security Rules
+// ─────────────────────────────────────────────────────────────────
+// These rules allow ANYONE to read and write the hub data.
+// This is fine for a family app shared via private link.
+//
+// If you want to add auth later, change the rules to:
+//   allow read, write: if request.auth != null;
+// and add Firebase Auth (Google sign-in is easiest).
+// ─────────────────────────────────────────────────────────────────
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /hub/{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
