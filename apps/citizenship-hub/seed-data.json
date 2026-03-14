@@ -1,0 +1,108 @@
+{
+  "familyMembers": [
+    {
+      "id": "gp-paternal-gf",
+      "name": "Grandfather (Paternal)",
+      "relationship": "Grandfather",
+      "generation": 0,
+      "born": "",
+      "birthPlace": "",
+      "citizenshipStatus": "born-in-canada",
+      "documents": {
+        "birthCertificate": { "status": "not-started", "link": "", "notes": "" },
+        "marriageCertificate": { "status": "not-started", "link": "", "notes": "" },
+        "proofOfCitizenship": { "status": "not-started", "link": "", "notes": "" },
+        "deathCertificate": { "status": "not-started", "link": "", "notes": "" },
+        "other": []
+      },
+      "notes": ""
+    },
+    {
+      "id": "gp-paternal-gm",
+      "name": "Grandmother (Paternal)",
+      "relationship": "Grandmother",
+      "generation": 0,
+      "born": "",
+      "birthPlace": "",
+      "citizenshipStatus": "unknown",
+      "documents": {
+        "birthCertificate": { "status": "not-started", "link": "", "notes": "" },
+        "marriageCertificate": { "status": "not-started", "link": "", "notes": "" },
+        "proofOfCitizenship": { "status": "not-started", "link": "", "notes": "" },
+        "deathCertificate": { "status": "not-started", "link": "", "notes": "" },
+        "other": []
+      },
+      "notes": ""
+    },
+    {
+      "id": "parent-father",
+      "name": "Father",
+      "relationship": "Father",
+      "generation": 1,
+      "born": "",
+      "birthPlace": "",
+      "citizenshipStatus": "by-descent",
+      "parentIds": ["gp-paternal-gf", "gp-paternal-gm"],
+      "documents": {
+        "birthCertificate": { "status": "not-started", "link": "", "notes": "" },
+        "marriageCertificate": { "status": "not-started", "link": "", "notes": "" },
+        "proofOfCitizenship": { "status": "not-started", "link": "", "notes": "" },
+        "other": []
+      },
+      "notes": ""
+    },
+    {
+      "id": "parent-mother",
+      "name": "Mother",
+      "relationship": "Mother",
+      "generation": 1,
+      "born": "",
+      "birthPlace": "",
+      "citizenshipStatus": "not-applicable",
+      "documents": {
+        "birthCertificate": { "status": "not-started", "link": "", "notes": "" },
+        "marriageCertificate": { "status": "not-started", "link": "", "notes": "" },
+        "other": []
+      },
+      "notes": ""
+    },
+    {
+      "id": "child-1",
+      "name": "Child 1",
+      "relationship": "Self/Sibling",
+      "generation": 2,
+      "born": "",
+      "birthPlace": "",
+      "citizenshipStatus": "applying",
+      "parentIds": ["parent-father", "parent-mother"],
+      "documents": {
+        "birthCertificate": { "status": "not-started", "link": "", "notes": "" },
+        "proofOfCitizenship": { "status": "not-started", "link": "", "notes": "" },
+        "applicationForm": { "status": "not-started", "link": "", "notes": "" },
+        "photos": { "status": "not-started", "link": "", "notes": "" },
+        "other": []
+      },
+      "notes": ""
+    },
+    {
+      "id": "child-2",
+      "name": "Child 2",
+      "relationship": "Self/Sibling",
+      "generation": 2,
+      "born": "",
+      "birthPlace": "",
+      "citizenshipStatus": "applying",
+      "parentIds": ["parent-father", "parent-mother"],
+      "documents": {
+        "birthCertificate": { "status": "not-started", "link": "", "notes": "" },
+        "proofOfCitizenship": { "status": "not-started", "link": "", "notes": "" },
+        "applicationForm": { "status": "not-started", "link": "", "notes": "" },
+        "photos": { "status": "not-started", "link": "", "notes": "" },
+        "other": []
+      },
+      "notes": ""
+    }
+  ],
+  "activityLog": [],
+  "lastUpdated": null
+}
