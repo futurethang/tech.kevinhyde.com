@@ -1,6 +1,15 @@
 {
   "apps": [
     {
+      "slug": "daily-baseline",
+      "name": "Daily Baseline",
+      "description": "Minimalist daily bodyweight workout tracker — log reps and time for six exercises each day",
+      "type": "static",
+      "status": "live",
+      "createdAt": "2026-03-14",
+      "tags": ["fitness", "health", "pwa", "tool"]
+    },
+    {
       "slug": "baseball-effects-workbench",
       "name": "Baseball FX Tester",
       "description": "Mobile testing PWA for baseball game effects — haptics, animations, and sounds",

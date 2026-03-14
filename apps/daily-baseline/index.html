@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Baseline">
+  <meta name="theme-color" content="#704214">
+  <title>Daily Baseline</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23704214'/><polyline points='25,55 42,72 75,35' fill='none' stroke='%23FEFCF8' stroke-width='10' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23704214'/><polyline points='25,55 42,72 75,35' fill='none' stroke='%23FEFCF8' stroke-width='10' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #704214;
+      --primary-light: #8B6914;
+      --bg: #FEFCF8;
+      --surface: #FFFFFF;
+      --accent: #C4956A;
+      --accent-light: #E8D5B7;
+      --muted: #B8A99A;
+      --border: #D4C5B2;
+      --danger: #9B2C2C;
+      --radius: 10px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--primary);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 480px;
+      padding: 20px;
+      min-height: 100vh;
+      position: relative;
+      overflow: hidden;
+    }
+
+    button {
+      font-family: inherit;
+      cursor: pointer;
+      border: none;
+      transition: transform 0.1s ease, opacity 0.1s ease;
+    }
+
+    button:active {
+      transform: scale(0.97);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    input[type="number"] {
+      font-family: inherit;
+      -moz-appearance: textfield;
+    }
+
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    /* Screen transitions */
+    .screen {
+      display: none;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    /* Landing screen */
+    .date-header {
+      font-size: 1.25rem;
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 24px;
+      color: var(--primary);
+    }
+
+    .app-title {
+      font-size: 0.8rem;
+      font-weight: 500;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .settings-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: none;
+      color: var(--muted);
+      font-size: 1.25rem;
+      padding: 8px;
+      border-radius: var(--radius);
+    }
+
+    .settings-btn:hover { color: var(--primary); }
+
+    .btn-primary {
+      width: 100%;
+      padding: 16px;
+      background: var(--primary);
+      color: var(--bg);
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: var(--radius);
+      min-height: 48px;
+    }
+
+    .btn-secondary {
+      width: 100%;
+      padding: 14px;
+      background: var(--surface);
+      color: var(--primary);
+      font-size: 1rem;
+      font-weight: 500;
+      border-radius: var(--radius);
+      border: 1.5px solid var(--border);
+      min-height: 48px;
+    }
+
+    .btn-danger {
+      width: 100%;
+      padding: 14px;
+      background: var(--surface);
+      color: var(--danger);
+      font-size: 1rem;
+      font-weight: 500;
+      border-radius: var(--radius);
+      border: 1.5px solid var(--danger);
+      min-height: 48px;
+    }
+
+    /* Summary card */
+    .summary-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+
+    .summary-card h3 {
+      font-size: 0.8rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+    }
+
+    .summary-row + .summary-row {
+      border-top: 1px solid var(--accent-light);
+    }
+
+    .summary-name {
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    .summary-value {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    /* Heatmap calendar */
+    .heatmap {
+      margin-top: 24px;
+    }
+
+    .heatmap-title {
+      font-size: 0.8rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .heatmap-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+
+    .heatmap-day-label {
+      font-size: 0.65rem;
+      color: var(--muted);
+      text-align: center;
+      font-weight: 500;
+    }
+
+    .heatmap-cell {
+      aspect-ratio: 1;
+      border-radius: 4px;
+      background: var(--accent-light);
+      position: relative;
+    }
+
+    .heatmap-cell.empty {
+      background: transparent;
+    }
+
+    .heatmap-cell.filled {
+      background: var(--accent);
+    }
+
+    .heatmap-cell.today {
+      outline: 2px solid var(--primary);
+      outline-offset: -1px;
+    }
+
+    .heatmap-cell.future {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      opacity: 0.4;
+    }
+
+    .heatmap-cell .day-num {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.6rem;
+      color: var(--primary);
+      font-weight: 500;
+    }
+
+    .heatmap-cell.filled .day-num {
+      color: var(--surface);
+    }
+
+    /* Exercise screen */
+    .exercise-screen {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: calc(100vh - 40px);
+    }
+
+    .exercise-progress {
+      text-align: center;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    .exercise-name {
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .exercise-desc {
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--primary-light);
+      margin-bottom: 32px;
+    }
+
+    .input-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .stepper-btn {
+      width: 56px;
+      height: 56px;
+      border-radius: var(--radius);
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--primary);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .rep-input {
+      flex: 1;
+      text-align: center;
+      font-size: 2rem;
+      font-weight: 600;
+      padding: 12px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--primary);
+      min-height: 56px;
+    }
+
+    .rep-input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .rep-label {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: -24px;
+      margin-bottom: 32px;
+    }
+
+    .nav-buttons {
+      display: flex;
+      gap: 12px;
+    }
+
+    .nav-buttons .btn-secondary { flex: 1; }
+    .nav-buttons .btn-primary { flex: 2; }
+
+    /* Timer */
+    .timer-display {
+      text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 3.5rem;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 24px;
+      letter-spacing: 2px;
+    }
+
+    .timer-display.running {
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    .timer-btn {
+      width: 100%;
+      padding: 18px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      border-radius: var(--radius);
+      min-height: 56px;
+      margin-bottom: 12px;
+    }
+
+    .timer-btn.start {
+      background: var(--primary);
+      color: var(--bg);
+    }
+
+    .timer-btn.stop {
+      background: var(--danger);
+      color: var(--surface);
+    }
+
+    .timer-confirm {
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .timer-confirm p {
+      font-size: 1.1rem;
+      font-weight: 500;
+      margin-bottom: 12px;
+    }
+
+    .timer-confirm-buttons {
+      display: flex;
+      gap: 12px;
+    }
+
+    .timer-confirm-buttons button {
+      flex: 1;
+    }
+
+    /* Summary screen */
+    .final-summary {
+      margin-bottom: 24px;
+    }
+
+    .final-summary .summary-row {
+      padding: 10px 0;
+    }
+
+    /* Settings screen */
+    .settings-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .settings-header h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    .back-btn {
+      background: none;
+      font-size: 1.25rem;
+      color: var(--primary);
+      padding: 8px;
+    }
+
+    .settings-section {
+      margin-bottom: 24px;
+    }
+
+    .settings-section h3 {
+      font-size: 0.8rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    .settings-section button + button {
+      margin-top: 10px;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 24px;
+      max-width: 360px;
+      width: 100%;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+
+    .modal h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .modal p {
+      font-size: 0.95rem;
+      color: var(--primary-light);
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .modal-buttons button {
+      flex: 1;
+      padding: 12px;
+      border-radius: var(--radius);
+      font-size: 0.95rem;
+      font-weight: 500;
+      min-height: 44px;
+    }
+
+    .modal-cancel {
+      background: var(--bg);
+      color: var(--primary);
+      border: 1px solid var(--border);
+    }
+
+    .modal-confirm {
+      background: var(--primary);
+      color: var(--bg);
+    }
+
+    .modal-danger {
+      background: var(--danger);
+      color: var(--surface);
+    }
+
+    /* File input hidden */
+    #import-input { display: none; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <!-- Landing Screen -->
+    <div id="screen-landing" class="screen active">
+      <button class="settings-btn" onclick="showScreen('settings')" aria-label="Settings">&#9881;</button>
+      <div class="app-title">Daily Baseline</div>
+      <div class="date-header" id="today-date"></div>
+      <div id="today-summary"></div>
+      <div id="start-area"></div>
+      <div class="heatmap" id="heatmap"></div>
+    </div>
+
+    <!-- Exercise Screens (rendered dynamically) -->
+    <div id="screen-exercise" class="screen">
+      <div class="exercise-screen">
+        <div class="exercise-progress" id="ex-progress"></div>
+        <div class="exercise-name" id="ex-name"></div>
+        <div class="exercise-desc" id="ex-desc"></div>
+        <div id="ex-input-area"></div>
+        <div class="nav-buttons" id="ex-nav"></div>
+      </div>
+    </div>
+
+    <!-- Summary Screen -->
+    <div id="screen-summary" class="screen">
+      <div class="app-title" style="margin-bottom:4px">Workout Complete</div>
+      <div class="date-header" id="summary-date"></div>
+      <div class="summary-card final-summary" id="final-summary"></div>
+      <button class="btn-primary" onclick="saveWorkout()">Save Workout</button>
+    </div>
+
+    <!-- Settings Screen -->
+    <div id="screen-settings" class="screen">
+      <div class="settings-header">
+        <button class="back-btn" onclick="showScreen('landing')">&#8592;</button>
+        <h2>Settings</h2>
+      </div>
+      <div class="settings-section">
+        <h3>Data</h3>
+        <button class="btn-secondary" onclick="exportData()">Export Data (.json)</button>
+        <button class="btn-secondary" onclick="document.getElementById('import-input').click()">Import Data (.json)</button>
+        <input type="file" id="import-input" accept=".json" onchange="importData(event)">
+      </div>
+      <div class="settings-section">
+        <h3>Danger Zone</h3>
+        <button class="btn-danger" onclick="confirmClearAll()">Clear All Data</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="modal">
+    <div class="modal">
+      <h3 id="modal-title"></h3>
+      <p id="modal-message"></p>
+      <div class="modal-buttons" id="modal-buttons"></div>
+    </div>
+  </div>
+
+  <script>
+    // ============ DATA ============
+    const EXERCISES = [
+      { id: 'dead_bugs', name: 'Dead Bugs', metric: 'reps', desc: 'Alternating reps, total count' },
+      { id: 'squats', name: 'Squats', metric: 'reps', desc: 'Bodyweight squats to failure' },
+      { id: 'pushups', name: 'Push-ups', metric: 'reps', desc: 'To failure' },
+      { id: 'rows', name: 'Rows', metric: 'reps', desc: 'Towel/door/bar rows to failure' },
+      { id: 'glute_bridges', name: 'Glute Bridges', metric: 'reps', desc: 'To failure' },
+      { id: 'plank', name: 'Plank', metric: 'time', desc: 'Hold to failure, timed' }
+    ];
+
+    const STORAGE_KEY = 'daily-baseline-data';
+
+    function loadData() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return { days: [] };
+        return JSON.parse(raw);
+      } catch { return { days: [] }; }
+    }
+
+    function saveData(data) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    function getTodayStr() {
+      const d = new Date();
+      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+
+    function getTodayEntry() {
+      const data = loadData();
+      return data.days.find(d => d.date === getTodayStr());
+    }
+
+    function formatDate(dateStr) {
+      const d = new Date(dateStr + 'T12:00:00');
+      return d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+    }
+
+    function formatSeconds(s) {
+      const m = Math.floor(s / 60);
+      const sec = s % 60;
+      return m + ':' + String(sec).padStart(2, '0');
+    }
+
+    function formatValue(exercise, value) {
+      if (exercise.metric === 'time') return formatSeconds(value);
+      return value + ' reps';
+    }
+
+    // ============ SCREENS ============
+    let currentScreen = 'landing';
+    let currentExercise = 0;
+    let workoutValues = {};
+    let wakeLockSentinel = null;
+
+    function showScreen(name) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById('screen-' + name).classList.add('active');
+      currentScreen = name;
+
+      if (name === 'landing') renderLanding();
+      else if (name === 'exercise') renderExercise();
+      else if (name === 'summary') renderSummary();
+    }
+
+    // ============ LANDING ============
+    function renderLanding() {
+      document.getElementById('today-date').textContent = formatDate(getTodayStr());
+
+      const entry = getTodayEntry();
+      const summaryEl = document.getElementById('today-summary');
+      const startEl = document.getElementById('start-area');
+
+      if (entry) {
+        let rows = '';
+        EXERCISES.forEach(ex => {
+          const val = entry.exercises[ex.id];
+          if (val) {
+            rows += `<div class="summary-row">
+              <span class="summary-name">${ex.name}</span>
+              <span class="summary-value">${formatValue(ex, val.value)}</span>
+            </div>`;
+          }
+        });
+        summaryEl.innerHTML = `<div class="summary-card">
+          <h3>Today's Workout</h3>
+          ${rows}
+        </div>`;
+        startEl.innerHTML = `<button class="btn-secondary" onclick="startWorkout(true)">Edit Workout</button>`;
+      } else {
+        summaryEl.innerHTML = '';
+        startEl.innerHTML = `<button class="btn-primary" onclick="startWorkout(false)">Start Workout</button>`;
+      }
+
+      renderHeatmap();
+    }
+
+    function renderHeatmap() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = now.getMonth();
+      const todayStr = getTodayStr();
+      const data = loadData();
+      const loggedDates = new Set(data.days.map(d => d.date));
+
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const monthName = new Date(year, month).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+      const dayLabels = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+      let html = `<div class="heatmap-title">${monthName}</div><div class="heatmap-grid">`;
+
+      dayLabels.forEach(l => {
+        html += `<div class="heatmap-day-label">${l}</div>`;
+      });
+
+      for (let i = 0; i < firstDay; i++) {
+        html += `<div class="heatmap-cell empty"></div>`;
+      }
+
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dateStr = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+        const isToday = dateStr === todayStr;
+        const isFuture = new Date(year, month, d) > now && !isToday;
+        const isFilled = loggedDates.has(dateStr);
+
+        let cls = 'heatmap-cell';
+        if (isToday) cls += ' today';
+        if (isFuture) cls += ' future';
+        else if (isFilled) cls += ' filled';
+
+        html += `<div class="${cls}"><span class="day-num">${d}</span></div>`;
+      }
+
+      html += '</div>';
+      document.getElementById('heatmap').innerHTML = html;
+    }
+
+    // ============ WORKOUT FLOW ============
+    function startWorkout(isEdit) {
+      currentExercise = 0;
+      workoutValues = {};
+
+      if (isEdit) {
+        const entry = getTodayEntry();
+        if (entry) {
+          EXERCISES.forEach(ex => {
+            if (entry.exercises[ex.id]) {
+              workoutValues[ex.id] = entry.exercises[ex.id].value;
+            }
+          });
+        }
+      }
+
+      showScreen('exercise');
+    }
+
+    function renderExercise() {
+      const ex = EXERCISES[currentExercise];
+      document.getElementById('ex-progress').textContent = `Exercise ${currentExercise + 1} of ${EXERCISES.length}`;
+      document.getElementById('ex-name').textContent = ex.name;
+      document.getElementById('ex-desc').textContent = ex.desc;
+
+      const inputArea = document.getElementById('ex-input-area');
+      const navArea = document.getElementById('ex-nav');
+
+      if (ex.metric === 'time') {
+        renderTimer(inputArea);
+      } else {
+        const existing = workoutValues[ex.id] || '';
+        inputArea.innerHTML = `
+          <div class="input-group">
+            <button class="stepper-btn" onclick="stepValue(-1)">−</button>
+            <input type="number" class="rep-input" id="rep-input" inputmode="numeric" pattern="[0-9]*" value="${existing}" placeholder="0" min="0" max="9999">
+            <button class="stepper-btn" onclick="stepValue(1)">+</button>
+          </div>
+          <div class="rep-label">reps</div>`;
+
+        setTimeout(() => {
+          const inp = document.getElementById('rep-input');
+          if (inp) {
+            inp.focus();
+            inp.select();
+            inp.addEventListener('input', () => {
+              workoutValues[ex.id] = parseInt(inp.value) || 0;
+            });
+          }
+        }, 50);
+      }
+
+      // Nav buttons
+      let navHtml = '';
+      if (currentExercise > 0) {
+        navHtml += `<button class="btn-secondary" onclick="prevExercise()">Back</button>`;
+      }
+      const isLast = currentExercise === EXERCISES.length - 1;
+      const hasValue = workoutValues[ex.id] !== undefined && workoutValues[ex.id] !== '' && workoutValues[ex.id] > 0;
+      navHtml += `<button class="btn-primary" id="next-btn" onclick="nextExercise()" ${hasValue ? '' : 'disabled'}>${isLast ? 'Review' : 'Next'}</button>`;
+      navArea.innerHTML = navHtml;
+    }
+
+    function stepValue(delta) {
+      const inp = document.getElementById('rep-input');
+      if (!inp) return;
+      let val = parseInt(inp.value) || 0;
+      val = Math.max(0, val + delta);
+      inp.value = val;
+      const ex = EXERCISES[currentExercise];
+      workoutValues[ex.id] = val;
+      updateNextBtn();
+    }
+
+    function updateNextBtn() {
+      const ex = EXERCISES[currentExercise];
+      const btn = document.getElementById('next-btn');
+      if (!btn) return;
+      const val = workoutValues[ex.id];
+      btn.disabled = !(val !== undefined && val !== '' && val > 0);
+    }
+
+    function nextExercise() {
+      const ex = EXERCISES[currentExercise];
+      if (ex.metric !== 'time') {
+        const inp = document.getElementById('rep-input');
+        if (inp) workoutValues[ex.id] = parseInt(inp.value) || 0;
+      }
+
+      if (currentExercise < EXERCISES.length - 1) {
+        currentExercise++;
+        showScreen('exercise');
+      } else {
+        showScreen('summary');
+      }
+    }
+
+    function prevExercise() {
+      const ex = EXERCISES[currentExercise];
+      if (ex.metric !== 'time') {
+        const inp = document.getElementById('rep-input');
+        if (inp) workoutValues[ex.id] = parseInt(inp.value) || 0;
+      }
+      stopTimer();
+
+      if (currentExercise > 0) {
+        currentExercise--;
+        showScreen('exercise');
+      }
+    }
+
+    // ============ TIMER ============
+    let timerInterval = null;
+    let timerStart = 0;
+    let timerElapsed = 0;
+    let timerState = 'idle'; // idle, running, stopped
+
+    function renderTimer(container) {
+      timerState = 'idle';
+      timerElapsed = 0;
+      clearInterval(timerInterval);
+
+      const existing = workoutValues['plank'];
+
+      if (existing) {
+        container.innerHTML = `
+          <div class="timer-display">${formatSeconds(existing)}</div>
+          <div class="timer-confirm">
+            <p>Logged: ${formatSeconds(existing)}</p>
+            <div class="timer-confirm-buttons">
+              <button class="btn-secondary" onclick="resetTimer()">Retry</button>
+            </div>
+          </div>`;
+        updateNextBtn();
+        return;
+      }
+
+      container.innerHTML = `
+        <div class="timer-display" id="timer-display">0:00.0</div>
+        <button class="timer-btn start" id="timer-btn" onclick="toggleTimer()">Start</button>`;
+    }
+
+    function toggleTimer() {
+      if (timerState === 'idle' || timerState === 'stopped') {
+        startTimer();
+      } else if (timerState === 'running') {
+        stopTimerAndConfirm();
+      }
+    }
+
+    async function startTimer() {
+      timerState = 'running';
+      timerStart = Date.now();
+      timerElapsed = 0;
+
+      // Try to acquire wake lock
+      try {
+        if ('wakeLock' in navigator) {
+          wakeLockSentinel = await navigator.wakeLock.request('screen');
+        }
+      } catch (e) { /* fall back gracefully */ }
+
+      const display = document.getElementById('timer-display');
+      const btn = document.getElementById('timer-btn');
+      if (display) display.classList.add('running');
+      if (btn) {
+        btn.textContent = 'Stop';
+        btn.className = 'timer-btn stop';
+      }
+
+      timerInterval = setInterval(() => {
+        timerElapsed = (Date.now() - timerStart) / 1000;
+        if (display) {
+          const m = Math.floor(timerElapsed / 60);
+          const s = Math.floor(timerElapsed % 60);
+          const ms = Math.floor((timerElapsed % 1) * 10);
+          display.textContent = m + ':' + String(s).padStart(2, '0') + '.' + ms;
+        }
+      }, 50);
+    }
+
+    function stopTimer() {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      timerState = 'idle';
+      releaseWakeLock();
+    }
+
+    function stopTimerAndConfirm() {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      timerState = 'stopped';
+      releaseWakeLock();
+
+      const totalSeconds = Math.round(timerElapsed);
+      const display = document.getElementById('timer-display');
+      if (display) {
+        display.classList.remove('running');
+        display.textContent = formatSeconds(totalSeconds);
+      }
+
+      const inputArea = document.getElementById('ex-input-area');
+      inputArea.innerHTML = `
+        <div class="timer-display">${formatSeconds(totalSeconds)}</div>
+        <div class="timer-confirm">
+          <p>Log ${formatSeconds(totalSeconds)}?</p>
+          <div class="timer-confirm-buttons">
+            <button class="btn-secondary" onclick="resetTimer()">Retry</button>
+            <button class="btn-primary" onclick="confirmTimer(${totalSeconds})">Confirm</button>
+          </div>
+        </div>`;
+    }
+
+    function confirmTimer(seconds) {
+      workoutValues['plank'] = seconds;
+      updateNextBtn();
+
+      const inputArea = document.getElementById('ex-input-area');
+      inputArea.innerHTML = `
+        <div class="timer-display">${formatSeconds(seconds)}</div>
+        <div class="timer-confirm">
+          <p>Logged: ${formatSeconds(seconds)}</p>
+          <div class="timer-confirm-buttons">
+            <button class="btn-secondary" onclick="resetTimer()">Retry</button>
+          </div>
+        </div>`;
+    }
+
+    function resetTimer() {
+      delete workoutValues['plank'];
+      updateNextBtn();
+      renderTimer(document.getElementById('ex-input-area'));
+    }
+
+    function releaseWakeLock() {
+      if (wakeLockSentinel) {
+        wakeLockSentinel.release().catch(() => {});
+        wakeLockSentinel = null;
+      }
+    }
+
+    // ============ SUMMARY ============
+    function renderSummary() {
+      document.getElementById('summary-date').textContent = formatDate(getTodayStr());
+
+      let rows = '';
+      EXERCISES.forEach(ex => {
+        const val = workoutValues[ex.id];
+        rows += `<div class="summary-row">
+          <span class="summary-name">${ex.name}</span>
+          <span class="summary-value">${val ? formatValue(ex, val) : '—'}</span>
+        </div>`;
+      });
+
+      document.getElementById('final-summary').innerHTML = `<h3>Summary</h3>${rows}`;
+    }
+
+    function saveWorkout() {
+      const data = loadData();
+      const todayStr = getTodayStr();
+      const exercises = {};
+
+      EXERCISES.forEach(ex => {
+        if (workoutValues[ex.id] !== undefined) {
+          exercises[ex.id] = {
+            value: workoutValues[ex.id],
+            metric: ex.metric === 'time' ? 'seconds' : 'reps'
+          };
+        }
+      });
+
+      const existing = data.days.findIndex(d => d.date === todayStr);
+      if (existing >= 0) {
+        data.days[existing].exercises = exercises;
+      } else {
+        data.days.push({ date: todayStr, exercises });
+      }
+
+      saveData(data);
+      showScreen('landing');
+    }
+
+    // ============ SETTINGS / IMPORT / EXPORT ============
+    function exportData() {
+      const data = loadData();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'daily-baseline-export-' + getTodayStr() + '.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function importData(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+
+          // Validate schema
+          if (!imported.days || !Array.isArray(imported.days)) {
+            showModal('Invalid File', 'This file does not have the expected format.', [
+              { text: 'OK', cls: 'modal-confirm', action: closeModal }
+            ]);
+            return;
+          }
+
+          const count = imported.days.length;
+          showModal(
+            'Import Data',
+            `This will replace all existing data. ${count} day${count !== 1 ? 's' : ''} found in file. Continue?`,
+            [
+              { text: 'Cancel', cls: 'modal-cancel', action: closeModal },
+              { text: 'Import', cls: 'modal-danger', action: () => {
+                saveData(imported);
+                closeModal();
+                showScreen('landing');
+              }}
+            ]
+          );
+        } catch {
+          showModal('Invalid File', 'Could not parse the JSON file.', [
+            { text: 'OK', cls: 'modal-confirm', action: closeModal }
+          ]);
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = '';
+    }
+
+    function confirmClearAll() {
+      showModal(
+        'Clear All Data',
+        'Are you sure you want to delete all workout data? This cannot be undone.',
+        [
+          { text: 'Cancel', cls: 'modal-cancel', action: closeModal },
+          { text: 'Delete Everything', cls: 'modal-danger', action: () => {
+            closeModal();
+            showModal(
+              'Really Delete?',
+              'This is your last chance. All data will be permanently deleted.',
+              [
+                { text: 'Keep Data', cls: 'modal-cancel', action: closeModal },
+                { text: 'Yes, Delete All', cls: 'modal-danger', action: () => {
+                  localStorage.removeItem(STORAGE_KEY);
+                  closeModal();
+                  showScreen('landing');
+                }}
+              ]
+            );
+          }}
+        ]
+      );
+    }
+
+    // ============ MODAL ============
+    function showModal(title, message, buttons) {
+      document.getElementById('modal-title').textContent = title;
+      document.getElementById('modal-message').textContent = message;
+      const btnContainer = document.getElementById('modal-buttons');
+      btnContainer.innerHTML = '';
+      buttons.forEach(b => {
+        const btn = document.createElement('button');
+        btn.textContent = b.text;
+        btn.className = b.cls;
+        btn.onclick = b.action;
+        btnContainer.appendChild(btn);
+      });
+      document.getElementById('modal').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('modal').classList.remove('active');
+    }
+
+    // ============ INIT ============
+    renderLanding();
+
+    // Re-acquire wake lock on visibility change
+    document.addEventListener('visibilitychange', async () => {
+      if (document.visibilityState === 'visible' && timerState === 'running') {
+        try {
+          if ('wakeLock' in navigator) {
+            wakeLockSentinel = await navigator.wakeLock.request('screen');
+          }
+        } catch { /* ignore */ }
+      }
+    });
+
+    // Register service worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
+  </script>
+</body>
+</html>
