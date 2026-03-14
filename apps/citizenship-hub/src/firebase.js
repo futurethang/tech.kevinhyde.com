@@ -1,17 +1,13 @@
 import { initializeApp } from 'firebase/app'
 import { getFirestore, doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore'
 
-// ============================================================
-// REPLACE THESE WITH YOUR FIREBASE CONFIG VALUES
-// Get them from: Firebase Console → Project Settings → Your App
-// ============================================================
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY_HERE",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.firebasestorage.app",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyB5Ja5fzD1e1atMCWxrlVfTJV-V0sC_wZg",
+  authDomain: "citizenship-hub.firebaseapp.com",
+  projectId: "citizenship-hub",
+  storageBucket: "citizenship-hub.firebasestorage.app",
+  messagingSenderId: "254076867848",
+  appId: "1:254076867848:web:6a85899bff7112485788bd"
 }
 
 const app = initializeApp(firebaseConfig)
