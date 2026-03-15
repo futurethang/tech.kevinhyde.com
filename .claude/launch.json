@@ -2,10 +2,18 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "retro-browser",
-      "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["--filter", "@tech/retro-browser", "dev"],
-      "port": 5173
+      "name": "dice-baseball-backend",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["--yes", "tsx", "watch", "src/index.ts"],
+      "port": 3001,
+      "cwd": "apps/dice-baseball/backend"
+    },
+    {
+      "name": "dice-baseball-frontend",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["--yes", "vite", "--port", "5173"],
+      "port": 5173,
+      "cwd": "apps/dice-baseball/frontend"
     }
   ]
 }
