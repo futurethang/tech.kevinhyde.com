@@ -1,608 +1,1036 @@
-import { useState, useEffect, useCallback, useRef } from "react";
-import { loadShared, saveShared, onSharedChange, loadMe, saveMe, clearMe } from "./firebase";
+import React, { useState, useEffect, useCallback, useRef } from 'react'
+import { loadData, saveData, subscribeToData } from './firebase'
 
-const FAMILY_NAME = "Wallace-Hyde";
-// Storage is now in firebase.js — loadShared, saveShared, onSharedChange, loadMe, saveMe, clearMe
-
-// ── Palette & type ─────────────────────────────────────────────────
-const C = {
-  bg: "#FAFAF7", card: "#FFFFFF", border: "#E8E4DD", borderLight: "#F0EDE8",
-  accent: "#8B2500", accentPale: "#FFF5F0",
-  blue: "#1A4B6E", blueLight: "#E8F0F6",
-  green: "#2D6A4F", greenLight: "#E8F5EE", greenBadge: "#D4EDDA",
-  yellowBadge: "#FFF3CD", redBadge: "#F8D7DA", grayBadge: "#E9ECEF",
-  text: "#2C2417", textMuted: "#7A7062", textLight: "#A09888",
-  maple: "#C41E3A", meBg: "#FDF2F4", meBorder: "#E8A0B0",
-};
-const serif = `'Source Serif 4','Georgia',serif`;
-const sans = `'DM Sans','Segoe UI',sans-serif`;
-
-const STATUS = [
-  { value: "missing", label: "Missing", bg: C.redBadge, fg: "#721C24" },
-  { value: "identified", label: "Identified", bg: C.yellowBadge, fg: "#856404" },
-  { value: "requested", label: "Requested", bg: C.blueLight, fg: C.blue },
-  { value: "in_hand", label: "In Hand", bg: C.greenBadge, fg: C.green },
-];
-const DOC_TYPES = ["Birth Certificate", "Death Certificate", "Marriage Certificate", "Other"];
-
-// ── Seed data ──────────────────────────────────────────────────────
+// ============================================================
+// INITIAL SEED DATA - Used on first load if Firestore is empty
+// This is the Wallace-Hyde family tree for Canadian citizenship
+// by descent applications under Bill C-3
+// ============================================================
 const INITIAL_DATA = {
   familyMembers: [
-    { id: "bruce_wallace", parentId: null, name: "Bruce Wallace", birthDate: "January 9, 1884", birthPlace: "Beachville, Ontario, Canada", deathDate: "May 30, 1940", deathPlace: "Saginaw, Michigan", father: "Alexander Wallace (Oxford County, Ontario)", mother: "Louise Annie Cook (Beachville, Ontario)", spouse: "Margaret Kohler", isAnchor: true, notes: "Canadian citizen by birth. Ontario birth registration #026921. Lived at 1501 Farwell St, Saginaw. Warehouse Manager in furniture industry. In U.S.A. for 50 years per death cert. Informant on death cert: W.G. Wallace (same address)." },
-    { id: "gen1_unknown", parentId: "bruce_wallace", name: "[Unknown — Bruce's child, Janet's parent]", birthDate: "", birthPlace: "Likely Saginaw area, MI", deathDate: "", deathPlace: "", father: "Bruce Wallace", mother: "Margaret Kohler", spouse: "", notes: "CRITICAL GAP — need to identify. W.G. Wallace (informant on Bruce's death cert) is a strong lead. Check 1940 Census for 1501 Farwell St, Saginaw. Ask Uncle Pat." },
-    { id: "janet_wallace", parentId: "gen1_unknown", name: "Janet Wallace (married Garety)", birthDate: "", birthPlace: "Saginaw area, MI (estimated)", deathDate: "", deathPlace: "", father: "[See parent link]", mother: "", spouse: "Pat Garety", notes: "Need birth certificate + marriage certificate to Pat Garety. Marriage likely in Saginaw County." },
-    { id: "ann_garety", parentId: "janet_wallace", name: "Ann Garety (married Hyde)", birthDate: "1954", birthPlace: "Michigan (likely)", deathDate: "", deathPlace: "", father: "Pat Garety", mother: "Janet Wallace Garety", spouse: "Mr. Hyde", notes: "Married 1973 in Caro, Michigan. Need birth certificate (as Ann Garety) + marriage certificate (Garety → Hyde). Also an applicant in her own right." },
-    { id: "kevin_hyde", parentId: "ann_garety", name: "Kevin Hyde", birthDate: "", birthPlace: "", deathDate: "", deathPlace: "", father: "Mr. Hyde", mother: "Ann Garety Hyde", spouse: "", notes: "Need birth certificate." },
+    {
+      id: 'gp-paternal-gf',
+      name: 'Grandfather (Paternal)',
+      relationship: 'Grandfather',
+      generation: 0,
+      born: '',
+      birthPlace: '',
+      citizenshipStatus: 'born-in-canada',
+      documents: {
+        birthCertificate: { status: 'not-started', link: '', notes: '' },
+        marriageCertificate: { status: 'not-started', link: '', notes: '' },
+        proofOfCitizenship: { status: 'not-started', link: '', notes: '' },
+        deathCertificate: { status: 'not-started', link: '', notes: '' },
+        other: []
+      },
+      notes: ''
+    },
+    {
+      id: 'gp-paternal-gm',
+      name: 'Grandmother (Paternal)',
+      relationship: 'Grandmother',
+      generation: 0,
+      born: '',
+      birthPlace: '',
+      citizenshipStatus: 'unknown',
+      documents: {
+        birthCertificate: { status: 'not-started', link: '', notes: '' },
+        marriageCertificate: { status: 'not-started', link: '', notes: '' },
+        proofOfCitizenship: { status: 'not-started', link: '', notes: '' },
+        deathCertificate: { status: 'not-started', link: '', notes: '' },
+        other: []
+      },
+      notes: ''
+    },
+    {
+      id: 'parent-father',
+      name: 'Father',
+      relationship: 'Father',
+      generation: 1,
+      born: '',
+      birthPlace: '',
+      citizenshipStatus: 'by-descent',
+      parentIds: ['gp-paternal-gf', 'gp-paternal-gm'],
+      documents: {
+        birthCertificate: { status: 'not-started', link: '', notes: '' },
+        marriageCertificate: { status: 'not-started', link: '', notes: '' },
+        proofOfCitizenship: { status: 'not-started', link: '', notes: '' },
+        other: []
+      },
+      notes: ''
+    },
+    {
+      id: 'parent-mother',
+      name: 'Mother',
+      relationship: 'Mother',
+      generation: 1,
+      born: '',
+      birthPlace: '',
+      citizenshipStatus: 'not-applicable',
+      documents: {
+        birthCertificate: { status: 'not-started', link: '', notes: '' },
+        marriageCertificate: { status: 'not-started', link: '', notes: '' },
+        other: []
+      },
+      notes: ''
+    },
+    {
+      id: 'child-1',
+      name: 'Child 1',
+      relationship: 'Self/Sibling',
+      generation: 2,
+      born: '',
+      birthPlace: '',
+      citizenshipStatus: 'applying',
+      parentIds: ['parent-father', 'parent-mother'],
+      documents: {
+        birthCertificate: { status: 'not-started', link: '', notes: '' },
+        proofOfCitizenship: { status: 'not-started', link: '', notes: '' },
+        applicationForm: { status: 'not-started', link: '', notes: '' },
+        photos: { status: 'not-started', link: '', notes: '' },
+        other: []
+      },
+      notes: ''
+    },
+    {
+      id: 'child-2',
+      name: 'Child 2',
+      relationship: 'Self/Sibling',
+      generation: 2,
+      born: '',
+      birthPlace: '',
+      citizenshipStatus: 'applying',
+      parentIds: ['parent-father', 'parent-mother'],
+      documents: {
+        birthCertificate: { status: 'not-started', link: '', notes: '' },
+        proofOfCitizenship: { status: 'not-started', link: '', notes: '' },
+        applicationForm: { status: 'not-started', link: '', notes: '' },
+        photos: { status: 'not-started', link: '', notes: '' },
+        other: []
+      },
+      notes: ''
+    }
   ],
-  documents: [
-    { id: "doc_bruce_birth", personId: "bruce_wallace", type: "Birth Certificate", description: "Ontario birth registration #026921, Beachville", status: "in_hand", source: "Ontario Vital Records / FHL film #1845869", fileUrl: "", fileName: "18840109WALLACE_Bruce.PDF", notes: "Scanned copy from FamilySearch/Archives of Ontario. May need certified copy from Archives of Ontario for IRCC.", addedBy: "Kevin", addedDate: "2026-03-14" },
-    { id: "doc_bruce_death", personId: "bruce_wallace", type: "Death Certificate", description: "Michigan death certificate, State File #17318718", status: "in_hand", source: "Michigan Dept. of Health", fileUrl: "", fileName: "1940_05_30_Bruce_WALLACE_Death.jpeg", notes: "Confirms Beachville Ontario birthplace, parents Alexander Wallace & Louise Cook.", addedBy: "Kevin", addedDate: "2026-03-14" },
-    { id: "doc_gen1_birth", personId: "gen1_unknown", type: "Birth Certificate", description: "Birth certificate for Bruce's child (Janet's parent)", status: "missing", source: "Michigan Vital Records — need to identify person first", fileUrl: "", fileName: "", notes: "BLOCKED: Need to identify Gen 1 person first.", addedBy: "Kevin", addedDate: "2026-03-14" },
-    { id: "doc_janet_birth", personId: "janet_wallace", type: "Birth Certificate", description: "Janet Wallace birth certificate", status: "missing", source: "Michigan Vital Records", fileUrl: "", fileName: "", notes: "Need approximate year and county.", addedBy: "Kevin", addedDate: "2026-03-14" },
-    { id: "doc_janet_marriage", personId: "janet_wallace", type: "Marriage Certificate", description: "Janet Wallace → Garety marriage certificate", status: "missing", source: "Michigan Vital Records or Saginaw County Clerk", fileUrl: "", fileName: "", notes: "Proves name change from Wallace to Garety.", addedBy: "Kevin", addedDate: "2026-03-14" },
-    { id: "doc_ann_birth", personId: "ann_garety", type: "Birth Certificate", description: "Ann Garety birth certificate", status: "identified", source: "Michigan Vital Records", fileUrl: "", fileName: "", notes: "Born 1954. Need to confirm county and order ($34).", addedBy: "Kevin", addedDate: "2026-03-14" },
-    { id: "doc_ann_marriage", personId: "ann_garety", type: "Marriage Certificate", description: "Ann Garety → Hyde marriage certificate, 1973, Caro MI", status: "identified", source: "Tuscola County Clerk", fileUrl: "", fileName: "", notes: "Married 1973, Caro, Michigan. Proves name change Garety → Hyde.", addedBy: "Kevin", addedDate: "2026-03-14" },
-    { id: "doc_kevin_birth", personId: "kevin_hyde", type: "Birth Certificate", description: "Kevin Hyde birth certificate", status: "missing", source: "State vital records where born", fileUrl: "", fileName: "", notes: "Order certified copy with parental information.", addedBy: "Kevin", addedDate: "2026-03-14" },
-  ],
-  activityLog: [{ date: "2026-03-14", user: "Kevin", action: "Created family hub with initial records from Bruce Wallace Ontario birth reg. and Michigan death cert." }],
-};
-
-// ── Helpers ────────────────────────────────────────────────────────
-function getChain(members, personId) {
-  const chain = []; let cur = personId; let i = 0;
-  while (cur && i < 20) { const p = members.find((m) => m.id === cur); if (!p) break; chain.unshift(p); cur = p.parentId; i++; }
-  return chain;
+  activityLog: [],
+  lastUpdated: null
 }
 
-// ── Storage is imported from ./firebase ────────────────────────────
+const STATUS_OPTIONS = [
+  { value: 'not-started', label: 'Not Started', color: '#9ca3af' },
+  { value: 'in-progress', label: 'In Progress', color: '#f59e0b' },
+  { value: 'requested', label: 'Requested', color: '#3b82f6' },
+  { value: 'received', label: 'Received', color: '#10b981' },
+  { value: 'not-needed', label: 'Not Needed', color: '#6b7280' }
+]
 
-// ── Styles ─────────────────────────────────────────────────────────
-const S = {
-  input: { width: "100%", padding: "10px 12px", border: `1px solid ${C.border}`, borderRadius: 6, fontSize: 14, fontFamily: sans, color: C.text, background: C.bg, outline: "none", boxSizing: "border-box" },
-  textarea: { width: "100%", padding: "10px 12px", border: `1px solid ${C.border}`, borderRadius: 6, fontSize: 14, fontFamily: sans, color: C.text, background: C.bg, outline: "none", boxSizing: "border-box", minHeight: 80, resize: "vertical" },
-  select: { width: "100%", padding: "10px 12px", border: `1px solid ${C.border}`, borderRadius: 6, fontSize: 14, fontFamily: sans, color: C.text, background: C.bg, outline: "none", cursor: "pointer" },
-  label: { fontSize: 12, fontWeight: 600, color: C.textMuted, marginBottom: 4, display: "block", letterSpacing: "0.4px", textTransform: "uppercase" },
-  fg: { marginBottom: 14 },
-  badge: (bg, fg) => ({ display: "inline-block", padding: "3px 10px", borderRadius: 12, fontSize: 11, fontWeight: 600, background: bg, color: fg, letterSpacing: "0.3px", textTransform: "uppercase" }),
-  btn: (v = "primary") => ({ padding: "10px 20px", borderRadius: 6, fontSize: 13, fontWeight: 600, fontFamily: sans, cursor: "pointer", border: v === "primary" ? "none" : `1px solid ${C.border}`, background: v === "primary" ? C.accent : C.card, color: v === "primary" ? "#fff" : C.text, transition: "all 0.15s", letterSpacing: "0.3px" }),
-};
+const CITIZENSHIP_OPTIONS = [
+  { value: 'born-in-canada', label: 'Born in Canada', color: '#dc2626' },
+  { value: 'by-descent', label: 'By Descent (proven)', color: '#10b981' },
+  { value: 'applying', label: 'Applying', color: '#f59e0b' },
+  { value: 'not-applicable', label: 'Not Applicable', color: '#6b7280' },
+  { value: 'unknown', label: 'Unknown', color: '#9ca3af' }
+]
 
-// ── Small components ───────────────────────────────────────────────
-function StatusBadge({ status }) { const s = STATUS.find((o) => o.value === status) || STATUS[0]; return <span style={S.badge(s.bg, s.fg)}>{s.label}</span>; }
+const TABS = ['Family Tree', 'My Chain', 'Resources']
 
-function GenLabel({ gen, isMe, isAnchor }) {
-  const colors = ["#C41E3A", "#1A4B6E", "#2D6A4F", "#8B6914", "#6B3FA0", "#4A6741", "#8B4513"];
-  const bgs = ["#FDEDEF", "#E8F0F6", "#E8F5EE", "#FFF8E1", "#F3EDF7", "#E8F5EE", "#FFF5F0"];
-  let label = `Gen ${gen}`; if (isAnchor) label = "Anchor"; if (isMe) label = "YOU";
-  return <span style={{ display: "inline-block", padding: "2px 8px", borderRadius: 10, fontSize: 10, fontWeight: 700, letterSpacing: "0.5px", marginRight: 8, background: isMe ? C.maple : (bgs[gen] || bgs[4]), color: isMe ? "#fff" : (colors[gen] || colors[4]) }}>{label}</span>;
+const DOC_LABELS = {
+  birthCertificate: 'Birth Certificate',
+  marriageCertificate: 'Marriage Certificate',
+  proofOfCitizenship: 'Proof of Citizenship',
+  deathCertificate: 'Death Certificate',
+  applicationForm: 'Application Form (CIT 0001)',
+  photos: 'Photos (2 passport-style)',
+  other: 'Other Documents'
 }
 
-function MeBanner({ person, onClear }) {
-  return (
-    <div style={{ background: `linear-gradient(135deg, ${C.meBg} 0%, #FFF0F2 100%)`, border: `1px solid ${C.meBorder}`, borderRadius: 8, padding: "14px 20px", marginBottom: 20, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
-      <div>
-        <div style={{ fontSize: 13, fontWeight: 700, color: C.maple, marginBottom: 2 }}>🍁 Your Application View</div>
-        <div style={{ fontSize: 14, fontWeight: 600, color: C.text }}>Viewing as: <strong>{person.name}</strong></div>
-        <div style={{ fontSize: 12, color: C.textMuted, marginTop: 2 }}>Showing your direct line of descent to Bruce Wallace.</div>
-      </div>
-      <button onClick={onClear} style={{ ...S.btn("secondary"), fontSize: 11, padding: "6px 14px" }}>Change / Clear</button>
-    </div>
-  );
+function getStatusColor(status) {
+  return STATUS_OPTIONS.find(s => s.value === status)?.color || '#9ca3af'
 }
 
-function SetMePrompt({ members, allMembers, onSelect, onAddAndSelect }) {
-  const [adding, setAdding] = useState(false);
-  const [form, setForm] = useState({ name: "", parentId: "", birthDate: "", birthPlace: "" });
-  const set = (k, v) => setForm({ ...form, [k]: v });
-
-  return (
-    <div style={{ background: C.blueLight, border: `1px solid #B8D4E8`, borderRadius: 8, padding: 20, marginBottom: 20, textAlign: "center" }}>
-      <div style={{ fontSize: 15, fontWeight: 700, color: C.blue, marginBottom: 6 }}>Who are you?</div>
-      <div style={{ fontSize: 13, color: C.textMuted, marginBottom: 14, lineHeight: 1.5 }}>Select yourself to see your personal chain of descent and application progress. This is saved only in your browser — it won't affect anyone else's view.</div>
-      
-      {members.length > 0 && (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center", marginBottom: 16 }}>
-          {members.map((m) => (
-            <button key={m.id} onClick={() => onSelect(m.id)} style={{ padding: "8px 16px", borderRadius: 20, fontSize: 13, fontWeight: 600, fontFamily: sans, cursor: "pointer", border: `1px solid ${C.border}`, background: C.card, color: C.text, transition: "all 0.15s" }}>{m.name}</button>
-          ))}
-        </div>
-      )}
-
-      {!adding ? (
-        <div>
-          <div style={{ height: 1, background: "#B8D4E8", margin: "12px 40px" }} />
-          <div style={{ fontSize: 13, color: C.textMuted, marginBottom: 10, marginTop: 12 }}>
-            {members.length > 0 ? "Not listed above?" : "No family members have been added at your generation yet."}
-          </div>
-          <button onClick={() => setAdding(true)} style={{ ...S.btn("primary"), padding: "10px 24px" }}>
-            + Add myself to the family tree
-          </button>
-        </div>
-      ) : (
-        <div style={{ background: C.card, borderRadius: 8, padding: 20, marginTop: 12, textAlign: "left", border: `1px solid ${C.border}` }}>
-          <div style={{ fontFamily: serif, fontSize: 16, fontWeight: 700, marginBottom: 14, color: C.text }}>Add yourself</div>
-          <div style={S.fg}>
-            <label style={S.label}>Your Full Name</label>
-            <input style={S.input} value={form.name} onChange={(e) => set("name", e.target.value)} placeholder="e.g. Sarah Hyde" />
-          </div>
-          <div style={S.fg}>
-            <label style={S.label}>Your Parent (in the descent chain)</label>
-            <select style={S.select} value={form.parentId} onChange={(e) => set("parentId", e.target.value)}>
-              <option value="">— Select your parent —</option>
-              {allMembers.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
-            </select>
-            <div style={{ fontSize: 11, color: C.textLight, marginTop: 4 }}>Which person in the tree is your parent? This links you into the Canadian descent chain.</div>
-          </div>
-          <div style={{ display: "flex", gap: 12 }}>
-            <div style={{ ...S.fg, flex: 1 }}>
-              <label style={S.label}>Birth Date</label>
-              <input style={S.input} value={form.birthDate} onChange={(e) => set("birthDate", e.target.value)} placeholder="e.g. 1985" />
-            </div>
-            <div style={{ ...S.fg, flex: 1 }}>
-              <label style={S.label}>Birth Place</label>
-              <input style={S.input} value={form.birthPlace} onChange={(e) => set("birthPlace", e.target.value)} placeholder="e.g. Saginaw, MI" />
-            </div>
-          </div>
-          <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 8 }}>
-            <button style={S.btn("secondary")} onClick={() => setAdding(false)}>Cancel</button>
-            <button style={S.btn("primary")} onClick={() => {
-              if (!form.name.trim() || !form.parentId) return;
-              onAddAndSelect({ ...form, id: "person_" + Date.now(), parentId: form.parentId, deathDate: "", deathPlace: "", father: "", mother: "", spouse: "", notes: "" });
-            }}>Add & Continue</button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
+function getCitizenshipColor(status) {
+  return CITIZENSHIP_OPTIONS.find(s => s.value === status)?.color || '#9ca3af'
 }
 
-function ProgressSummary({ documents, label }) {
-  const total = documents.length; if (total === 0) return null;
-  const inHand = documents.filter((d) => d.status === "in_hand").length;
-  const requested = documents.filter((d) => d.status === "requested").length;
-  const identified = documents.filter((d) => d.status === "identified").length;
-  return (
-    <div style={{ background: C.card, borderRadius: 8, border: `1px solid ${C.border}`, padding: 20, marginBottom: 20 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-        <span style={{ fontFamily: serif, fontSize: 16, fontWeight: 700 }}>{label || "Document Progress"}</span>
-        <span style={{ fontSize: 24, fontWeight: 800, color: C.accent, fontFamily: serif }}>{inHand}/{total}</span>
-      </div>
-      <div style={{ height: 6, borderRadius: 3, background: C.borderLight, overflow: "hidden" }}>
-        <div style={{ display: "flex", height: "100%" }}>
-          <div style={{ width: `${(inHand / total) * 100}%`, background: C.green, transition: "width 0.4s" }} />
-          <div style={{ width: `${(requested / total) * 100}%`, background: C.blue, transition: "width 0.4s" }} />
-          <div style={{ width: `${(identified / total) * 100}%`, background: "#C9A834", transition: "width 0.4s" }} />
-        </div>
-      </div>
-      <div style={{ display: "flex", gap: 16, marginTop: 12, flexWrap: "wrap" }}>
-        {[{ n: inHand, l: "In Hand", c: C.green }, { n: requested, l: "Requested", c: C.blue }, { n: identified, l: "Identified", c: "#C9A834" }, { n: total - inHand - requested - identified, l: "Missing", c: "#C41E3A" }].map((s) => (
-          <div key={s.l} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: C.textMuted }}><div style={{ width: 8, height: 8, borderRadius: "50%", background: s.c }} /><span style={{ fontWeight: 600 }}>{s.n}</span> {s.l}</div>
-        ))}
-      </div>
-    </div>
-  );
+function formatDate(iso) {
+  if (!iso) return ''
+  const d = new Date(iso)
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
 }
 
-// ── Person Card ────────────────────────────────────────────────────
-function PersonCard({ person, documents, gen, isMe, isInChain, onEdit, onEditDoc, onAddDoc, onSetMe }) {
-  const [open, setOpen] = useState(false);
-  const pDocs = documents.filter((d) => d.personId === person.id);
-  const allGood = pDocs.length > 0 && pDocs.every((d) => d.status === "in_hand");
-  const hasMissing = pDocs.some((d) => d.status === "missing");
-  const bColor = isMe ? C.maple : allGood ? C.green : hasMissing ? C.maple : C.border;
+export default function App() {
+  const [data, setData] = useState(null)
+  const [activeTab, setActiveTab] = useState(0)
+  const [selectedMemberId, setSelectedMemberId] = useState(null)
+  const [meId, setMeId] = useState(() => localStorage.getItem('citizenship-hub-me') || '')
+  const [saving, setSaving] = useState(false)
+  const [importText, setImportText] = useState('')
+  const [showImport, setShowImport] = useState(false)
+  const saveTimeout = useRef(null)
 
-  return (
-    <div style={{ background: isMe ? C.meBg : isInChain ? "#FAFCFF" : C.card, borderRadius: 8, border: `1px solid ${isMe ? C.meBorder : C.border}`, borderLeft: `3px solid ${bColor}`, marginBottom: 12, overflow: "hidden" }}>
-      <div style={{ padding: "14px 20px", display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer", userSelect: "none" }} onClick={() => setOpen(!open)}>
-        <div>
-          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4, flexWrap: "wrap" }}>
-            {gen !== undefined && <GenLabel gen={gen} isMe={isMe} isAnchor={person.isAnchor} />}
-            <span style={{ fontFamily: serif, fontSize: 17, fontWeight: 700 }}>{person.name}</span>
-            {isMe && <span style={{ fontSize: 11, color: C.maple, fontWeight: 600 }}>(You)</span>}
-          </div>
-          <div style={{ fontSize: 12, color: C.textMuted }}>{person.birthDate && `b. ${person.birthDate}`}{person.birthDate && person.birthPlace && " · "}{person.birthPlace}</div>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <div style={{ fontSize: 11, color: C.textMuted }}>{pDocs.filter((d) => d.status === "in_hand").length}/{pDocs.length} docs</div>
-          <span style={{ fontSize: 18, color: C.textLight, transform: open ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>▾</span>
-        </div>
-      </div>
-      {open && (
-        <div style={{ padding: "0 20px 20px", borderTop: `1px solid ${C.borderLight}` }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 24px", marginTop: 16, marginBottom: 16 }}>
-            {[["Birth Date", person.birthDate], ["Birth Place", person.birthPlace], ["Death Date", person.deathDate], ["Death Place", person.deathPlace], ["Father", person.father], ["Mother", person.mother], ["Spouse", person.spouse]].filter(([, v]) => v).map(([l, v]) => (
-              <div key={l} style={{ fontSize: 13, color: C.textMuted, lineHeight: 1.5 }}><span style={{ fontWeight: 600, color: C.text, marginRight: 4 }}>{l}:</span>{v}</div>
-            ))}
-          </div>
-          {person.notes && <div style={{ background: C.bg, padding: 12, borderRadius: 6, fontSize: 13, color: C.textMuted, lineHeight: 1.6, marginBottom: 16, borderLeft: `3px solid ${C.border}` }}>{person.notes}</div>}
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
-            <button style={S.btn("secondary")} onClick={() => onEdit(person)}>Edit Details</button>
-            {!isMe && !person.isAnchor && gen >= 3 && <button onClick={() => onSetMe(person.id)} style={{ ...S.btn("secondary"), background: C.meBg, borderColor: C.meBorder, color: C.maple }}>🍁 This is me</button>}
-          </div>
-          <div style={{ fontSize: 13, fontWeight: 700, color: C.textMuted, textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 10 }}>Documents ({pDocs.length})</div>
-          {pDocs.map((doc) => (
-            <div key={doc.id} style={{ padding: "10px 12px", background: C.bg, borderRadius: 6, marginBottom: 6, border: `1px solid ${C.borderLight}` }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}><StatusBadge status={doc.status} /><span style={{ fontSize: 13, fontWeight: 600 }}>{doc.type}</span></div>
-                  <div style={{ fontSize: 12, color: C.textMuted }}>{doc.description}</div>
-                  {doc.source && <div style={{ fontSize: 11, color: C.textLight, marginTop: 2 }}>Source: {doc.source}</div>}
-                  {doc.notes && <div style={{ fontSize: 12, color: C.textMuted, marginTop: 4, fontStyle: "italic" }}>{doc.notes}</div>}
-                </div>
-                <button style={{ ...S.btn("secondary"), padding: "6px 12px", fontSize: 11, marginLeft: 12, flexShrink: 0 }} onClick={() => onEditDoc(doc)}>Update</button>
-              </div>
-              {doc.fileUrl ? (
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8, padding: "8px 10px", background: C.greenLight, borderRadius: 5, border: `1px solid ${C.greenBadge}` }}>
-                  <span style={{ fontSize: 14 }}>📄</span>
-                  <span style={{ fontSize: 12, color: C.green, fontWeight: 600, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{doc.fileName || "Linked document"}</span>
-                  <a href={doc.fileUrl} target="_blank" rel="noopener noreferrer" style={{ padding: "4px 12px", borderRadius: 4, fontSize: 11, fontWeight: 600, background: C.green, color: "#fff", textDecoration: "none", fontFamily: sans }}>View / Download ↗</a>
-                </div>
-              ) : doc.fileName ? (
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8, padding: "8px 10px", background: C.yellowBadge, borderRadius: 5, border: "1px solid #F0E0A0" }}>
-                  <span style={{ fontSize: 14 }}>📎</span><span style={{ fontSize: 12, color: "#856404", flex: 1 }}>{doc.fileName} — <em>no link added yet</em></span>
-                </div>
-              ) : null}
-            </div>
-          ))}
-          <button style={{ ...S.btn("secondary"), marginTop: 8, fontSize: 12 }} onClick={() => onAddDoc(person.id)}>+ Add Document</button>
-        </div>
-      )}
-    </div>
-  );
-}
+  // Load data from Firestore on mount, subscribe to real-time updates
+  useEffect(() => {
+    let unsubscribe
+    async function init() {
+      const stored = await loadData()
+      if (stored) {
+        setData(stored)
+      } else {
+        // First load — seed Firestore with initial data
+        const seed = { ...INITIAL_DATA, lastUpdated: new Date().toISOString() }
+        await saveData(seed)
+        setData(seed)
+      }
+      // Subscribe to real-time updates
+      unsubscribe = subscribeToData((newData) => {
+        setData(newData)
+      })
+    }
+    init()
+    return () => unsubscribe && unsubscribe()
+  }, [])
 
-// ── Modals & Forms ─────────────────────────────────────────────────
-function Modal({ title, onClose, children }) {
-  return (
-    <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100, padding: 20 }} onClick={onClose}>
-      <div style={{ background: C.card, borderRadius: 10, width: "100%", maxWidth: 540, maxHeight: "85vh", overflow: "auto", boxShadow: "0 20px 60px rgba(0,0,0,0.15)" }} onClick={(e) => e.stopPropagation()}>
-        <div style={{ padding: "16px 20px", borderBottom: `1px solid ${C.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span style={{ fontFamily: serif, fontSize: 18, fontWeight: 700 }}>{title}</span>
-          <button onClick={onClose} style={{ background: "none", border: "none", fontSize: 20, cursor: "pointer", color: C.textMuted }}>×</button>
-        </div>
-        <div style={{ padding: 20 }}>{children}</div>
-      </div>
-    </div>
-  );
-}
+  // Debounced save to Firestore
+  const persistData = useCallback((newData) => {
+    setData(newData)
+    if (saveTimeout.current) clearTimeout(saveTimeout.current)
+    saveTimeout.current = setTimeout(async () => {
+      setSaving(true)
+      try {
+        await saveData({ ...newData, lastUpdated: new Date().toISOString() })
+      } catch (e) {
+        console.error('Save failed:', e)
+      }
+      setSaving(false)
+    }, 800)
+  }, [])
 
-function EditPersonForm({ person, members, onSave, onCancel }) {
-  const [form, setForm] = useState({ ...person });
-  const set = (k, v) => setForm({ ...form, [k]: v });
-  const possibleParents = members.filter((m) => m.id !== person.id);
-  return (
-    <div>
-      <div style={S.fg}>
-        <label style={S.label}>Parent in Descent Chain</label>
-        <select style={S.select} value={form.parentId || ""} onChange={(e) => set("parentId", e.target.value || null)}>
-          <option value="">— None (this is the anchor) —</option>
-          {possibleParents.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
-        </select>
-        <div style={{ fontSize: 11, color: C.textLight, marginTop: 4 }}>Who is this person's parent in the Canadian descent line?</div>
-      </div>
-      {[["name", "Full Name"], ["birthDate", "Birth Date"], ["birthPlace", "Birth Place"], ["deathDate", "Death Date"], ["deathPlace", "Death Place"], ["father", "Father"], ["mother", "Mother"], ["spouse", "Spouse"]].map(([k, l]) => (
-        <div key={k} style={S.fg}><label style={S.label}>{l}</label><input style={S.input} value={form[k] || ""} onChange={(e) => set(k, e.target.value)} /></div>
-      ))}
-      <div style={S.fg}><label style={S.label}>Notes</label><textarea style={S.textarea} value={form.notes || ""} onChange={(e) => set("notes", e.target.value)} /></div>
-      <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 16 }}>
-        <button style={S.btn("secondary")} onClick={onCancel}>Cancel</button>
-        <button style={S.btn("primary")} onClick={() => onSave(form)}>Save Changes</button>
-      </div>
-    </div>
-  );
-}
+  const addLogEntry = useCallback((message) => {
+    setData(prev => {
+      const who = prev.familyMembers.find(m => m.id === meId)?.name || 'Someone'
+      const updated = {
+        ...prev,
+        activityLog: [
+          { timestamp: new Date().toISOString(), who, message },
+          ...(prev.activityLog || []).slice(0, 49)
+        ]
+      }
+      persistData(updated)
+      return updated
+    })
+  }, [meId, persistData])
 
-function AddPersonForm({ members, onSave, onCancel }) {
-  const [form, setForm] = useState({ name: "", parentId: "", birthDate: "", birthPlace: "", deathDate: "", deathPlace: "", father: "", mother: "", spouse: "", notes: "" });
-  const set = (k, v) => setForm({ ...form, [k]: v });
-  return (
-    <div>
-      <div style={S.fg}><label style={S.label}>Full Name</label><input style={S.input} value={form.name} onChange={(e) => set("name", e.target.value)} placeholder="e.g. Sarah Hyde" /></div>
-      <div style={S.fg}>
-        <label style={S.label}>Parent in Descent Chain</label>
-        <select style={S.select} value={form.parentId} onChange={(e) => set("parentId", e.target.value)}>
-          <option value="">— Select parent —</option>
-          {members.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
-        </select>
-        <div style={{ fontSize: 11, color: C.textLight, marginTop: 4 }}>Who is this person's parent in the Canadian descent chain? (e.g. for Kevin's sister, select "Ann Garety")</div>
-      </div>
-      {[["birthDate", "Birth Date"], ["birthPlace", "Birth Place"], ["father", "Father"], ["mother", "Mother"], ["spouse", "Spouse"]].map(([k, l]) => (
-        <div key={k} style={S.fg}><label style={S.label}>{l}</label><input style={S.input} value={form[k]} onChange={(e) => set(k, e.target.value)} /></div>
-      ))}
-      <div style={S.fg}><label style={S.label}>Notes</label><textarea style={S.textarea} value={form.notes} onChange={(e) => set("notes", e.target.value)} /></div>
-      <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 16 }}>
-        <button style={S.btn("secondary")} onClick={onCancel}>Cancel</button>
-        <button style={S.btn("primary")} onClick={() => { if (!form.name.trim()) return; onSave({ ...form, id: "person_" + Date.now(), parentId: form.parentId || null }); }}>Add Person</button>
-      </div>
-    </div>
-  );
-}
+  const updateMember = useCallback((memberId, updates) => {
+    setData(prev => {
+      const updated = {
+        ...prev,
+        familyMembers: prev.familyMembers.map(m =>
+          m.id === memberId ? { ...m, ...updates } : m
+        )
+      }
+      persistData(updated)
+      return updated
+    })
+  }, [persistData])
 
-function SharingInfoBox() {
-  return (
-    <div style={{ background: "#FFF8E8", border: "1px solid #F0DCA0", borderLeft: "4px solid #C9A834", borderRadius: 6, padding: "14px 16px", marginBottom: 18 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}><span style={{ fontSize: 16 }}>🔗</span><span style={{ fontSize: 13, fontWeight: 700, color: "#6B5300" }}>Sharing a document? Check link permissions</span></div>
-      <div style={{ fontSize: 12, color: "#7A6520", lineHeight: 1.7 }}>For everyone to access the file, set the link to <strong>"Anyone with the link can view"</strong>:</div>
-      <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 6 }}>
-        {[["OneDrive", "Share → \"Anyone with the link\" → \"Can view\" → Copy link"], ["Google Drive", "Share → General access → \"Anyone with the link\" → Viewer → Copy link"], ["Dropbox", "Share → Link settings → \"Anyone with this link\" → Copy link"], ["iCloud", "Share → \"Anyone with the link\" → Copy link"]].map(([svc, steps]) => (
-          <div key={svc} style={{ fontSize: 11, color: "#7A6520", background: "rgba(255,255,255,0.6)", padding: "6px 10px", borderRadius: 4 }}><strong>{svc}:</strong> {steps}</div>
-        ))}
-      </div>
-      <div style={{ fontSize: 11, color: "#9A8540", marginTop: 10, fontStyle: "italic" }}>Tip: Test the link in a private/incognito window to verify it works without sign-in.</div>
-    </div>
-  );
-}
+  const updateDocument = useCallback((memberId, docKey, updates) => {
+    setData(prev => {
+      const updated = {
+        ...prev,
+        familyMembers: prev.familyMembers.map(m =>
+          m.id === memberId
+            ? { ...m, documents: { ...m.documents, [docKey]: { ...m.documents[docKey], ...updates } } }
+            : m
+        )
+      }
+      persistData(updated)
+      return updated
+    })
+  }, [persistData])
 
-function EditDocForm({ doc, onSave, onCancel, isNew }) {
-  const [form, setForm] = useState({ ...doc, fileUrl: doc.fileUrl || "" });
-  const set = (k, v) => setForm({ ...form, [k]: v });
-  return (
-    <div>
-      {isNew && <SharingInfoBox />}
-      <div style={S.fg}><label style={S.label}>Document Type</label><select style={S.select} value={form.type} onChange={(e) => set("type", e.target.value)}>{DOC_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}</select></div>
-      <div style={S.fg}><label style={S.label}>Description</label><input style={S.input} value={form.description || ""} onChange={(e) => set("description", e.target.value)} placeholder="e.g. Janet Wallace birth certificate, Saginaw County" /></div>
-      <div style={S.fg}>
-        <label style={S.label}>Status</label>
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          {STATUS.map((s) => (<button key={s.value} onClick={() => set("status", s.value)} style={{ ...S.badge(form.status === s.value ? s.bg : C.grayBadge, form.status === s.value ? s.fg : C.textMuted), cursor: "pointer", border: form.status === s.value ? `2px solid ${s.fg}` : "2px solid transparent", padding: "6px 14px", fontSize: 12 }}>{s.label}</button>))}
-        </div>
-      </div>
-      <div style={{ background: form.fileUrl ? C.greenLight : C.bg, border: `1px solid ${form.fileUrl ? C.greenBadge : C.border}`, borderRadius: 8, padding: 16, marginBottom: 14 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}><span style={{ fontSize: 16 }}>{form.fileUrl ? "✅" : "📄"}</span><label style={{ ...S.label, margin: 0 }}>Document Link</label></div>
-        <input style={{ ...S.input, background: "#fff", borderColor: form.fileUrl ? C.green : C.border, fontSize: 13 }} value={form.fileUrl || ""} onChange={(e) => set("fileUrl", e.target.value)} placeholder="Paste a OneDrive, Google Drive, Dropbox, or other share link…" />
-        {form.fileUrl && <div style={{ marginTop: 8, display: "flex", alignItems: "center", gap: 8 }}><a href={form.fileUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: C.green, fontWeight: 600, textDecoration: "none" }}>Test link ↗</a><span style={{ fontSize: 11, color: C.textLight }}>— verify access</span></div>}
-        <div style={S.fg}><label style={{ ...S.label, marginTop: 10 }}>File Name (optional label)</label><input style={S.input} value={form.fileName || ""} onChange={(e) => set("fileName", e.target.value)} placeholder="e.g. Bruce_Wallace_Birth_Ontario.pdf" /></div>
-        {!isNew && !form.fileUrl && <details style={{ marginTop: 8 }}><summary style={{ fontSize: 12, color: C.blue, cursor: "pointer", fontWeight: 600 }}>How to set sharing permissions</summary><div style={{ marginTop: 8 }}><SharingInfoBox /></div></details>}
-      </div>
-      <div style={S.fg}><label style={S.label}>Source / Where to Order</label><input style={S.input} value={form.source || ""} onChange={(e) => set("source", e.target.value)} /></div>
-      <div style={S.fg}><label style={S.label}>Notes</label><textarea style={S.textarea} value={form.notes || ""} onChange={(e) => set("notes", e.target.value)} /></div>
-      <div style={S.fg}><label style={S.label}>Your Name</label><input style={S.input} value={form.addedBy || ""} onChange={(e) => set("addedBy", e.target.value)} placeholder="So the family knows who added this" /></div>
-      <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 16 }}>
-        <button style={S.btn("secondary")} onClick={onCancel}>Cancel</button>
-        <button style={S.btn("primary")} onClick={() => onSave({ ...form, addedDate: new Date().toISOString().split("T")[0] })}>{isNew ? "Add Document" : "Save Changes"}</button>
-      </div>
-    </div>
-  );
-}
-
-// ── Activity & Resources ───────────────────────────────────────────
-function ActivityTab({ log, onAdd }) {
-  const [note, setNote] = useState(""); const [author, setAuthor] = useState("");
-  return (
-    <div>
-      <div style={{ background: C.card, borderRadius: 8, border: `1px solid ${C.border}`, padding: 20, marginBottom: 20 }}>
-        <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 12, fontFamily: serif }}>Add a Note</div>
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-          <input style={{ ...S.input, flex: "0 0 120px", minWidth: 100 }} placeholder="Your name" value={author} onChange={(e) => setAuthor(e.target.value)} />
-          <input style={{ ...S.input, flex: 1, minWidth: 200 }} placeholder="What did you find, do, or learn?" value={note} onChange={(e) => setNote(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter" && note.trim() && author.trim()) { onAdd(author, note); setNote(""); } }} />
-          <button style={S.btn("primary")} onClick={() => { if (note.trim() && author.trim()) { onAdd(author, note); setNote(""); } }}>Post</button>
-        </div>
-      </div>
-      {[...log].reverse().map((e, i) => (
-        <div key={i} style={{ padding: "12px 16px", borderLeft: `3px solid ${i === 0 ? C.accent : C.borderLight}`, marginBottom: 8, background: i === 0 ? C.accentPale : C.card, borderRadius: "0 6px 6px 0" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}><span style={{ fontSize: 13, fontWeight: 700, color: C.accent }}>{e.user}</span><span style={{ fontSize: 11, color: C.textLight }}>{e.date}</span></div>
-          <div style={{ fontSize: 13, color: C.textMuted, lineHeight: 1.5 }}>{e.action}</div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function ResourcesTab({ data, onImport }) {
-  const [importText, setImportText] = useState("");
-  const [importStatus, setImportStatus] = useState(null);
-  const fileInputRef = useRef(null);
+  const setMe = (id) => {
+    setMeId(id)
+    localStorage.setItem('citizenship-hub-me', id)
+  }
 
   const handleExport = () => {
-    const exportData = { ...data, _exportedAt: new Date().toISOString(), _version: "1.0", _source: "wallace-hyde-citizenship-hub" };
-    const json = JSON.stringify(exportData, null, 2);
-    const blob = new Blob([json], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `citizenship-hub-backup-${new Date().toISOString().split("T")[0]}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `citizenship-hub-backup-${new Date().toISOString().slice(0, 10)}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
 
-  const handleFileImport = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      try {
-        const parsed = JSON.parse(ev.target.result);
-        if (!parsed.familyMembers || !parsed.documents) { setImportStatus("error"); return; }
-        onImport(parsed);
-        setImportStatus("success");
-      } catch { setImportStatus("error"); }
-    };
-    reader.readAsText(file);
-  };
-
-  const handleTextImport = () => {
+  const handleImport = () => {
     try {
-      const parsed = JSON.parse(importText);
-      if (!parsed.familyMembers || !parsed.documents) { setImportStatus("error"); return; }
-      onImport(parsed);
-      setImportStatus("success");
-      setImportText("");
-    } catch { setImportStatus("error"); }
-  };
-  const secs = [
-    { t: "Canadian Government (IRCC)", l: [["Bill C-3 overview", "https://www.canada.ca/en/immigration-refugees-citizenship/services/canadian-citizenship/act-changes/rules-2025.html"], ["Check if you may be a citizen", "https://www.canada.ca/en/immigration-refugees-citizenship/services/canadian-citizenship/become-canadian-citizen/eligibility/already-citizen.html"], ["Apply for citizenship certificate", "https://www.canada.ca/en/immigration-refugees-citizenship/services/canadian-citizenship/proof-citizenship/apply.html"], ["CIT 0001 — Application form", "https://www.canada.ca/en/immigration-refugees-citizenship/services/application/application-forms-guides/application-citizenship-certificate-adults-minors.html"], ["CIT 0014 — Document checklist", "https://www.canada.ca/en/immigration-refugees-citizenship/services/application/application-forms-guides/cit0014.html"], ["Paper application guide", "https://www.canada.ca/en/immigration-refugees-citizenship/services/application/application-forms-guides/guide-0001-application-citizenship-certificate-adults-minors-proof-citizenship-section-3.html"], ["Processing times", "https://www.canada.ca/en/immigration-refugees-citizenship/services/application/check-processing-times.html"]] },
-    { t: "Ontario Vital Records", l: [["Archives of Ontario (pre-1919)", "https://www.archives.gov.on.ca/topic/birth-marriage-and-death/"], ["ServiceOntario (1920+)", "https://www.ontario.ca/page/get-or-replace-ontario-birth-certificate"], ["FamilySearch Ontario (free)", "https://www.familysearch.org/en/wiki/Ontario_County,_Ontario,_Canada_Genealogy"]] },
-    { t: "Michigan Vital Records", l: [["Michigan MDHHS", "https://www.michigan.gov/mdhhs/doing-business/vitalrecords"], ["VitalChek (online)", "https://www.vitalchek.com"], ["CDC — all states", "https://www.cdc.gov/nchs/w2w/index.htm"]] },
-    { t: "Helpful Guides", l: [["Marin Immigration Law", "https://www.marinimmigrationlaw.ca/blog/bill-c-3-americans-with-canadian-ancestry---citizenship-by-descent-expanded"], ["Serotte Law", "https://serottelaw.com/waking-up-canadian/"], ["Immigration.ca", "https://immigration.ca/claiming-canadian-citizenship-by-descent-under-canadas-new-citizenship-act-bill-c-3/"]] },
-  ];
+      const parsed = JSON.parse(importText)
+      if (parsed.familyMembers) {
+        persistData({ ...parsed, lastUpdated: new Date().toISOString() })
+        addLogEntry('Restored data from backup')
+        setShowImport(false)
+        setImportText('')
+      } else {
+        alert('Invalid backup format — missing familyMembers')
+      }
+    } catch {
+      alert('Invalid JSON — please paste the full backup file contents')
+    }
+  }
+
+  if (!data) {
+    return (
+      <div style={styles.loading}>
+        <div style={styles.loadingText}>Loading...</div>
+      </div>
+    )
+  }
+
+  const selectedMember = data.familyMembers.find(m => m.id === selectedMemberId)
+  const meMember = data.familyMembers.find(m => m.id === meId)
+
+  // Build the chain from me back to the Canadian ancestor
+  const getMyChain = () => {
+    if (!meId) return []
+    const chain = []
+    let current = data.familyMembers.find(m => m.id === meId)
+    const visited = new Set()
+    while (current && !visited.has(current.id)) {
+      visited.add(current.id)
+      chain.push(current)
+      if (current.parentIds && current.parentIds.length > 0) {
+        // Follow the first parent (paternal line for citizenship by descent)
+        current = data.familyMembers.find(m => m.id === current.parentIds[0])
+      } else {
+        break
+      }
+    }
+    return chain.reverse()
+  }
+
   return (
-    <div>
-      {secs.map((s) => (<div key={s.t} style={{ background: C.card, borderRadius: 8, border: `1px solid ${C.border}`, padding: 20, marginBottom: 16 }}><div style={{ fontFamily: serif, fontSize: 16, fontWeight: 700, marginBottom: 12, color: C.blue }}>{s.t}</div>{s.l.map(([n, u]) => (<div key={u} style={{ marginBottom: 8 }}><a href={u} target="_blank" rel="noopener noreferrer" style={{ color: C.accent, fontSize: 13, textDecoration: "none", fontWeight: 500 }}>{n} ↗</a></div>))}</div>))}
-      <div style={{ background: C.accentPale, borderRadius: 8, border: `1px solid ${C.border}`, padding: 20 }}>
-        <div style={{ fontFamily: serif, fontSize: 16, fontWeight: 700, marginBottom: 8 }}>Key Reminders</div>
-        <div style={{ fontSize: 13, color: C.textMuted, lineHeight: 1.8 }}><strong>Apply on paper</strong> — online portal doesn't handle multigenerational Bill C-3 claims well.<br /><strong>IRCC fee:</strong> $75 CAD per applicant.<br /><strong>Submit COLOR photocopies</strong> — never originals.<br /><strong>Each applicant needs their own application</strong> — but bundle family apps in one package with a cover letter.<br /><strong>Mail to:</strong> Case Processing Centre – Sydney, P.O. Box 7000, Sydney, NS B1P 6V6, Canada.</div>
-      </div>
+    <div style={styles.app}>
+      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
-      {/* ── Backup & Restore ── */}
-      <div style={{ background: C.card, borderRadius: 8, border: `1px solid ${C.border}`, padding: 20, marginTop: 16 }}>
-        <div style={{ fontFamily: serif, fontSize: 16, fontWeight: 700, marginBottom: 4, color: C.text }}>💾 Backup & Restore</div>
-        <div style={{ fontSize: 13, color: C.textMuted, marginBottom: 16, lineHeight: 1.5 }}>
-          Export a full snapshot of all family data, documents, and activity. Keep this file safe — if anything ever goes wrong, you can restore from it.
-        </div>
-
-        {/* Export */}
-        <button onClick={handleExport} style={{ ...S.btn("primary"), marginBottom: 20, display: "flex", alignItems: "center", gap: 8 }}>
-          ⬇ Export Full Backup (JSON)
-        </button>
-
-        {/* Import */}
-        <div style={{ borderTop: `1px solid ${C.borderLight}`, paddingTop: 16 }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: C.textMuted, marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.4px" }}>Restore from backup</div>
-          <div style={{ fontSize: 12, color: C.textLight, marginBottom: 12, lineHeight: 1.5 }}>
-            This will <strong>replace all current data</strong> with the backup file. Make sure you export a current backup first if you want to preserve recent changes.
+      {/* Header */}
+      <header style={styles.header}>
+        <div style={styles.headerTop}>
+          <h1 style={styles.title}>🍁 Citizenship Hub</h1>
+          <div style={styles.headerRight}>
+            {saving && <span style={styles.savingBadge}>Saving...</span>}
+            <select
+              value={meId}
+              onChange={e => setMe(e.target.value)}
+              style={styles.meSelect}
+            >
+              <option value="">Select "ME"</option>
+              {data.familyMembers
+                .filter(m => m.generation === Math.max(...data.familyMembers.map(f => f.generation)))
+                .map(m => (
+                  <option key={m.id} value={m.id}>{m.name}</option>
+                ))
+              }
+            </select>
           </div>
-          
-          <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 12 }}>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".json"
-              onChange={handleFileImport}
-              style={{ display: "none" }}
-            />
-            <button onClick={() => fileInputRef.current?.click()} style={{ ...S.btn("secondary"), fontSize: 12 }}>
-              📂 Choose backup file…
-            </button>
-            <span style={{ fontSize: 11, color: C.textLight }}>or paste JSON below</span>
-          </div>
-
-          <textarea
-            style={{ ...S.textarea, minHeight: 60, fontSize: 12, fontFamily: "monospace" }}
-            value={importText}
-            onChange={(e) => { setImportText(e.target.value); setImportStatus(null); }}
-            placeholder='Paste exported JSON here…'
-          />
-          {importText.trim() && (
-            <button onClick={handleTextImport} style={{ ...S.btn("secondary"), marginTop: 8, fontSize: 12 }}>
-              Restore from pasted JSON
-            </button>
-          )}
-
-          {importStatus === "success" && (
-            <div style={{ marginTop: 10, padding: "8px 12px", background: C.greenBadge, borderRadius: 6, fontSize: 12, color: C.green, fontWeight: 600 }}>
-              ✅ Data restored successfully. All family data has been updated.
-            </div>
-          )}
-          {importStatus === "error" && (
-            <div style={{ marginTop: 10, padding: "8px 12px", background: C.redBadge, borderRadius: 6, fontSize: 12, color: "#721C24", fontWeight: 600 }}>
-              ❌ Invalid backup file. Make sure it's a JSON file exported from this hub (must contain familyMembers and documents).
-            </div>
-          )}
         </div>
-      </div>
+        <p style={styles.subtitle}>Canadian Citizenship by Descent — Bill C-3 Family Tracker</p>
+      </header>
+
+      {/* Tab Bar */}
+      <nav style={styles.tabBar}>
+        {TABS.map((tab, i) => (
+          <button
+            key={tab}
+            onClick={() => { setActiveTab(i); setSelectedMemberId(null) }}
+            style={{
+              ...styles.tab,
+              ...(activeTab === i ? styles.tabActive : {})
+            }}
+          >
+            {tab}
+          </button>
+        ))}
+      </nav>
+
+      <main style={styles.main}>
+        {/* FAMILY TREE TAB */}
+        {activeTab === 0 && !selectedMember && (
+          <div>
+            <h2 style={styles.sectionTitle}>Family Members</h2>
+            <div style={styles.generationsContainer}>
+              {[0, 1, 2].map(gen => {
+                const members = data.familyMembers.filter(m => m.generation === gen)
+                const genLabel = gen === 0 ? 'Grandparents' : gen === 1 ? 'Parents' : 'Applicants'
+                return (
+                  <div key={gen} style={styles.generation}>
+                    <h3 style={styles.genLabel}>{genLabel}</h3>
+                    <div style={styles.memberGrid}>
+                      {members.map(m => {
+                        const totalDocs = Object.keys(m.documents).filter(k => k !== 'other').length
+                        const doneDocs = Object.entries(m.documents)
+                          .filter(([k]) => k !== 'other')
+                          .filter(([, v]) => v.status === 'received' || v.status === 'not-needed').length
+                        return (
+                          <button
+                            key={m.id}
+                            onClick={() => setSelectedMemberId(m.id)}
+                            style={styles.memberCard}
+                          >
+                            <div style={styles.memberName}>{m.name}</div>
+                            <div style={{
+                              ...styles.citizenshipBadge,
+                              backgroundColor: getCitizenshipColor(m.citizenshipStatus) + '22',
+                              color: getCitizenshipColor(m.citizenshipStatus),
+                              borderColor: getCitizenshipColor(m.citizenshipStatus)
+                            }}>
+                              {CITIZENSHIP_OPTIONS.find(o => o.value === m.citizenshipStatus)?.label}
+                            </div>
+                            <div style={styles.docProgress}>
+                              {doneDocs}/{totalDocs} docs ready
+                            </div>
+                            <div style={styles.progressBar}>
+                              <div style={{
+                                ...styles.progressFill,
+                                width: `${totalDocs > 0 ? (doneDocs / totalDocs * 100) : 0}%`
+                              }} />
+                            </div>
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* MEMBER DETAIL VIEW */}
+        {activeTab === 0 && selectedMember && (
+          <div>
+            <button onClick={() => setSelectedMemberId(null)} style={styles.backBtn}>
+              &larr; Back to Family Tree
+            </button>
+            <h2 style={styles.sectionTitle}>{selectedMember.name}</h2>
+
+            <div style={styles.detailGrid}>
+              <div style={styles.detailSection}>
+                <h3 style={styles.detailLabel}>Basic Info</h3>
+                <label style={styles.fieldLabel}>Name</label>
+                <input
+                  style={styles.input}
+                  value={selectedMember.name}
+                  onChange={e => {
+                    updateMember(selectedMember.id, { name: e.target.value })
+                  }}
+                  onBlur={() => addLogEntry(`Updated name for ${selectedMember.name}`)}
+                />
+                <label style={styles.fieldLabel}>Born</label>
+                <input
+                  style={styles.input}
+                  value={selectedMember.born}
+                  onChange={e => updateMember(selectedMember.id, { born: e.target.value })}
+                  placeholder="e.g. 1945"
+                />
+                <label style={styles.fieldLabel}>Birth Place</label>
+                <input
+                  style={styles.input}
+                  value={selectedMember.birthPlace}
+                  onChange={e => updateMember(selectedMember.id, { birthPlace: e.target.value })}
+                  placeholder="e.g. Toronto, ON, Canada"
+                />
+                <label style={styles.fieldLabel}>Citizenship Status</label>
+                <select
+                  style={styles.input}
+                  value={selectedMember.citizenshipStatus}
+                  onChange={e => {
+                    updateMember(selectedMember.id, { citizenshipStatus: e.target.value })
+                    addLogEntry(`Changed citizenship status for ${selectedMember.name} to ${e.target.value}`)
+                  }}
+                >
+                  {CITIZENSHIP_OPTIONS.map(o => (
+                    <option key={o.value} value={o.value}>{o.label}</option>
+                  ))}
+                </select>
+                <label style={styles.fieldLabel}>Notes</label>
+                <textarea
+                  style={{ ...styles.input, minHeight: 80, resize: 'vertical' }}
+                  value={selectedMember.notes}
+                  onChange={e => updateMember(selectedMember.id, { notes: e.target.value })}
+                  placeholder="Any notes about this person's application..."
+                />
+              </div>
+
+              <div style={styles.detailSection}>
+                <h3 style={styles.detailLabel}>Documents</h3>
+                {Object.entries(selectedMember.documents)
+                  .filter(([key]) => key !== 'other')
+                  .map(([key, doc]) => (
+                    <div key={key} style={styles.docRow}>
+                      <div style={styles.docHeader}>
+                        <span style={styles.docName}>{DOC_LABELS[key] || key}</span>
+                        <select
+                          style={{
+                            ...styles.statusSelect,
+                            color: getStatusColor(doc.status),
+                            borderColor: getStatusColor(doc.status)
+                          }}
+                          value={doc.status}
+                          onChange={e => {
+                            updateDocument(selectedMember.id, key, { status: e.target.value })
+                            addLogEntry(`${selectedMember.name}: ${DOC_LABELS[key]} → ${e.target.value}`)
+                          }}
+                        >
+                          {STATUS_OPTIONS.map(o => (
+                            <option key={o.value} value={o.value}>{o.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <input
+                        style={styles.linkInput}
+                        value={doc.link}
+                        onChange={e => updateDocument(selectedMember.id, key, { link: e.target.value })}
+                        placeholder="Paste share link (OneDrive, Google Drive, etc.)"
+                      />
+                      {doc.link && (
+                        <a href={doc.link} target="_blank" rel="noopener noreferrer" style={styles.linkPreview}>
+                          Open document &rarr;
+                        </a>
+                      )}
+                      <input
+                        style={styles.linkInput}
+                        value={doc.notes}
+                        onChange={e => updateDocument(selectedMember.id, key, { notes: e.target.value })}
+                        placeholder="Notes about this document..."
+                      />
+                    </div>
+                  ))
+                }
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* MY CHAIN TAB */}
+        {activeTab === 1 && (
+          <div>
+            <h2 style={styles.sectionTitle}>My Chain of Descent</h2>
+            {!meId ? (
+              <div style={styles.emptyState}>
+                <p>Select yourself using the "ME" dropdown in the header to see your chain of descent.</p>
+              </div>
+            ) : (
+              <div>
+                <p style={styles.chainExplainer}>
+                  Your citizenship claim traces through these family members. Each link in the chain
+                  must have their documents in order for your application to succeed.
+                </p>
+                <div style={styles.chainContainer}>
+                  {getMyChain().map((member, i, arr) => {
+                    const totalDocs = Object.keys(member.documents).filter(k => k !== 'other').length
+                    const doneDocs = Object.entries(member.documents)
+                      .filter(([k]) => k !== 'other')
+                      .filter(([, v]) => v.status === 'received' || v.status === 'not-needed').length
+                    const isMe = member.id === meId
+                    return (
+                      <div key={member.id}>
+                        <div style={{
+                          ...styles.chainCard,
+                          ...(isMe ? styles.chainCardMe : {})
+                        }}>
+                          <div style={styles.chainCardHeader}>
+                            <span style={styles.chainName}>
+                              {member.name} {isMe && '(YOU)'}
+                            </span>
+                            <span style={{
+                              ...styles.citizenshipBadge,
+                              backgroundColor: getCitizenshipColor(member.citizenshipStatus) + '22',
+                              color: getCitizenshipColor(member.citizenshipStatus),
+                              borderColor: getCitizenshipColor(member.citizenshipStatus),
+                              fontSize: 11
+                            }}>
+                              {CITIZENSHIP_OPTIONS.find(o => o.value === member.citizenshipStatus)?.label}
+                            </span>
+                          </div>
+                          <div style={styles.docProgress}>{doneDocs}/{totalDocs} documents ready</div>
+                          <div style={styles.progressBar}>
+                            <div style={{
+                              ...styles.progressFill,
+                              width: `${totalDocs > 0 ? (doneDocs / totalDocs * 100) : 0}%`
+                            }} />
+                          </div>
+                          <button
+                            onClick={() => { setActiveTab(0); setSelectedMemberId(member.id) }}
+                            style={styles.viewDetailsBtn}
+                          >
+                            View Details
+                          </button>
+                        </div>
+                        {i < arr.length - 1 && (
+                          <div style={styles.chainArrow}>&#8595;</div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* RESOURCES TAB */}
+        {activeTab === 2 && (
+          <div>
+            <h2 style={styles.sectionTitle}>Resources & Activity</h2>
+
+            {/* Backup & Restore */}
+            <div style={styles.resourceSection}>
+              <h3 style={styles.detailLabel}>Backup & Restore</h3>
+              <div style={styles.btnRow}>
+                <button onClick={handleExport} style={styles.primaryBtn}>
+                  Export Backup (JSON)
+                </button>
+                <button onClick={() => setShowImport(!showImport)} style={styles.secondaryBtn}>
+                  {showImport ? 'Cancel' : 'Import Backup'}
+                </button>
+              </div>
+              {showImport && (
+                <div style={{ marginTop: 12 }}>
+                  <textarea
+                    style={{ ...styles.input, minHeight: 120, fontFamily: 'monospace', fontSize: 12 }}
+                    value={importText}
+                    onChange={e => setImportText(e.target.value)}
+                    placeholder="Paste the full JSON backup here..."
+                  />
+                  <button onClick={handleImport} style={{ ...styles.primaryBtn, marginTop: 8 }}>
+                    Restore from Backup
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Useful Links */}
+            <div style={styles.resourceSection}>
+              <h3 style={styles.detailLabel}>Useful Links</h3>
+              <ul style={styles.linkList}>
+                <li><a href="https://www.canada.ca/en/immigration-refugees-citizenship/services/canadian-citizenship/become-canadian-citizen/eligibility/already-citizen.html" target="_blank" rel="noopener noreferrer" style={styles.resourceLink}>IRCC — Am I already a citizen?</a></li>
+                <li><a href="https://www.canada.ca/en/immigration-refugees-citizenship/services/application/application-forms-guides/application-citizenship-certificate-adults-minors.html" target="_blank" rel="noopener noreferrer" style={styles.resourceLink}>Citizenship Certificate Application (CIT 0001)</a></li>
+                <li><a href="https://www.parl.ca/legisinfo/en/bill/40-2/c-3" target="_blank" rel="noopener noreferrer" style={styles.resourceLink}>Bill C-3 (Citizenship Act amendments)</a></li>
+              </ul>
+            </div>
+
+            {/* Activity Log */}
+            <div style={styles.resourceSection}>
+              <h3 style={styles.detailLabel}>Recent Activity</h3>
+              {(!data.activityLog || data.activityLog.length === 0) ? (
+                <p style={styles.emptyState}>No activity yet. Changes will appear here as family members update documents.</p>
+              ) : (
+                <div style={styles.logContainer}>
+                  {data.activityLog.map((entry, i) => (
+                    <div key={i} style={styles.logEntry}>
+                      <span style={styles.logTime}>{formatDate(entry.timestamp)}</span>
+                      <span style={styles.logWho}>{entry.who}</span>
+                      <span style={styles.logMessage}>{entry.message}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </main>
+
+      {/* Footer */}
+      <footer style={styles.footer}>
+        <p>Wallace-Hyde Family — Canadian Citizenship Tracker</p>
+        {data.lastUpdated && (
+          <p style={styles.footerDate}>Last synced: {formatDate(data.lastUpdated)}</p>
+        )}
+      </footer>
     </div>
-  );
+  )
 }
 
-// ── Main App ───────────────────────────────────────────────────────
-export default function App() {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState("chain");
-  const [meId, setMeId] = useState(null);
-  const [modal, setModal] = useState(null);
+// ============================================================
+// STYLES — All inline, no external CSS needed
+// ============================================================
+const styles = {
+  app: {
+    fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+    maxWidth: 900,
+    margin: '0 auto',
+    padding: '0 16px',
+    minHeight: '100vh',
+    backgroundColor: '#fafafa',
+    color: '#1f2937'
+  },
+  loading: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '100vh',
+    backgroundColor: '#fafafa'
+  },
+  loadingText: {
+    fontSize: 18,
+    color: '#6b7280'
+  },
+  header: {
+    padding: '24px 0 16px',
+    borderBottom: '2px solid #dc2626'
+  },
+  headerTop: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 12
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 700,
+    margin: 0,
+    color: '#dc2626'
+  },
+  headerRight: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 12
+  },
+  savingBadge: {
+    fontSize: 12,
+    color: '#f59e0b',
+    fontWeight: 500
+  },
+  meSelect: {
+    padding: '6px 12px',
+    borderRadius: 6,
+    border: '1px solid #d1d5db',
+    fontSize: 14,
+    backgroundColor: 'white'
+  },
+  subtitle: {
+    fontSize: 13,
+    color: '#6b7280',
+    margin: '8px 0 0'
+  },
+  tabBar: {
+    display: 'flex',
+    gap: 0,
+    borderBottom: '1px solid #e5e7eb',
+    marginBottom: 24
+  },
+  tab: {
+    padding: '12px 20px',
+    border: 'none',
+    background: 'none',
+    cursor: 'pointer',
+    fontSize: 14,
+    fontWeight: 500,
+    color: '#6b7280',
+    borderBottom: '2px solid transparent',
+    transition: 'all 0.15s'
+  },
+  tabActive: {
+    color: '#dc2626',
+    borderBottomColor: '#dc2626'
+  },
+  main: {
+    minHeight: 400,
+    paddingBottom: 40
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: 600,
+    marginBottom: 20
+  },
+  generationsContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 32
+  },
+  generation: {},
+  genLabel: {
+    fontSize: 13,
+    fontWeight: 600,
+    color: '#6b7280',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginBottom: 12
+  },
+  memberGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+    gap: 12
+  },
+  memberCard: {
+    background: 'white',
+    border: '1px solid #e5e7eb',
+    borderRadius: 10,
+    padding: 16,
+    cursor: 'pointer',
+    textAlign: 'left',
+    transition: 'box-shadow 0.15s, border-color 0.15s',
+    width: '100%'
+  },
+  memberName: {
+    fontSize: 16,
+    fontWeight: 600,
+    marginBottom: 8
+  },
+  citizenshipBadge: {
+    display: 'inline-block',
+    padding: '2px 8px',
+    borderRadius: 12,
+    fontSize: 12,
+    fontWeight: 500,
+    border: '1px solid',
+    marginBottom: 8
+  },
+  docProgress: {
+    fontSize: 12,
+    color: '#6b7280',
+    marginBottom: 6
+  },
+  progressBar: {
+    height: 4,
+    backgroundColor: '#e5e7eb',
+    borderRadius: 2,
+    overflow: 'hidden'
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: '#10b981',
+    borderRadius: 2,
+    transition: 'width 0.3s'
+  },
+  backBtn: {
+    background: 'none',
+    border: 'none',
+    color: '#dc2626',
+    cursor: 'pointer',
+    fontSize: 14,
+    fontWeight: 500,
+    padding: '4px 0',
+    marginBottom: 12
+  },
+  detailGrid: {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: 24
+  },
+  detailSection: {
+    background: 'white',
+    border: '1px solid #e5e7eb',
+    borderRadius: 10,
+    padding: 20
+  },
+  detailLabel: {
+    fontSize: 16,
+    fontWeight: 600,
+    marginTop: 0,
+    marginBottom: 16
+  },
+  fieldLabel: {
+    display: 'block',
+    fontSize: 12,
+    fontWeight: 500,
+    color: '#6b7280',
+    marginBottom: 4,
+    marginTop: 12
+  },
+  input: {
+    width: '100%',
+    padding: '8px 12px',
+    borderRadius: 6,
+    border: '1px solid #d1d5db',
+    fontSize: 14,
+    boxSizing: 'border-box',
+    fontFamily: 'inherit'
+  },
+  docRow: {
+    marginBottom: 16,
+    paddingBottom: 16,
+    borderBottom: '1px solid #f3f4f6'
+  },
+  docHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6
+  },
+  docName: {
+    fontSize: 14,
+    fontWeight: 500
+  },
+  statusSelect: {
+    padding: '2px 8px',
+    borderRadius: 12,
+    border: '1px solid',
+    fontSize: 12,
+    fontWeight: 500,
+    background: 'white',
+    cursor: 'pointer'
+  },
+  linkInput: {
+    width: '100%',
+    padding: '6px 10px',
+    borderRadius: 4,
+    border: '1px solid #e5e7eb',
+    fontSize: 12,
+    marginTop: 4,
+    boxSizing: 'border-box',
+    fontFamily: 'inherit'
+  },
+  linkPreview: {
+    display: 'inline-block',
+    fontSize: 12,
+    color: '#3b82f6',
+    marginTop: 4,
+    textDecoration: 'none'
+  },
+  chainExplainer: {
+    fontSize: 14,
+    color: '#6b7280',
+    marginBottom: 20,
+    lineHeight: 1.5
+  },
+  chainContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: 0
+  },
+  chainCard: {
+    background: 'white',
+    border: '1px solid #e5e7eb',
+    borderRadius: 10,
+    padding: 20,
+    width: 340,
+    maxWidth: '100%'
+  },
+  chainCardMe: {
+    borderColor: '#dc2626',
+    boxShadow: '0 0 0 2px #dc262622'
+  },
+  chainCardHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8
+  },
+  chainName: {
+    fontSize: 16,
+    fontWeight: 600
+  },
+  chainArrow: {
+    fontSize: 24,
+    color: '#d1d5db',
+    textAlign: 'center',
+    lineHeight: '36px'
+  },
+  viewDetailsBtn: {
+    marginTop: 12,
+    padding: '6px 16px',
+    borderRadius: 6,
+    border: '1px solid #dc2626',
+    background: 'white',
+    color: '#dc2626',
+    fontSize: 13,
+    fontWeight: 500,
+    cursor: 'pointer'
+  },
+  resourceSection: {
+    background: 'white',
+    border: '1px solid #e5e7eb',
+    borderRadius: 10,
+    padding: 20,
+    marginBottom: 20
+  },
+  btnRow: {
+    display: 'flex',
+    gap: 12,
+    flexWrap: 'wrap'
+  },
+  primaryBtn: {
+    padding: '8px 20px',
+    borderRadius: 6,
+    border: 'none',
+    background: '#dc2626',
+    color: 'white',
+    fontSize: 14,
+    fontWeight: 500,
+    cursor: 'pointer'
+  },
+  secondaryBtn: {
+    padding: '8px 20px',
+    borderRadius: 6,
+    border: '1px solid #d1d5db',
+    background: 'white',
+    color: '#374151',
+    fontSize: 14,
+    fontWeight: 500,
+    cursor: 'pointer'
+  },
+  linkList: {
+    listStyle: 'none',
+    padding: 0,
+    margin: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 8
+  },
+  resourceLink: {
+    color: '#3b82f6',
+    textDecoration: 'none',
+    fontSize: 14
+  },
+  logContainer: {
+    maxHeight: 400,
+    overflowY: 'auto'
+  },
+  logEntry: {
+    display: 'flex',
+    gap: 12,
+    padding: '8px 0',
+    borderBottom: '1px solid #f3f4f6',
+    fontSize: 13,
+    flexWrap: 'wrap'
+  },
+  logTime: {
+    color: '#9ca3af',
+    whiteSpace: 'nowrap',
+    minWidth: 120
+  },
+  logWho: {
+    fontWeight: 600,
+    color: '#374151',
+    minWidth: 80
+  },
+  logMessage: {
+    color: '#6b7280',
+    flex: 1
+  },
+  emptyState: {
+    color: '#9ca3af',
+    textAlign: 'center',
+    padding: '40px 20px',
+    fontSize: 14
+  },
+  footer: {
+    textAlign: 'center',
+    padding: '20px 0',
+    borderTop: '1px solid #e5e7eb',
+    color: '#9ca3af',
+    fontSize: 12
+  },
+  footerDate: {
+    marginTop: 4,
+    fontSize: 11
+  }
+}
 
-  useEffect(() => {
-    let unsubscribe;
-    (async () => {
-      const saved = await loadShared();
-      const savedMe = loadMe();
-      setData(saved || INITIAL_DATA);
-      if (savedMe) setMeId(savedMe);
-      setLoading(false);
-      // Real-time sync — updates from other family members appear automatically
-      unsubscribe = onSharedChange((newData) => { if (newData) setData(newData); });
-    })();
-    return () => { if (unsubscribe) unsubscribe(); };
-  }, []);
-
-  const persist = useCallback(async (nd) => { setData(nd); await saveShared(nd); }, []);
-  const handleSetMe = useCallback(async (id) => { setMeId(id); saveMe(id); setTab("chain"); }, []);
-  const handleClearMe = useCallback(async () => { setMeId(null); clearMe(); }, []);
-  const handleAddAndSelect = useCallback(async (person) => {
-    const newData = { ...data, familyMembers: [...data.familyMembers, person], activityLog: [...data.activityLog, { date: new Date().toISOString().split("T")[0], user: person.name, action: `Joined the family hub and added themselves to the tree` }] };
-    await saveShared(newData); setData(newData); setMeId(person.id); saveMe(person.id);
-  }, [data]);
-
-  const updatePerson = useCallback((u) => { persist({ ...data, familyMembers: data.familyMembers.map((p) => (p.id === u.id ? u : p)), activityLog: [...data.activityLog, { date: new Date().toISOString().split("T")[0], user: "Family", action: `Updated details for ${u.name}` }] }); setModal(null); }, [data, persist]);
-  const addPerson = useCallback((p) => { persist({ ...data, familyMembers: [...data.familyMembers, p], activityLog: [...data.activityLog, { date: new Date().toISOString().split("T")[0], user: "Family", action: `Added family member: ${p.name}` }] }); setModal(null); }, [data, persist]);
-  const updateDoc = useCallback((u) => { const ex = data.documents.find((d) => d.id === u.id); const nd = ex ? data.documents.map((d) => (d.id === u.id ? u : d)) : [...data.documents, u]; const who = data.familyMembers.find((p) => p.id === u.personId)?.name || "unknown"; persist({ ...data, documents: nd, activityLog: [...data.activityLog, { date: new Date().toISOString().split("T")[0], user: u.addedBy || "Family", action: `${ex ? "Updated" : "Added"} document: ${u.type} for ${who}` }] }); setModal(null); }, [data, persist]);
-  const addLog = useCallback((user, action) => { persist({ ...data, activityLog: [...data.activityLog, { date: new Date().toISOString().split("T")[0], user, action }] }); }, [data, persist]);
-
-  if (loading) return <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: serif, fontSize: 18, color: C.textMuted, background: C.bg }}>Loading family records…</div>;
-
-  const mePerson = meId ? data.familyMembers.find((m) => m.id === meId) : null;
-  const myChain = meId ? getChain(data.familyMembers, meId) : [];
-  const myChainIds = new Set(myChain.map((p) => p.id));
-  const myChainDocs = data.documents.filter((d) => myChainIds.has(d.personId));
-
-  const depthMap = {};
-  const calcDepth = (id, s = 0) => { if (s > 20) return 0; if (depthMap[id] !== undefined) return depthMap[id]; const p = data.familyMembers.find((m) => m.id === id); if (!p || !p.parentId) { depthMap[id] = 0; return 0; } depthMap[id] = calcDepth(p.parentId, s + 1) + 1; return depthMap[id]; };
-  data.familyMembers.forEach((m) => calcDepth(m.id));
-  const sorted = [...data.familyMembers].sort((a, b) => (depthMap[a.id] || 0) - (depthMap[b.id] || 0));
-
-  const tabs = [{ id: "chain", label: "My Chain", icon: "🍁" }, { id: "all", label: "All Family", icon: "👥" }, { id: "activity", label: "Activity", icon: "📋" }, { id: "resources", label: "Resources", icon: "🔗" }];
-
-  const cp = (person, gen) => ({
-    person, documents: data.documents, gen, isMe: person.id === meId, isInChain: myChainIds.has(person.id),
-    onEdit: (p) => setModal({ type: "editPerson", payload: p }),
-    onEditDoc: (d) => setModal({ type: "editDoc", payload: d }),
-    onAddDoc: (pid) => setModal({ type: "addDoc", payload: { id: "doc_" + Date.now(), personId: pid, type: "Birth Certificate", description: "", status: "missing", source: "", fileUrl: "", fileName: "", notes: "", addedBy: "", addedDate: new Date().toISOString().split("T")[0] } }),
-    onSetMe: handleSetMe,
-  });
-
-  return (
-    <div style={{ minHeight: "100vh", background: `linear-gradient(180deg, ${C.bg} 0%, #F5F3ED 100%)`, fontFamily: sans, color: C.text }}>
-      <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
-      <div style={{ background: "linear-gradient(135deg, #1a1a18 0%, #2C2417 60%)", padding: "28px 32px 24px", borderBottom: `3px solid ${C.maple}` }}>
-        <h1 style={{ fontFamily: serif, fontSize: 28, fontWeight: 700, color: "#FAFAF7", margin: 0 }}><span style={{ color: C.maple, fontSize: 22, marginRight: 10 }}>🍁</span>{FAMILY_NAME} Citizenship Hub</h1>
-        <div style={{ fontFamily: sans, fontSize: 13, color: "#A09888", marginTop: 4, letterSpacing: "0.5px", textTransform: "uppercase" }}>Canadian Citizenship by Descent · Bill C-3 · Shared Family Workspace</div>
-      </div>
-      <div style={{ display: "flex", gap: 0, background: C.card, borderBottom: `1px solid ${C.border}`, padding: "0 16px", position: "sticky", top: 0, zIndex: 10, boxShadow: "0 1px 3px rgba(0,0,0,0.04)", overflowX: "auto" }}>
-        {tabs.map((t) => (<button key={t.id} onClick={() => setTab(t.id)} style={{ padding: "14px 16px", fontSize: 13, fontWeight: tab === t.id ? 600 : 500, color: tab === t.id ? C.accent : C.textMuted, cursor: "pointer", borderBottom: tab === t.id ? `2px solid ${C.accent}` : "2px solid transparent", background: "none", border: "none", borderBottomStyle: "solid", fontFamily: sans, whiteSpace: "nowrap" }}>{t.icon} {t.label}</button>))}
-      </div>
-      <div style={{ maxWidth: 900, margin: "0 auto", padding: "24px 20px" }}>
-        {tab === "chain" && (<>
-          {!meId && <SetMePrompt members={sorted.filter((m) => (depthMap[m.id] || 0) >= 3)} allMembers={sorted} onSelect={handleSetMe} onAddAndSelect={handleAddAndSelect} />}
-          {mePerson && <MeBanner person={mePerson} onClear={handleClearMe} />}
-          {meId && myChain.length > 0 && (<>
-            <ProgressSummary documents={myChainDocs} label="Your Application Progress" />
-            <div style={{ fontFamily: serif, fontSize: 20, fontWeight: 700, marginBottom: 16 }}>Your Line of Descent</div>
-            {myChain.map((p, i) => <PersonCard key={p.id} {...cp(p, i)} />)}
-            <div style={{ background: C.blueLight, borderRadius: 8, padding: 16, marginTop: 20, border: `1px solid #B8D4E8`, fontSize: 13, color: C.blue, lineHeight: 1.7 }}>
-              <strong>Your chain: {myChain.length} generations</strong> from Bruce Wallace to you. Under Bill C-3, citizenship cascades retroactively for anyone born before Dec 15, 2025.
-              {myChainDocs.some((d) => d.status === "missing") && <span style={{ display: "block", marginTop: 8, color: "#C41E3A", fontWeight: 600 }}>⚠ You still have documents marked "Missing" — resolve these before submitting.</span>}
-            </div>
-          </>)}
-          {meId && myChain.length === 0 && <div style={{ textAlign: "center", padding: 40, color: C.textLight }}>Could not trace a chain to the anchor. Check parent links in "All Family" tab.</div>}
-        </>)}
-        {tab === "all" && (<>
-          <ProgressSummary documents={data.documents} label="All Family Documents" />
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-            <div style={{ fontFamily: serif, fontSize: 20, fontWeight: 700 }}>Complete Family Tree</div>
-            <button style={S.btn("secondary")} onClick={() => setModal({ type: "addPerson" })}>+ Add Person</button>
-          </div>
-          {sorted.map((p) => <PersonCard key={p.id} {...cp(p, depthMap[p.id] || 0)} />)}
-        </>)}
-        {tab === "activity" && <ActivityTab log={data.activityLog} onAdd={addLog} />}
-        {tab === "resources" && <ResourcesTab data={data} onImport={(imported) => { const restored = { familyMembers: imported.familyMembers, documents: imported.documents, activityLog: [...(imported.activityLog || []), { date: new Date().toISOString().split("T")[0], user: "System", action: "Data restored from backup" }] }; persist(restored); }} />}
-      </div>
-      {modal?.type === "editPerson" && <Modal title="Edit Family Member" onClose={() => setModal(null)}><EditPersonForm person={modal.payload} members={data.familyMembers} onSave={updatePerson} onCancel={() => setModal(null)} /></Modal>}
-      {modal?.type === "addPerson" && <Modal title="Add Family Member" onClose={() => setModal(null)}><AddPersonForm members={data.familyMembers} onSave={addPerson} onCancel={() => setModal(null)} /></Modal>}
-      {modal?.type === "editDoc" && <Modal title="Update Document" onClose={() => setModal(null)}><EditDocForm doc={modal.payload} isNew={false} onSave={updateDoc} onCancel={() => setModal(null)} /></Modal>}
-      {modal?.type === "addDoc" && <Modal title="Add Document" onClose={() => setModal(null)}><EditDocForm doc={modal.payload} isNew={true} onSave={updateDoc} onCancel={() => setModal(null)} /></Modal>}
-    </div>
-  );
+// Responsive: on narrow screens, stack the detail grid
+if (typeof window !== 'undefined' && window.innerWidth < 700) {
+  styles.detailGrid.gridTemplateColumns = '1fr'
 }

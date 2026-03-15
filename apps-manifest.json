@@ -1,6 +1,15 @@
 {
   "apps": [
     {
+      "slug": "citizenship-hub",
+      "name": "Citizenship Hub",
+      "description": "Family collaboration app for tracking Canadian citizenship by descent applications under Bill C-3",
+      "type": "react",
+      "status": "wip",
+      "createdAt": "2026-03-14",
+      "tags": ["family", "tool", "firebase", "collaboration"]
+    },
+    {
       "slug": "daily-baseline",
       "name": "Daily Baseline",
       "description": "Minimalist daily bodyweight workout tracker — log reps and time for six exercises each day",

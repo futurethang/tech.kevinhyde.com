@@ -1,25 +1,108 @@
 {
-  "_exportedAt": "2026-03-14T00:00:00.000Z",
-  "_version": "1.0",
-  "_source": "wallace-hyde-citizenship-hub",
   "familyMembers": [
-    { "id": "bruce_wallace", "parentId": null, "name": "Bruce Wallace", "birthDate": "January 9, 1884", "birthPlace": "Beachville, Ontario, Canada", "deathDate": "May 30, 1940", "deathPlace": "Saginaw, Michigan", "father": "Alexander Wallace (Oxford County, Ontario)", "mother": "Louise Annie Cook (Beachville, Ontario)", "spouse": "Margaret Kohler", "isAnchor": true, "notes": "Canadian citizen by birth. Ontario birth registration #026921. Lived at 1501 Farwell St, Saginaw. Warehouse Manager in furniture industry. In U.S.A. for 50 years per death cert. Informant on death cert: W.G. Wallace (same address)." },
-    { "id": "gen1_unknown", "parentId": "bruce_wallace", "name": "[Unknown — Bruce's child, Janet's parent]", "birthDate": "", "birthPlace": "Likely Saginaw area, MI", "deathDate": "", "deathPlace": "", "father": "Bruce Wallace", "mother": "Margaret Kohler", "spouse": "", "notes": "CRITICAL GAP — need to identify. W.G. Wallace (informant on Bruce's death cert) is a strong lead. Check 1940 Census for 1501 Farwell St, Saginaw. Ask Uncle Pat." },
-    { "id": "janet_wallace", "parentId": "gen1_unknown", "name": "Janet Wallace (married Garety)", "birthDate": "", "birthPlace": "Saginaw area, MI (estimated)", "deathDate": "", "deathPlace": "", "father": "[See parent link]", "mother": "", "spouse": "Pat Garety", "notes": "Need birth certificate + marriage certificate to Pat Garety. Marriage likely in Saginaw County." },
-    { "id": "ann_garety", "parentId": "janet_wallace", "name": "Ann Garety (married Hyde)", "birthDate": "1954", "birthPlace": "Michigan (likely)", "deathDate": "", "deathPlace": "", "father": "Pat Garety", "mother": "Janet Wallace Garety", "spouse": "Mr. Hyde", "notes": "Married 1973 in Caro, Michigan. Need birth certificate (as Ann Garety) + marriage certificate (Garety → Hyde). Also an applicant in her own right." },
-    { "id": "kevin_hyde", "parentId": "ann_garety", "name": "Kevin Hyde", "birthDate": "", "birthPlace": "", "deathDate": "", "deathPlace": "", "father": "Mr. Hyde", "mother": "Ann Garety Hyde", "spouse": "", "notes": "Need birth certificate." }
+    {
+      "id": "gp-paternal-gf",
+      "name": "Grandfather (Paternal)",
+      "relationship": "Grandfather",
+      "generation": 0,
+      "born": "",
+      "birthPlace": "",
+      "citizenshipStatus": "born-in-canada",
+      "documents": {
+        "birthCertificate": { "status": "not-started", "link": "", "notes": "" },
+        "marriageCertificate": { "status": "not-started", "link": "", "notes": "" },
+        "proofOfCitizenship": { "status": "not-started", "link": "", "notes": "" },
+        "deathCertificate": { "status": "not-started", "link": "", "notes": "" },
+        "other": []
+      },
+      "notes": ""
+    },
+    {
+      "id": "gp-paternal-gm",
+      "name": "Grandmother (Paternal)",
+      "relationship": "Grandmother",
+      "generation": 0,
+      "born": "",
+      "birthPlace": "",
+      "citizenshipStatus": "unknown",
+      "documents": {
+        "birthCertificate": { "status": "not-started", "link": "", "notes": "" },
+        "marriageCertificate": { "status": "not-started", "link": "", "notes": "" },
+        "proofOfCitizenship": { "status": "not-started", "link": "", "notes": "" },
+        "deathCertificate": { "status": "not-started", "link": "", "notes": "" },
+        "other": []
+      },
+      "notes": ""
+    },
+    {
+      "id": "parent-father",
+      "name": "Father",
+      "relationship": "Father",
+      "generation": 1,
+      "born": "",
+      "birthPlace": "",
+      "citizenshipStatus": "by-descent",
+      "parentIds": ["gp-paternal-gf", "gp-paternal-gm"],
+      "documents": {
+        "birthCertificate": { "status": "not-started", "link": "", "notes": "" },
+        "marriageCertificate": { "status": "not-started", "link": "", "notes": "" },
+        "proofOfCitizenship": { "status": "not-started", "link": "", "notes": "" },
+        "other": []
+      },
+      "notes": ""
+    },
+    {
+      "id": "parent-mother",
+      "name": "Mother",
+      "relationship": "Mother",
+      "generation": 1,
+      "born": "",
+      "birthPlace": "",
+      "citizenshipStatus": "not-applicable",
+      "documents": {
+        "birthCertificate": { "status": "not-started", "link": "", "notes": "" },
+        "marriageCertificate": { "status": "not-started", "link": "", "notes": "" },
+        "other": []
+      },
+      "notes": ""
+    },
+    {
+      "id": "child-1",
+      "name": "Child 1",
+      "relationship": "Self/Sibling",
+      "generation": 2,
+      "born": "",
+      "birthPlace": "",
+      "citizenshipStatus": "applying",
+      "parentIds": ["parent-father", "parent-mother"],
+      "documents": {
+        "birthCertificate": { "status": "not-started", "link": "", "notes": "" },
+        "proofOfCitizenship": { "status": "not-started", "link": "", "notes": "" },
+        "applicationForm": { "status": "not-started", "link": "", "notes": "" },
+        "photos": { "status": "not-started", "link": "", "notes": "" },
+        "other": []
+      },
+      "notes": ""
+    },
+    {
+      "id": "child-2",
+      "name": "Child 2",
+      "relationship": "Self/Sibling",
+      "generation": 2,
+      "born": "",
+      "birthPlace": "",
+      "citizenshipStatus": "applying",
+      "parentIds": ["parent-father", "parent-mother"],
+      "documents": {
+        "birthCertificate": { "status": "not-started", "link": "", "notes": "" },
+        "proofOfCitizenship": { "status": "not-started", "link": "", "notes": "" },
+        "applicationForm": { "status": "not-started", "link": "", "notes": "" },
+        "photos": { "status": "not-started", "link": "", "notes": "" },
+        "other": []
+      },
+      "notes": ""
+    }
   ],
-  "documents": [
-    { "id": "doc_bruce_birth", "personId": "bruce_wallace", "type": "Birth Certificate", "description": "Ontario birth registration #026921, Beachville", "status": "in_hand", "source": "Ontario Vital Records / FHL film #1845869", "fileUrl": "", "fileName": "18840109WALLACE_Bruce.PDF", "notes": "Scanned copy from FamilySearch/Archives of Ontario. May need certified copy from Archives of Ontario for IRCC.", "addedBy": "Kevin", "addedDate": "2026-03-14" },
-    { "id": "doc_bruce_death", "personId": "bruce_wallace", "type": "Death Certificate", "description": "Michigan death certificate, State File #17318718", "status": "in_hand", "source": "Michigan Dept. of Health", "fileUrl": "", "fileName": "1940_05_30_Bruce_WALLACE_Death.jpeg", "notes": "Confirms Beachville Ontario birthplace, parents Alexander Wallace & Louise Cook.", "addedBy": "Kevin", "addedDate": "2026-03-14" },
-    { "id": "doc_gen1_birth", "personId": "gen1_unknown", "type": "Birth Certificate", "description": "Birth certificate for Bruce's child (Janet's parent)", "status": "missing", "source": "Michigan Vital Records — need to identify person first", "fileUrl": "", "fileName": "", "notes": "BLOCKED: Need to identify Gen 1 person first.", "addedBy": "Kevin", "addedDate": "2026-03-14" },
-    { "id": "doc_janet_birth", "personId": "janet_wallace", "type": "Birth Certificate", "description": "Janet Wallace birth certificate", "status": "missing", "source": "Michigan Vital Records", "fileUrl": "", "fileName": "", "notes": "Need approximate year and county.", "addedBy": "Kevin", "addedDate": "2026-03-14" },
-    { "id": "doc_janet_marriage", "personId": "janet_wallace", "type": "Marriage Certificate", "description": "Janet Wallace → Garety marriage certificate", "status": "missing", "source": "Michigan Vital Records or Saginaw County Clerk", "fileUrl": "", "fileName": "", "notes": "Proves name change from Wallace to Garety.", "addedBy": "Kevin", "addedDate": "2026-03-14" },
-    { "id": "doc_ann_birth", "personId": "ann_garety", "type": "Birth Certificate", "description": "Ann Garety birth certificate", "status": "identified", "source": "Michigan Vital Records", "fileUrl": "", "fileName": "", "notes": "Born 1954. Need to confirm county and order ($34).", "addedBy": "Kevin", "addedDate": "2026-03-14" },
-    { "id": "doc_ann_marriage", "personId": "ann_garety", "type": "Marriage Certificate", "description": "Ann Garety → Hyde marriage certificate, 1973, Caro MI", "status": "identified", "source": "Tuscola County Clerk", "fileUrl": "", "fileName": "", "notes": "Married 1973, Caro, Michigan. Proves name change Garety → Hyde.", "addedBy": "Kevin", "addedDate": "2026-03-14" },
-    { "id": "doc_kevin_birth", "personId": "kevin_hyde", "type": "Birth Certificate", "description": "Kevin Hyde birth certificate", "status": "missing", "source": "State vital records where born", "fileUrl": "", "fileName": "", "notes": "Order certified copy with parental information.", "addedBy": "Kevin", "addedDate": "2026-03-14" }
-  ],
-  "activityLog": [
-    { "date": "2026-03-14", "user": "Kevin", "action": "Created family hub with initial records from Bruce Wallace Ontario birth reg. and Michigan death cert." }
-  ]
+  "activityLog": [],
+  "lastUpdated": null
 }
