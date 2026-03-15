@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { loadData, saveData, subscribeToData } from "./firebase";
+import { loadData, saveData, subscribeToData, initAuth } from "./firebase";
 
 const FAMILY_NAME = "Wallace-Hyde";
 const ME_KEY = "citizenship-hub-me";
@@ -500,6 +500,168 @@ function ResourcesTab({ data, onImport }) {
   );
 }
 
+// ── Apply Tab ──────────────────────────────────────────────────────
+function ApplyTab({ myChain, myChainDocs, mePerson }) {
+  const total = myChainDocs.length;
+  const inHand = myChainDocs.filter((d) => d.status === "in_hand").length;
+  const missing = myChainDocs.filter((d) => d.status === "missing").length;
+  const allReady = total > 0 && inHand === total;
+  const hasMissing = missing > 0;
+
+  const readinessBg = allReady ? C.greenLight : hasMissing ? C.accentPale : C.yellowBadge;
+  const readinessBorder = allReady ? C.greenBadge : hasMissing ? C.maple : "#F0DCA0";
+  const readinessColor = allReady ? C.green : hasMissing ? C.maple : "#856404";
+  const readinessText = allReady
+    ? "All documents are in hand. You're ready to apply!"
+    : hasMissing
+    ? `${missing} document${missing > 1 ? "s" : ""} still missing. Resolve these before submitting.`
+    : "Some documents are in progress. Almost there!";
+
+  const steps = [
+    {
+      num: 1, title: "Gather all chain documents",
+      done: allReady,
+      content: "Collect certified copies of birth, death, and marriage certificates for every person in your line of descent — from Bruce Wallace down to you. See the checklist below."
+    },
+    {
+      num: 2, title: "Complete form CIT 0001",
+      done: false,
+      content: "Download and fill out the Application for a Citizenship Certificate. Each applicant submits their own form.",
+      link: "https://www.canada.ca/en/immigration-refugees-citizenship/services/application/application-forms-guides/application-citizenship-certificate-adults-minors.html",
+      linkLabel: "Download CIT 0001"
+    },
+    {
+      num: 3, title: "Complete form CIT 0014",
+      done: false,
+      content: "Use the Document Checklist to verify you have everything IRCC requires.",
+      link: "https://www.canada.ca/en/immigration-refugees-citizenship/services/application/application-forms-guides/cit0014.html",
+      linkLabel: "Download CIT 0014"
+    },
+    {
+      num: 4, title: "Get citizenship photos taken",
+      done: false,
+      content: "Two identical photos, 50 mm × 70 mm, taken by a commercial photographer within the last 6 months. White or light background, full face, no glasses. Photographer's stamp on back of one; guarantor's signature on back of the other."
+    },
+    {
+      num: 5, title: "Pay the $75 CAD fee",
+      done: false,
+      content: "Per applicant. Pay by credit card (Visa/MC/Amex) using the payment form in the application kit, or by certified cheque / money order payable to the Receiver General for Canada. Do not send cash."
+    },
+    {
+      num: 6, title: "Write a cover letter",
+      done: false,
+      content: `Explain your multigenerational claim under Bill C-3. Lay out the descent chain clearly:\n\n${myChain.map((p, i) => `  ${i === 0 ? "Anchor" : `Gen ${i}`}: ${p.name}${p.birthDate ? ` (b. ${p.birthDate})` : ""}${p.birthPlace ? `, ${p.birthPlace}` : ""}`).join("\n")}\n\nInclude a document index listing every enclosed item with tab labels (Tab A, Tab B, etc.).`
+    },
+    {
+      num: 7, title: "Prepare COLOR photocopies",
+      done: false,
+      content: "Submit color photocopies of all supporting documents. Never send originals — IRCC does not return them. Organize with labeled tabs matching your cover letter index."
+    },
+    {
+      num: 8, title: "Mail the complete package",
+      done: false,
+      content: "Bundle all family applications together with one cover letter. Send via tracked mail (e.g. USPS Priority International or Canada Post Xpresspost).",
+      address: true
+    },
+  ];
+
+  return (
+    <div>
+      <style>{`
+        @media print {
+          body { background: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          [data-no-print] { display: none !important; }
+        }
+      `}</style>
+
+      {/* Print button */}
+      <div data-no-print style={{ display: "flex", justifyContent: "flex-end", marginBottom: 16 }}>
+        <button onClick={() => window.print()} style={{ ...S.btn("secondary"), display: "flex", alignItems: "center", gap: 8 }}>
+          Print this guide
+        </button>
+      </div>
+
+      {/* Readiness banner */}
+      <div style={{ background: readinessBg, border: `1px solid ${readinessBorder}`, borderLeft: `4px solid ${readinessColor}`, borderRadius: 8, padding: "16px 20px", marginBottom: 20 }}>
+        <div style={{ fontSize: 16, fontWeight: 700, color: readinessColor, fontFamily: serif, marginBottom: 4 }}>
+          Application Readiness: {mePerson.name}
+        </div>
+        <div style={{ fontSize: 13, color: readinessColor, lineHeight: 1.5 }}>{readinessText}</div>
+      </div>
+
+      {/* Progress bar */}
+      <ProgressSummary documents={myChainDocs} label="Your Document Progress" />
+
+      {/* Per-person document checklist */}
+      <div style={{ background: C.card, borderRadius: 8, border: `1px solid ${C.border}`, padding: 20, marginBottom: 20 }}>
+        <div style={{ fontFamily: serif, fontSize: 18, fontWeight: 700, marginBottom: 16 }}>Document Checklist by Person</div>
+        {myChain.map((person, genIdx) => {
+          const pDocs = myChainDocs.filter((d) => d.personId === person.id);
+          const personReady = pDocs.length > 0 && pDocs.every((d) => d.status === "in_hand");
+          return (
+            <div key={person.id} style={{ marginBottom: 16, paddingBottom: 16, borderBottom: genIdx < myChain.length - 1 ? `1px solid ${C.borderLight}` : "none" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                <GenLabel gen={genIdx} isMe={person.id === mePerson.id} isAnchor={person.isAnchor} />
+                <span style={{ fontFamily: serif, fontSize: 15, fontWeight: 700 }}>{person.name}</span>
+                {personReady && <span style={{ fontSize: 12, color: C.green, fontWeight: 600 }}>All docs in hand</span>}
+              </div>
+              {pDocs.length === 0 ? (
+                <div style={{ fontSize: 13, color: C.textLight, fontStyle: "italic", marginLeft: 8 }}>No documents tracked yet</div>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 4, marginLeft: 8 }}>
+                  {pDocs.map((doc) => (
+                    <div key={doc.id} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: C.textMuted }}>
+                      <StatusBadge status={doc.status} />
+                      <span style={{ fontWeight: 500 }}>{doc.type}</span>
+                      {doc.description && <span style={{ color: C.textLight }}>— {doc.description}</span>}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Step-by-step submission guide */}
+      <div style={{ fontFamily: serif, fontSize: 20, fontWeight: 700, marginBottom: 16 }}>Step-by-Step Submission Guide</div>
+      {steps.map((step) => (
+        <div key={step.num} style={{ background: step.done ? C.greenLight : C.card, borderRadius: 8, border: `1px solid ${step.done ? C.greenBadge : C.border}`, padding: "16px 20px", marginBottom: 12, borderLeft: `3px solid ${step.done ? C.green : C.border}` }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+            <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 28, height: 28, borderRadius: "50%", background: step.done ? C.green : C.bg, color: step.done ? "#fff" : C.textMuted, fontSize: 13, fontWeight: 700, flexShrink: 0 }}>
+              {step.done ? "✓" : step.num}
+            </span>
+            <span style={{ fontFamily: serif, fontSize: 15, fontWeight: 700, color: step.done ? C.green : C.text }}>{step.title}</span>
+          </div>
+          <div style={{ fontSize: 13, color: C.textMuted, lineHeight: 1.7, marginLeft: 38, whiteSpace: "pre-line" }}>{step.content}</div>
+          {step.link && (
+            <div style={{ marginLeft: 38, marginTop: 8 }}>
+              <a href={step.link} target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, color: C.accent, fontWeight: 600, textDecoration: "none" }}>{step.linkLabel}</a>
+            </div>
+          )}
+          {step.address && (
+            <div style={{ marginLeft: 38, marginTop: 10, background: C.bg, borderRadius: 6, padding: "12px 16px", border: `1px solid ${C.borderLight}`, fontSize: 13, lineHeight: 1.6 }}>
+              <div style={{ fontWeight: 700, color: C.text, marginBottom: 4 }}>Mailing Address:</div>
+              <div style={{ color: C.textMuted }}>
+                Case Processing Centre – Sydney<br />
+                IRCC<br />
+                PO Box 7000<br />
+                Sydney, NS B1P 6V6<br />
+                Canada
+              </div>
+            </div>
+          )}
+        </div>
+      ))}
+
+      {/* Helpful links */}
+      <div style={{ background: C.blueLight, borderRadius: 8, padding: 16, marginTop: 20, border: `1px solid #B8D4E8`, fontSize: 13, color: C.blue, lineHeight: 1.7 }}>
+        <strong>Tip:</strong> Apply on paper — the online IRCC portal doesn't handle multigenerational Bill C-3 claims well. Bundle all family applications in one package with a single cover letter. Send via tracked mail and keep copies of everything you send.
+      </div>
+    </div>
+  );
+}
+
 // ── Main App ───────────────────────────────────────────────────────
 export default function App() {
   const [data, setData] = useState(null);
@@ -522,6 +684,7 @@ export default function App() {
     let unsubscribe;
     async function init() {
       try {
+        await initAuth();
         const stored = await loadData();
         if (stored && stored.familyMembers && stored.documents) {
           setData(normalize(stored));
@@ -615,7 +778,7 @@ export default function App() {
   data.familyMembers.forEach((m) => calcDepth(m.id));
   const sorted = [...data.familyMembers].sort((a, b) => (depthMap[a.id] || 0) - (depthMap[b.id] || 0));
 
-  const tabs = [{ id: "chain", label: "My Chain" }, { id: "all", label: "All Family" }, { id: "activity", label: "Activity" }, { id: "resources", label: "Resources" }];
+  const tabs = [{ id: "chain", label: "My Chain" }, { id: "apply", label: "Apply" }, { id: "all", label: "All Family" }, { id: "activity", label: "Activity" }, { id: "resources", label: "Resources" }];
 
   const cp = (person, gen) => ({
     person, documents: docs, gen, isMe: person.id === meId, isInChain: myChainIds.has(person.id),
@@ -650,6 +813,11 @@ export default function App() {
           </>)}
           {meId && myChain.length === 0 && <div style={{ textAlign: "center", padding: 40, color: C.textLight }}>Could not trace a chain to the anchor. Check parent links in "All Family" tab.</div>}
         </>)}
+        {tab === "apply" && (
+          meId && mePerson
+            ? <ApplyTab myChain={myChain} myChainDocs={myChainDocs} mePerson={mePerson} />
+            : <SetMePrompt members={sorted.filter((m) => (depthMap[m.id] || 0) >= 3)} allMembers={sorted} onSelect={handleSetMe} onAddAndSelect={handleAddAndSelect} />
+        )}
         {tab === "all" && (<>
           <ProgressSummary documents={docs} label="All Family Documents" />
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>

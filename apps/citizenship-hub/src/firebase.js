@@ -1,5 +1,6 @@
 import { initializeApp } from 'firebase/app'
 import { getFirestore, doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore'
+import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth'
 
 const firebaseConfig = {
   apiKey: "AIzaSyB5Ja5fzD1e1atMCWxrlVfTJV-V0sC_wZg",
@@ -12,6 +13,16 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig)
 const db = getFirestore(app)
+const auth = getAuth(app)
+
+export function initAuth() {
+  return new Promise((resolve, reject) => {
+    signInAnonymously(auth).catch(reject)
+    const unsub = onAuthStateChanged(auth, (user) => {
+      if (user) { unsub(); resolve(user) }
+    })
+  })
+}
 
 const DATA_DOC = doc(db, 'appData', 'main')
 
