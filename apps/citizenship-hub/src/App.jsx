@@ -171,19 +171,25 @@ export default function App() {
   useEffect(() => {
     let unsubscribe
     async function init() {
-      const stored = await loadData()
-      if (stored) {
-        setData(stored)
-      } else {
-        // First load — seed Firestore with initial data
-        const seed = { ...INITIAL_DATA, lastUpdated: new Date().toISOString() }
-        await saveData(seed)
-        setData(seed)
+      try {
+        const stored = await loadData()
+        if (stored) {
+          setData(stored)
+        } else {
+          // First load — seed Firestore with initial data
+          const seed = { ...INITIAL_DATA, lastUpdated: new Date().toISOString() }
+          await saveData(seed)
+          setData(seed)
+        }
+        // Subscribe to real-time updates
+        unsubscribe = subscribeToData((newData) => {
+          setData(newData)
+        })
+      } catch (err) {
+        console.error('Failed to load from Firestore:', err)
+        // Fall back to initial data so the app isn't stuck on loading
+        setData({ ...INITIAL_DATA, lastUpdated: new Date().toISOString() })
       }
-      // Subscribe to real-time updates
-      unsubscribe = subscribeToData((newData) => {
-        setData(newData)
-      })
     }
     init()
     return () => unsubscribe && unsubscribe()
