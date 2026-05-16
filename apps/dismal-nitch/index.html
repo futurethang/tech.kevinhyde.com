@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Dismal Nitch — a recording studio in Ballard, WA offering tracking, mixing, mastering, engineering and production." />
+  <meta name="theme-color" content="#1f2a1c" />
+  <title>Dismal Nitch — Recording Studio in Ballard, WA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="nav">
+    <a class="nav__brand" href="#top">
+      <span class="nav__mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 20 L8 8 L12 14 L16 4 L21 20 Z" />
+        </svg>
+      </span>
+      <span class="nav__name">Dismal Nitch</span>
+    </a>
+    <nav class="nav__links" aria-label="Primary">
+      <a href="#about">The Space</a>
+      <a href="#services">Services</a>
+      <a href="#gear">Gear</a>
+      <a href="#listen">Listen</a>
+      <a href="#contact" class="nav__cta">Inquire</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <!-- HERO -->
+    <section class="hero" data-parallax-root>
+      <div class="hero__bg" data-parallax="0.35"
+           style="background-image: url('https://loremflickr.com/2000/1200/forest,fog,pacific-northwest?lock=314');"></div>
+      <div class="hero__veil"></div>
+      <div class="hero__inner">
+        <p class="eyebrow reveal">Ballard, Washington</p>
+        <h1 class="hero__title reveal">Dismal&nbsp;Nitch</h1>
+        <p class="hero__tagline reveal">A small, humble recording studio for songwriters, bands &amp; quiet sessions in the Pacific Northwest.</p>
+        <div class="hero__actions reveal">
+          <a class="btn btn--primary" href="#contact">Book a session</a>
+          <a class="btn btn--ghost" href="#listen">Hear the room</a>
+        </div>
+      </div>
+      <div class="hero__scroll" aria-hidden="true">
+        <span></span>
+        <small>scroll</small>
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section id="about" class="section about">
+      <div class="container about__grid">
+        <div class="about__copy">
+          <p class="eyebrow reveal">The space</p>
+          <h2 class="reveal">A warm room for honest records.</h2>
+          <p class="reveal">Dismal Nitch is a small, well-equipped studio tucked into Ballard. It's not glossy or oversized — it's a comfortable room with good gear, good ears, and the patience to let a song breathe. We track, mix, master, engineer and produce for artists who care about the take.</p>
+          <p class="reveal">We work mostly in singer-songwriter and rock territory, but we're open to anything that sounds like itself. Whether you're cutting a single live to tape-feel, demoing a record, or finishing a project that stalled somewhere else — bring it in.</p>
+          <ul class="about__chips reveal" role="list">
+            <li>Singer-songwriter</li>
+            <li>Indie rock</li>
+            <li>Folk</li>
+            <li>Americana</li>
+            <li>Quiet noise</li>
+          </ul>
+        </div>
+        <div class="about__photos reveal">
+          <div class="about__photo about__photo--lg">
+            <img loading="lazy" alt="Studio control room" src="https://loremflickr.com/900/1100/recording-studio,console?lock=88" />
+          </div>
+          <div class="about__photo about__photo--sm">
+            <img loading="lazy" alt="Microphone in live room" src="https://loremflickr.com/600/600/microphone,studio?lock=12" />
+          </div>
+          <div class="about__photo about__photo--sm">
+            <img loading="lazy" alt="Acoustic guitar leaning on amp" src="https://loremflickr.com/600/600/acoustic,guitar?lock=44" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SERVICES -->
+    <section id="services" class="section services">
+      <div class="container">
+        <header class="section__head">
+          <p class="eyebrow reveal">What we do</p>
+          <h2 class="reveal">Services</h2>
+          <p class="section__lede reveal">End-to-end or a la carte. Bring us a half-finished demo or an empty session — we'll meet you where you are.</p>
+        </header>
+        <ul class="services__grid" role="list">
+          <li class="service reveal">
+            <span class="service__num">01</span>
+            <h3>Tracking</h3>
+            <p>Live takes, overdubs, vocals. A quiet room and patient hands.</p>
+          </li>
+          <li class="service reveal">
+            <span class="service__num">02</span>
+            <h3>Mixing</h3>
+            <p>In-the-box or hybrid. Mixes that translate from your phone to a hi-fi.</p>
+          </li>
+          <li class="service reveal">
+            <span class="service__num">03</span>
+            <h3>Mastering</h3>
+            <p>Final polish, level, and cohesion across an EP or full record.</p>
+          </li>
+          <li class="service reveal">
+            <span class="service__num">04</span>
+            <h3>Engineering</h3>
+            <p>Tracking and routing for your producer, your band, your vision.</p>
+          </li>
+          <li class="service reveal">
+            <span class="service__num">05</span>
+            <h3>Production</h3>
+            <p>From skeleton to song — arrangement, performance, the whole arc.</p>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- PARALLAX BREAK -->
+    <section class="break" aria-hidden="true" data-parallax-root>
+      <div class="break__bg" data-parallax="0.25"
+           style="background-image: url('https://loremflickr.com/2000/1000/cedar,forest,moss?lock=207');"></div>
+      <div class="break__veil"></div>
+      <blockquote class="break__quote">
+        <p>"Small room. Big patience. The records sound like the people who made them."</p>
+      </blockquote>
+    </section>
+
+    <!-- GEAR -->
+    <section id="gear" class="section gear">
+      <div class="container gear__grid">
+        <div class="gear__intro">
+          <p class="eyebrow reveal">Equipped</p>
+          <h2 class="reveal">A full kit, ready when you are.</h2>
+          <p class="reveal">We keep a working collection of microphones, guitars, amps and keys on hand — so you can show up light and leave with a record.</p>
+        </div>
+        <div class="gear__cols">
+          <div class="gear__col reveal">
+            <h3><span class="gear__dot"></span>Microphones</h3>
+            <ul role="list">
+              <li>Large-diaphragm condensers</li>
+              <li>Ribbons for guitar cabs &amp; horns</li>
+              <li>Dynamics for drums &amp; vocals</li>
+              <li>Small-diaphragm pairs for acoustic</li>
+            </ul>
+          </div>
+          <div class="gear__col reveal">
+            <h3><span class="gear__dot"></span>Guitars &amp; Amps</h3>
+            <ul role="list">
+              <li>Tele, Strat &amp; semi-hollow electrics</li>
+              <li>Steel-string and nylon acoustics</li>
+              <li>Tweed, blackface &amp; British-flavored amps</li>
+              <li>Pedalboard and odds-and-ends</li>
+            </ul>
+          </div>
+          <div class="gear__col reveal">
+            <h3><span class="gear__dot"></span>Keys</h3>
+            <ul role="list">
+              <li>Upright &amp; electric piano</li>
+              <li>Vintage-style organ</li>
+              <li>Analog &amp; digital synths</li>
+              <li>Drum machines</li>
+            </ul>
+          </div>
+          <div class="gear__col reveal">
+            <h3><span class="gear__dot"></span>Room &amp; Chain</h3>
+            <ul role="list">
+              <li>Treated live room</li>
+              <li>Boutique preamps &amp; outboard</li>
+              <li>In-the-box mixing rig</li>
+              <li>Coffee &amp; couches</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PARALLAX BREAK 2 -->
+    <section class="break break--alt" aria-hidden="true" data-parallax-root>
+      <div class="break__bg" data-parallax="0.3"
+           style="background-image: url('https://loremflickr.com/2000/1000/vinyl,records,studio?lock=512');"></div>
+      <div class="break__veil"></div>
+    </section>
+
+    <!-- LISTEN -->
+    <section id="listen" class="section listen">
+      <div class="container">
+        <header class="section__head">
+          <p class="eyebrow reveal">Recently from the room</p>
+          <h2 class="reveal">Listen</h2>
+          <p class="section__lede reveal">A few records and sessions we've finished here. Drop us a line if you'd like a longer reel.</p>
+        </header>
+        <ul class="tracks" role="list">
+          <li class="track reveal">
+            <button class="track__play" aria-label="Play preview">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            </button>
+            <div class="track__meta">
+              <p class="track__artist">Coyote Hours</p>
+              <p class="track__title">Driftwood Sunday</p>
+              <p class="track__detail">Tracked &amp; mixed · Singer-songwriter</p>
+            </div>
+            <span class="track__time">3:42</span>
+          </li>
+          <li class="track reveal">
+            <button class="track__play" aria-label="Play preview">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            </button>
+            <div class="track__meta">
+              <p class="track__artist">The Salish Set</p>
+              <p class="track__title">Low Tide Hymn</p>
+              <p class="track__detail">Produced &amp; mastered · Indie folk</p>
+            </div>
+            <span class="track__time">4:11</span>
+          </li>
+          <li class="track reveal">
+            <button class="track__play" aria-label="Play preview">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            </button>
+            <div class="track__meta">
+              <p class="track__artist">Ferry Lights</p>
+              <p class="track__title">Ballard at Dusk</p>
+              <p class="track__detail">Mixed · Rock</p>
+            </div>
+            <span class="track__time">2:58</span>
+          </li>
+          <li class="track reveal">
+            <button class="track__play" aria-label="Play preview">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            </button>
+            <div class="track__meta">
+              <p class="track__artist">Halibut Channel</p>
+              <p class="track__title">A Short Letter</p>
+              <p class="track__detail">Engineered · Americana</p>
+            </div>
+            <span class="track__time">3:25</span>
+          </li>
+        </ul>
+        <p class="listen__note reveal">Track previews coming soon — paste a Bandcamp or SoundCloud embed in here when ready.</p>
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section id="contact" class="section contact">
+      <div class="container contact__grid">
+        <div class="contact__copy">
+          <p class="eyebrow reveal">Get in touch</p>
+          <h2 class="reveal">Tell us about your record.</h2>
+          <p class="reveal">A few sentences is enough. Songs you're working on, dates you're hoping for, what you need help with — we'll write back within a day or two.</p>
+          <ul class="contact__info reveal" role="list">
+            <li>
+              <span class="contact__label">Email</span>
+              <a href="mailto:hello@dismalnitch.studio">hello@dismalnitch.studio</a>
+            </li>
+            <li>
+              <span class="contact__label">Studio</span>
+              <span>Ballard · Seattle, WA</span>
+            </li>
+            <li>
+              <span class="contact__label">Hours</span>
+              <span>By appointment</span>
+            </li>
+          </ul>
+        </div>
+        <form class="form reveal" novalidate>
+          <label class="form__row">
+            <span>Name</span>
+            <input type="text" name="name" autocomplete="name" required />
+          </label>
+          <label class="form__row">
+            <span>Email</span>
+            <input type="email" name="email" autocomplete="email" required />
+          </label>
+          <label class="form__row">
+            <span>Project &amp; what you need</span>
+            <textarea name="message" rows="5" placeholder="Band, project, services you're interested in, rough timeline…" required></textarea>
+          </label>
+          <button type="submit" class="btn btn--primary form__submit">Send inquiry</button>
+          <p class="form__status" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <div>
+        <p class="footer__brand">Dismal Nitch</p>
+        <p class="footer__line">Ballard · Seattle, WA</p>
+      </div>
+      <p class="footer__line">© <span id="year"></span> Dismal Nitch Recording. All takes are sacred.</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
