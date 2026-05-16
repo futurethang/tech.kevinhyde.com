@@ -1,6 +1,15 @@
 {
   "apps": [
     {
+      "slug": "dismal-nitch",
+      "name": "Dismal Nitch",
+      "description": "Landing page for Dismal Nitch, a small recording studio in Ballard, WA — tracking, mixing, mastering, engineering and production",
+      "type": "static",
+      "status": "live",
+      "createdAt": "2026-05-16",
+      "tags": ["site", "studio", "music", "landing-page"]
+    },
+    {
       "slug": "citizenship-hub",
       "name": "Citizenship Hub",
       "description": "Family collaboration app for tracking Canadian citizenship by descent applications under Bill C-3",
