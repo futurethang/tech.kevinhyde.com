@@ -1,0 +1,1968 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Chef Jenny — Every meal, a little more you.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=Caprasimo&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&display=swap" rel="stylesheet" />
+<style>
+  /* ---------- Tokens ---------- */
+  :root {
+    --cream: #F7F3EC;
+    --cream-deep: #EFE8DA;
+    --lime: #B8F500;
+    --lime-soft: #D2FA66;
+    --magenta: #E8187A;
+    --magenta-deep: #B81162;
+    --forest: #1A3A2A;
+    --forest-deep: #102619;
+    --forest-light: #244C38;
+    --charcoal: #1C1C1C;
+
+    --display: "Bricolage Grotesque", system-ui, sans-serif;
+    --display-style: normal;
+    --display-weight: 500;
+    --sans: "DM Sans", system-ui, sans-serif;
+
+    --plum-deep: #3D0F26;
+    --plum-mid: #4F1532;
+    --plum-light: #6E1F47;
+    --ground: var(--plum-deep);
+    --ground-light: var(--plum-light);
+    --contrast-dark: var(--forest);
+
+    --r-sm: 4px;
+    --r-btn: 6px;
+    --r-md: 10px;
+    --r-lg: 18px;
+    --r-pill: 999px;
+
+    --section-pad-y: clamp(80px, 10vw, 140px);
+    --section-pad-x: clamp(24px, 5vw, 64px);
+    --max: 1240px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 78px; }
+  body {
+    margin: 0;
+    background: var(--cream);
+    color: var(--charcoal);
+    font-family: var(--sans);
+    font-size: 17px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection { background: var(--lime); color: var(--forest); }
+  img { max-width: 100%; display: block; }
+  a { color: inherit; }
+
+  /* ---------- Grain SVG (used as background-image on dark sections) ---------- */
+  .grain { position: relative; isolation: isolate; }
+  .grain::before {
+    content: "";
+    position: absolute; inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: .18;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.96 0 0 0 0 0.95 0 0 0 0 0.86 0 0 0 0.7 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+  .grain > * { position: relative; z-index: 1; }
+
+  /* ---------- Type ---------- */
+  .display {
+    font-family: var(--display);
+    font-style: var(--display-style);
+    font-weight: var(--display-weight);
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+  }
+  .eyebrow {
+    font-family: var(--sans);
+    font-weight: 500;
+    font-size: 12px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+  }
+  h1, h2, h3, h4 { margin: 0; }
+  p { margin: 0 0 1em; }
+  p:last-child { margin-bottom: 0; }
+
+  /* ---------- Buttons ---------- */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 26px;
+    border-radius: var(--r-btn);
+    font-family: var(--sans);
+    font-weight: 500;
+    font-size: 15px;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: transform .18s ease, box-shadow .25s ease, background .2s ease, color .2s ease, border-color .2s ease;
+    white-space: nowrap;
+    line-height: 1;
+  }
+  .btn .arrow {
+    display: inline-block;
+    transition: transform .25s ease;
+  }
+  .btn:hover .arrow { transform: translateX(4px); }
+
+  .btn-lime {
+    background: var(--lime);
+    color: var(--forest);
+  }
+  .btn-lime:hover {
+    box-shadow: 0 0 0 1px var(--lime), 0 0 16px var(--lime), 0 0 36px rgba(184, 245, 0, 0.45);
+    transform: translateY(-1px);
+  }
+  .btn-magenta {
+    background: var(--magenta);
+    color: var(--cream);
+  }
+  .btn-magenta:hover {
+    background: var(--magenta-deep);
+    box-shadow: 0 0 0 1px var(--magenta), 0 0 18px rgba(232, 24, 122, 0.55);
+    transform: translateY(-1px);
+  }
+  .btn-magenta-outline {
+    background: transparent;
+    color: var(--magenta);
+    border-color: var(--magenta);
+  }
+  .btn-magenta-outline.on-dark { color: #FFB7D4; border-color: #FFB7D4; }
+  .btn-magenta-outline:hover {
+    background: var(--magenta);
+    color: var(--cream);
+    border-color: var(--magenta);
+  }
+
+  /* ---------- Chip / pill ---------- */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: var(--contrast-dark);
+    color: var(--lime);
+    font-family: var(--sans);
+    font-weight: 500;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    border-radius: var(--r-pill);
+  }
+  .chip-sm {
+    padding: 5px 10px;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  /* ---------- Nav ---------- */
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--ground);
+    color: var(--cream);
+    border-bottom: 1px solid rgba(247, 243, 236, 0.08);
+  }
+  .nav-inner {
+    max-width: var(--max);
+    margin: 0 auto;
+    padding: 16px var(--section-pad-x);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+  }
+  .nav-logo {
+    font-family: var(--display);
+    font-style: var(--display-style);
+    font-weight: 600;
+    font-size: 22px;
+    color: var(--cream);
+    text-decoration: none;
+    letter-spacing: -0.01em;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .nav-logo .dot {
+    display: inline-block;
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--lime);
+    transform: translateY(-2px);
+  }
+  .nav-links {
+    display: flex;
+    gap: 6px;
+    list-style: none;
+    padding: 0; margin: 0;
+    align-items: center;
+  }
+  .nav-links a {
+    display: inline-block;
+    padding: 10px 14px;
+    color: var(--cream);
+    text-decoration: none;
+    font-family: var(--sans);
+    font-weight: 500;
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    border-radius: var(--r-pill);
+    transition: color .15s ease, background .15s ease;
+  }
+  .nav-links a:hover { color: var(--lime); }
+  .nav-links a.active { color: var(--forest); background: var(--lime); }
+  .nav-cta { margin-left: 8px; }
+  .nav-cta .btn { padding: 10px 18px; font-size: 13px; }
+  .nav-burger {
+    display: none;
+    background: transparent;
+    border: 1px solid rgba(247,243,236,0.25);
+    color: var(--cream);
+    border-radius: var(--r-pill);
+    padding: 10px 14px;
+    font-family: var(--sans);
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  @media (max-width: 860px) {
+    .nav-links, .nav-cta { display: none; }
+    .nav-burger { display: inline-block; }
+    .nav-open .nav-links {
+      display: flex;
+      position: absolute;
+      top: 100%; left: 0; right: 0;
+      flex-direction: column;
+      align-items: stretch;
+      background: var(--forest-deep);
+      padding: 12px var(--section-pad-x) 24px;
+      gap: 0;
+    }
+    .nav-open .nav-links a { padding: 14px 4px; border-bottom: 1px solid rgba(247,243,236,0.06); }
+  }
+
+  /* ---------- Section base ---------- */
+  section {
+    padding: var(--section-pad-y) var(--section-pad-x);
+    position: relative;
+  }
+  .section-inner { max-width: var(--max); margin: 0 auto; }
+  .on-forest { background: var(--forest); color: var(--cream); }
+  .on-cream { background: var(--cream); color: var(--charcoal); }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    background: var(--ground);
+    color: var(--cream);
+    min-height: 92vh;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    padding-bottom: calc(var(--section-pad-y) + 40px);
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: clamp(40px, 6vw, 80px);
+    align-items: center;
+    width: 100%;
+    max-width: var(--max);
+    margin: 0 auto;
+  }
+  .hero-eyebrow {
+    color: var(--lime);
+    margin-bottom: 28px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .hero-eyebrow::before {
+    content: "";
+    width: 28px; height: 1px; background: var(--lime);
+    display: inline-block;
+  }
+  .hero h1 {
+    font-family: var(--display);
+    font-style: var(--display-style);
+    font-weight: var(--display-weight);
+    color: var(--cream);
+    font-size: clamp(72px, 12vw, 192px);
+    line-height: 0.86;
+    letter-spacing: -0.035em;
+    margin-bottom: 28px;
+  }
+  .hero h1 .amp {
+    color: var(--lime);
+    font-style: var(--display-style);
+    font-weight: var(--display-weight);
+  }
+  .hero-sub {
+    font-family: var(--sans);
+    font-size: clamp(18px, 1.6vw, 22px);
+    line-height: 1.45;
+    color: var(--cream);
+    max-width: 30ch;
+    margin-bottom: 40px;
+    opacity: 0.9;
+  }
+  .hero-ctas {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .hero-media {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    background: var(--forest-light);
+  }
+  .hero-media::after {
+    content: "";
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(26,58,42,0) 40%, rgba(26,58,42,0.55) 100%);
+    pointer-events: none;
+  }
+  .hero-tag {
+    position: absolute;
+    z-index: 2;
+    bottom: 22px; left: 22px;
+    color: var(--cream);
+    font-family: var(--sans);
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    display: inline-flex; align-items: center; gap: 10px;
+  }
+  .hero-tag .live {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--lime);
+    box-shadow: 0 0 12px var(--lime);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.35;} }
+
+  .hero-marquee {
+    position: absolute;
+    z-index: 2;
+    left: 0; right: 0;
+    bottom: 28px;
+    display: flex;
+    gap: 36px;
+    overflow: hidden;
+    color: var(--cream);
+    opacity: 0.5;
+    font-family: var(--display);
+    font-style: italic;
+    font-size: 18px;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  .hero-marquee .track {
+    display: inline-flex;
+    gap: 36px;
+    animation: marquee 38s linear infinite;
+  }
+  .hero-marquee .track span { display: inline-flex; gap: 36px; align-items: center; }
+  .hero-marquee .track .dot { display: inline-block; width: 4px; height: 4px; border-radius: 50%; background: var(--lime); }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  .scroll-cue {
+    position: absolute;
+    bottom: 84px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--lime);
+    font-family: var(--sans);
+    font-size: 11px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+    z-index: 2;
+  }
+  .scroll-cue .line {
+    width: 1px; height: 36px;
+    background: linear-gradient(to bottom, var(--lime), transparent);
+    animation: cue 2.4s ease-in-out infinite;
+  }
+  @keyframes cue {
+    0% { transform: scaleY(0.2); transform-origin: top; }
+    50% { transform: scaleY(1); transform-origin: top; }
+    51% { transform: scaleY(1); transform-origin: bottom; }
+    100% { transform: scaleY(0.2); transform-origin: bottom; }
+  }
+
+  @media (max-width: 860px) {
+    .hero { min-height: 0; padding-top: 60px; }
+    .hero-grid { grid-template-columns: 1fr; }
+    .scroll-cue { display: none; }
+    .hero-marquee { font-size: 14px; }
+  }
+
+  /* ---------- Organic dividers ---------- */
+  .divider {
+    display: block;
+    width: 100%;
+    line-height: 0;
+    margin: 0;
+    padding: 0;
+  }
+  .divider svg { display: block; width: 100%; height: auto; }
+
+  /* ---------- Meet Jenny ---------- */
+  .meet {
+    background: var(--cream);
+    padding-top: clamp(80px, 9vw, 120px);
+  }
+  .meet-grid {
+    display: grid;
+    grid-template-columns: 0.95fr 1.05fr;
+    gap: clamp(40px, 7vw, 96px);
+    align-items: center;
+  }
+  .meet-photo {
+    position: relative;
+    aspect-ratio: 3 / 4;
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    background: var(--forest-light);
+    transform: translateY(-40px);
+    box-shadow: 0 30px 60px -30px rgba(26, 58, 42, 0.35);
+  }
+  .meet-photo .tag-overlay {
+    position: absolute;
+    bottom: 18px; left: 18px;
+    background: var(--lime);
+    color: var(--forest);
+    padding: 8px 14px;
+    border-radius: var(--r-pill);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .meet h2 {
+    font-family: var(--display);
+    font-style: var(--display-style);
+    font-weight: var(--display-weight);
+    color: var(--charcoal);
+    font-size: clamp(56px, 8vw, 120px);
+    line-height: 0.92;
+    letter-spacing: -0.025em;
+    margin-bottom: 36px;
+  }
+  .meet h2 em { color: var(--magenta); font-style: italic; }
+  .meet-body p {
+    font-size: 17px;
+    color: #2a2a2a;
+    max-width: 56ch;
+    margin-bottom: 1.2em;
+  }
+  .meet-chips {
+    display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px;
+  }
+  .meet-signature {
+    margin-top: 36px;
+    font-family: var(--display);
+    font-style: italic;
+    font-size: 32px;
+    color: var(--forest);
+    letter-spacing: -0.01em;
+  }
+  .meet-signature small {
+    display: block;
+    font-family: var(--sans);
+    font-style: normal;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #6b6b6b;
+    margin-top: 6px;
+  }
+
+  @media (max-width: 860px) {
+    .meet-grid { grid-template-columns: 1fr; }
+    .meet-photo { transform: none; }
+  }
+
+  /* ---------- Section header (shared) ---------- */
+  .sec-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 40px;
+    margin-bottom: 60px;
+    flex-wrap: wrap;
+  }
+  .sec-head h2 {
+    font-family: var(--display);
+    font-style: var(--display-style);
+    font-weight: var(--display-weight);
+    font-size: clamp(52px, 7.5vw, 112px);
+    line-height: 0.92;
+    letter-spacing: -0.025em;
+    max-width: 14ch;
+  }
+  .sec-head .sub {
+    font-size: 17px;
+    max-width: 36ch;
+    opacity: 0.85;
+  }
+  .sec-num {
+    font-family: var(--sans);
+    font-size: 12px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    display: inline-flex; align-items: center; gap: 12px;
+    margin-bottom: 24px;
+  }
+  .sec-num::before { content: ""; width: 28px; height: 1px; background: currentColor; display: inline-block; }
+  .on-forest .sec-num { color: var(--lime); }
+
+  /* ---------- Experiences ---------- */
+  .experiences {
+    background: var(--contrast-dark);
+    color: var(--cream);
+  }
+  .exp-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+  }
+  .exp-card {
+    background: var(--cream);
+    color: var(--charcoal);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .exp-card .card-media {
+    aspect-ratio: 5 / 3;
+    background: var(--cream-deep);
+    position: relative;
+  }
+  .exp-card .card-body {
+    padding: 36px 36px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    flex: 1;
+  }
+  .exp-card h3 {
+    font-family: var(--display);
+    font-style: var(--display-style);
+    font-weight: var(--display-weight);
+    font-size: clamp(28px, 3vw, 38px);
+    line-height: 1.02;
+    letter-spacing: -0.015em;
+    color: var(--forest);
+    max-width: 18ch;
+  }
+  .exp-card .price-strap {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--magenta);
+    font-weight: 500;
+  }
+  .exp-card .price-strap .dotsep { width: 4px; height: 4px; background: currentColor; border-radius: 50%; }
+  .exp-card ul {
+    list-style: none;
+    margin: 0; padding: 0;
+    display: grid; gap: 10px;
+  }
+  .exp-card ul li {
+    display: flex; align-items: flex-start; gap: 12px;
+    font-size: 15px;
+    color: #2a2a2a;
+  }
+  .exp-card ul li::before {
+    content: "";
+    width: 16px; height: 16px;
+    background: var(--lime);
+    border-radius: 50%;
+    flex: 0 0 16px;
+    margin-top: 4px;
+  }
+  .exp-card .format-list li::before { background: var(--magenta); }
+  .exp-card .format-list li strong {
+    color: var(--forest);
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+  .exp-card .card-cta { margin-top: auto; padding-top: 12px; }
+
+  .community-note {
+    margin-top: 60px;
+    text-align: center;
+    font-family: var(--display);
+    font-style: italic;
+    font-size: 19px;
+    color: #FFA8C8;
+    max-width: 60ch;
+    margin-left: auto; margin-right: auto;
+    line-height: 1.5;
+  }
+  .community-note::before, .community-note::after {
+    content: "✦";
+    color: var(--lime);
+    margin: 0 12px;
+    font-style: normal;
+    font-size: 12px;
+    display: inline-block;
+    transform: translateY(-4px);
+  }
+
+  @media (max-width: 860px) {
+    .exp-cards { grid-template-columns: 1fr; }
+    .exp-card .card-body { padding: 28px; }
+  }
+
+  /* ---------- In the Kitchen ---------- */
+  .kitchen { background: var(--cream); }
+  .video-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+  }
+  .video-card {
+    background: var(--cream);
+    border-radius: var(--r-lg);
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform .25s ease;
+    display: flex;
+    flex-direction: column;
+  }
+  .video-card:hover { transform: translateY(-4px); }
+  .video-card .vt {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    background: var(--forest-light);
+    border-radius: var(--r-lg);
+  }
+  .play-btn {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    background: var(--lime);
+    color: var(--forest);
+    display: grid; place-items: center;
+    border: none;
+    cursor: pointer;
+    z-index: 2;
+    box-shadow: 0 0 0 0 rgba(184,245,0,0.6);
+    animation: playpulse 2.6s ease-in-out infinite;
+  }
+  .play-btn svg { width: 22px; height: 22px; transform: translateX(2px); }
+  @keyframes playpulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(184,245,0,0.55); }
+    50% { box-shadow: 0 0 0 18px rgba(184,245,0,0); }
+  }
+  .video-card .vmeta {
+    padding: 20px 6px 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .video-card h4 {
+    font-family: var(--display);
+    font-style: var(--display-style);
+    font-weight: var(--display-weight);
+    font-size: 26px;
+    color: var(--forest);
+    letter-spacing: -0.01em;
+  }
+  .video-card .vdesc { color: #444; font-size: 15px; }
+  .video-card .vtags { display: flex; gap: 8px; margin-top: 4px; }
+  .kitchen-foot {
+    margin-top: 60px;
+    display: flex; justify-content: space-between; align-items: center; gap: 24px;
+    flex-wrap: wrap;
+  }
+  .ig-link {
+    color: var(--magenta);
+    text-decoration: none;
+    font-family: var(--sans);
+    font-weight: 500;
+    font-size: 16px;
+    display: inline-flex; align-items: center; gap: 10px;
+    border-bottom: 1px solid currentColor;
+    padding-bottom: 4px;
+  }
+  .ig-link:hover { color: var(--magenta-deep); }
+  .stats {
+    display: flex; gap: 36px;
+    font-family: var(--display);
+    font-style: var(--display-style);
+    color: var(--forest);
+  }
+  .stats .stat strong { display: block; font-size: 38px; line-height: 1; font-weight: 400; letter-spacing: -0.02em; }
+  .stats .stat span { font-family: var(--sans); font-style: normal; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #6b6b6b; }
+
+  @media (max-width: 860px) {
+    .video-grid { grid-template-columns: 1fr; }
+    .stats { gap: 20px; }
+    .stats .stat strong { font-size: 30px; }
+  }
+
+  /* ---------- Duchess ---------- */
+  .duchess {
+    background: var(--magenta);
+    color: var(--cream);
+    padding-bottom: 0;
+    overflow: hidden;
+  }
+  .duchess .sec-head h2 { color: var(--cream); }
+  .duchess .sec-head .sub { color: var(--cream); opacity: 0.95; }
+  .duchess-intro {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(40px, 6vw, 80px);
+    margin-bottom: 56px;
+    align-items: center;
+  }
+  .duchess-body p { color: var(--cream); font-size: 17px; max-width: 50ch; }
+  .duchess-stamp {
+    aspect-ratio: 1;
+    max-width: 380px;
+    margin-left: auto;
+    border-radius: 50%;
+    background: var(--forest);
+    color: var(--lime);
+    display: grid; place-items: center;
+    text-align: center;
+    padding: 24px;
+    position: relative;
+    transform: rotate(-6deg);
+  }
+  .duchess-stamp .stamp-inner {
+    font-family: var(--display);
+    font-style: var(--display-style);
+    font-weight: 600;
+    font-size: 28px;
+    line-height: 1.1;
+    color: var(--cream);
+  }
+  .duchess-stamp .stamp-inner em { color: var(--lime); font-style: italic; }
+  .duchess-stamp::before {
+    content: "EST. SEATTLE · SINCE 2021 · EST. SEATTLE · SINCE 2021 · ";
+    position: absolute;
+    inset: 14px;
+    border-radius: 50%;
+    border: 1px dashed rgba(247,243,236,0.35);
+  }
+
+  .menu-strip {
+    background: var(--cream);
+    color: var(--charcoal);
+    margin: 0 calc(var(--section-pad-x) * -1);
+    padding: 64px var(--section-pad-x) 80px;
+    border-top-left-radius: 32px;
+    border-top-right-radius: 32px;
+    position: relative;
+  }
+  .menu-head {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 24px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+  .menu-head h3 {
+    font-family: var(--display);
+    font-style: var(--display-style);
+    font-weight: var(--display-weight);
+    font-size: clamp(36px, 4.5vw, 60px);
+    color: var(--forest);
+    letter-spacing: -0.02em;
+  }
+  .menu-head .menu-eyebrow {
+    font-family: var(--sans);
+    font-size: 12px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--magenta);
+  }
+  .menu-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  .menu-card {
+    background: var(--cream-deep);
+    border-radius: var(--r-md);
+    overflow: hidden;
+    transition: transform .2s ease;
+  }
+  .menu-card:hover { transform: translateY(-3px); }
+  .menu-card .mc-photo {
+    aspect-ratio: 4 / 3;
+    background: var(--cream-deep);
+  }
+  .menu-card .mc-body { padding: 22px 22px 24px; }
+  .menu-card .mc-num {
+    font-family: var(--sans);
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--magenta);
+    margin-bottom: 6px;
+  }
+  .menu-card h4 {
+    font-family: var(--display);
+    font-style: var(--display-style);
+    font-weight: var(--display-weight);
+    font-size: 24px;
+    color: var(--forest);
+    letter-spacing: -0.01em;
+    margin-bottom: 6px;
+  }
+  .menu-card p { font-size: 14px; color: #444; line-height: 1.5; }
+
+  .duchess-info {
+    margin-top: 48px;
+    display: grid;
+    grid-template-columns: 1.4fr 1fr auto;
+    gap: 32px;
+    align-items: center;
+    padding: 28px;
+    background: var(--forest);
+    color: var(--cream);
+    border-radius: var(--r-md);
+  }
+  .duchess-info .info-line {
+    display: flex; align-items: center; gap: 12px;
+    font-size: 15px;
+  }
+  .duchess-info .info-line .ico {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--lime);
+    color: var(--forest);
+    display: grid; place-items: center;
+    font-size: 14px;
+    flex: 0 0 36px;
+  }
+  .duchess-info .info-line strong { display: block; font-weight: 600; font-size: 15px; }
+  .duchess-info .info-line span { display: block; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--lime); margin-bottom: 2px; }
+
+  @media (max-width: 860px) {
+    .duchess-intro { grid-template-columns: 1fr; }
+    .duchess-stamp { margin: 0 auto; max-width: 260px; }
+    .menu-cards { grid-template-columns: 1fr; }
+    .menu-strip { margin-left: calc(var(--section-pad-x) * -1); margin-right: calc(var(--section-pad-x) * -1); }
+    .duchess-info { grid-template-columns: 1fr; }
+  }
+
+  /* ---------- Contact ---------- */
+  .contact {
+    background: var(--ground);
+    color: var(--cream);
+  }
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: clamp(40px, 6vw, 80px);
+    align-items: start;
+  }
+  .contact h2 {
+    font-family: var(--display);
+    font-style: var(--display-style);
+    font-weight: var(--display-weight);
+    font-size: clamp(64px, 9vw, 144px);
+    line-height: 0.9;
+    letter-spacing: -0.03em;
+    color: var(--cream);
+    margin-bottom: 28px;
+  }
+  .contact h2 em { color: var(--lime); font-style: italic; }
+  .contact-sub {
+    max-width: 32ch;
+    font-size: 18px;
+    opacity: 0.9;
+    margin-bottom: 40px;
+  }
+  .contact-meta {
+    display: grid; gap: 18px;
+    margin-bottom: 36px;
+  }
+  .contact-meta .row {
+    display: flex; align-items: baseline; gap: 16px;
+    border-top: 1px solid rgba(247,243,236,0.12);
+    padding-top: 16px;
+  }
+  .contact-meta .row .label {
+    font-family: var(--sans);
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--lime);
+    flex: 0 0 110px;
+  }
+  .contact-meta .row .val {
+    font-family: var(--display);
+    font-style: var(--display-style);
+    font-weight: 500;
+    font-size: 22px;
+    color: var(--cream);
+  }
+  .closing-line {
+    font-family: var(--display);
+    font-style: italic;
+    color: #FFB7D4;
+    font-size: 20px;
+    line-height: 1.4;
+    max-width: 32ch;
+  }
+
+  /* Form */
+  .form-card {
+    background: var(--cream);
+    color: var(--charcoal);
+    border-radius: var(--r-lg);
+    padding: 36px;
+    display: grid; gap: 18px;
+  }
+  .form-card .field { display: grid; gap: 6px; }
+  .form-card label {
+    font-family: var(--sans);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #6b6b6b;
+    font-weight: 500;
+  }
+  .form-card input,
+  .form-card select,
+  .form-card textarea {
+    appearance: none;
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1.5px solid rgba(28,28,28,0.18);
+    padding: 10px 0 12px;
+    font-family: var(--sans);
+    font-size: 17px;
+    color: var(--charcoal);
+    outline: none;
+    transition: border-color .2s ease;
+  }
+  .form-card input:focus,
+  .form-card select:focus,
+  .form-card textarea:focus { border-color: var(--forest); }
+  .form-card textarea { resize: vertical; min-height: 110px; padding-top: 10px; }
+  .form-card .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .form-card .submit-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 8px; flex-wrap: wrap; }
+  .form-card .privacy {
+    font-size: 12px; color: #6b6b6b;
+  }
+  .form-success {
+    display: none;
+    padding: 22px;
+    background: var(--lime);
+    color: var(--forest);
+    border-radius: var(--r-md);
+    font-weight: 500;
+    margin-top: 12px;
+  }
+  .form-success.on { display: block; }
+  @media (max-width: 860px) {
+    .contact-grid { grid-template-columns: 1fr; }
+    .form-card .row2 { grid-template-columns: 1fr; }
+    .form-card { padding: 26px; }
+  }
+
+  /* ---------- Footer ---------- */
+  footer.site-foot {
+    background: var(--charcoal);
+    color: var(--cream);
+    padding: 80px var(--section-pad-x) 40px;
+  }
+  .foot-inner {
+    max-width: var(--max);
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1.2fr 1fr 1fr;
+    gap: 40px;
+    align-items: start;
+  }
+  .foot-logo {
+    font-family: var(--display);
+    font-style: var(--display-style);
+    font-weight: var(--display-weight);
+    font-size: 72px;
+    color: var(--cream);
+    line-height: 0.9;
+    letter-spacing: -0.025em;
+    margin-bottom: 16px;
+  }
+  .foot-logo em { color: var(--lime); font-style: italic; }
+  .foot-tag {
+    font-family: var(--sans);
+    color: #c2c2c2;
+    font-size: 14px;
+    max-width: 30ch;
+  }
+  .foot-col h5 {
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--lime);
+    margin-bottom: 16px;
+  }
+  .foot-col ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+  .foot-col a { color: var(--cream); text-decoration: none; font-size: 15px; }
+  .foot-col a:hover { color: var(--lime); }
+  .foot-bottom {
+    max-width: var(--max);
+    margin: 60px auto 0;
+    padding-top: 24px;
+    border-top: 1px solid rgba(247,243,236,0.1);
+    display: flex; justify-content: space-between; align-items: center; gap: 16px;
+    font-size: 12px;
+    color: #8a8a8a;
+    flex-wrap: wrap;
+  }
+  .foot-bottom em { color: #FFB7D4; font-style: italic; }
+  @media (max-width: 860px) {
+    .foot-inner { grid-template-columns: 1fr; gap: 32px; }
+    .foot-logo { font-size: 56px; }
+  }
+
+  /* ---------- Image placeholders (subtle striped SVG with monospace caption) ---------- */
+  .ph {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    overflow: hidden;
+  }
+  .ph .ph-art {
+    position: absolute; inset: 0;
+    background-image:
+      repeating-linear-gradient(135deg,
+        rgba(255,255,255,0.05) 0 14px,
+        rgba(255,255,255,0) 14px 28px);
+  }
+  .ph.cream .ph-art {
+    background-image:
+      repeating-linear-gradient(135deg,
+        rgba(26,58,42,0.06) 0 14px,
+        rgba(26,58,42,0) 14px 28px);
+  }
+  .ph .ph-cap {
+    position: absolute;
+    left: 18px; bottom: 16px;
+    font-family: ui-monospace, "JetBrains Mono", Menlo, monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: rgba(247,243,236,0.7);
+    background: rgba(0,0,0,0.18);
+    padding: 6px 10px;
+    border-radius: 4px;
+    backdrop-filter: blur(2px);
+    text-transform: lowercase;
+  }
+  .ph.cream .ph-cap { color: var(--forest); background: rgba(26,58,42,0.08); }
+  .ph .ph-corner {
+    position: absolute;
+    top: 16px; left: 16px;
+    font-family: ui-monospace, "JetBrains Mono", Menlo, monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    color: rgba(247,243,236,0.5);
+    text-transform: uppercase;
+  }
+  .ph.cream .ph-corner { color: rgba(26,58,42,0.55); }
+  .ph.dark { background: var(--forest-light); }
+  .ph.warm { background: #C97A4F; }
+  .ph.warm .ph-cap { color: #fff7e8; background: rgba(0,0,0,0.18); }
+  .ph.warm .ph-corner { color: rgba(255,247,232,0.7); }
+  .ph.olive { background: #6E7F4C; }
+  .ph.cream { background: var(--cream-deep); }
+  .ph.toast { background: #B8915C; }
+  .ph.toast .ph-cap { color: #fff7e8; background: rgba(0,0,0,0.18); }
+  .ph.toast .ph-corner { color: rgba(255,247,232,0.7); }
+  .ph.plum { background: #6E2A3E; }
+  .ph.plum .ph-cap { color: #fff7e8; background: rgba(0,0,0,0.18); }
+  .ph.plum .ph-corner { color: rgba(255,247,232,0.7); }
+
+  /* hero placeholder has a softer overlay */
+  .hero-media .ph { background: linear-gradient(135deg, #244C38 0%, #1A3A2A 60%, #102619 100%); }
+
+  /* reveal-on-load stagger */
+  .reveal { opacity: 0; transform: translateY(14px); animation: rise 0.7s cubic-bezier(.2,.7,.2,1) forwards; }
+  .reveal.d1 { animation-delay: 0.05s; }
+  .reveal.d2 { animation-delay: 0.20s; }
+  .reveal.d3 { animation-delay: 0.35s; }
+  .reveal.d4 { animation-delay: 0.50s; }
+  @keyframes rise { to { opacity: 1; transform: translateY(0); } }
+
+  /* ---------- Tweaks Panel ---------- */
+  .tweaks {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 320px;
+    max-height: calc(100vh - 40px);
+    background: var(--cream);
+    color: var(--charcoal);
+    border-radius: var(--r-lg);
+    box-shadow: 0 20px 60px -20px rgba(0,0,0,0.45), 0 0 0 1px rgba(0,0,0,0.08);
+    z-index: 100;
+    display: none;
+    flex-direction: column;
+    font-family: var(--sans);
+    overflow: hidden;
+  }
+  .tweaks.on { display: flex; }
+  .tweaks-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 18px 14px;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+    background: var(--cream-deep);
+  }
+  .tweaks-title {
+    font-family: var(--display);
+    font-style: var(--display-style);
+    font-weight: 600;
+    font-size: 18px;
+    letter-spacing: -0.01em;
+    color: var(--ground);
+  }
+  .tweaks-title::before {
+    content: "✦"; color: var(--magenta); margin-right: 6px; font-size: 14px;
+  }
+  .tweaks-close {
+    background: transparent; border: none; cursor: pointer;
+    width: 28px; height: 28px; border-radius: 50%;
+    color: var(--charcoal); font-size: 16px;
+    display: grid; place-items: center;
+    transition: background .15s ease;
+  }
+  .tweaks-close:hover { background: rgba(0,0,0,0.06); }
+  .tweaks-body {
+    padding: 14px 18px 20px;
+    overflow-y: auto;
+    display: flex; flex-direction: column; gap: 18px;
+  }
+  .tweaks-sec h4 {
+    font-family: var(--sans);
+    font-weight: 500;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #6b6b6b;
+    margin: 0 0 10px;
+  }
+  .tweaks-radio {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    gap: 6px;
+    background: var(--cream-deep);
+    padding: 4px;
+    border-radius: var(--r-btn);
+  }
+  .tweaks-radio button {
+    appearance: none;
+    background: transparent;
+    border: none;
+    padding: 8px 6px;
+    border-radius: 4px;
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 500;
+    color: #555;
+    cursor: pointer;
+    transition: background .15s ease, color .15s ease;
+    letter-spacing: 0.02em;
+  }
+  .tweaks-radio button.on {
+    background: var(--ground);
+    color: var(--cream);
+  }
+  .tweaks-radio button:hover:not(.on) { background: rgba(0,0,0,0.04); }
+
+  .tweaks-swatches { display: flex; gap: 8px; }
+  .tweaks-swatch {
+    appearance: none; border: none; cursor: pointer;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.1) inset;
+    transition: transform .15s ease, box-shadow .15s ease;
+    position: relative;
+  }
+  .tweaks-swatch.on {
+    box-shadow: 0 0 0 2px var(--cream), 0 0 0 4px var(--ground);
+    transform: scale(1.05);
+  }
+  .tweaks-swatch:hover { transform: scale(1.08); }
+
+  .tweaks-slider-row {
+    display: flex; align-items: center; gap: 12px;
+  }
+  .tweaks-slider {
+    flex: 1;
+    appearance: none;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--cream-deep);
+    outline: none;
+  }
+  .tweaks-slider::-webkit-slider-thumb {
+    appearance: none;
+    width: 16px; height: 16px;
+    background: var(--ground);
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid var(--cream);
+    box-shadow: 0 0 0 1px var(--ground);
+  }
+  .tweaks-slider::-moz-range-thumb {
+    width: 16px; height: 16px;
+    background: var(--ground);
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid var(--cream);
+  }
+  .tweaks-val {
+    font-family: ui-monospace, "JetBrains Mono", Menlo, monospace;
+    font-size: 12px;
+    color: var(--ground);
+    min-width: 36px;
+    text-align: right;
+    font-weight: 500;
+  }
+
+  .tweaks-toggle {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px;
+  }
+  .tweaks-toggle .lbl { font-size: 13px; color: var(--charcoal); }
+  .tweaks-switch {
+    width: 38px; height: 22px;
+    border-radius: 999px;
+    background: #d0cabb;
+    cursor: pointer;
+    position: relative;
+    transition: background .2s ease;
+    border: none;
+  }
+  .tweaks-switch::after {
+    content: "";
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 18px; height: 18px;
+    background: var(--cream);
+    border-radius: 50%;
+    transition: transform .2s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+  .tweaks-switch.on { background: var(--ground); }
+  .tweaks-switch.on::after { transform: translateX(16px); }
+
+  body.no-grain .grain::before { display: none; }
+
+  @media (max-width: 600px) {
+    .tweaks { left: 12px; right: 12px; bottom: 12px; width: auto; }
+  }
+
+</style>
+</head>
+<body>
+
+<!-- ============ NAV ============ -->
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <a class="nav-logo" href="#top">
+      <span class="dot"></span> Chef Jenny
+    </a>
+    <ul class="nav-links">
+      <li><a href="#about" data-link="about">About</a></li>
+      <li><a href="#experiences" data-link="experiences">Experiences</a></li>
+      <li><a href="#watch" data-link="watch">Watch</a></li>
+      <li><a href="#duchess" data-link="duchess">Duchess</a></li>
+      <li><a href="#book" data-link="book">Book</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a class="btn btn-lime" href="#book">Book now <span class="arrow">→</span></a>
+    </div>
+    <button class="nav-burger" id="burger" aria-label="Open menu">Menu</button>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<section class="hero grain" id="top">
+  <div class="hero-grid">
+    <div>
+      <div class="hero-eyebrow eyebrow reveal d1">Private chef · Cooking classes · Seattle</div>
+      <h1 class="reveal d2" data-comment-anchor="f4ab2e52c8-h1">Chef<br />Jenny<span class="amp">.</span></h1>
+      <p class="hero-sub reveal d3">Every meal, a little more you. Home cooking, turned all the way up.</p>
+      <div class="hero-ctas reveal d4">
+        <a class="btn btn-lime" href="#experiences">Book a private experience <span class="arrow">→</span></a>
+        <a class="btn btn-magenta-outline on-dark" href="#duchess">Visit Duchess <span class="arrow">→</span></a>
+      </div>
+    </div>
+    <div class="hero-media reveal d3">
+      <div class="ph">
+        <div class="ph-art"></div>
+        <div class="ph-corner">HERO_BG · 4:5</div>
+        <div class="ph-cap">jenny at the stove · candid · warm window light</div>
+      </div>
+      <div class="hero-tag"><span class="live"></span>Now booking · summer ’26</div>
+    </div>
+  </div>
+
+  <div class="hero-marquee" aria-hidden="true">
+    <div class="track">
+      <span>Private dinners <span class="dot"></span> Cooking classes <span class="dot"></span> Date nights <span class="dot"></span> Duchess <span class="dot"></span> Seattle, WA <span class="dot"></span> Every meal, a little more you <span class="dot"></span></span>
+      <span>Private dinners <span class="dot"></span> Cooking classes <span class="dot"></span> Date nights <span class="dot"></span> Duchess <span class="dot"></span> Seattle, WA <span class="dot"></span> Every meal, a little more you <span class="dot"></span></span>
+    </div>
+  </div>
+
+  <div class="scroll-cue"><span>scroll</span><span class="line"></span></div>
+</section>
+
+<!-- organic divider forest -> cream -->
+<div class="divider" aria-hidden="true">
+  <svg viewBox="0 0 1440 80" preserveAspectRatio="none">
+    <path d="M0,40 C160,90 320,0 480,30 C640,60 800,10 960,28 C1120,46 1280,80 1440,40 L1440,0 L0,0 Z" style="fill: var(--ground)"/>
+  </svg>
+</div>
+
+<!-- ============ MEET JENNY ============ -->
+<section class="meet" id="about">
+  <div class="section-inner">
+    <div class="meet-grid">
+      <div class="meet-photo">
+        <div class="ph cream">
+          <div class="ph-art"></div>
+          <div class="ph-corner">JENNY_PORTRAIT · 3:4</div>
+          <div class="ph-cap">candid · apron at the stove · mid-laugh</div>
+        </div>
+        <div class="tag-overlay">Hi from Seattle ✿</div>
+      </div>
+      <div class="meet-body">
+        <div class="sec-num">02 — Meet Jenny</div>
+        <h2>Hi, I'm <em>Jenny.</em></h2>
+        <p>I've been feeding people my whole life — not because I had to, but because there's nothing I love more than watching someone take a first bite and just <em>relax</em>. Food is how I say welcome. It's how I celebrate, how I comfort, how I connect.</p>
+        <p>I don't cook for one type of person or one type of table. I cook for <em>your</em> table — whoever's around it, whatever the occasion. My food is versatile, personal, and always made with the kind of care you can taste.</p>
+        <p>Whether you're booking me for a private dinner, coming to one of my classes, or swinging by Duchess for a puffed pancake and a latte — you're always going to feel at home.</p>
+        <div class="meet-chips">
+          <span class="chip">🍳 Versatile across cuisines</span>
+          <span class="chip">🏠 Seattle-based, private events</span>
+          <span class="chip">🌈 A welcoming table for everyone</span>
+        </div>
+        <div class="meet-signature">— Jenny<small>chef, host, neighbor</small></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- organic divider cream -> forest -->
+<div class="divider" aria-hidden="true">
+  <svg viewBox="0 0 1440 80" preserveAspectRatio="none">
+    <path d="M0,40 C180,0 360,80 540,42 C720,4 900,70 1080,38 C1260,8 1380,60 1440,40 L1440,80 L0,80 Z" style="fill: var(--contrast-dark)"/>
+  </svg>
+</div>
+
+<!-- ============ EXPERIENCES ============ -->
+<section class="experiences grain" id="experiences">
+  <div class="section-inner">
+    <div class="sec-head">
+      <div>
+        <div class="sec-num">03 — Experiences</div>
+        <h2>Let's make something <em style="color:var(--lime);font-style:italic;">together</em>.</h2>
+      </div>
+      <p class="sec-head sub" style="margin:0">Private dinners, cooking classes, special events — designed around you, your people, and your kitchen.</p>
+    </div>
+
+    <div class="exp-cards">
+      <article class="exp-card">
+        <div class="card-media">
+          <div class="ph warm">
+            <div class="ph-art"></div>
+            <div class="ph-corner">PRIVATE_DINNER_PHOTO · 5:3</div>
+            <div class="ph-cap">candlelit table · plating · intimate</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="price-strap">Private Chef <span class="dotsep"></span> From $185 / guest</div>
+          <h3>Your kitchen. My menu. One unforgettable night.</h3>
+          <p>I come to you — or we find a space that works — and I handle everything. Menu planning, shopping, cooking, plating, cleanup. You just show up and enjoy. Perfect for dinner parties, date nights, anniversaries, birthdays, or any occasion worth marking.</p>
+          <ul>
+            <li>Custom menu built around your preferences and dietary needs</li>
+            <li>Full grocery sourcing and prep</li>
+            <li>Multi-course cooking and plating on-site</li>
+            <li>Kitchen cleanup included</li>
+            <li>Optional wine and beverage pairing suggestions</li>
+          </ul>
+          <div class="card-cta">
+            <a class="btn btn-magenta" href="#book">Inquire about a private dinner <span class="arrow">→</span></a>
+          </div>
+        </div>
+      </article>
+
+      <article class="exp-card">
+        <div class="card-media">
+          <div class="ph olive">
+            <div class="ph-art"></div>
+            <div class="ph-corner">CLASS_PHOTO · 5:3</div>
+            <div class="ph-cap">hands in dough · group laughing · warm chaos</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="price-strap">Cooking Classes <span class="dotsep"></span> Small groups · 4–10 guests</div>
+          <h3>Learn to cook like someone who actually loves cooking.</h3>
+          <p>These aren't intimidating culinary school classes. They're hands-on, fun, a little messy, and you leave with real skills you'll actually use — plus a meal you made yourself. Designed for home cooks of all levels, in intimate groups.</p>
+          <ul class="format-list">
+            <li><span><strong>Date Night Classes</strong> — cook together, eat together</span></li>
+            <li><span><strong>Friends & Sips</strong> — group workshop with wine, more party than lesson</span></li>
+            <li><span><strong>Skill-Builder Sessions</strong> — focused technique for the serious home cook</span></li>
+            <li><span><strong>Private Group Classes</strong> — birthdays, bachelorettes, team events, gatherings</span></li>
+          </ul>
+          <div class="card-cta">
+            <a class="btn btn-lime" href="#book">Book a class <span class="arrow">→</span></a>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <p class="community-note">Jenny's table is open to everyone. She actively creates welcoming spaces for the LGBTQ+ community and anyone who's ever felt like food culture wasn't made for them.</p>
+  </div>
+</section>
+
+<!-- organic divider forest -> cream -->
+<div class="divider" aria-hidden="true">
+  <svg viewBox="0 0 1440 80" preserveAspectRatio="none">
+    <path d="M0,30 C200,80 380,0 580,30 C760,58 940,8 1140,36 C1300,58 1380,40 1440,30 L1440,0 L0,0 Z" style="fill: var(--contrast-dark)"/>
+  </svg>
+</div>
+
+<!-- ============ IN THE KITCHEN ============ -->
+<section class="kitchen" id="watch">
+  <div class="section-inner">
+    <div class="sec-head">
+      <div>
+        <div class="sec-num">04 — In the kitchen</div>
+        <h2>Watch me <em style="color:var(--magenta);font-style:italic;">cook</em>.</h2>
+      </div>
+      <p class="sec-head sub" style="margin:0">A peek into how I think about food — and how you can make it too. New videos every other week.</p>
+    </div>
+
+    <div class="video-grid">
+      <article class="video-card">
+        <div class="vt">
+          <div class="ph toast">
+            <div class="ph-art"></div>
+            <div class="ph-corner">VIDEO_01 · 16:10</div>
+            <div class="ph-cap">signature dish · pan to plate</div>
+          </div>
+          <button class="play-btn" aria-label="Play video"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M8 5v14l11-7z"/></svg></button>
+        </div>
+        <div class="vmeta">
+          <div class="vtags"><span class="chip chip-sm">Showstopper</span><span class="chip chip-sm" style="background:transparent;color:var(--forest);border:1px solid rgba(26,58,42,0.2)">8 min</span></div>
+          <h4>Brown butter scallops, leek confit</h4>
+          <div class="vdesc">The dish that gets requested at every private dinner. Easier than it looks.</div>
+        </div>
+      </article>
+
+      <article class="video-card">
+        <div class="vt">
+          <div class="ph olive">
+            <div class="ph-art"></div>
+            <div class="ph-corner">VIDEO_02 · 16:10</div>
+            <div class="ph-cap">weeknight pasta · 30 min</div>
+          </div>
+          <button class="play-btn" aria-label="Play video"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M8 5v14l11-7z"/></svg></button>
+        </div>
+        <div class="vmeta">
+          <div class="vtags"><span class="chip chip-sm">Weeknight</span><span class="chip chip-sm" style="background:transparent;color:var(--forest);border:1px solid rgba(26,58,42,0.2)">12 min</span></div>
+          <h4>Anchovy & chili spaghetti, in your pantry</h4>
+          <div class="vdesc">Five ingredients, ten dollars, no apologies. My go-to weeknight rescue.</div>
+        </div>
+      </article>
+
+      <article class="video-card">
+        <div class="vt">
+          <div class="ph plum">
+            <div class="ph-art"></div>
+            <div class="ph-corner">VIDEO_03 · 16:10</div>
+            <div class="ph-cap">technique tutorial · knife work</div>
+          </div>
+          <button class="play-btn" aria-label="Play video"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M8 5v14l11-7z"/></svg></button>
+        </div>
+        <div class="vmeta">
+          <div class="vtags"><span class="chip chip-sm">Easy</span><span class="chip chip-sm" style="background:transparent;color:var(--forest);border:1px solid rgba(26,58,42,0.2)">6 min</span></div>
+          <h4>How to actually sharpen a knife</h4>
+          <div class="vdesc">The one technique that quietly upgrades every meal you'll ever cook.</div>
+        </div>
+      </article>
+
+      <article class="video-card">
+        <div class="vt">
+          <div class="ph warm">
+            <div class="ph-art"></div>
+            <div class="ph-corner">VIDEO_04 · 16:10</div>
+            <div class="ph-cap">seasonal · stone fruit galette</div>
+          </div>
+          <button class="play-btn" aria-label="Play video"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M8 5v14l11-7z"/></svg></button>
+        </div>
+        <div class="vmeta">
+          <div class="vtags"><span class="chip chip-sm">Showstopper</span><span class="chip chip-sm" style="background:transparent;color:var(--forest);border:1px solid rgba(26,58,42,0.2)">14 min</span></div>
+          <h4>Stone fruit galette with thyme sugar</h4>
+          <div class="vdesc">A rustic dessert that looks like you tried — but you barely had to.</div>
+        </div>
+      </article>
+    </div>
+
+    <div class="kitchen-foot">
+      <div class="stats">
+        <div class="stat"><strong>48k</strong><span>Instagram</span></div>
+        <div class="stat"><strong>120+</strong><span>Recipes</span></div>
+        <div class="stat"><strong>4 yrs</strong><span>Cooking online</span></div>
+      </div>
+      <a class="ig-link" href="#">Follow along on Instagram <span>→</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ DUCHESS ============ -->
+<section class="duchess" id="duchess">
+  <div class="section-inner">
+    <div class="sec-head">
+      <div>
+        <div class="sec-num" style="color:var(--cream)">05 — Duchess</div>
+        <h2>Find me at <em style="color:var(--forest);font-style:italic;">Duchess</em>.</h2>
+      </div>
+      <p class="sec-head sub" style="margin:0; color:var(--cream)">My brick-and-mortar home base — breakfast, coffee, and food that surprises you in the best way.</p>
+    </div>
+
+    <div class="duchess-intro">
+      <div class="duchess-body">
+        <p>Duchess started as a love letter to Dutch mini pancakes — those perfect little puffed bites — and it's grown into something I'm really proud of. Come in for breakfast, stay for the grilled cheese, or try one of our creative bao bun sandwiches. The menu keeps evolving, just like me.</p>
+      </div>
+      <div class="duchess-stamp">
+        <div class="stamp-inner">Duchess<br /><em>by Jenny</em></div>
+      </div>
+    </div>
+
+    <div class="menu-strip">
+      <div class="menu-head">
+        <h3>The hits, on the counter today.</h3>
+        <span class="menu-eyebrow">From the menu →</span>
+      </div>
+      <div class="menu-cards">
+        <article class="menu-card">
+          <div class="mc-photo">
+            <div class="ph toast" style="position:relative">
+              <div class="ph-art"></div>
+              <div class="ph-corner">MENU_ITEM_01 · 4:3</div>
+              <div class="ph-cap">puffed mini pancakes · powdered sugar</div>
+            </div>
+          </div>
+          <div class="mc-body">
+            <div class="mc-num">01 · The original</div>
+            <h4>Dutch mini pancakes</h4>
+            <p>A dozen golden, butter-puffed poffertjes with vanilla bean cream and powdered sugar. The thing we're known for.</p>
+          </div>
+        </article>
+        <article class="menu-card">
+          <div class="mc-photo">
+            <div class="ph plum" style="position:relative">
+              <div class="ph-art"></div>
+              <div class="ph-corner">MENU_ITEM_02 · 4:3</div>
+              <div class="ph-cap">bao bun · braised pork · pickled veg</div>
+            </div>
+          </div>
+          <div class="mc-body">
+            <div class="mc-num">02 · Crowd favorite</div>
+            <h4>The bao bun sandwich</h4>
+            <p>Soft, pillowy bao filled with slow-braised pork shoulder, quick pickles, herbs, and our house chili crisp. Photogenic and serious.</p>
+          </div>
+        </article>
+        <article class="menu-card">
+          <div class="mc-photo">
+            <div class="ph warm" style="position:relative">
+              <div class="ph-art"></div>
+              <div class="ph-corner">MENU_ITEM_03 · 4:3</div>
+              <div class="ph-cap">grilled cheese · tomato confit</div>
+            </div>
+          </div>
+          <div class="mc-body">
+            <div class="mc-num">03 · The comfort one</div>
+            <h4>Three-cheese griddled sandwich</h4>
+            <p>Aged cheddar, gruyère, and fontina on sourdough with slow tomato confit. Better than it has any right to be.</p>
+          </div>
+        </article>
+      </div>
+
+      <div class="duchess-info">
+        <div class="info-line">
+          <div class="ico">📍</div>
+          <div><span>Visit</span><strong>1428 E Pine St, Seattle WA</strong></div>
+        </div>
+        <div class="info-line">
+          <div class="ico">🕐</div>
+          <div><span>Hours</span><strong>Wed–Sun · 8am–3pm</strong></div>
+        </div>
+        <div class="info-line" style="justify-content:flex-end">
+          <a class="btn btn-magenta" href="#" style="padding:14px 22px">See the full menu <span class="arrow">→</span></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CONTACT ============ -->
+<section class="contact grain" id="book">
+  <div class="section-inner">
+    <div class="contact-grid">
+      <div>
+        <div class="sec-num">06 — Let's talk</div>
+        <h2>Let's <em>talk</em>.</h2>
+        <p class="contact-sub">Whether you're planning a dinner party or just want to say hi — my inbox is always open.</p>
+
+        <div class="contact-meta">
+          <div class="row">
+            <div class="label">Email</div>
+            <div class="val">hello@chefjenny.co</div>
+          </div>
+          <div class="row">
+            <div class="label">Instagram</div>
+            <div class="val">@chefjenny.seattle</div>
+          </div>
+          <div class="row">
+            <div class="label">Phone</div>
+            <div class="val">By request</div>
+          </div>
+        </div>
+
+        <p class="closing-line">I try to respond within 48 hours. Can't wait to cook for you.</p>
+      </div>
+
+      <form class="form-card" id="contact-form" novalidate>
+        <div class="field">
+          <label for="name">Your name</label>
+          <input id="name" name="name" type="text" placeholder="Jamie Park" required />
+        </div>
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" placeholder="you@email.com" required />
+        </div>
+        <div class="field">
+          <label for="interest">What are you interested in?</label>
+          <select id="interest" name="interest" required>
+            <option value="">Pick one…</option>
+            <option>Private chef experience</option>
+            <option>Cooking class</option>
+            <option>Duchess</option>
+            <option>Just saying hi</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="message">Tell me about your event or question</label>
+          <textarea id="message" name="message" placeholder="A few details about the date, the people, what you're hoping for…"></textarea>
+        </div>
+        <div class="submit-row">
+          <span class="privacy">Your details stay between us. No newsletters, no spam.</span>
+          <button class="btn btn-lime" type="submit">Send it over <span class="arrow">→</span></button>
+        </div>
+        <div class="form-success" id="form-success">Got it — thanks. I'll be in touch within 48 hours. ✦</div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="site-foot">
+  <div class="foot-inner">
+    <div>
+      <div class="foot-logo">Chef <em>Jenny</em></div>
+      <p class="foot-tag">Private chef, cooking classes, and a brick-and-mortar called Duchess. Serving Seattle with love.</p>
+    </div>
+    <div class="foot-col">
+      <h5>Explore</h5>
+      <ul>
+        <li><a href="#about">About</a></li>
+        <li><a href="#experiences">Experiences</a></li>
+        <li><a href="#watch">Watch</a></li>
+        <li><a href="#duchess">Duchess</a></li>
+        <li><a href="#book">Book</a></li>
+      </ul>
+    </div>
+    <div class="foot-col">
+      <h5>Elsewhere</h5>
+      <ul>
+        <li><a href="#">Instagram — @chefjenny.seattle</a></li>
+        <li><a href="#">TikTok — @chefjenny</a></li>
+        <li><a href="#">Email — hello@chefjenny.co</a></li>
+        <li><a href="#">Duchess on Maps</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot-bottom">
+    <span>© Chef Jenny. Serving Seattle with love.</span>
+    <span><em>Duchess is her storefront. This is her whole world.</em></span>
+  </div>
+</footer>
+
+<script>
+  // Mobile nav
+  const nav = document.getElementById('nav');
+  const burger = document.getElementById('burger');
+  burger?.addEventListener('click', () => nav.classList.toggle('nav-open'));
+  document.querySelectorAll('.nav-links a').forEach(a => {
+    a.addEventListener('click', () => nav.classList.remove('nav-open'));
+  });
+
+  // Active-section highlight in nav as user scrolls
+  const linkMap = {
+    about: document.querySelector('[data-link="about"]'),
+    experiences: document.querySelector('[data-link="experiences"]'),
+    watch: document.querySelector('[data-link="watch"]'),
+    duchess: document.querySelector('[data-link="duchess"]'),
+    book: document.querySelector('[data-link="book"]'),
+  };
+  const sectionIds = Object.keys(linkMap);
+  const sections = sectionIds.map(id => document.getElementById(id));
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const id = e.target.id;
+        Object.values(linkMap).forEach(l => l && l.classList.remove('active'));
+        linkMap[id] && linkMap[id].classList.add('active');
+      }
+    });
+  }, { rootMargin: "-45% 0px -50% 0px", threshold: 0 });
+  sections.forEach(s => s && io.observe(s));
+
+  // Form
+  const form = document.getElementById('contact-form');
+  const success = document.getElementById('form-success');
+  form?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const data = new FormData(form);
+    if (!data.get('name') || !data.get('email') || !data.get('interest')) {
+      success.textContent = "I need a name, email, and what you're interested in to get back to you.";
+      success.style.background = "#FFB7D4";
+      success.classList.add('on');
+      return;
+    }
+    success.textContent = "Got it — thanks. I'll be in touch within 48 hours. ✦";
+    success.style.background = "var(--lime)";
+    success.classList.add('on');
+    form.querySelectorAll('input, select, textarea').forEach(el => el.value = '');
+  });
+
+  // Video card "play" — just toggles a tinted overlay (placeholder behavior)
+  document.querySelectorAll('.play-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const vt = btn.closest('.vt');
+      vt.style.outline = '2px solid var(--lime)';
+      vt.style.outlineOffset = '-6px';
+      setTimeout(() => { vt.style.outline = 'none'; }, 800);
+    });
+  });
+</script>
+
+<!-- ============ TWEAKS PANEL ============ -->
+<aside class="tweaks" id="tweaks" aria-hidden="true">
+  <div class="tweaks-head">
+    <div class="tweaks-title">Tweaks</div>
+    <button class="tweaks-close" id="tweaks-close" aria-label="Close">✕</button>
+  </div>
+  <div class="tweaks-body">
+    <div class="tweaks-sec">
+      <h4>Vibe — dark anchor</h4>
+      <div class="tweaks-radio" id="tw-mood">
+        <button data-v="fuchsia">Fuchsia</button>
+        <button data-v="forest">Forest</button>
+        <button data-v="ink">Ink</button>
+      </div>
+    </div>
+
+    <div class="tweaks-sec">
+      <h4>Headline font</h4>
+      <div class="tweaks-radio" id="tw-font">
+        <button data-v="bricolage">Casual</button>
+        <button data-v="caprasimo">Chunky</button>
+        <button data-v="fraunces">Serif</button>
+      </div>
+    </div>
+
+    <div class="tweaks-sec">
+      <h4>Primary accent</h4>
+      <div class="tweaks-swatches" id="tw-accent">
+        <button class="tweaks-swatch" data-v="lime" style="background:#B8F500" aria-label="Lime"></button>
+        <button class="tweaks-swatch" data-v="sunshine" style="background:#FFCB2E" aria-label="Sunshine"></button>
+        <button class="tweaks-swatch" data-v="peach" style="background:#FF8C5A" aria-label="Peach"></button>
+        <button class="tweaks-swatch" data-v="sky" style="background:#6FD2C9" aria-label="Sky"></button>
+      </div>
+    </div>
+
+    <div class="tweaks-sec">
+      <h4>Button corners</h4>
+      <div class="tweaks-slider-row">
+        <input type="range" min="0" max="24" step="1" class="tweaks-slider" id="tw-radius" />
+        <span class="tweaks-val" id="tw-radius-val">6px</span>
+      </div>
+    </div>
+
+    <div class="tweaks-sec">
+      <h4>Texture</h4>
+      <div class="tweaks-toggle">
+        <span class="lbl">Grain on dark sections</span>
+        <button class="tweaks-switch" id="tw-grain" aria-label="Toggle grain"></button>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<script>
+  const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+    "mood": "fuchsia",
+    "font": "caprasimo",
+    "accent": "sunshine",
+    "buttonRadius": 6,
+    "grain": true
+  }/*EDITMODE-END*/;
+
+  let tweaks = { ...TWEAK_DEFAULTS };
+
+  const MOODS = {
+    fuchsia: { ground: '#3D0F26', groundLight: '#6E1F47', contrast: '#1A3A2A' },
+    forest:  { ground: '#1A3A2A', groundLight: '#244C38', contrast: '#3D0F26' },
+    ink:     { ground: '#1F1F1F', groundLight: '#2E2E2E', contrast: '#1A3A2A' },
+  };
+  const ACCENTS = {
+    lime:     '#B8F500',
+    sunshine: '#FFCB2E',
+    peach:    '#FF8C5A',
+    sky:      '#6FD2C9',
+  };
+  const FONTS = {
+    bricolage: { fam: '"Bricolage Grotesque", system-ui, sans-serif', style: 'normal',  weight: 500 },
+    caprasimo: { fam: '"Caprasimo", "Bricolage Grotesque", serif',     style: 'normal',  weight: 400 },
+    fraunces:  { fam: '"Fraunces", "Times New Roman", serif',           style: 'italic',  weight: 300 },
+  };
+
+  function applyTweaks(t) {
+    const root = document.documentElement.style;
+    const m = MOODS[t.mood] || MOODS.fuchsia;
+    root.setProperty('--ground', m.ground);
+    root.setProperty('--ground-light', m.groundLight);
+    root.setProperty('--contrast-dark', m.contrast);
+
+    root.setProperty('--lime', ACCENTS[t.accent] || ACCENTS.lime);
+
+    const f = FONTS[t.font] || FONTS.bricolage;
+    root.setProperty('--display', f.fam);
+    root.setProperty('--display-style', f.style);
+    root.setProperty('--display-weight', f.weight);
+
+    root.setProperty('--r-btn', t.buttonRadius + 'px');
+
+    document.body.classList.toggle('no-grain', !t.grain);
+
+    // sync UI selections
+    syncSelections();
+  }
+
+  function syncSelections() {
+    document.querySelectorAll('#tw-mood button').forEach(b => b.classList.toggle('on', b.dataset.v === tweaks.mood));
+    document.querySelectorAll('#tw-font button').forEach(b => b.classList.toggle('on', b.dataset.v === tweaks.font));
+    document.querySelectorAll('#tw-accent button').forEach(b => b.classList.toggle('on', b.dataset.v === tweaks.accent));
+    const radius = document.getElementById('tw-radius');
+    const radiusVal = document.getElementById('tw-radius-val');
+    if (radius) radius.value = tweaks.buttonRadius;
+    if (radiusVal) radiusVal.textContent = tweaks.buttonRadius + 'px';
+    const grain = document.getElementById('tw-grain');
+    if (grain) grain.classList.toggle('on', !!tweaks.grain);
+  }
+
+  function setTweak(key, value) {
+    tweaks[key] = value;
+    applyTweaks(tweaks);
+    try {
+      window.parent.postMessage({ type: '__edit_mode_set_keys', edits: { [key]: value } }, '*');
+    } catch (e) {}
+  }
+
+  // Wire controls
+  document.querySelectorAll('#tw-mood button').forEach(b => {
+    b.addEventListener('click', () => setTweak('mood', b.dataset.v));
+  });
+  document.querySelectorAll('#tw-font button').forEach(b => {
+    b.addEventListener('click', () => setTweak('font', b.dataset.v));
+  });
+  document.querySelectorAll('#tw-accent button').forEach(b => {
+    b.addEventListener('click', () => setTweak('accent', b.dataset.v));
+  });
+  const radiusEl = document.getElementById('tw-radius');
+  radiusEl.addEventListener('input', () => {
+    const v = parseInt(radiusEl.value, 10);
+    document.getElementById('tw-radius-val').textContent = v + 'px';
+    document.documentElement.style.setProperty('--r-btn', v + 'px');
+    tweaks.buttonRadius = v;
+  });
+  radiusEl.addEventListener('change', () => setTweak('buttonRadius', parseInt(radiusEl.value, 10)));
+  document.getElementById('tw-grain').addEventListener('click', () => {
+    setTweak('grain', !tweaks.grain);
+  });
+
+  // Tweaks panel show/hide
+  const panel = document.getElementById('tweaks');
+  document.getElementById('tweaks-close').addEventListener('click', () => {
+    panel.classList.remove('on');
+    panel.setAttribute('aria-hidden', 'true');
+    try { window.parent.postMessage({ type: '__edit_mode_dismissed' }, '*'); } catch (e) {}
+  });
+
+  // Edit-mode protocol — listener FIRST, then announce availability
+  window.addEventListener('message', (e) => {
+    const d = e.data || {};
+    if (d.type === '__activate_edit_mode') {
+      panel.classList.add('on');
+      panel.setAttribute('aria-hidden', 'false');
+    } else if (d.type === '__deactivate_edit_mode') {
+      panel.classList.remove('on');
+      panel.setAttribute('aria-hidden', 'true');
+    }
+  });
+
+  // Apply defaults, then announce
+  applyTweaks(tweaks);
+  try { window.parent.postMessage({ type: '__edit_mode_available' }, '*'); } catch (e) {}
+</script>
+
+</body>
+</html>
