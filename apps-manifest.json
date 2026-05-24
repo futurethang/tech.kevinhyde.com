@@ -1,6 +1,15 @@
 {
   "apps": [
     {
+      "slug": "chef-jenny",
+      "name": "Chef Jenny",
+      "description": "Personal brand website for Chef Jenny — Seattle private chef, cooking class instructor, and owner of Duchess café",
+      "type": "static",
+      "status": "live",
+      "createdAt": "2026-05-24",
+      "tags": ["site", "food", "landing-page", "design"]
+    },
+    {
       "slug": "dismal-nitch",
       "name": "Dismal Nitch",
       "description": "Landing page for Dismal Nitch, a small recording studio in Ballard, WA — tracking, mixing, mastering, engineering and production",
