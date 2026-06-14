@@ -1,4 +1,4 @@
-import { sql } from 'drizzle-orm';
+import { relations, sql } from 'drizzle-orm';
 import { index, integer, primaryKey, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 import { newId } from './ids.ts';
 import { type SourceType } from './constants.ts';
@@ -204,6 +204,53 @@ export const itemEvent = sqliteTable(
   },
   (t) => [index('item_event_item_idx').on(t.itemId)],
 );
+
+// ---- Relations (for the relational query API; no SQL/migration impact) ------
+
+export const sourceRelations = relations(source, ({ many }) => ({
+  items: many(feedItem),
+  sourceTags: many(sourceTag),
+}));
+
+export const tagRelations = relations(tag, ({ many }) => ({
+  sourceTags: many(sourceTag),
+  itemTags: many(itemTag),
+}));
+
+export const sourceTagRelations = relations(sourceTag, ({ one }) => ({
+  source: one(source, { fields: [sourceTag.sourceId], references: [source.id] }),
+  tag: one(tag, { fields: [sourceTag.tagId], references: [tag.id] }),
+}));
+
+export const feedItemRelations = relations(feedItem, ({ one, many }) => ({
+  source: one(source, { fields: [feedItem.sourceId], references: [source.id] }),
+  state: one(itemState, { fields: [feedItem.id], references: [itemState.itemId] }),
+  notes: many(note),
+  summaries: many(summary),
+  itemTags: many(itemTag),
+  events: many(itemEvent),
+}));
+
+export const itemTagRelations = relations(itemTag, ({ one }) => ({
+  item: one(feedItem, { fields: [itemTag.itemId], references: [feedItem.id] }),
+  tag: one(tag, { fields: [itemTag.tagId], references: [tag.id] }),
+}));
+
+export const itemStateRelations = relations(itemState, ({ one }) => ({
+  item: one(feedItem, { fields: [itemState.itemId], references: [feedItem.id] }),
+}));
+
+export const noteRelations = relations(note, ({ one }) => ({
+  item: one(feedItem, { fields: [note.itemId], references: [feedItem.id] }),
+}));
+
+export const summaryRelations = relations(summary, ({ one }) => ({
+  item: one(feedItem, { fields: [summary.itemId], references: [feedItem.id] }),
+}));
+
+export const itemEventRelations = relations(itemEvent, ({ one }) => ({
+  item: one(feedItem, { fields: [itemEvent.itemId], references: [feedItem.id] }),
+}));
 
 // Re-export sql in case migration helpers need it downstream.
 export { sql };

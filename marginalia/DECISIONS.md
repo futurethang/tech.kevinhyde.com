@@ -93,3 +93,28 @@ Decision: Verified against the installed packages (drizzle-orm 0.45.2,
   same dialect serves a local `file:` DB now and a managed Turso URL later (the
   escape hatch), unchanged.
 Consequences: All DB access is async/awaited (deliberate — buys the Turso hatch).
+
+---
+
+## ADR-005: API layer shape (Hono) — dependency injection, summary caching, pagination
+Date: 2026-06-14
+Status: accepted
+Context: Phase 3 builds the §3.7 API. A few choices worth pinning.
+Decision:
+- Route factories take an injected AppDeps { db, sourcesConfigPath, summarizer }.
+  The summarizer is an interface (Summarizer) so Phase 4 swaps the Phase-3
+  stubSummarizer for the real Anthropic call with no route changes.
+- Auth: a single bearerAuth middleware on /api/* that internally exempts
+  /api/healthz (registered before routes so it always runs first).
+- Summary caching: POST /api/items/:id/summary returns the latest existing row for
+  (prompt_version, input_kind='metadata') unless ?regenerate=true, which always
+  inserts a new append-only row (D2). Responses carry a `cached` boolean.
+- List pagination: cursor = ULID id, ordered desc (newest first), `lt(id, cursor)`;
+  filters (status/source/tag/q) are applied as subquery conditions so the base query
+  stays a simple feed_item scan. Text search (q) spans title + description + note
+  bodies + summary bodies. raw_json is never exposed over the API.
+- Tags: POST creates a user_tag (kind='user_tag'), slugifying the label if no slug
+  is given; the controlled focus_area vocabulary is seeded only via YAML sync.
+Consequences: The whole UI (Phase 5) talks only to this API + the Zod DTOs and can
+be rebuilt without touching data/ingestion/API. Static PWA hosting is layered onto
+the same Hono app in Phase 4.

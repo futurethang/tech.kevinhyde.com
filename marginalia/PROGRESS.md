@@ -5,17 +5,19 @@
 
 ## RESUME HERE
 
-Phases 0–1 are DONE+verified. Phase 2 (ingestion/cron) CODE is complete and
-offline-verified; it is **paused at the first 🧑‍🔧 human checkpoint** awaiting real
-feed URLs to replace the REPLACE_ME entries in `config/sources.yaml` (1 real YouTube
-channel feed + 1 real podcast feed, see README/§7.3). Once the owner provides them,
-run the LIVE Phase 2 Verify: `pnpm tsx apps/server/src/dev-ingest.ts` twice (2nd run
-inserts 0 = dedup), then typo one feed_url and confirm the other still ingests while
-the broken source records last_status='error'; inspect a stored feed_item.raw_json.
-Then commit and proceed to Phase 3 (API layer).
+Phases 0–1 DONE+verified. Phase 3 (API layer) DONE+verified. Phase 2 (ingestion)
+code is complete + offline-verified but its **live** verify is still paused at the
+🧑‍🔧 feed checkpoint — the environment's network-egress allowlist blocks YouTube/Apple
+(even google.com → 403), so I can neither resolve the @handle/Apple-Podcasts links to
+canonical feeds nor run a live fetch. UNBLOCK options given to owner: add
+`www.youtube.com` + `itunes.apple.com` + the podcast's feed host to the egress
+allowlist (then I resolve via the standard YouTube Atom feed + iTunes Lookup API and
+run the live verify), or paste the resolved UC… channel id + RSS URL.
 
-Project lives at repo-root `marginalia/` (nested pnpm monorepo, ADR-002); run all
-commands from inside `marginalia/`.
+Next coding work: **Phase 4** (real Anthropic summarizer + Vite/Lit/vite-plugin-pwa
+shell, static-served from the same Hono app). Phase 4 has a 🧑‍🔧 checkpoint for
+`ANTHROPIC_API_KEY`. Project at repo-root `marginalia/` (ADR-002); run all commands
+from inside `marginalia/`.
 
 ## DONE
 
@@ -64,14 +66,32 @@ commands from inside `marginalia/`.
     (externalId/url/description/thumbnail/rawJson), syncSources upsert/seed/idempotent/
     deactivate — all ✓. `pnpm typecheck` ✓.
 
+## DONE (cont.)
+
+- **Phase 3 — API layer** (verified 2026-06-14):
+  - Deps: hono 4.12, @hono/node-server 2.0, @hono/zod-validator 0.8, dotenv.
+  - Drizzle relations added to schema.ts (relational query API; no migration impact).
+  - auth.ts (bearer, exempts /api/healthz); llm/summarize.ts (Summarizer interface +
+    stubSummarizer, PROMPT_VERSION='v1'); data/items.ts (listItems w/ filters+search+
+    cursor, getItemDetail); routes/{items,notes,sources,ingest}.ts; app.ts; index.ts
+    boot (migrate→sync→scheduler→serve) with dotenv + graceful shutdown.
+  - Verify: scripts/phase3-api.ts — 28 checks via app.request() (auth 401/200,
+    list/filter/search incl. note bodies, state+timestamps, tags create/slugify/delete,
+    notes CRUD, summary generate/cache/regenerate append-only, sources list/sync,
+    ingest resilient errors=2 no-crash, 404s) all ✓. Real HTTP boot smoke: healthz 200
+    unauth, /api/items 401→200, root placeholder, scheduler armed ✓. `pnpm typecheck` ✓.
+
 ## NOW
 
-- 🧑‍🔧 PAUSED at human checkpoint: need 2 real feed URLs before the LIVE Phase 2 verify.
+- Phase 3 complete. Phase 2 LIVE verify still blocked on feeds/egress (see RESUME HERE).
+  Ready to start Phase 4 (LLM + PWA shell).
 
 ## NEXT
 
-1. (after feeds provided) LIVE verify: dev-ingest twice (dedup), break one feed,
-   inspect raw_json; commit; update DONE.
-2. Phase 3 — API layer (§3.7): Hono + @hono/node-server + @hono/zod-validator;
-   auth.ts bearer middleware; routes (items list/detail, state PATCH, tags, notes,
-   sources, ingest/run, summary stub); boot wiring in index.ts.
+1. Phase 4 — install @anthropic-ai/sdk; implement real summarize.ts (on-demand,
+   append-only, cache-unless-regenerate) behind the existing Summarizer interface.
+   🧑‍🔧 needs ANTHROPIC_API_KEY (§7.2) — STOP and ask before the live summary verify.
+2. Phase 4 — scaffold apps/web (Vite + Lit + vite-plugin-pwa): manifest, Workbox
+   runtime caching (NetworkFirst for GET /api/items*, never cache mutations), token
+   gate (IndexedDB), API client; serve apps/web/dist from the Hono app at '/'.
+3. (when feeds/egress available) finish Phase 2 live verify.
