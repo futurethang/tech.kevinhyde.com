@@ -1,0 +1,19 @@
+{
+  "name": "marginalia",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "typecheck": "pnpm -r typecheck",
+    "check:config": "tsx scripts/check-config.ts"
+  },
+  "devDependencies": {
+    "@marginalia/core": "workspace:*",
+    "@types/node": "^25.9.3",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3"
+  }
+}

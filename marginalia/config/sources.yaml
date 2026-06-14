@@ -1,0 +1,37 @@
+# Marginalia source list — THE feed registry. Pure data, edited by humans (§3.2).
+#
+# This file is declarative truth for WHICH sources exist and their metadata.
+# Runtime state (last_polled_at, last_error, ...) lives in the DB `source` row.
+# On sync, the `active` flag here wins; the API may toggle it at runtime, but the
+# next sync re-asserts this file. (Precedence rule — see README.)
+#
+# `slug` is the STABLE identity key. Sources are upserted by slug and never
+# deleted (missing slugs are deactivated, not destroyed). Never reuse a slug.
+#
+# To add a feed: append an entry and run `POST /api/sources/sync` (or restart
+# the server). No code change, no logic redeploy.
+
+defaults:
+  poll_interval_minutes: 30 # overridable per source
+
+sources:
+  # ---- REPLACE_ME: example YouTube channel ----------------------------------
+  # See README §7.3 for how to find a channel_id (UC...). The @handle does NOT
+  # work in the feed URL. Set exclude_shorts to skip Shorts (the parser swaps
+  # the UC prefix for UULF to build a long-form-only playlist feed).
+  - slug: replace-me-youtube
+    title: REPLACE_ME YouTube Channel
+    type: youtube
+    feed_url: "https://www.youtube.com/feeds/videos.xml?channel_id=UC_REPLACE_ME"
+    exclude_shorts: true
+    focus_areas: [architecture, engineering-opinion]
+    active: true
+
+  # ---- REPLACE_ME: example podcast ------------------------------------------
+  # Find the show's RSS URL (show site, or search "<show name> RSS feed").
+  - slug: replace-me-podcast
+    title: REPLACE_ME Podcast
+    type: podcast
+    feed_url: "https://feeds.example.com/REPLACE_ME.xml"
+    focus_areas: [architecture, lit-web-components]
+    active: true
