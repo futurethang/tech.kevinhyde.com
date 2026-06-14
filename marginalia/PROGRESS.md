@@ -5,16 +5,17 @@
 
 ## RESUME HERE
 
-Phases 0 and 1 are DONE and verified. The project lives at repo-root `marginalia/`
-as a self-contained nested pnpm monorepo isolated from the parent `tech.kevinhyde.com`
-workspace (ADR-002). Run all commands from inside `marginalia/`. The data layer is
-complete: Drizzle schema (§3.3), reviewed migration `drizzle/0000_init.sql`, libSQL
-client + migrate-on-start (`packages/core/src/db.ts`), and drizzle-zod schemas
-(`zod.ts`). Next up is **Phase 2 (ingestion/cron)**: `syncSources()`, YouTube +
-podcast parsers, `runIngest()` with dedup + per-source resilience. Phase 2 contains
-the FIRST 🧑‍🔧 human checkpoint — real feed URLs in `config/sources.yaml` — so build
-the pipeline, then STOP and ask for 1 real YouTube channel feed + 1 real podcast feed
-before the live-data Verify step.
+Phases 0–1 are DONE+verified. Phase 2 (ingestion/cron) CODE is complete and
+offline-verified; it is **paused at the first 🧑‍🔧 human checkpoint** awaiting real
+feed URLs to replace the REPLACE_ME entries in `config/sources.yaml` (1 real YouTube
+channel feed + 1 real podcast feed, see README/§7.3). Once the owner provides them,
+run the LIVE Phase 2 Verify: `pnpm tsx apps/server/src/dev-ingest.ts` twice (2nd run
+inserts 0 = dedup), then typo one feed_url and confirm the other still ingests while
+the broken source records last_status='error'; inspect a stored feed_item.raw_json.
+Then commit and proceed to Phase 3 (API layer).
+
+Project lives at repo-root `marginalia/` (nested pnpm monorepo, ADR-002); run all
+commands from inside `marginalia/`.
 
 ## DONE
 
@@ -48,21 +49,29 @@ before the live-data Verify step.
     source+tag+source_tag+feed_item+item_state+note+summary ✓; dedup index rejected a
     duplicate ✓; append-only summary produced 2 rows ✓; `pnpm typecheck` ✓.
 
+## DONE (cont.)
+
+- **Phase 2 — ingestion/cron** CODE (offline-verified 2026-06-14; live verify pending):
+  - Deps: rss-parser 3.13, node-cron 4.2, p-limit 7.3, drizzle-orm (server).
+  - `apps/server/src/ingest/`: normalize.ts (FeedItemDraft + safe helpers);
+    parse-youtube.ts (Atom + yt:/media:, exclude_shorts UC→UULF transform, thumbnail
+    from videoId); parse-podcast.ts (RSS + content:encoded + itunes:, feed-image
+    fallback); sync.ts (syncSources: upsert by slug, seed tags+links, deactivate
+    dropped); run.ts (runIngest: due filter, p-limit 4, onConflictDoNothing dedup,
+    item_state 'new' + item_tag seed (D5) + 'ingested' event, per-source try/catch
+    health); scheduler.ts (node-cron tick from smallest interval); dev-ingest.ts entry.
+  - Offline verify (scripts/phase2-offline.ts): URL transform, YT + podcast mapping
+    (externalId/url/description/thumbnail/rawJson), syncSources upsert/seed/idempotent/
+    deactivate — all ✓. `pnpm typecheck` ✓.
+
 ## NOW
 
-- Phase 1 complete. Ready to start Phase 2 (ingestion/cron).
+- 🧑‍🔧 PAUSED at human checkpoint: need 2 real feed URLs before the LIVE Phase 2 verify.
 
 ## NEXT
 
-1. Phase 2 — install `rss-parser`, `node-cron`, `p-limit`.
-2. `apps/server/src/ingest/{sync,parse-youtube,parse-podcast,normalize,run}.ts`:
-   `syncSources()` (YAML → upsert source by slug, seed tag+source_tag); YouTube parser
-   (Atom + yt:/media:, honor exclude_shorts via UC→UULF playlist trick, §7.3); podcast
-   parser; `runIngest()` (due sources → fetch/parse, concurrency-limited → upsert on
-   (source_id, external_id) → create item_state 'new' + seed item_tag per D5 →
-   per-source try/catch health). Standalone tsx cron entry for now.
-3. 🧑‍🔧 STOP before live-data Verify: ask owner for 1 real YouTube channel feed + 1
-   real podcast feed to replace the REPLACE_ME entries (§7.3).
-4. Verify: run ingest twice (2nd inserts 0 = dedup); break one feed URL and confirm
-   the other still ingests + broken source shows last_status='error'; inspect a
-   stored feed_item.raw_json.
+1. (after feeds provided) LIVE verify: dev-ingest twice (dedup), break one feed,
+   inspect raw_json; commit; update DONE.
+2. Phase 3 — API layer (§3.7): Hono + @hono/node-server + @hono/zod-validator;
+   auth.ts bearer middleware; routes (items list/detail, state PATCH, tags, notes,
+   sources, ingest/run, summary stub); boot wiring in index.ts.
