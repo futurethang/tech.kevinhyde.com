@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { parse as parseYaml } from 'yaml';
 import { z } from 'zod';
+import { SOURCE_TYPE_VALUES } from './constants.ts';
 
 /**
  * config/sources.yaml is the declarative source of truth for WHICH feeds exist
@@ -12,9 +13,6 @@ import { z } from 'zod';
 
 const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
-export const SOURCE_TYPES = ['youtube', 'podcast'] as const;
-export type SourceType = (typeof SOURCE_TYPES)[number];
-
 /** A single feed entry, exactly as written in YAML (pre-normalization). */
 const RawSourceSchema = z
   .object({
@@ -23,7 +21,7 @@ const RawSourceSchema = z
       .min(1)
       .regex(SLUG_RE, 'slug must be lowercase alphanumerics separated by single hyphens'),
     title: z.string().min(1),
-    type: z.enum(SOURCE_TYPES),
+    type: z.enum(SOURCE_TYPE_VALUES),
     feed_url: z.url(),
     exclude_shorts: z.boolean().default(false),
     focus_areas: z.array(z.string().regex(SLUG_RE, 'focus_area must be a slug')).default([]),

@@ -42,3 +42,54 @@ Consequences: Matches the brief's exact layout (§3.1). GitHub Pages build is un
 Marginalia deploys independently to Fly.io. Slight deviation from this repo's
 "apps live in /apps/" convention, justified by the different deploy target and the
 nested-workspace constraint.
+
+---
+
+## ADR-003: Data-model migration-safety choices (D1–D5) + timestamp convention
+Date: 2026-06-14
+Status: accepted
+Context: §3.3 of the brief locks the *shape* of the schema and a set of decision
+points (D1–D5) whose whole purpose is to keep later UI iteration and model changes
+cheap and migration-free. It also requires picking one timestamp representation.
+Decision:
+- TIMESTAMP CONVENTION: epoch **milliseconds stored as integer** columns, consistent
+  across every table (created_at/updated_at and the domain *_at columns). JS-native
+  (Date.now()), sortable, readable enough in raw SQL. Chosen over ISO text.
+- Every entity has a ULID text primary key (ids.ts → newId()); every table has
+  created_at + updated_at (including the join tables source_tag/item_tag — strict
+  compliance with "every table", even though joins are delete+recreate rather than
+  updated in place).
+- D1: feed_item.raw_json (TEXT NOT NULL) stores the full original feed entry.
+- D2: summary rows are append-only — NO unique constraint on
+  (item_id, model, prompt_version, input_kind), so regenerate adds a row. input_kind
+  ('metadata'|'transcript') reserves the transcript seam with no future migration.
+- D3: a single `tag` table with kind ('focus_area'|'user_tag').
+- D4: item_state is its own table, 1:1 with feed_item (unique item_id), so
+  re-ingesting never clobbers triage decisions.
+- D5: SEED item_tag from a source's focus_areas at ingest = YES (recommended), with
+  such tags marked removable. (Implemented in Phase 2 ingest; recorded here.)
+- Status/type fields (type, status, kind, last_status, input_kind, event_type) are
+  TEXT constrained at the TS layer via .$type<>() against documented *_VALUES consts —
+  not integer enums. exclude_shorts/active are boolean flags stored as integer.
+- item_event audit table IS included in v1 (cheap; its history is not backfillable).
+Consequences: First migration drizzle/0000_init.sql reviewed and committed. Future
+UI can surface any raw_json field, show summary history / regenerate, and split or
+merge tag presentation — all with zero schema change.
+
+---
+
+## ADR-004: libSQL/Drizzle access patterns
+Date: 2026-06-14
+Status: accepted
+Context: The libSQL driver and drizzle-kit config have version-specific syntax; the
+brief forbids trusting that from memory.
+Decision: Verified against the installed packages (drizzle-orm 0.45.2,
+@libsql/client 0.17.3, drizzle-kit 0.31.10, drizzle-zod 0.8.3, zod 4.4.3):
+- db.ts uses createClient() from @libsql/client + drizzle() from drizzle-orm/libsql;
+  migrations applied programmatically via migrate() from drizzle-orm/libsql/migrator
+  (runMigrations()). createDb() turns on `PRAGMA foreign_keys = ON` per connection
+  (SQLite/libSQL default it off).
+- drizzle.config.ts uses dialect 'turso' with dbCredentials { url, authToken? } — the
+  same dialect serves a local `file:` DB now and a managed Turso URL later (the
+  escape hatch), unchanged.
+Consequences: All DB access is async/awaited (deliberate — buys the Turso hatch).

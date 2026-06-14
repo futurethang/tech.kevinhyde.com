@@ -5,12 +5,20 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./sources-config": "./src/sources-config.ts"
+    "./sources-config": "./src/sources-config.ts",
+    "./schema": "./src/schema.ts",
+    "./db": "./src/db.ts",
+    "./zod": "./src/zod.ts",
+    "./ids": "./src/ids.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
+    "@libsql/client": "^0.17.3",
+    "drizzle-orm": "^0.45.2",
+    "drizzle-zod": "^0.8.3",
+    "ulid": "^3.0.2",
     "yaml": "^2.9.0",
     "zod": "^4.4.3"
   }
