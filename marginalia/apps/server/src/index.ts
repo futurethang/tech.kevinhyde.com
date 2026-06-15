@@ -5,6 +5,7 @@ import { createApp } from './app.ts';
 import { syncSources } from './ingest/sync.ts';
 import { startScheduler } from './ingest/scheduler.ts';
 import { stubSummarizer } from './llm/summarize.ts';
+import { createAnthropicSummarizer } from './llm/summarize-anthropic.ts';
 
 /**
  * Boot sequence (§3.4): open DB → migrate (fail hard) → sync sources from YAML →
@@ -33,8 +34,16 @@ async function main(): Promise<void> {
 
   startScheduler(db, config);
 
-  // Phase 4 swaps stubSummarizer for the real Anthropic-backed summarizer.
-  const app = createApp({ db, sourcesConfigPath, summarizer: stubSummarizer, appToken });
+  // Real Anthropic summarizer when a key is set; the stub otherwise (so the app
+  // runs end-to-end without a key — summaries just return canned text).
+  const anthropicKey = process.env.ANTHROPIC_API_KEY;
+  const summarizer = anthropicKey
+    ? createAnthropicSummarizer({ apiKey: anthropicKey, model: process.env.ANTHROPIC_MODEL })
+    : stubSummarizer;
+  console.log(`[boot] summarizer: ${anthropicKey ? 'anthropic' : 'stub (no ANTHROPIC_API_KEY)'}`);
+
+  const webDist = process.env.WEB_DIST ?? './apps/web/dist';
+  const app = createApp({ db, sourcesConfigPath, summarizer, appToken, webDist });
 
   serve({ fetch: app.fetch, port }, (info) => {
     console.log(`[boot] ready — http://localhost:${info.port} (db: ${process.env.DATABASE_URL ?? 'file:./data/app.db'})`);

@@ -118,3 +118,37 @@ Decision:
 Consequences: The whole UI (Phase 5) talks only to this API + the Zod DTOs and can
 be rebuilt without touching data/ingestion/API. Static PWA hosting is layered onto
 the same Hono app in Phase 4.
+
+---
+
+## ADR-006: LLM summarizer + PWA shell choices (Phases 4–5)
+Date: 2026-06-15
+Status: accepted
+Context: Phase 4 wires the real Anthropic summarizer and the Vite/Lit PWA; Phase 5
+adds the disposable triage UI.
+Decision:
+- Summarizer: createAnthropicSummarizer() implements the existing Summarizer
+  interface using @anthropic-ai/sdk, model `claude-haiku-4-5` (Haiku-tier per §2;
+  confirmed current via the claude-api reference). Plain messages.create with a
+  system prompt (terse recall voice: TL;DR + 3–5 key points + why-it-matters),
+  max_tokens 1024; records response.model + usage.input/output_tokens. index.ts
+  uses it when ANTHROPIC_API_KEY is set, else stubSummarizer — the app runs
+  end-to-end without a key. NOTE: api.anthropic.com IS reachable through this
+  environment's egress allowlist (probe returned 404, not 403), so live summaries
+  work here once a key is provided (unlike YouTube/Apple, which are blocked).
+- PWA: Vite 8 + Lit 3 + vite-plugin-pwa 1.3 (generateSW/Workbox). Manifest name
+  "Marginalia", standalone, maskable placeholder icons (generated dependency-free
+  via scripts/generate-icons.mjs — flagged for redesign). Runtime caching:
+  NetworkFirst for GET /api/items* only; mutations never cached (offline mutations
+  surface "offline — change not saved"). Token stored in IndexedDB (not
+  localStorage, §3.9). TS uses experimentalDecorators + useDefineForClassFields:false
+  for Lit classic decorators; web tsconfig is standalone (DOM lib, no node types).
+- Static hosting: the Hono app serves apps/web/dist at '/' via
+  @hono/node-server/serve-static, registered after /api so API routes win, with
+  index.html SPA fallback (WEB_DIST env, default ./apps/web/dist).
+- Phase 5 UI: Lit components (app-shell + auth-gate + list/detail/sources views),
+  each carrying a "SCAFFOLD UI — disposable" banner; they talk only to api.ts + the
+  DTOs, so the UI can be rebuilt without touching data/ingestion/API.
+Consequences: One deployable process serves API + PWA. Deep-links open externally
+via <a target="_blank" rel="noopener"> — no embedded players. Live summary verify
+and the offline-install verify are the remaining manual checks (key + a browser).

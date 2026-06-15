@@ -1,3 +1,5 @@
-// Marginalia PWA entry point.
-// Phase 0: placeholder. Vite + Lit + vite-plugin-pwa shell lands in Phase 4 (§3.9).
-export {};
+import { registerSW } from 'virtual:pwa-register';
+import './app-shell.ts';
+
+// Auto-update the service worker (precaches app shell; runtime-caches item reads).
+registerSW({ immediate: true });

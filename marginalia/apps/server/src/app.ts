@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import { serveStatic } from '@hono/node-server/serve-static';
 import { bearerAuth } from './auth.ts';
 import type { AppDeps } from './deps.ts';
 import { itemsRoute } from './routes/items.ts';
@@ -8,6 +9,8 @@ import { ingestRoute } from './routes/ingest.ts';
 
 export interface CreateAppOptions extends AppDeps {
   appToken: string;
+  /** Path to the built PWA (apps/web/dist). When set, served at '/'. */
+  webDist?: string;
 }
 
 /**
@@ -29,8 +32,14 @@ export function createApp(opts: CreateAppOptions): Hono {
 
   app.route('/api', api);
 
-  // Placeholder root until the PWA is served here (Phase 4).
-  app.get('/', (c) => c.text('Marginalia API. PWA served here in Phase 4.'));
+  // Serve the built PWA at '/' (one process, one URL). Registered after /api so
+  // API routes win. Unknown non-API paths fall back to index.html (SPA routing).
+  if (opts.webDist) {
+    app.use('/*', serveStatic({ root: opts.webDist }));
+    app.get('*', serveStatic({ path: `${opts.webDist}/index.html` }));
+  } else {
+    app.get('/', (c) => c.text('Marginalia API (web dist not configured).'));
+  }
 
   return app;
 }

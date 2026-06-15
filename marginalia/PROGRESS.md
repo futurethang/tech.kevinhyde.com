@@ -5,19 +5,19 @@
 
 ## RESUME HERE
 
-Phases 0–1 DONE+verified. Phase 3 (API layer) DONE+verified. Phase 2 (ingestion)
-code is complete + offline-verified but its **live** verify is still paused at the
-🧑‍🔧 feed checkpoint — the environment's network-egress allowlist blocks YouTube/Apple
-(even google.com → 403), so I can neither resolve the @handle/Apple-Podcasts links to
-canonical feeds nor run a live fetch. UNBLOCK options given to owner: add
-`www.youtube.com` + `itunes.apple.com` + the podcast's feed host to the egress
-allowlist (then I resolve via the standard YouTube Atom feed + iTunes Lookup API and
-run the live verify), or paste the resolved UC… channel id + RSS URL.
+Phases 0–1, 3, 4, 5 DONE+verified (code/offline/HTTP). Two things still need a human:
+(1) **Phase 2 live verify** — blocked on the egress allowlist: YouTube + Apple are
+blocked (even google.com → 403), so I can't resolve the @handle / Apple-Podcasts
+links or do a live fetch. Owner options: add `www.youtube.com` + `itunes.apple.com`
++ the podcast feed host to the egress allowlist (then I resolve via the standard
+YouTube Atom feed + iTunes Lookup API and run it), or paste the UC… channel id + RSS
+URL. (2) **Live LLM summary verify** — needs `ANTHROPIC_API_KEY` (api.anthropic.com
+IS reachable here — probe returned 404 not 403 — so it'll work once keyed). The PWA
+**offline-install** verify is a manual browser step.
 
-Next coding work: **Phase 4** (real Anthropic summarizer + Vite/Lit/vite-plugin-pwa
-shell, static-served from the same Hono app). Phase 4 has a 🧑‍🔧 checkpoint for
-`ANTHROPIC_API_KEY`. Project at repo-root `marginalia/` (ADR-002); run all commands
-from inside `marginalia/`.
+Next coding work: **Phase 6** (Dockerfile + fly.toml + README deploy runbook). Then
+deploy is a 🧑‍🔧 action (§7.5). Project at repo-root `marginalia/` (ADR-002); run all
+commands from inside `marginalia/`.
 
 ## DONE
 
@@ -81,17 +81,33 @@ from inside `marginalia/`.
     ingest resilient errors=2 no-crash, 404s) all ✓. Real HTTP boot smoke: healthz 200
     unauth, /api/items 401→200, root placeholder, scheduler armed ✓. `pnpm typecheck` ✓.
 
+## DONE (cont.)
+
+- **Phase 4 — LLM summaries + PWA shell** (verified 2026-06-15, minus key/browser steps):
+  - llm/summarize-anthropic.ts: real Summarizer via @anthropic-ai/sdk (claude-haiku-4-5,
+    system prompt = terse recall voice, records model + token usage). index.ts uses it
+    when ANTHROPIC_API_KEY set, else stub. (ADR-006)
+  - apps/web: Vite 8 + Lit 3 + vite-plugin-pwa 1.3. Manifest, Workbox NetworkFirst on
+    GET /api/items*, placeholder maskable icons (generate-icons.mjs), IndexedDB token
+    store (idb.ts), api.ts client. Hono serves apps/web/dist at '/' (serve-static, SPA
+    fallback). Verify: typecheck ✓, vite build ✓ (sw.js + manifest + precache), HTTP
+    smoke ✓ (/, /manifest.webmanifest, /sw.js, icon, SPA fallback, /api 401).
+- **Phase 5 — minimal triage UI** (built; manual e2e pending real data):
+  - app-shell (token gate + routing) + auth-gate + views/{list,detail,sources}.ts, each
+    a "SCAFFOLD UI — disposable" Lit component talking only to api.ts + DTOs. List
+    filters/search + inline queue/ignore/save + deep-link out; detail = description,
+    notes CRUD, summarize/regenerate, tags, Open↗; sources = health + Refresh now +
+    Sync config. Typecheck + build ✓.
+
 ## NOW
 
-- Phase 3 complete. Phase 2 LIVE verify still blocked on feeds/egress (see RESUME HERE).
-  Ready to start Phase 4 (LLM + PWA shell).
+- Phases 4–5 complete (code/build/HTTP verified). Ready for Phase 6 (deploy artifacts).
 
 ## NEXT
 
-1. Phase 4 — install @anthropic-ai/sdk; implement real summarize.ts (on-demand,
-   append-only, cache-unless-regenerate) behind the existing Summarizer interface.
-   🧑‍🔧 needs ANTHROPIC_API_KEY (§7.2) — STOP and ask before the live summary verify.
-2. Phase 4 — scaffold apps/web (Vite + Lit + vite-plugin-pwa): manifest, Workbox
-   runtime caching (NetworkFirst for GET /api/items*, never cache mutations), token
-   gate (IndexedDB), API client; serve apps/web/dist from the Hono app at '/'.
-3. (when feeds/egress available) finish Phase 2 live verify.
+1. Phase 6 — Dockerfile (build web → bundle server → migrate on start → serve $PORT),
+   fly.toml (1 app, volume at /data, DATABASE_URL=file:/data/app.db,
+   min_machines_running=1, healthcheck /api/healthz), README deploy/backup runbook +
+   Turso escape-hatch note.
+2. 🧑‍🔧 checkpoints outstanding: feeds/egress (Phase 2 live), ANTHROPIC_API_KEY (live
+   summary), APP_TOKEN + Fly deploy (§7.4/§7.5), manual PWA offline-install check.
