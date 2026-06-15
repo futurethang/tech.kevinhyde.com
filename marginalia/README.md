@@ -66,11 +66,88 @@ deactivated, preserving history).
 To add a YouTube channel you need its **channel ID** (`UC…`) — the `@handle` does
 not work in the feed URL. See the setup checklist for how to find it.
 
+## Environment & secrets
+
+Copy `.env.example` → `.env` and fill it in (see the variable table in
+`.env.example`). `.env` is gitignored; never commit real secrets.
+
+- `APP_TOKEN` — required; the shared bearer token. Generate: `openssl rand -hex 32`.
+  You enter this once in the PWA's access screen.
+- `ANTHROPIC_API_KEY` — required only for real summaries (Phase 4). Without it, the
+  server falls back to a stub summarizer and everything else works.
+- `DATABASE_URL` — `file:./data/app.db` in dev; `file:/data/app.db` in prod (Fly volume).
+
+## Run locally
+
+```bash
+cd marginalia
+pnpm install
+pnpm --filter @marginalia/web build          # build the PWA once
+APP_TOKEN=$(openssl rand -hex 32) pnpm tsx apps/server/src/index.ts
+# → http://localhost:8080  (enter the APP_TOKEN on the access screen)
+```
+
+For PWA hot-reload during UI work, run `pnpm --filter @marginalia/web dev`
+alongside the server (Vite proxies `/api` to `:8080`).
+
+Add feeds by editing `config/sources.yaml`, then **Sync config** + **Refresh now**
+in the Sources view (or `POST /api/sources/sync` then `POST /api/ingest/run`).
+
+## Deploy to Fly.io (§7.5)
+
+One app, one process, one volume holding `app.db`. `min_machines_running = 1` keeps
+the in-process cron alive (a few $/month — accepted tradeoff, ADR-001).
+
+```bash
+# 1. Install flyctl + sign in
+fly auth login
+
+# 2. From marginalia/: launch (accept the app, DECLINE auto-deploy for now)
+fly launch
+
+# 3. Create the volume that holds the database (pick your region)
+fly volumes create marginalia_data --size 1 --region <region>
+#    Confirm fly.toml mounts it at /data and DATABASE_URL=file:/data/app.db
+
+# 4. Set secrets (never in git / fly.toml)
+fly secrets set APP_TOKEN=<from openssl rand -hex 32> ANTHROPIC_API_KEY=<sk-ant-...>
+
+# 5. Deploy + open
+fly deploy
+fly open      # enter your APP_TOKEN on the access screen
+```
+
+Migrations run automatically on container start. The Dockerfile builds the PWA and
+runs the server (which serves both the API and the static PWA on `$PORT`).
+
+## Backups & restore
+
+Fly snapshots the volume **daily** automatically (v1 backup strategy). To grab the
+DB manually:
+
+```bash
+fly ssh console                              # poke around /data
+fly ssh sftp get /data/app.db ./backup-app.db   # copy it off the machine
+```
+
+To restore, copy a backup back to `/data/app.db` (stop the machine first) or
+restore the volume from a Fly snapshot.
+
+*Later hardening (not built):* Litestream for continuous replication, or move to
+managed Turso (below).
+
+## Escape hatch: file → managed Turso (zero code change)
+
+All DB access goes through the libSQL driver (async), so moving off the local file
+to managed, zero-ops Turso storage is a **config change, not a code change**:
+
+1. Create a Turso database; get its libSQL URL + auth token.
+2. Set `DATABASE_URL=libsql://<your-db>.turso.io` and
+   `DATABASE_AUTH_TOKEN=<token>` (as Fly secrets).
+3. Redeploy. `drizzle.config.ts` already uses dialect `turso`, so `drizzle-kit`
+   tooling works against it too.
+
 ## Status
 
-Under active construction — see `PROGRESS.md` for current phase and `DECISIONS.md`
-for the ADR log. Run/deploy notes (Fly.io launch, backups, the Turso escape hatch)
-are filled in as later phases land.
-
-<!-- TODO(phase-6): full setup checklist (§7), deploy runbook, backup/restore,
-     Turso-migration escape hatch. -->
+See `PROGRESS.md` for the current phase and `DECISIONS.md` (ADR-001…006) for the
+decision log.

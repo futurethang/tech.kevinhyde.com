@@ -1,0 +1,42 @@
+# Fly.io config (§3.10). One app, one process, one volume for the SQLite file.
+# `fly launch` may regenerate parts of this — keep the [mounts], [env], and
+# min_machines_running settings below.
+app = "marginalia"
+# 🧑‍🔧 set your region on `fly launch` (e.g. "sea", "iad", "lhr").
+primary_region = "sea"
+
+[build]
+
+[env]
+  PORT = "8080"
+  # SQLite file lives on the mounted volume. Flip to a Turso libSQL URL later with
+  # zero code change (set DATABASE_AUTH_TOKEN as a secret) — the escape hatch.
+  DATABASE_URL = "file:/data/app.db"
+  MIGRATIONS_DIR = "./drizzle"
+  SOURCES_CONFIG_PATH = "./config/sources.yaml"
+  WEB_DIST = "./apps/web/dist"
+
+# Persistent volume holding app.db. Create once:
+#   fly volumes create marginalia_data --size 1 --region <region>
+[mounts]
+  source = "marginalia_data"
+  destination = "/data"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  # In-process cron requires the machine to stay up — do NOT auto-stop.
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [[http_service.checks]]
+    method = "GET"
+    path = "/api/healthz"
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "10s"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"

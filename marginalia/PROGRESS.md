@@ -99,15 +99,24 @@ commands from inside `marginalia/`.
     notes CRUD, summarize/regenerate, tags, Open↗; sources = health + Refresh now +
     Sync config. Typecheck + build ✓.
 
+- **Phase 6 — deploy artifacts** (authored; in-container build blocked by Docker Hub
+  rate-limit in this env, not a Dockerfile defect):
+  - Dockerfile (node:22-slim, pnpm install --frozen-lockfile → build web → `tsx` boot;
+    migrate-on-start; env defaults), .dockerignore, fly.toml (1 app, volume at /data,
+    DATABASE_URL=file:/data/app.db, min_machines_running=1, /api/healthz check),
+    README deploy/backup runbook + Turso escape hatch. Each Dockerfile step is verified
+    locally (pnpm install, web build, tsx boot); `fly deploy` runs on Fly's builders.
+
 ## NOW
 
-- Phases 4–5 complete (code/build/HTTP verified). Ready for Phase 6 (deploy artifacts).
+- All build phases (0–6) authored & verified to the extent possible without external
+  network/secrets. Remaining work is human-gated (see NEXT / RESUME HERE).
 
-## NEXT
+## NEXT (all 🧑‍🔧)
 
-1. Phase 6 — Dockerfile (build web → bundle server → migrate on start → serve $PORT),
-   fly.toml (1 app, volume at /data, DATABASE_URL=file:/data/app.db,
-   min_machines_running=1, healthcheck /api/healthz), README deploy/backup runbook +
-   Turso escape-hatch note.
-2. 🧑‍🔧 checkpoints outstanding: feeds/egress (Phase 2 live), ANTHROPIC_API_KEY (live
-   summary), APP_TOKEN + Fly deploy (§7.4/§7.5), manual PWA offline-install check.
+1. Phase 2 live verify — needs feeds/egress (add YouTube+Apple+feed host to egress
+   allowlist, or paste UC… id + RSS URL). Then dev-ingest twice (dedup), break a feed.
+2. Live LLM summary verify — needs ANTHROPIC_API_KEY (host reachable here).
+3. PWA offline-install verify — manual browser step.
+4. Deploy (§7.5) — fly launch / volume / secrets (APP_TOKEN, ANTHROPIC_API_KEY) /
+   fly deploy; confirm DB persists across `fly machine restart`.
