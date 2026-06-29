@@ -1,6 +1,15 @@
 {
   "apps": [
     {
+      "slug": "blade-storage-box",
+      "name": "Blade Storage Box",
+      "description": "3D printable STL for storing ~10 Stanley L-series 1.8mm snap-off utility knife blades",
+      "type": "static",
+      "status": "live",
+      "createdAt": "2026-06-29",
+      "tags": ["3d-printing", "stl", "tool", "download"]
+    },
+    {
       "slug": "chef-jenny",
       "name": "Chef Jenny",
       "description": "Personal brand website for Chef Jenny — Seattle private chef, cooking class instructor, and owner of Duchess café",

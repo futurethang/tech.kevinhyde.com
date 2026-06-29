@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blade Storage Box — 3D Printable STL</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 2rem 1.25rem 4rem;
+      line-height: 1.55;
+    }
+    h1 { margin-bottom: 0.25rem; }
+    .sub { color: #888; margin-top: 0; }
+    .downloads {
+      display: grid;
+      gap: 0.75rem;
+      margin: 1.5rem 0 2rem;
+    }
+    .downloads a {
+      display: block;
+      padding: 0.85rem 1rem;
+      border: 1px solid currentColor;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .downloads a small { display: block; font-weight: 400; opacity: 0.7; margin-top: 0.2rem; }
+    dl { display: grid; grid-template-columns: max-content 1fr; gap: 0.4rem 1rem; }
+    dt { font-weight: 600; }
+    code { background: rgba(127,127,127,0.15); padding: 0.05rem 0.35rem; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Snap-off Blade Storage Box</h1>
+    <p class="sub">3D printable STL for Stanley L-series 1.8mm blades — holds ~10.</p>
+
+    <div class="downloads">
+      <a href="blade-box-body.stl" download>Download box body (.stl)
+        <small>106.5 × 23.5 × 11 mm — open at one end</small></a>
+      <a href="blade-box-cap.stl" download>Download cap (.stl)
+        <small>14.5 × 27.9 × 15.4 mm — slip-fit over the open end</small></a>
+    </div>
+
+    <h2>Specs</h2>
+    <dl>
+      <dt>Fits</dt><dd>Stanley Quick Point 1.8mm L-series (~100 × 18 × 0.5 mm) snap-off blades</dd>
+      <dt>Capacity</dt><dd>~10 blades stacked flat</dd>
+      <dt>Cavity</dt><dd>104 × 19.5 × 7 mm</dd>
+      <dt>Wall</dt><dd>2 mm</dd>
+      <dt>Closure</dt><dd>Friction-fit cap slides over the open short end</dd>
+    </dl>
+
+    <h2>Print notes</h2>
+    <ul>
+      <li>Print both parts flat (largest face down). No supports needed.</li>
+      <li>0.2 mm layer height, 2–3 perimeters, 20% infill is plenty.</li>
+      <li>Cap clearance is 0.2 mm per side — if your printer runs tight, scale the cap by ~101% on X/Y.</li>
+      <li>Any rigid filament works (PLA, PETG). Avoid flexibles.</li>
+    </ul>
+
+    <p><small>Files regenerated from <code>generate_stl.py</code> in the repo — tweak dimensions there if you need a different capacity.</small></p>
+  </main>
+</body>
+</html>
