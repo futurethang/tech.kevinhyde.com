@@ -15,11 +15,7 @@
     }
     h1 { margin-bottom: 0.25rem; }
     .sub { color: #888; margin-top: 0; }
-    .downloads {
-      display: grid;
-      gap: 0.75rem;
-      margin: 1.5rem 0 2rem;
-    }
+    .downloads { display: grid; gap: 0.75rem; margin: 1.5rem 0 2rem; }
     .downloads a {
       display: block;
       padding: 0.85rem 1rem;
@@ -37,33 +33,32 @@
 <body>
   <main>
     <h1>Snap-off Blade Storage Box</h1>
-    <p class="sub">3D printable STL for Stanley L-series 1.8mm blades — holds ~10.</p>
+    <p class="sub">Sliding-lid (pencil-box style) — fits ~10 Stanley L-series 1.8mm blades.</p>
 
     <div class="downloads">
       <a href="blade-box-body.stl" download>Download box body (.stl)
-        <small>106.5 × 23.5 × 11 mm — open at one end</small></a>
-      <a href="blade-box-cap.stl" download>Download cap (.stl)
-        <small>14.5 × 27.9 × 15.4 mm — slip-fit over the open end</small></a>
+        <small>110 × 24.5 × 12.9 mm — open top, captive lid groove</small></a>
+      <a href="blade-box-lid.stl" download>Download lid (.stl)
+        <small>113 × 22.0 × 2.0 mm — slides in along the long axis</small></a>
     </div>
 
     <h2>Specs</h2>
     <dl>
-      <dt>Fits</dt><dd>Stanley Quick Point 1.8mm L-series (~100 × 18 × 0.5 mm) snap-off blades</dd>
+      <dt>Fits</dt><dd>Stanley Quick Point 1.8mm L-series (~100 × 18 × 0.5 mm)</dd>
       <dt>Capacity</dt><dd>~10 blades stacked flat</dd>
-      <dt>Cavity</dt><dd>104 × 19.5 × 7 mm</dd>
-      <dt>Wall</dt><dd>2 mm</dd>
-      <dt>Closure</dt><dd>Friction-fit cap slides over the open short end</dd>
+      <dt>Cavity</dt><dd>106 × 19.5 × 7 mm</dd>
+      <dt>Closure</dt><dd>Sliding lid; pull the 5 mm tab at the open end to extract</dd>
     </dl>
 
     <h2>Print notes</h2>
     <ul>
-      <li>Print both parts flat (largest face down). No supports needed.</li>
-      <li>0.2 mm layer height, 2–3 perimeters, 20% infill is plenty.</li>
-      <li>Cap clearance is 0.2 mm per side — if your printer runs tight, scale the cap by ~101% on X/Y.</li>
-      <li>Any rigid filament works (PLA, PETG). Avoid flexibles.</li>
+      <li><strong>No supports needed.</strong> Body prints with the cavity up; the lid groove uses a 45° chamfered ceiling so every layer is supported.</li>
+      <li>Print both flat on the bed at 0.2 mm layers, 2–3 perimeters, 15–20% infill.</li>
+      <li>PLA or PETG. Avoid flexible filaments — the lid needs to stay rigid.</li>
+      <li>If your printer over-extrudes, the lid may bind on first insertion. Slide it in and out a few times to wear in the fit, or scale the lid 99% on X/Y.</li>
     </ul>
 
-    <p><small>Files regenerated from <code>generate_stl.py</code> in the repo — tweak dimensions there if you need a different capacity.</small></p>
+    <p><small>Regenerate from <code>generate_stl.py</code> if you want different dimensions (no Python dependencies needed).</small></p>
   </main>
 </body>
 </html>
