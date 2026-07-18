@@ -1,6 +1,15 @@
 {
   "apps": [
     {
+      "slug": "drink-tracker",
+      "name": "Drink Tracker",
+      "description": "Mobile-first alcohol unit tracker with scroll-wheel logging and reduction-focused streaks — trend your average down",
+      "type": "static",
+      "status": "live",
+      "createdAt": "2026-07-18",
+      "tags": ["health", "tool", "pwa", "tracker"]
+    },
+    {
       "slug": "chef-jenny",
       "name": "Chef Jenny",
       "description": "Personal brand website for Chef Jenny — Seattle private chef, cooking class instructor, and owner of Duchess café",
