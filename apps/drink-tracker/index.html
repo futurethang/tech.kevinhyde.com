@@ -1,0 +1,1954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Drink Tracker</title>
+  <meta name="description" content="Mobile-first alcohol unit tracker focused on trending down">
+  <meta name="theme-color" content="#000000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23000'/><polyline points='20,32 45,55 60,42 82,68' fill='none' stroke='%23fff' stroke-width='7' stroke-linecap='round' stroke-linejoin='round'/><circle cx='82' cy='68' r='7' fill='%2345deb2'/></svg>">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23000'/><polyline points='20,32 45,55 60,42 82,68' fill='none' stroke='%23fff' stroke-width='7' stroke-linecap='round' stroke-linejoin='round'/><circle cx='82' cy='68' r='7' fill='%2345deb2'/></svg>">
+  <style>
+    :root {
+      --bg: #000;
+      --surface: #0a0a0a;
+      --surface-2: #111;
+      --surface-3: #1a1a1a;
+      --border: #222;
+      --border-2: #333;
+      --text: #ededed;
+      --text-2: #a1a1a1;
+      --text-3: #666;
+      --good: #45deb2;
+      --good-dim: rgba(69, 222, 178, 0.12);
+      --warn: #f5a623;
+      --warn-dim: rgba(245, 166, 35, 0.12);
+      --over: #f45c6d;
+      --over-dim: rgba(244, 92, 109, 0.12);
+      --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+      --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+      --sheet-radius: 20px;
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    html { height: 100%; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      min-height: 100%;
+      -webkit-font-smoothing: antialiased;
+      overscroll-behavior-y: none;
+    }
+
+    button { font-family: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+    input { font-family: inherit; }
+
+    #app {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 0 16px calc(120px + var(--safe-bottom));
+    }
+
+    /* ---------- Header ---------- */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 2px 6px;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: linear-gradient(var(--bg) 75%, transparent);
+    }
+
+    .brand {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-2);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand svg { display: block; }
+
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 1px solid var(--border-2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-2);
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    .icon-btn:active { border-color: var(--text-2); color: var(--text); }
+
+    /* ---------- Hero ---------- */
+    .hero {
+      padding: 22px 2px 6px;
+    }
+
+    .hero-label {
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin-bottom: 6px;
+    }
+
+    .hero-row {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .hero-value {
+      font-family: var(--mono);
+      font-size: 64px;
+      font-weight: 700;
+      line-height: 0.95;
+      letter-spacing: -0.03em;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .hero-value .unit-word {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-3);
+      letter-spacing: 0;
+      font-family: var(--sans);
+      margin-left: 4px;
+    }
+
+    .hero-spark { flex-shrink: 0; padding-bottom: 6px; }
+
+    .hero-delta {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 10px;
+      font-size: 13px;
+      font-family: var(--mono);
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      color: var(--text-2);
+    }
+
+    .hero-delta.down { color: var(--good); border-color: rgba(69,222,178,0.35); background: var(--good-dim); }
+    .hero-delta.up { color: var(--warn); border-color: rgba(245,166,35,0.3); background: var(--warn-dim); }
+
+    .badge-best {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 10px;
+      margin-left: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 999px;
+      color: #000;
+      background: var(--good);
+      animation: bestGlow 2.4s ease-in-out infinite;
+    }
+
+    @keyframes bestGlow {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(69,222,178,0); }
+      50% { box-shadow: 0 0 18px 0 rgba(69,222,178,0.45); }
+    }
+
+    /* ---------- Cards ---------- */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      margin-top: 14px;
+    }
+
+    .card-title {
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* ---------- Today / budget bars ---------- */
+    .meter-row { margin-bottom: 14px; }
+    .meter-row:last-child { margin-bottom: 0; }
+
+    .meter-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 7px;
+      font-size: 13px;
+      color: var(--text-2);
+    }
+
+    .meter-head strong {
+      font-family: var(--mono);
+      font-size: 15px;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .meter {
+      height: 6px;
+      border-radius: 3px;
+      background: var(--surface-3);
+      overflow: hidden;
+    }
+
+    .meter-fill {
+      height: 100%;
+      border-radius: 3px;
+      background: var(--good);
+      width: 0%;
+      transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1), background 0.3s;
+    }
+
+    .meter-fill.warn { background: var(--warn); }
+    .meter-fill.over { background: var(--over); }
+
+    .meter-fill.pulse { animation: fillPulse 0.7s ease-out; }
+    @keyframes fillPulse {
+      0% { filter: brightness(2.2); }
+      100% { filter: brightness(1); }
+    }
+
+    /* ---------- Streak chips ---------- */
+    .chips {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding-bottom: 2px;
+    }
+    .chips::-webkit-scrollbar { display: none; }
+
+    .chip {
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 12.5px;
+      color: var(--text-2);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      border-radius: 999px;
+      padding: 8px 13px;
+      white-space: nowrap;
+    }
+
+    .chip .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text-3); }
+    .chip.lit { color: var(--text); border-color: rgba(69,222,178,0.4); }
+    .chip.lit .dot { background: var(--good); box-shadow: 0 0 8px rgba(69,222,178,0.7); }
+    .chip strong { font-family: var(--mono); font-weight: 600; }
+
+    /* ---------- Charts ---------- */
+    .seg {
+      display: flex;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 3px;
+      gap: 2px;
+    }
+
+    .seg button {
+      flex: 1;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-3);
+      padding: 6px 4px;
+      border-radius: 6px;
+      transition: color 0.15s, background 0.15s;
+    }
+
+    .seg button.active {
+      color: var(--text);
+      background: var(--surface-3);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    }
+
+    #chartHost { margin-top: 14px; min-height: 190px; }
+    #chartHost svg { display: block; width: 100%; }
+
+    .chart-empty {
+      height: 180px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-3);
+      font-size: 13px;
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    /* ---------- History ---------- */
+    .day-row {
+      border-bottom: 1px solid var(--border);
+      padding: 12px 2px;
+    }
+    .day-row:last-child { border-bottom: none; }
+
+    .day-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      text-align: left;
+    }
+
+    .day-date { flex: 1; }
+    .day-date .d1 { font-size: 14px; font-weight: 500; }
+    .day-date .d2 { font-size: 11.5px; color: var(--text-3); margin-top: 1px; }
+
+    .day-note {
+      font-size: 12px;
+      color: var(--text-3);
+      font-style: italic;
+      max-width: 110px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .day-units {
+      font-family: var(--mono);
+      font-size: 14px;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      padding: 5px 11px;
+      border-radius: 999px;
+      min-width: 52px;
+      text-align: center;
+    }
+
+    .day-units.zero { color: var(--good); background: var(--good-dim); }
+    .day-units.under { color: var(--text); background: var(--surface-3); }
+    .day-units.warn { color: var(--warn); background: var(--warn-dim); }
+    .day-units.over { color: var(--over); background: var(--over-dim); }
+
+    .day-body { padding: 8px 0 2px 4px; display: none; }
+    .day-row.open .day-body { display: block; }
+
+    .drink-line {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-2);
+      padding: 6px 0;
+    }
+
+    .drink-line .dl-name { flex: 1; }
+    .drink-line .dl-units { font-family: var(--mono); color: var(--text); }
+
+    .dl-del {
+      color: var(--text-3);
+      font-size: 16px;
+      padding: 2px 8px;
+      border-radius: 6px;
+    }
+    .dl-del:active { color: var(--over); }
+
+    .show-more {
+      width: 100%;
+      text-align: center;
+      color: var(--text-3);
+      font-size: 13px;
+      padding: 12px 0 4px;
+    }
+
+    /* ---------- FAB bar ---------- */
+    .fab-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 30;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      padding: 14px 16px calc(14px + var(--safe-bottom));
+      background: linear-gradient(transparent, rgba(0,0,0,0.85) 40%, #000);
+      pointer-events: none;
+    }
+
+    .fab-bar > * { pointer-events: auto; }
+
+    .fab {
+      flex: 1;
+      max-width: 300px;
+      height: 54px;
+      border-radius: 27px;
+      background: #fff;
+      color: #000;
+      font-size: 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+      transition: transform 0.1s;
+    }
+
+    .fab:active { transform: scale(0.97); }
+
+    .fab-zero {
+      flex: 0 0 auto;
+      width: auto;
+      padding: 0 20px;
+      height: 54px;
+      border-radius: 27px;
+      background: var(--surface-2);
+      border: 1px solid var(--border-2);
+      color: var(--text-2);
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      transition: transform 0.1s, border-color 0.2s, color 0.2s;
+    }
+
+    .fab-zero:active { transform: scale(0.97); }
+    .fab-zero.done { color: var(--good); border-color: rgba(69,222,178,0.5); }
+
+    /* ---------- Sheets ---------- */
+    .backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(2px);
+      z-index: 40;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s;
+    }
+
+    .backdrop.show { opacity: 1; pointer-events: auto; }
+
+    .sheet {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 50;
+      background: var(--surface);
+      border: 1px solid var(--border-2);
+      border-bottom: none;
+      border-radius: var(--sheet-radius) var(--sheet-radius) 0 0;
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 10px 18px calc(18px + var(--safe-bottom));
+      transform: translateY(105%);
+      transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+      max-height: 92vh;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+    }
+
+    .sheet.show { transform: translateY(0); }
+
+    .grab {
+      width: 36px;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--border-2);
+      margin: 4px auto 14px;
+    }
+
+    .sheet h2 {
+      font-size: 17px;
+      font-weight: 600;
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .sheet h3 {
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      font-weight: 600;
+      margin: 18px 0 10px;
+    }
+
+    /* Type selector */
+    .type-row { display: flex; gap: 8px; }
+
+    .type-btn {
+      flex: 1;
+      padding: 11px 4px 9px;
+      border-radius: 11px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text-2);
+      font-size: 12.5px;
+      font-weight: 600;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+
+    .type-btn .t-ico { font-size: 19px; line-height: 1; }
+
+    .type-btn.active {
+      border-color: #fff;
+      color: #fff;
+      background: var(--surface-3);
+    }
+
+    /* Recent chips */
+    .recent-row {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding-bottom: 2px;
+    }
+    .recent-row::-webkit-scrollbar { display: none; }
+
+    .recent-chip {
+      flex-shrink: 0;
+      border: 1px solid var(--border-2);
+      background: var(--surface-2);
+      color: var(--text-2);
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 12.5px;
+      white-space: nowrap;
+      transition: transform 0.1s;
+    }
+
+    .recent-chip:active { transform: scale(0.95); border-color: #fff; color: #fff; }
+    .recent-chip .rc-u { font-family: var(--mono); color: var(--text); margin-left: 6px; }
+
+    /* ---------- Wheels ---------- */
+    .wheels {
+      display: flex;
+      gap: 10px;
+      margin-top: 4px;
+      position: relative;
+    }
+
+    .wheel-col { flex: 1; position: relative; }
+
+    .wheel-label {
+      text-align: center;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin-bottom: 6px;
+    }
+
+    .wheel {
+      height: 200px;
+      overflow-y: scroll;
+      scroll-snap-type: y mandatory;
+      scrollbar-width: none;
+      border-radius: 12px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      position: relative;
+      -webkit-mask-image: linear-gradient(transparent, #000 25%, #000 75%, transparent);
+      mask-image: linear-gradient(transparent, #000 25%, #000 75%, transparent);
+    }
+
+    .wheel::-webkit-scrollbar { display: none; }
+
+    .wheel .pad { height: 80px; scroll-snap-align: none; }
+
+    .wheel .item {
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      scroll-snap-align: center;
+      font-family: var(--mono);
+      font-size: 19px;
+      font-variant-numeric: tabular-nums;
+      color: var(--text-3);
+      transition: color 0.12s, transform 0.12s;
+    }
+
+    .wheel .item.sel {
+      color: #fff;
+      font-weight: 700;
+      transform: scale(1.12);
+    }
+
+    .wheel-hl {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: calc(50% + 11px);
+      transform: translateY(-50%);
+      height: 40px;
+      pointer-events: none;
+      border-top: 1px solid var(--border-2);
+      border-bottom: 1px solid var(--border-2);
+    }
+
+    /* Live units readout */
+    .calc-readout {
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 12px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+    }
+
+    .calc-readout .cr-num {
+      font-family: var(--mono);
+      font-size: 30px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .calc-readout .cr-lbl { font-size: 13px; color: var(--text-3); }
+
+    /* Date chips */
+    .date-row { display: flex; gap: 8px; align-items: stretch; }
+
+    .date-chip {
+      padding: 9px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text-2);
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .date-chip.active { border-color: #fff; color: #fff; background: var(--surface-3); }
+
+    .date-input {
+      flex: 1;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text-2);
+      font-size: 13px;
+      padding: 0 12px;
+      min-width: 0;
+      color-scheme: dark;
+    }
+
+    .date-input.active { border-color: #fff; color: #fff; }
+
+    .sheet-actions { display: flex; gap: 10px; margin-top: 20px; }
+
+    .btn-primary {
+      flex: 1;
+      height: 50px;
+      border-radius: 25px;
+      background: #fff;
+      color: #000;
+      font-size: 15.5px;
+      font-weight: 600;
+      transition: transform 0.1s;
+    }
+
+    .btn-primary:active { transform: scale(0.98); }
+    .btn-primary:disabled { opacity: 0.4; }
+
+    .btn-ghost {
+      padding: 0 18px;
+      height: 50px;
+      border-radius: 25px;
+      border: 1px solid var(--border-2);
+      color: var(--text-2);
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    /* ---------- Settings ---------- */
+    .set-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 13px 0;
+      border-bottom: 1px solid var(--border);
+      gap: 12px;
+    }
+
+    .set-row:last-child { border-bottom: none; }
+
+    .set-info .s1 { font-size: 14px; font-weight: 500; }
+    .set-info .s2 { font-size: 12px; color: var(--text-3); margin-top: 2px; line-height: 1.4; }
+
+    .stepper { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
+
+    .stepper button {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      border: 1px solid var(--border-2);
+      color: var(--text-2);
+      font-size: 17px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .stepper button:active { color: #fff; border-color: #fff; }
+
+    .stepper .st-val {
+      font-family: var(--mono);
+      font-size: 15px;
+      font-weight: 600;
+      min-width: 46px;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .set-btn {
+      width: 100%;
+      padding: 13px;
+      border-radius: 11px;
+      border: 1px solid var(--border-2);
+      background: var(--surface-2);
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 500;
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .set-btn:active { background: var(--surface-3); }
+    .set-btn.danger { color: var(--over); border-color: rgba(244,92,109,0.35); }
+
+    .file-hidden { display: none; }
+
+    /* ---------- Stats grid (in trends card) ---------- */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .stat-cell {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      padding: 12px;
+    }
+
+    .stat-cell .sc-lbl { font-size: 11px; color: var(--text-3); letter-spacing: 0.06em; text-transform: uppercase; }
+    .stat-cell .sc-val {
+      font-family: var(--mono);
+      font-size: 22px;
+      font-weight: 700;
+      margin-top: 4px;
+      font-variant-numeric: tabular-nums;
+    }
+    .stat-cell .sc-sub { font-size: 11.5px; color: var(--text-3); margin-top: 2px; }
+    .stat-cell .sc-val.good { color: var(--good); }
+
+    /* ---------- Toast ---------- */
+    #toast {
+      position: fixed;
+      left: 50%;
+      bottom: calc(96px + var(--safe-bottom));
+      transform: translate(-50%, 20px);
+      background: var(--surface-3);
+      border: 1px solid var(--border-2);
+      color: var(--text);
+      font-size: 13.5px;
+      padding: 11px 18px;
+      border-radius: 999px;
+      z-index: 60;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s, transform 0.25s;
+      max-width: 88vw;
+      text-align: center;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+    }
+
+    #toast.show { opacity: 1; transform: translate(-50%, 0); }
+    #toast.win { border-color: rgba(69,222,178,0.5); }
+    #toast.win::before { content: "●"; color: var(--good); margin-right: 8px; font-size: 10px; vertical-align: 2px; }
+
+    .empty-hint {
+      text-align: center;
+      color: var(--text-3);
+      font-size: 13.5px;
+      line-height: 1.7;
+      padding: 28px 20px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <header>
+      <div class="brand">
+        <svg width="18" height="18" viewBox="0 0 100 100"><rect width="100" height="100" rx="24" fill="#111" stroke="#333"/><polyline points="22,34 45,56 59,44 79,66" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="79" cy="66" r="6.5" fill="#45deb2"/></svg>
+        Drink Tracker
+      </div>
+      <button class="icon-btn" id="settingsBtn" aria-label="Settings">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/><circle cx="9" cy="7" r="2" fill="#000"/><circle cx="15" cy="12" r="2" fill="#000"/><circle cx="7" cy="17" r="2" fill="#000"/></svg>
+      </button>
+    </header>
+
+    <section class="hero">
+      <div class="hero-label">7-day average · units/day</div>
+      <div class="hero-row">
+        <div class="hero-value"><span id="heroAvg">–</span><span class="unit-word">u/day</span></div>
+        <div class="hero-spark" id="heroSpark"></div>
+      </div>
+      <div id="heroBadges"></div>
+    </section>
+
+    <section class="card" id="todayCard">
+      <div class="card-title"><span>Today · <span id="todayDateLbl"></span></span></div>
+      <div class="meter-row">
+        <div class="meter-head">
+          <span>Units today</span>
+          <span><strong id="todayUnits">0</strong> <span id="todayGoalLbl" style="color:var(--text-3)">/ 4</span></span>
+        </div>
+        <div class="meter"><div class="meter-fill" id="todayFill"></div></div>
+      </div>
+      <div class="meter-row">
+        <div class="meter-head">
+          <span>Week budget</span>
+          <span><strong id="weekUnits">0</strong> <span id="weekGoalLbl" style="color:var(--text-3)">/ 14</span></span>
+        </div>
+        <div class="meter"><div class="meter-fill" id="weekFill"></div></div>
+      </div>
+    </section>
+
+    <div class="chips" id="streakChips"></div>
+
+    <section class="card">
+      <div class="card-title"><span>Trends</span></div>
+      <div class="seg" id="chartSeg">
+        <button data-view="daily" class="active">30 days</button>
+        <button data-view="rolling">Rolling avg</button>
+        <button data-view="weekly">Weekly</button>
+      </div>
+      <div id="chartHost"></div>
+      <div class="stats-grid" id="statsGrid"></div>
+    </section>
+
+    <section class="card">
+      <div class="card-title"><span>History</span><span id="historyCount" style="letter-spacing:0;text-transform:none;"></span></div>
+      <div id="historyList"></div>
+    </section>
+  </div>
+
+  <div class="fab-bar">
+    <button class="fab-zero" id="zeroBtn">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="9"/></svg>
+      <span id="zeroLbl">Zero day</span>
+    </button>
+    <button class="fab" id="addBtn">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Log drink
+    </button>
+  </div>
+
+  <div class="backdrop" id="backdrop"></div>
+
+  <!-- Add sheet -->
+  <div class="sheet" id="addSheet">
+    <div class="grab"></div>
+    <div class="type-row" id="typeRow">
+      <button class="type-btn active" data-type="beer"><span class="t-ico">🍺</span>Beer</button>
+      <button class="type-btn" data-type="wine"><span class="t-ico">🍷</span>Wine</button>
+      <button class="type-btn" data-type="liquor"><span class="t-ico">🥃</span>Liquor</button>
+      <button class="type-btn" data-type="other"><span class="t-ico">🍹</span>Other</button>
+    </div>
+
+    <div id="recentWrap" style="display:none">
+      <h3>Log again</h3>
+      <div class="recent-row" id="recentRow"></div>
+    </div>
+
+    <h3>Size &amp; strength</h3>
+    <div class="wheels">
+      <div class="wheel-col">
+        <div class="wheel-label">fl oz</div>
+        <div class="wheel" id="ozWheel"></div>
+        <div class="wheel-hl"></div>
+      </div>
+      <div class="wheel-col">
+        <div class="wheel-label">ABV %</div>
+        <div class="wheel" id="abvWheel"></div>
+        <div class="wheel-hl"></div>
+      </div>
+    </div>
+
+    <div class="calc-readout">
+      <span class="cr-num" id="calcUnits">1.0</span>
+      <span class="cr-lbl" id="calcDetail">standard units</span>
+    </div>
+
+    <h3>When</h3>
+    <div class="date-row">
+      <button class="date-chip active" id="dateToday">Today</button>
+      <button class="date-chip" id="dateYesterday">Yesterday</button>
+      <input type="date" class="date-input" id="dateCustom">
+    </div>
+
+    <div class="sheet-actions">
+      <button class="btn-ghost" id="zeroForDate">Zero day</button>
+      <button class="btn-primary" id="logBtn">Log drink</button>
+    </div>
+  </div>
+
+  <!-- Settings sheet -->
+  <div class="sheet" id="settingsSheet">
+    <div class="grab"></div>
+    <h2>Settings &amp; data</h2>
+
+    <h3>Goals</h3>
+    <div class="set-row">
+      <div class="set-info">
+        <div class="s1">Daily cap</div>
+        <div class="s2">A day at or under this counts toward your streak</div>
+      </div>
+      <div class="stepper">
+        <button id="dailyMinus">−</button>
+        <span class="st-val" id="dailyGoalVal">4</span>
+        <button id="dailyPlus">+</button>
+      </div>
+    </div>
+    <div class="set-row">
+      <div class="set-info">
+        <div class="s1">Weekly budget</div>
+        <div class="s2">Total units per rolling 7 days</div>
+      </div>
+      <div class="stepper">
+        <button id="weeklyMinus">−</button>
+        <span class="st-val" id="weeklyGoalVal">14</span>
+        <button id="weeklyPlus">+</button>
+      </div>
+    </div>
+
+    <h3>Sync &amp; backup</h3>
+    <p style="font-size:12.5px;color:var(--text-3);line-height:1.6;margin-bottom:4px;">
+      Your data lives on this device. Export a JSON file to the Files app (iCloud Drive) as your backup, and import it on another device to sync.
+    </p>
+    <button class="set-btn" id="exportBtn">↓&nbsp; Export JSON file</button>
+    <label class="set-btn" style="cursor:pointer">
+      ↑&nbsp; Import JSON file
+      <input type="file" accept=".json,application/json" id="importFile" class="file-hidden">
+    </label>
+    <button class="set-btn" id="copyBtn">⧉&nbsp; Copy data to clipboard</button>
+    <button class="set-btn" id="pasteBtn">⇩&nbsp; Paste data from clipboard</button>
+
+    <h3>Danger zone</h3>
+    <button class="set-btn danger" id="clearBtn">Delete all data</button>
+  </div>
+
+  <div id="toast"></div>
+
+  <script>
+    // ================= Storage =================
+    const KEY = 'drinkTrackerV2';
+
+    const defaultStore = () => ({
+      version: 2,
+      settings: { dailyGoal: 4, weeklyGoal: 14 },
+      drinks: [],        // {id, date:'YYYY-MM-DD', ts, type, oz, abv, units}
+      afDays: [],        // ['YYYY-MM-DD'] explicitly marked alcohol-free
+      legacy: []         // {date, units, note} imported from V1
+    });
+
+    let store = load();
+
+    function load() {
+      try {
+        const raw = localStorage.getItem(KEY);
+        if (!raw) return defaultStore();
+        const s = JSON.parse(raw);
+        return Object.assign(defaultStore(), s, {
+          settings: Object.assign(defaultStore().settings, s.settings || {})
+        });
+      } catch (e) { return defaultStore(); }
+    }
+
+    function save() { localStorage.setItem(KEY, JSON.stringify(store)); }
+
+    // ================= Date helpers =================
+    function fmtDate(d) {
+      const y = d.getFullYear(), m = String(d.getMonth() + 1).padStart(2, '0'), day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
+    function todayStr() { return fmtDate(new Date()); }
+    function addDays(dateStr, n) {
+      const d = new Date(dateStr + 'T12:00:00');
+      d.setDate(d.getDate() + n);
+      return fmtDate(d);
+    }
+    function dayName(dateStr) {
+      return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][new Date(dateStr + 'T12:00:00').getDay()];
+    }
+    function niceDate(dateStr) {
+      const d = new Date(dateStr + 'T12:00:00');
+      return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    }
+    function calcUnits(oz, abv) { return (oz * abv) / 60; }
+    function r1(n) { return Math.round(n * 10) / 10; }
+
+    // ================= Derived data =================
+    // dayMap: date -> {units, drinks[], af, legacy, note, tracked}
+    function buildDayMap() {
+      const map = new Map();
+      const get = d => {
+        if (!map.has(d)) map.set(d, { units: 0, drinks: [], af: false, note: '', tracked: false });
+        return map.get(d);
+      };
+      for (const dr of store.drinks) {
+        const e = get(dr.date);
+        e.drinks.push(dr);
+        e.units += dr.units;
+        e.tracked = true;
+      }
+      for (const l of store.legacy) {
+        const e = get(l.date);
+        e.units += l.units;
+        if (l.note) e.note = l.note;
+        e.tracked = true;
+      }
+      for (const d of store.afDays) {
+        const e = get(d);
+        e.af = true;
+        e.tracked = true;
+      }
+      return map;
+    }
+
+    // Continuous series from first tracked date through today; units null on untracked days
+    function buildSeries(dayMap) {
+      const dates = [...dayMap.keys()].sort();
+      if (dates.length === 0) return [];
+      const out = [];
+      let d = dates[0];
+      const end = todayStr();
+      const last = dates[dates.length - 1] > end ? dates[dates.length - 1] : end;
+      while (d <= last) {
+        const e = dayMap.get(d);
+        out.push({ date: d, units: e && e.tracked ? r1(e.units) : null });
+        d = addDays(d, 1);
+      }
+      return out;
+    }
+
+    function rollingAt(series, i) {
+      let sum = 0, n = 0;
+      for (let j = Math.max(0, i - 6); j <= i; j++) {
+        if (series[j].units !== null) { sum += series[j].units; n++; }
+      }
+      return n === 0 ? null : sum / n;
+    }
+
+    function trackedCountAt(series, i) {
+      let n = 0;
+      for (let j = Math.max(0, i - 6); j <= i; j++) if (series[j].units !== null) n++;
+      return n;
+    }
+
+    function computeStats() {
+      const dayMap = buildDayMap();
+      const series = buildSeries(dayMap);
+      const today = todayStr();
+      const todayEntry = dayMap.get(today);
+      const todayUnits = todayEntry && todayEntry.tracked ? r1(todayEntry.units) : (todayEntry ? r1(todayEntry.units) : 0);
+      const li = series.length - 1;
+
+      const currentAvg = li >= 0 ? rollingAt(series, li) : null;
+
+      // previous window: 7 days before the current one
+      let prevAvg = null;
+      if (li >= 7) {
+        let sum = 0, n = 0;
+        for (let j = Math.max(0, li - 13); j <= li - 7; j++) {
+          if (series[j].units !== null) { sum += series[j].units; n++; }
+        }
+        prevAvg = n === 0 ? null : sum / n;
+      }
+
+      // personal best: lowest rolling avg with at least 4 tracked days in window
+      let best = null, bestDate = null;
+      for (let i = 0; i < series.length; i++) {
+        if (trackedCountAt(series, i) >= 4) {
+          const v = rollingAt(series, i);
+          if (v !== null && (best === null || v < best - 1e-9)) { best = v; bestDate = series[i].date; }
+        }
+      }
+      const isAtBest = best !== null && currentAvg !== null && currentAvg <= best + 1e-9 && trackedCountAt(series, li) >= 4;
+
+      // goal streak: consecutive tracked days ≤ dailyGoal, ending today or yesterday
+      const goal = store.settings.dailyGoal;
+      let streak = 0;
+      let cursor = today;
+      const todayTracked = todayEntry && todayEntry.tracked;
+      if (todayTracked && todayEntry.units <= goal + 1e-9) { streak++; cursor = addDays(today, -1); }
+      else if (todayTracked && todayEntry.units > goal) { streak = 0; cursor = null; }
+      else { cursor = addDays(today, -1); } // today untracked: pending, look back from yesterday
+      while (cursor) {
+        const e = dayMap.get(cursor);
+        if (e && e.tracked && e.units <= goal + 1e-9) { streak++; cursor = addDays(cursor, -1); }
+        else break;
+      }
+
+      // log streak: consecutive tracked days (any amount), ending today or yesterday
+      let logStreak = 0;
+      cursor = todayTracked ? today : addDays(today, -1);
+      while (cursor) {
+        const e = dayMap.get(cursor);
+        if (e && e.tracked) { logStreak++; cursor = addDays(cursor, -1); }
+        else break;
+      }
+
+      // zero days in the last 30
+      let zero30 = 0;
+      for (let i = 0; i < 30; i++) {
+        const e = dayMap.get(addDays(today, -i));
+        if (e && e.tracked && e.units < 0.05) zero30++;
+      }
+
+      // week total: last 7 calendar days including today
+      let weekUnits = 0;
+      for (let i = 0; i < 7; i++) {
+        const e = dayMap.get(addDays(today, -i));
+        if (e) weekUnits += e.units;
+      }
+
+      const trackedDays = [...dayMap.values()].filter(e => e.tracked).length;
+      const underDays = [...dayMap.values()].filter(e => e.tracked && e.units <= goal + 1e-9).length;
+
+      return {
+        dayMap, series, todayUnits, currentAvg, prevAvg, best, bestDate, isAtBest,
+        streak, logStreak, zero30, weekUnits: r1(weekUnits), trackedDays, underDays
+      };
+    }
+
+    // ================= Rendering =================
+    const $ = id => document.getElementById(id);
+    let chartView = 'daily';
+    let historyLimit = 14;
+
+    function render() {
+      const s = computeStats();
+      renderHero(s);
+      renderToday(s);
+      renderChips(s);
+      renderChart(s);
+      renderStatsGrid(s);
+      renderHistory(s);
+      renderZeroBtn(s);
+      renderSettings();
+      return s;
+    }
+
+    function renderHero(s) {
+      $('heroAvg').textContent = s.currentAvg === null ? '–' : r1(s.currentAvg).toFixed(1);
+
+      // sparkline: rolling avg over last 14 days
+      const host = $('heroSpark');
+      host.innerHTML = '';
+      const n = s.series.length;
+      if (n >= 2) {
+        const pts = [];
+        for (let i = Math.max(0, n - 14); i < n; i++) {
+          const v = rollingAt(s.series, i);
+          if (v !== null) pts.push(v);
+        }
+        if (pts.length >= 2) {
+          const w = 96, h = 34, max = Math.max(...pts, 0.1), min = Math.min(...pts);
+          const span = Math.max(max - min, 0.1);
+          const step = w / (pts.length - 1);
+          const path = pts.map((v, i) =>
+            `${i === 0 ? 'M' : 'L'}${(i * step).toFixed(1)},${(h - 3 - ((v - min) / span) * (h - 6)).toFixed(1)}`
+          ).join('');
+          const trendDown = pts[pts.length - 1] <= pts[0];
+          const color = trendDown ? 'var(--good)' : 'var(--text-3)';
+          host.innerHTML = `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+            <path d="${path}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="${w}" cy="${(h - 3 - ((pts[pts.length-1] - min) / span) * (h - 6)).toFixed(1)}" r="3" fill="${color}"/>
+          </svg>`;
+        }
+      }
+
+      const badges = $('heroBadges');
+      badges.innerHTML = '';
+      if (s.currentAvg !== null && s.prevAvg !== null) {
+        const diff = s.currentAvg - s.prevAvg;
+        const el = document.createElement('span');
+        el.className = 'hero-delta ' + (diff < -0.05 ? 'down' : diff > 0.05 ? 'up' : '');
+        const arrow = diff < -0.05 ? '↓' : diff > 0.05 ? '↑' : '→';
+        el.textContent = `${arrow} ${Math.abs(r1(diff)).toFixed(1)} vs last week`;
+        badges.appendChild(el);
+      }
+      if (s.isAtBest && s.trackedDays >= 7) {
+        const el = document.createElement('span');
+        el.className = 'badge-best';
+        el.textContent = '★ Personal best';
+        badges.appendChild(el);
+      }
+    }
+
+    function meterClass(ratio) {
+      if (ratio > 1) return 'over';
+      if (ratio > 0.75) return 'warn';
+      return '';
+    }
+
+    function renderToday(s) {
+      const g = store.settings.dailyGoal, wg = store.settings.weeklyGoal;
+      const d = new Date();
+      $('todayDateLbl').textContent = d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+      $('todayUnits').textContent = s.todayUnits.toFixed(1);
+      $('todayGoalLbl').textContent = '/ ' + g;
+      $('weekUnits').textContent = s.weekUnits.toFixed(1);
+      $('weekGoalLbl').textContent = '/ ' + wg;
+
+      const tf = $('todayFill'), wf = $('weekFill');
+      const tr = g > 0 ? s.todayUnits / g : 0;
+      const wr = wg > 0 ? s.weekUnits / wg : 0;
+      tf.style.width = Math.min(tr * 100, 100) + '%';
+      wf.style.width = Math.min(wr * 100, 100) + '%';
+      tf.className = 'meter-fill ' + meterClass(tr);
+      wf.className = 'meter-fill ' + meterClass(wr);
+    }
+
+    function renderChips(s) {
+      const host = $('streakChips');
+      host.innerHTML = '';
+      const chips = [
+        { lit: s.streak >= 2, html: `<span class="dot"></span><strong>${s.streak}</strong>&nbsp;day${s.streak === 1 ? '' : 's'} under cap` },
+        { lit: s.zero30 >= 4, html: `<span class="dot"></span><strong>${s.zero30}</strong>&nbsp;zero day${s.zero30 === 1 ? '' : 's'} / 30d` },
+        { lit: s.logStreak >= 3, html: `<span class="dot"></span><strong>${s.logStreak}</strong>&nbsp;day${s.logStreak === 1 ? '' : 's'} logged` },
+      ];
+      if (s.best !== null && s.trackedDays >= 7) {
+        chips.push({ lit: s.isAtBest, html: `<span class="dot"></span>best avg <strong>${r1(s.best).toFixed(1)}</strong>` });
+      }
+      for (const c of chips) {
+        const el = document.createElement('span');
+        el.className = 'chip' + (c.lit ? ' lit' : '');
+        el.innerHTML = c.html;
+        host.appendChild(el);
+      }
+    }
+
+    // ---------- Charts (hand-rolled SVG) ----------
+    function svgEl(w, h) {
+      return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" style="height:${h}px">`;
+    }
+
+    function unitColor(u, goal) {
+      if (u < 0.05) return 'var(--good)';
+      if (u <= goal + 1e-9) return '#555';
+      if (u <= goal * 1.5) return 'var(--warn)';
+      return 'var(--over)';
+    }
+
+    function renderChart(s) {
+      const host = $('chartHost');
+      const goal = store.settings.dailyGoal;
+      const W = host.clientWidth || 320;
+      const H = 190;
+
+      if (s.series.length < 2) {
+        host.innerHTML = `<div class="chart-empty">Log a few days and your<br>trend lines will appear here.</div>`;
+        return;
+      }
+
+      let html = '';
+
+      if (chartView === 'daily') {
+        const days = s.series.slice(-30);
+        const max = Math.max(goal * 1.25, ...days.map(d => d.units || 0), 1);
+        const bw = W / days.length;
+        const gy = H - 18 - (goal / max) * (H - 30);
+        html = svgEl(W, H);
+        html += `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="#333" stroke-dasharray="4 4" stroke-width="1"/>`;
+        days.forEach((d, i) => {
+          const x = i * bw + bw * 0.18, w = bw * 0.64;
+          if (d.units === null) {
+            html += `<circle cx="${x + w/2}" cy="${H - 21}" r="1.5" fill="#333"/>`;
+          } else if (d.units < 0.05) {
+            html += `<rect x="${x}" y="${H - 22}" width="${w}" height="4" rx="2" fill="var(--good)"/>`;
+          } else {
+            const bh = Math.max((d.units / max) * (H - 30), 3);
+            html += `<rect x="${x}" y="${H - 18 - bh}" width="${w}" height="${bh}" rx="2" fill="${unitColor(d.units, goal)}"/>`;
+          }
+        });
+        html += `<text x="${W - 2}" y="${gy - 5}" fill="#555" font-size="10" text-anchor="end" font-family="var(--mono)">cap ${goal}</text>`;
+        html += `<text x="2" y="${H - 4}" fill="#555" font-size="10" font-family="var(--mono)">${niceDate(days[0].date)}</text>`;
+        html += `<text x="${W - 2}" y="${H - 4}" fill="#555" font-size="10" text-anchor="end" font-family="var(--mono)">${niceDate(days[days.length-1].date)}</text>`;
+        html += '</svg>';
+      }
+
+      if (chartView === 'rolling') {
+        const win = s.series.slice(-90);
+        const offset = s.series.length - win.length;
+        const pts = win.map((d, i) => rollingAt(s.series, offset + i));
+        const valid = pts.filter(v => v !== null);
+        if (valid.length < 2) { host.innerHTML = `<div class="chart-empty">Not enough data yet.</div>`; return; }
+        const max = Math.max(goal * 1.25, ...valid, 1);
+        const step = W / (pts.length - 1);
+        const y = v => H - 18 - (v / max) * (H - 34);
+        const gy = y(goal);
+        let path = '', area = '';
+        pts.forEach((v, i) => {
+          if (v === null) return;
+          const cmd = path === '' ? 'M' : 'L';
+          path += `${cmd}${(i * step).toFixed(1)},${y(v).toFixed(1)}`;
+        });
+        html = svgEl(W, H);
+        html += `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="#333" stroke-dasharray="4 4" stroke-width="1"/>`;
+        html += `<path d="${path}" fill="none" stroke="var(--good)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
+        const lastIdx = pts.length - 1 - [...pts].reverse().findIndex(v => v !== null);
+        const lastV = pts[lastIdx];
+        if (lastV !== null) html += `<circle cx="${(lastIdx * step).toFixed(1)}" cy="${y(lastV).toFixed(1)}" r="3.5" fill="var(--good)"/>`;
+        if (s.best !== null) {
+          const by = y(s.best);
+          html += `<line x1="0" y1="${by}" x2="${W}" y2="${by}" stroke="rgba(69,222,178,0.25)" stroke-width="1"/>`;
+          html += `<text x="2" y="${by - 4}" fill="rgba(69,222,178,0.6)" font-size="10" font-family="var(--mono)">best ${r1(s.best).toFixed(1)}</text>`;
+        }
+        html += `<text x="${W - 2}" y="${gy - 5}" fill="#555" font-size="10" text-anchor="end" font-family="var(--mono)">cap ${goal}</text>`;
+        html += `<text x="2" y="${H - 4}" fill="#555" font-size="10" font-family="var(--mono)">${niceDate(win[0].date)}</text>`;
+        html += `<text x="${W - 2}" y="${H - 4}" fill="#555" font-size="10" text-anchor="end" font-family="var(--mono)">${niceDate(win[win.length-1].date)}</text>`;
+        html += '</svg>';
+      }
+
+      if (chartView === 'weekly') {
+        // group series into calendar weeks ending today
+        const weeks = [];
+        let end = s.series.length;
+        while (end > 0 && weeks.length < 12) {
+          const start = Math.max(0, end - 7);
+          const chunk = s.series.slice(start, end);
+          const tracked = chunk.filter(d => d.units !== null);
+          weeks.unshift({
+            label: niceDate(chunk[0].date),
+            avg: tracked.length ? tracked.reduce((a, d) => a + d.units, 0) / tracked.length : null
+          });
+          end = start;
+        }
+        const valid = weeks.filter(w => w.avg !== null);
+        if (valid.length === 0) { host.innerHTML = `<div class="chart-empty">Not enough data yet.</div>`; return; }
+        const max = Math.max(goal * 1.25, ...valid.map(w => w.avg), 1);
+        const bw = W / weeks.length;
+        const gy = H - 18 - (goal / max) * (H - 30);
+        html = svgEl(W, H);
+        html += `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="#333" stroke-dasharray="4 4" stroke-width="1"/>`;
+        weeks.forEach((w, i) => {
+          if (w.avg === null) return;
+          const x = i * bw + bw * 0.15, wid = bw * 0.7;
+          const bh = Math.max((w.avg / max) * (H - 30), 3);
+          html += `<rect x="${x}" y="${H - 18 - bh}" width="${wid}" height="${bh}" rx="3" fill="${unitColor(w.avg, goal)}"/>`;
+        });
+        html += `<text x="${W - 2}" y="${gy - 5}" fill="#555" font-size="10" text-anchor="end" font-family="var(--mono)">cap ${goal}</text>`;
+        html += `<text x="2" y="${H - 4}" fill="#555" font-size="10" font-family="var(--mono)">${weeks[0].label}</text>`;
+        html += `<text x="${W - 2}" y="${H - 4}" fill="#555" font-size="10" text-anchor="end" font-family="var(--mono)">this week</text>`;
+        html += '</svg>';
+      }
+
+      host.innerHTML = html;
+    }
+
+    function renderStatsGrid(s) {
+      const host = $('statsGrid');
+      const pct = s.trackedDays ? Math.round((s.underDays / s.trackedDays) * 100) : 0;
+      host.innerHTML = `
+        <div class="stat-cell">
+          <div class="sc-lbl">Best 7-day avg</div>
+          <div class="sc-val ${s.isAtBest && s.best !== null ? 'good' : ''}">${s.best === null ? '–' : r1(s.best).toFixed(1)}</div>
+          <div class="sc-sub">${s.bestDate ? 'set ' + niceDate(s.bestDate) : 'needs 4+ tracked days'}</div>
+        </div>
+        <div class="stat-cell">
+          <div class="sc-lbl">Days under cap</div>
+          <div class="sc-val">${pct}%</div>
+          <div class="sc-sub">${s.underDays} of ${s.trackedDays} tracked days</div>
+        </div>
+        <div class="stat-cell">
+          <div class="sc-lbl">Zero days / 30d</div>
+          <div class="sc-val ${s.zero30 >= 4 ? 'good' : ''}">${s.zero30}</div>
+          <div class="sc-sub">alcohol-free days</div>
+        </div>
+        <div class="stat-cell">
+          <div class="sc-lbl">Days tracked</div>
+          <div class="sc-val">${s.trackedDays}</div>
+          <div class="sc-sub">${s.logStreak} in a row</div>
+        </div>`;
+    }
+
+    function renderHistory(s) {
+      const host = $('historyList');
+      const goal = store.settings.dailyGoal;
+      const days = [...s.dayMap.entries()]
+        .filter(([, e]) => e.tracked)
+        .sort((a, b) => b[0].localeCompare(a[0]));
+
+      $('historyCount').textContent = days.length ? `${days.length} days` : '';
+
+      if (days.length === 0) {
+        host.innerHTML = `<div class="empty-hint">Nothing logged yet.<br>Tap <b>Log drink</b> below to record your first entry,<br>or import your old data from Settings.</div>`;
+        return;
+      }
+
+      host.innerHTML = '';
+      for (const [date, e] of days.slice(0, historyLimit)) {
+        const row = document.createElement('div');
+        row.className = 'day-row';
+        const u = r1(e.units);
+        const cls = u < 0.05 ? 'zero' : u <= goal + 1e-9 ? 'under' : u <= goal * 1.5 ? 'warn' : 'over';
+        const label = u < 0.05 ? 'zero' : u.toFixed(1);
+        row.innerHTML = `
+          <button class="day-head">
+            <div class="day-date">
+              <div class="d1">${dayName(date)} · ${niceDate(date)}</div>
+              <div class="d2">${e.drinks.length ? e.drinks.length + ' drink' + (e.drinks.length === 1 ? '' : 's') : (e.af ? 'alcohol-free' : 'imported')}</div>
+            </div>
+            ${e.note ? `<span class="day-note">${escapeHtml(e.note)}</span>` : ''}
+            <span class="day-units ${cls}">${label}</span>
+          </button>
+          <div class="day-body"></div>`;
+        const body = row.querySelector('.day-body');
+
+        for (const dr of e.drinks) {
+          const line = document.createElement('div');
+          line.className = 'drink-line';
+          line.innerHTML = `
+            <span>${typeIcon(dr.type)}</span>
+            <span class="dl-name">${dr.oz} oz · ${dr.abv}% ABV</span>
+            <span class="dl-units">${r1(dr.units).toFixed(1)}u</span>
+            <button class="dl-del" aria-label="Delete drink">✕</button>`;
+          line.querySelector('.dl-del').addEventListener('click', ev => {
+            ev.stopPropagation();
+            deleteDrink(dr.id);
+          });
+          body.appendChild(line);
+        }
+
+        if (e.af) {
+          const line = document.createElement('div');
+          line.className = 'drink-line';
+          line.innerHTML = `<span>○</span><span class="dl-name">Marked alcohol-free</span><button class="dl-del" aria-label="Unmark">✕</button>`;
+          line.querySelector('.dl-del').addEventListener('click', ev => {
+            ev.stopPropagation();
+            store.afDays = store.afDays.filter(d => d !== date);
+            save(); render();
+          });
+          body.appendChild(line);
+        }
+
+        if (!e.drinks.length && !e.af && e.units > 0) {
+          const line = document.createElement('div');
+          line.className = 'drink-line';
+          line.innerHTML = `<span>◆</span><span class="dl-name">Imported day total${e.note ? ' — ' + escapeHtml(e.note) : ''}</span><span class="dl-units">${u.toFixed(1)}u</span><button class="dl-del" aria-label="Delete">✕</button>`;
+          line.querySelector('.dl-del').addEventListener('click', ev => {
+            ev.stopPropagation();
+            if (confirm('Delete this imported day?')) {
+              store.legacy = store.legacy.filter(l => l.date !== date);
+              save(); render();
+            }
+          });
+          body.appendChild(line);
+        }
+
+        row.querySelector('.day-head').addEventListener('click', () => row.classList.toggle('open'));
+        host.appendChild(row);
+      }
+
+      if (days.length > historyLimit) {
+        const more = document.createElement('button');
+        more.className = 'show-more';
+        more.textContent = `Show ${Math.min(days.length - historyLimit, 30)} more`;
+        more.addEventListener('click', () => { historyLimit += 30; render(); });
+        host.appendChild(more);
+      }
+    }
+
+    function renderZeroBtn(s) {
+      const today = s.dayMap.get(todayStr());
+      const marked = today && today.af;
+      const hasDrinks = today && today.drinks.length > 0;
+      const btn = $('zeroBtn');
+      btn.classList.toggle('done', !!marked);
+      btn.style.display = hasDrinks ? 'none' : 'flex';
+      $('zeroLbl').textContent = marked ? 'Zero ✓' : 'Zero day';
+    }
+
+    function typeIcon(t) {
+      return { beer: '🍺', wine: '🍷', liquor: '🥃', other: '🍹' }[t] || '🍹';
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+    }
+
+    // ================= Toast =================
+    let toastTimer = null;
+    function toast(msg, win = false) {
+      const el = $('toast');
+      el.textContent = msg;
+      el.className = win ? 'show win' : 'show';
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => { el.className = ''; }, 2600);
+    }
+
+    function haptic() { if (navigator.vibrate) navigator.vibrate(10); }
+
+    // ================= Wheel picker =================
+    class Wheel {
+      constructor(el, values, format) {
+        this.el = el;
+        this.values = values;
+        this.format = format || (v => v);
+        this.itemH = 40;
+        this.index = 0;
+        this.onchange = null;
+        this._build();
+        this._bind();
+      }
+      _build() {
+        const frag = document.createDocumentFragment();
+        const padTop = document.createElement('div');
+        padTop.className = 'pad';
+        frag.appendChild(padTop);
+        this.items = this.values.map(v => {
+          const it = document.createElement('div');
+          it.className = 'item';
+          it.textContent = this.format(v);
+          it.addEventListener('click', () => this.setIndex(this.values.indexOf(v), true));
+          frag.appendChild(it);
+          return it;
+        });
+        const padBot = document.createElement('div');
+        padBot.className = 'pad';
+        frag.appendChild(padBot);
+        this.el.appendChild(frag);
+      }
+      _bind() {
+        let t = null;
+        this.el.addEventListener('scroll', () => {
+          const i = Math.round(this.el.scrollTop / this.itemH);
+          const clamped = Math.max(0, Math.min(this.values.length - 1, i));
+          if (clamped !== this.index) {
+            this.index = clamped;
+            this._highlight();
+            haptic();
+            if (this.onchange) this.onchange(this.value);
+          }
+          clearTimeout(t);
+          t = setTimeout(() => this._highlight(), 90);
+        }, { passive: true });
+      }
+      _highlight() {
+        this.items.forEach((it, i) => it.classList.toggle('sel', i === this.index));
+      }
+      get value() { return this.values[this.index]; }
+      setIndex(i, smooth) {
+        this.index = Math.max(0, Math.min(this.values.length - 1, i));
+        this.el.scrollTo({ top: this.index * this.itemH, behavior: smooth ? 'smooth' : 'auto' });
+        this._highlight();
+        if (this.onchange) this.onchange(this.value);
+      }
+      setValue(v, smooth) {
+        let bi = 0, bd = Infinity;
+        this.values.forEach((val, i) => {
+          const d = Math.abs(val - v);
+          if (d < bd) { bd = d; bi = i; }
+        });
+        this.setIndex(bi, smooth);
+      }
+    }
+
+    function buildRange(specs) {
+      const out = [];
+      for (const [from, to, step] of specs) {
+        for (let v = from; v <= to + 1e-9; v += step) out.push(Math.round(v * 10) / 10);
+      }
+      return out;
+    }
+
+    const ozValues = buildRange([[0.5, 20, 0.5], [21, 40, 1]]);
+    const abvValues = buildRange([[0.5, 15, 0.1], [15.5, 30, 0.5], [31, 70, 1]]);
+
+    const ozWheel = new Wheel($('ozWheel'), ozValues, v => v % 1 === 0 ? String(v) : v.toFixed(1));
+    const abvWheel = new Wheel($('abvWheel'), abvValues, v => v.toFixed(1));
+
+    const typePresets = {
+      beer: { oz: 12, abv: 5.0 },
+      wine: { oz: 5, abv: 12 },
+      liquor: { oz: 1.5, abv: 40 },
+      other: { oz: 8, abv: 10 }
+    };
+
+    let currentType = 'beer';
+    let selectedDate = todayStr();
+
+    function updateCalc() {
+      const u = calcUnits(ozWheel.value, abvWheel.value);
+      $('calcUnits').textContent = r1(u).toFixed(1);
+      $('calcDetail').textContent = `standard units · ${ozWheel.value} oz @ ${abvWheel.value}%`;
+    }
+
+    ozWheel.onchange = updateCalc;
+    abvWheel.onchange = updateCalc;
+
+    // ================= Add sheet =================
+    const backdrop = $('backdrop');
+    let openSheet = null;
+
+    function showSheet(id) {
+      openSheet = $(id);
+      backdrop.classList.add('show');
+      openSheet.classList.add('show');
+    }
+
+    function hideSheets() {
+      backdrop.classList.remove('show');
+      document.querySelectorAll('.sheet').forEach(s => s.classList.remove('show'));
+      openSheet = null;
+    }
+
+    backdrop.addEventListener('click', hideSheets);
+
+    $('addBtn').addEventListener('click', () => {
+      selectDate(todayStr());
+      renderRecents();
+      showSheet('addSheet');
+      requestAnimationFrame(() => {
+        setType(currentType, false);
+      });
+    });
+
+    $('settingsBtn').addEventListener('click', () => {
+      renderSettings();
+      showSheet('settingsSheet');
+    });
+
+    // Type buttons
+    $('typeRow').addEventListener('click', e => {
+      const btn = e.target.closest('.type-btn');
+      if (!btn) return;
+      setType(btn.dataset.type, true);
+    });
+
+    function setType(t, smooth) {
+      currentType = t;
+      document.querySelectorAll('.type-btn').forEach(b => b.classList.toggle('active', b.dataset.type === t));
+      const p = typePresets[t];
+      ozWheel.setValue(p.oz, smooth);
+      abvWheel.setValue(p.abv, smooth);
+      updateCalc();
+    }
+
+    // Recent drinks (unique type/oz/abv combos, latest first)
+    function getRecents() {
+      const seen = new Set();
+      const out = [];
+      for (let i = store.drinks.length - 1; i >= 0 && out.length < 8; i--) {
+        const d = store.drinks[i];
+        const key = `${d.type}|${d.oz}|${d.abv}`;
+        if (!seen.has(key)) { seen.add(key); out.push(d); }
+      }
+      return out;
+    }
+
+    function renderRecents() {
+      const recents = getRecents();
+      $('recentWrap').style.display = recents.length ? 'block' : 'none';
+      const host = $('recentRow');
+      host.innerHTML = '';
+      for (const r of recents) {
+        const chip = document.createElement('button');
+        chip.className = 'recent-chip';
+        chip.innerHTML = `${typeIcon(r.type)} ${r.oz}oz · ${r.abv}%<span class="rc-u">${r1(r.units).toFixed(1)}u</span>`;
+        chip.addEventListener('click', () => {
+          currentType = r.type;
+          document.querySelectorAll('.type-btn').forEach(b => b.classList.toggle('active', b.dataset.type === r.type));
+          ozWheel.setValue(r.oz, true);
+          abvWheel.setValue(r.abv, true);
+          updateCalc();
+        });
+        host.appendChild(chip);
+      }
+    }
+
+    // Date selection
+    function selectDate(dateStr) {
+      selectedDate = dateStr;
+      const t = todayStr(), y = addDays(t, -1);
+      $('dateToday').classList.toggle('active', dateStr === t);
+      $('dateYesterday').classList.toggle('active', dateStr === y);
+      const custom = $('dateCustom');
+      const isCustom = dateStr !== t && dateStr !== y;
+      custom.classList.toggle('active', isCustom);
+      if (isCustom) custom.value = dateStr;
+      $('logBtn').textContent = dateStr === t ? 'Log drink' : `Log for ${niceDate(dateStr)}`;
+    }
+
+    $('dateToday').addEventListener('click', () => selectDate(todayStr()));
+    $('dateYesterday').addEventListener('click', () => selectDate(addDays(todayStr(), -1)));
+    $('dateCustom').addEventListener('change', e => { if (e.target.value) selectDate(e.target.value); });
+    $('dateCustom').max = todayStr();
+
+    // Log a drink
+    $('logBtn').addEventListener('click', () => {
+      const oz = ozWheel.value, abv = abvWheel.value;
+      const units = r1(calcUnits(oz, abv));
+      store.drinks.push({
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+        date: selectedDate,
+        ts: new Date().toISOString(),
+        type: currentType,
+        oz, abv, units
+      });
+      // logging a drink un-marks an AF day
+      store.afDays = store.afDays.filter(d => d !== selectedDate);
+      save();
+      hideSheets();
+      const s = render();
+      haptic();
+      pulse('todayFill');
+
+      const goal = store.settings.dailyGoal;
+      if (selectedDate === todayStr()) {
+        const left = goal - s.todayUnits;
+        if (left >= 0) toast(`Logged ${units.toFixed(1)}u — ${r1(left).toFixed(1)} left under today's cap`, true);
+        else toast(`Logged ${units.toFixed(1)}u — ${s.todayUnits.toFixed(1)} today`);
+      } else {
+        toast(`Logged ${units.toFixed(1)}u for ${niceDate(selectedDate)}`);
+      }
+    });
+
+    function pulse(id) {
+      const el = $(id);
+      el.classList.remove('pulse');
+      void el.offsetWidth;
+      el.classList.add('pulse');
+    }
+
+    // Zero day (from FAB, for today)
+    $('zeroBtn').addEventListener('click', () => {
+      const t = todayStr();
+      const marked = store.afDays.includes(t);
+      if (marked) {
+        store.afDays = store.afDays.filter(d => d !== t);
+        save(); render();
+        return;
+      }
+      markZero(t);
+    });
+
+    // Zero day for selected date (from add sheet)
+    $('zeroForDate').addEventListener('click', () => {
+      const dayMap = buildDayMap();
+      const e = dayMap.get(selectedDate);
+      if (e && e.drinks.length) { toast('That day already has drinks logged'); return; }
+      hideSheets();
+      markZero(selectedDate);
+    });
+
+    function markZero(dateStr) {
+      if (!store.afDays.includes(dateStr)) store.afDays.push(dateStr);
+      save();
+      const s = render();
+      haptic();
+      const msgs = [
+        `Zero day logged — ${s.zero30} this month`,
+        `Zero day logged — streak at ${s.streak}`,
+      ];
+      toast(msgs[s.zero30 % 2], true);
+    }
+
+    function deleteDrink(id) {
+      const d = store.drinks.find(x => x.id === id);
+      if (!d) return;
+      if (!confirm(`Delete ${d.oz}oz @ ${d.abv}% (${r1(d.units).toFixed(1)}u)?`)) return;
+      store.drinks = store.drinks.filter(x => x.id !== id);
+      save(); render();
+    }
+
+    // ================= Chart segment control =================
+    $('chartSeg').addEventListener('click', e => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      chartView = btn.dataset.view;
+      document.querySelectorAll('#chartSeg button').forEach(b => b.classList.toggle('active', b === btn));
+      renderChart(computeStats());
+    });
+
+    let resizeT = null;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeT);
+      resizeT = setTimeout(() => renderChart(computeStats()), 150);
+    });
+
+    // ================= Settings =================
+    function renderSettings() {
+      $('dailyGoalVal').textContent = store.settings.dailyGoal;
+      $('weeklyGoalVal').textContent = store.settings.weeklyGoal;
+    }
+
+    function bumpGoal(key, delta, min, max) {
+      store.settings[key] = Math.min(max, Math.max(min, r1(store.settings[key] + delta)));
+      save(); render();
+    }
+
+    $('dailyMinus').addEventListener('click', () => bumpGoal('dailyGoal', -0.5, 0.5, 20));
+    $('dailyPlus').addEventListener('click', () => bumpGoal('dailyGoal', 0.5, 0.5, 20));
+    $('weeklyMinus').addEventListener('click', () => bumpGoal('weeklyGoal', -1, 1, 100));
+    $('weeklyPlus').addEventListener('click', () => bumpGoal('weeklyGoal', 1, 1, 100));
+
+    // ================= Import / export =================
+    function exportPayload() {
+      return JSON.stringify(store, null, 2);
+    }
+
+    $('exportBtn').addEventListener('click', () => {
+      const blob = new Blob([exportPayload()], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `drink-tracker-${todayStr()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast('Exported — save it to iCloud Drive in Files');
+    });
+
+    $('importFile').addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => importText(ev.target.result);
+      reader.readAsText(file);
+      e.target.value = '';
+    });
+
+    $('copyBtn').addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(exportPayload());
+        toast('Copied — paste on your other device');
+      } catch (err) {
+        toast('Copy failed — use Export instead');
+      }
+    });
+
+    $('pasteBtn').addEventListener('click', async () => {
+      try {
+        const text = await navigator.clipboard.readText();
+        importText(text);
+      } catch (err) {
+        toast('Paste failed — use Import file instead');
+      }
+    });
+
+    function importText(text) {
+      let data;
+      try { data = JSON.parse(text); }
+      catch (e) { toast('Not valid JSON'); return; }
+
+      // V1 format: bare array of {date, drinks, note}
+      if (Array.isArray(data)) {
+        const rows = data.filter(r => r && typeof r.date === 'string' && typeof r.drinks === 'number');
+        if (!rows.length) { toast('No entries found in that data'); return; }
+        if (!confirm(`Import ${rows.length} days from your V1 tracker? Existing days keep priority.`)) return;
+        const have = new Set(store.legacy.map(l => l.date));
+        const dayMap = buildDayMap();
+        let added = 0;
+        for (const r of rows) {
+          if (have.has(r.date)) continue;
+          const existing = dayMap.get(r.date);
+          if (existing && existing.tracked) continue; // don't double-count days already tracked in V2
+          store.legacy.push({ date: r.date, units: r.drinks, note: r.note || '' });
+          added++;
+        }
+        store.legacy.sort((a, b) => a.date.localeCompare(b.date));
+        save(); render();
+        toast(`Imported ${added} days of history`, added > 0);
+        return;
+      }
+
+      // V2 format: full store object
+      if (data && data.version === 2) {
+        const theirs = Object.assign(defaultStore(), data, {
+          settings: Object.assign(defaultStore().settings, data.settings || {})
+        });
+        const merge = store.drinks.length + store.legacy.length + store.afDays.length > 0
+          ? confirm(`Merge ${theirs.drinks.length} drinks with your existing data?\n\nOK = merge · Cancel = replace everything`)
+          : false;
+        if (merge) {
+          const ids = new Set(store.drinks.map(d => d.id));
+          for (const d of theirs.drinks) if (!ids.has(d.id)) store.drinks.push(d);
+          const ldates = new Set(store.legacy.map(l => l.date));
+          for (const l of theirs.legacy) if (!ldates.has(l.date)) store.legacy.push(l);
+          store.afDays = [...new Set([...store.afDays, ...theirs.afDays])];
+        } else {
+          store = theirs;
+        }
+        store.drinks.sort((a, b) => a.date.localeCompare(b.date));
+        store.legacy.sort((a, b) => a.date.localeCompare(b.date));
+        save(); render();
+        toast('Import complete', true);
+        return;
+      }
+
+      toast('Unrecognized data format');
+    }
+
+    $('clearBtn').addEventListener('click', () => {
+      if (!confirm('Delete ALL tracking data on this device? This cannot be undone.')) return;
+      if (!confirm('Really sure? Export a backup first if in doubt.')) return;
+      store = defaultStore();
+      save(); render();
+      hideSheets();
+      toast('All data deleted');
+    });
+
+    // ================= Boot =================
+    render();
+    setType('beer', false);
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
+  </script>
+</body>
+</html>
