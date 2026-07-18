@@ -9,6 +9,8 @@ The original lived in the `neat-starter` repo as a calculator + tracker page pai
 - **Per-drink logging** — each drink is stored with type, fl oz, ABV%, and timestamp, then rolled up into daily unit totals. The old app stored one number per day.
 - **Scroll-wheel entry** — fl oz and ABV% are picked on iOS-style scroll wheels instead of number inputs. The Beer / Wine / Liquor buttons are broad jumps for the ABV wheel only (~5% / ~12% / ~40%) so you land near the right strength and fine-tune from there; the oz wheel stays wherever you set it. The oz + ABV flow is the primary path since beers vary so much.
 - **"Log again" chips** — your recent unique drinks are one tap to re-log.
+- **Quantity stepper** — log ×N identical drinks in one go (stored as N entries so they stay individually deletable).
+- **Backfill any date** — Today / Yesterday chips plus a native date picker, and every history day has an "+ Add drink to this day" action.
 - **Reduction-focused rewards** — streak of days under your cap, zero-day counts, a personal-best lowest 7-day average that glows when you're at it, and a weekly unit budget. Nothing celebrates drinking; everything celebrates less.
 - **Zero-day button** — logging an alcohol-free day is a first-class, one-tap action (untracked days are excluded from averages, so zero days must be claimed).
 - **Configurable goals** — daily cap and weekly budget, adjustable as you ratchet down.

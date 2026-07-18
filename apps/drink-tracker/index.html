@@ -373,6 +373,19 @@
     }
     .dl-del:active { color: var(--over); }
 
+    .day-add {
+      display: block;
+      margin-top: 6px;
+      padding: 7px 10px;
+      border: 1px dashed var(--border-2);
+      border-radius: 8px;
+      color: var(--text-3);
+      font-size: 12.5px;
+      font-weight: 500;
+    }
+
+    .day-add:active { color: var(--text); border-color: var(--text-3); }
+
     .show-more {
       width: 100%;
       text-align: center;
@@ -622,15 +635,25 @@
     /* Live units readout */
     .calc-readout {
       display: flex;
-      align-items: baseline;
-      justify-content: center;
-      gap: 8px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
       margin-top: 16px;
-      padding: 14px;
+      padding: 12px 14px;
       border-radius: 12px;
       background: var(--surface-2);
       border: 1px solid var(--border);
     }
+
+    .cr-left {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .qty-stepper { flex-shrink: 0; }
+    .qty-stepper .st-val { min-width: 38px; }
 
     .calc-readout .cr-num {
       font-family: var(--mono);
@@ -656,19 +679,35 @@
 
     .date-chip.active { border-color: #fff; color: #fff; background: var(--surface-3); }
 
-    .date-input {
+    .date-pick {
+      position: relative;
       flex: 1;
-      background: var(--surface-2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      min-width: 0;
       border: 1px solid var(--border);
       border-radius: 10px;
+      background: var(--surface-2);
       color: var(--text-2);
       font-size: 13px;
-      padding: 0 12px;
-      min-width: 0;
-      color-scheme: dark;
+      font-weight: 500;
+      padding: 9px 8px;
     }
 
-    .date-input.active { border-color: #fff; color: #fff; }
+    .date-pick.active { border-color: #fff; color: #fff; background: var(--surface-3); }
+
+    /* invisible native input on top so a tap opens the OS date picker */
+    .date-pick input {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      -webkit-appearance: none;
+      appearance: none;
+    }
 
     .sheet-actions { display: flex; gap: 10px; margin-top: 20px; }
 
@@ -918,15 +957,26 @@
     </div>
 
     <div class="calc-readout">
-      <span class="cr-num" id="calcUnits">1.0</span>
-      <span class="cr-lbl" id="calcDetail">standard units</span>
+      <div class="cr-left">
+        <span class="cr-num" id="calcUnits">1.0</span>
+        <span class="cr-lbl" id="calcDetail">standard units</span>
+      </div>
+      <div class="stepper qty-stepper">
+        <button id="qtyMinus" aria-label="Fewer drinks">−</button>
+        <span class="st-val" id="qtyVal">×1</span>
+        <button id="qtyPlus" aria-label="More drinks">+</button>
+      </div>
     </div>
 
     <h3>When</h3>
     <div class="date-row">
       <button class="date-chip active" id="dateToday">Today</button>
       <button class="date-chip" id="dateYesterday">Yesterday</button>
-      <input type="date" class="date-input" id="dateCustom">
+      <div class="date-pick" id="datePickWrap">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/></svg>
+        <span id="datePickLbl">Pick date</span>
+        <input type="date" id="dateCustom" aria-label="Pick a date">
+      </div>
     </div>
 
     <div class="sheet-actions">
@@ -1490,6 +1540,15 @@
           body.appendChild(line);
         }
 
+        const addLine = document.createElement('button');
+        addLine.className = 'day-add';
+        addLine.textContent = '+ Add drink to this day';
+        addLine.addEventListener('click', ev => {
+          ev.stopPropagation();
+          openAddSheet(date);
+        });
+        body.appendChild(addLine);
+
         row.querySelector('.day-head').addEventListener('click', () => row.classList.toggle('open'));
         host.appendChild(row);
       }
@@ -1617,12 +1676,30 @@
 
     let currentType = 'beer';
     let selectedDate = todayStr();
+    let qty = 1;
 
     function updateCalc() {
-      const u = calcUnits(ozWheel.value, abvWheel.value);
-      $('calcUnits').textContent = r1(u).toFixed(1);
-      $('calcDetail').textContent = `standard units · ${ozWheel.value} oz @ ${abvWheel.value}%`;
+      const per = calcUnits(ozWheel.value, abvWheel.value);
+      $('calcUnits').textContent = r1(per * qty).toFixed(1);
+      $('calcDetail').textContent = qty > 1
+        ? `units · ${qty} × ${r1(per).toFixed(1)}u · ${ozWheel.value} oz @ ${abvWheel.value}%`
+        : `standard units · ${ozWheel.value} oz @ ${abvWheel.value}%`;
+      updateLogBtn();
     }
+
+    function setQty(n) {
+      qty = Math.max(1, Math.min(24, n));
+      $('qtyVal').textContent = '×' + qty;
+      updateCalc();
+    }
+
+    function updateLogBtn() {
+      const what = qty > 1 ? `Log ${qty} drinks` : 'Log drink';
+      $('logBtn').textContent = selectedDate === todayStr() ? what : `${what} · ${niceDate(selectedDate)}`;
+    }
+
+    $('qtyMinus').addEventListener('click', () => setQty(qty - 1));
+    $('qtyPlus').addEventListener('click', () => setQty(qty + 1));
 
     ozWheel.onchange = updateCalc;
     abvWheel.onchange = updateCalc;
@@ -1645,11 +1722,14 @@
 
     backdrop.addEventListener('click', hideSheets);
 
-    $('addBtn').addEventListener('click', () => {
-      selectDate(todayStr());
+    function openAddSheet(dateStr) {
+      selectDate(dateStr || todayStr());
+      setQty(1);
       renderRecents();
       showSheet('addSheet');
-    });
+    }
+
+    $('addBtn').addEventListener('click', () => openAddSheet());
 
     $('settingsBtn').addEventListener('click', () => {
       renderSettings();
@@ -1706,13 +1786,13 @@
     function selectDate(dateStr) {
       selectedDate = dateStr;
       const t = todayStr(), y = addDays(t, -1);
+      const isCustom = dateStr !== t && dateStr !== y;
       $('dateToday').classList.toggle('active', dateStr === t);
       $('dateYesterday').classList.toggle('active', dateStr === y);
-      const custom = $('dateCustom');
-      const isCustom = dateStr !== t && dateStr !== y;
-      custom.classList.toggle('active', isCustom);
-      if (isCustom) custom.value = dateStr;
-      $('logBtn').textContent = dateStr === t ? 'Log drink' : `Log for ${niceDate(dateStr)}`;
+      $('datePickWrap').classList.toggle('active', isCustom);
+      $('datePickLbl').textContent = isCustom ? `${dayName(dateStr)} · ${niceDate(dateStr)}` : 'Pick date';
+      $('dateCustom').value = isCustom ? dateStr : '';
+      updateLogBtn();
     }
 
     $('dateToday').addEventListener('click', () => selectDate(todayStr()));
@@ -1720,17 +1800,21 @@
     $('dateCustom').addEventListener('change', e => { if (e.target.value) selectDate(e.target.value); });
     $('dateCustom').max = todayStr();
 
-    // Log a drink
+    // Log drink(s)
     $('logBtn').addEventListener('click', () => {
       const oz = ozWheel.value, abv = abvWheel.value;
       const units = r1(calcUnits(oz, abv));
-      store.drinks.push({
-        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-        date: selectedDate,
-        ts: new Date().toISOString(),
-        type: currentType,
-        oz, abv, units
-      });
+      const n = qty;
+      const now = new Date().toISOString();
+      for (let i = 0; i < n; i++) {
+        store.drinks.push({
+          id: Date.now().toString(36) + i + Math.random().toString(36).slice(2, 6),
+          date: selectedDate,
+          ts: now,
+          type: currentType,
+          oz, abv, units
+        });
+      }
       // logging a drink un-marks an AF day
       store.afDays = store.afDays.filter(d => d !== selectedDate);
       save();
@@ -1739,13 +1823,15 @@
       haptic();
       pulse('todayFill');
 
+      const total = r1(units * n);
+      const what = n > 1 ? `${n} × ${units.toFixed(1)}u (${total.toFixed(1)}u)` : `${units.toFixed(1)}u`;
       const goal = store.settings.dailyGoal;
       if (selectedDate === todayStr()) {
         const left = goal - s.todayUnits;
-        if (left >= 0) toast(`Logged ${units.toFixed(1)}u — ${r1(left).toFixed(1)} left under today's cap`, true);
-        else toast(`Logged ${units.toFixed(1)}u — ${s.todayUnits.toFixed(1)} today`);
+        if (left >= 0) toast(`Logged ${what} — ${r1(left).toFixed(1)} left under today's cap`, true);
+        else toast(`Logged ${what} — ${s.todayUnits.toFixed(1)} today`);
       } else {
-        toast(`Logged ${units.toFixed(1)}u for ${niceDate(selectedDate)}`);
+        toast(`Logged ${what} for ${niceDate(selectedDate)}`);
       }
     });
 
