@@ -1607,17 +1607,13 @@
     }
 
     const ozValues = buildRange([[0.5, 20, 0.5], [21, 40, 1]]);
-    const abvValues = buildRange([[0.5, 15, 0.1], [15.5, 30, 0.5], [31, 70, 1]]);
+    const abvValues = buildRange([[0.5, 15, 0.1], [15.5, 70, 0.5]]);
 
     const ozWheel = new Wheel($('ozWheel'), ozValues, v => v % 1 === 0 ? String(v) : v.toFixed(1));
     const abvWheel = new Wheel($('abvWheel'), abvValues, v => v.toFixed(1));
 
-    const typePresets = {
-      beer: { oz: 12, abv: 5.0 },
-      wine: { oz: 5, abv: 12 },
-      liquor: { oz: 1.5, abv: 40 },
-      other: { oz: 8, abv: 10 }
-    };
+    // Type buttons are broad jumps for the ABV wheel only — oz stays where you set it
+    const abvAnchors = { beer: 5.0, wine: 12, liquor: 40, other: 10 };
 
     let currentType = 'beer';
     let selectedDate = todayStr();
@@ -1653,9 +1649,6 @@
       selectDate(todayStr());
       renderRecents();
       showSheet('addSheet');
-      requestAnimationFrame(() => {
-        setType(currentType, false);
-      });
     });
 
     $('settingsBtn').addEventListener('click', () => {
@@ -1673,9 +1666,7 @@
     function setType(t, smooth) {
       currentType = t;
       document.querySelectorAll('.type-btn').forEach(b => b.classList.toggle('active', b.dataset.type === t));
-      const p = typePresets[t];
-      ozWheel.setValue(p.oz, smooth);
-      abvWheel.setValue(p.abv, smooth);
+      abvWheel.setValue(abvAnchors[t], smooth);
       updateCalc();
     }
 
@@ -1944,6 +1935,7 @@
 
     // ================= Boot =================
     render();
+    ozWheel.setValue(12, false);
     setType('beer', false);
 
     if ('serviceWorker' in navigator) {
