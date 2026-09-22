@@ -1,0 +1,24 @@
+{
+  "name": "Jam Book",
+  "short_name": "Jam Book",
+  "description": "Bluegrass song catalog and chord charts with independent key and capo transposition",
+  "start_url": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#0b0b0c",
+  "background_color": "#0b0b0c",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' fill='%230b0b0c'/><rect x='112' y='102' width='52' height='308' rx='16' fill='%23d9a441'/><rect x='230' y='102' width='52' height='308' rx='16' fill='%23ececef'/><rect x='348' y='102' width='52' height='308' rx='16' fill='%236ec7a8'/></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' fill='%230b0b0c'/><rect x='42' y='38' width='20' height='116' rx='6' fill='%23d9a441'/><rect x='86' y='38' width='20' height='116' rx='6' fill='%23ececef'/><rect x='130' y='38' width='20' height='116' rx='6' fill='%236ec7a8'/></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
