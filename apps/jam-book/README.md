@@ -96,8 +96,9 @@ becomes `[G]This nine pound [C]hammer is a little too heavy`.
   into two columns so a whole song fits without scrolling. Auto / 1 / 2 column switch, and A− / A+
   text sizing for reading at arm's length.
 - **Light and dark** — dark by default, paper-light for bright rooms.
-- **Metronome** — tap tempo, `{tempo:}` from the chart, 4/4 · 3/4 · 2/4 · 6/8, accented downbeat, and
-  a backbeat-only mode for chop practice. Web Audio, scheduled ahead so it doesn't drift.
+- **Metronome** — opening a song picks up its `{tempo:}` and `{time:}` (waltzes switch to 3/4 on
+  their own). Tap tempo, 4/4 · 3/4 · 2/4 · 6/8, accented downbeat, and a backbeat-only mode for chop
+  practice. Web Audio, scheduled ahead so it doesn't drift.
 - **Search and filters** — title, artist, key, tags, plus favorites.
 - **Keyboard** — `↑`/`↓` key, `←`/`→` capo, `space` metronome, `/` search.
 - **Offline** — installable PWA with a network-first service worker.
@@ -123,11 +124,21 @@ Import/export from the library menu:
 
 ## Starter songs
 
-Ships with eleven traditional, public-domain tunes — Cripple Creek, Old Joe Clark, Angeline the
-Baker, Soldier's Joy, Blackberry Blossom, Shady Grove, Little Maggie, Wildwood Flower, Will the
-Circle Be Unbroken, Man of Constant Sorrow, Nine Pound Hammer — chosen to exercise the format:
-grids, choruses, modal keys, minor keys. **Restore starter songs** in the library menu re-adds any
-you've deleted.
+Ships with 23 traditional, public-domain standards, chosen to cover the jam repertoire and to
+exercise the format — grids, choruses, modal keys, minor keys, waltzes.
+
+**Fiddle tunes** — Cripple Creek · Old Joe Clark · Angeline the Baker · Soldier's Joy · Blackberry
+Blossom · Whiskey Before Breakfast · Red Haired Boy · Arkansas Traveler · Sally Goodin · Bill
+Cheatham · Cluck Old Hen
+
+**Songs** — Man of Constant Sorrow · Nine Pound Hammer · Roll in My Sweet Baby's Arms · Little
+Maggie · Shady Grove · Wildwood Flower · Bury Me Beneath the Willow · John Hardy · Banks of the Ohio
+
+**Gospel** — Will the Circle Be Unbroken · Wayfaring Stranger · Amazing Grace
+
+They are chord skeletons for jamming, not definitive settings — every tune has a dozen variants, so
+edit them to whatever your circle plays. **Restore starter songs** in the library menu re-adds any
+you've deleted (and picks up new ones if the app already has a library saved).
 
 ## Setup
 

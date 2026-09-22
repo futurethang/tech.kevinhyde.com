@@ -848,6 +848,15 @@ function keysFor(song) {
 }
 function clampCapo(n) { return Math.max(0, Math.min(MAX_CAPO, parseInt(n, 10) || 0)); }
 
+/* {time: 3/4} -> three beats to the bar. Only the meters the metronome offers. */
+function beatsFromTime(time) {
+  const m = String(time || '').match(/^(\d+)\s*\/\s*(\d+)$/);
+  if (!m) return 0;
+  const top = +m[1], bottom = +m[2];
+  if (bottom === 8 && top === 6) return 6;
+  return [2, 3, 4].includes(top) ? top : 0;
+}
+
 /* ------------------------------------------------------------ rendering */
 function renderChart() {
   const chart = el('chart');
@@ -1045,8 +1054,11 @@ function selectSong(id) {
   renderChart();
   const song = currentSong();
   if (song) {
-    const t = songInfo(song).meta.tempo;
-    if (t) setBpm(t, true);
+    /* the chart carries the feel — follow it unless the metronome is running */
+    const meta = songInfo(song).meta;
+    if (meta.tempo && !met.on) setBpm(meta.tempo, true);
+    const beats = beatsFromTime(meta.time);
+    if (beats && !met.on) setBeats(beats);
   }
   el('chartScroll').scrollTop = 0;
   document.body.classList.remove('nav-open');
@@ -1464,9 +1476,12 @@ function wire() {
   });
   on('metSongTempo', 'click', () => {
     const s = currentSong();
-    const t = s && songInfo(s).meta.tempo;
-    if (t) { setBpm(t); toast('Tempo from the chart: ' + t + ' bpm'); }
+    const meta = s && songInfo(s).meta;
+    const beats = meta && beatsFromTime(meta.time);
+    if (beats) setBeats(beats);
+    if (meta && meta.tempo) toast('From the chart: ' + meta.tempo + ' bpm' + (meta.time ? ', ' + meta.time : ''));
     else toast('This chart has no {tempo:} set');
+    if (meta && meta.tempo) setBpm(meta.tempo);
   });
 
   /* keyboard shortcuts (handy with an iPad keyboard) */
@@ -1746,7 +1761,254 @@ I have [G]no friends to [D7]help me [G]now
 [G]Just to get a little [D7]brew, just to get a little [G]brew
 {end_of_verse}
 
-{chorus}`
+{chorus}`,
+
+`{title: Whiskey Before Breakfast}
+{artist: Traditional}
+{key: D}
+{tempo: 120}
+{time: 4/4}
+{tags: fiddle-tune, jam-standard, session-d, instrumental}
+{comment: Called everywhere. Both parts sit in first position in D.}
+
+{start_of_grid: A part}
+| D . . . | G . . . | D . . . | A . . . |
+| D . . . | G . . . | D . A . | D . . . |
+{end_of_grid}
+
+{start_of_grid: B part}
+| D . . . | G . . . | D . . . | A . . . |
+| D . . . | G . . . | D . A . | D . . . |
+{end_of_grid}`,
+
+`{title: Red Haired Boy}
+{artist: Traditional}
+{key: A}
+{tempo: 122}
+{time: 4/4}
+{tags: fiddle-tune, jam-standard, modal, instrumental}
+{comment: Mixolydian — that G is the flat seven. Also called The Little Beggarman.}
+
+{start_of_grid: A part}
+| A . . . | G . . . | A . . . | A . E . |
+| A . . . | G . . . | A . E . | A . . . |
+{end_of_grid}
+
+{start_of_grid: B part}
+| A . . . | G . . . | A . . . | A . E . |
+| A . . . | G . . . | A . E . | A . . . |
+{end_of_grid}`,
+
+`{title: Arkansas Traveler}
+{artist: Traditional}
+{key: D}
+{tempo: 126}
+{time: 4/4}
+{tags: fiddle-tune, jam-standard, session-d, instrumental}
+
+{start_of_grid: A part}
+| D . . . | D . . . | D . . . | A . . . |
+| D . . . | D . . . | A . . . | D . . . |
+{end_of_grid}
+
+{start_of_grid: B part}
+| G . . . | D . . . | G . . . | D . A . |
+| G . . . | D . . . | A . . . | D . . . |
+{end_of_grid}`,
+
+`{title: Sally Goodin}
+{artist: Traditional}
+{key: A}
+{tempo: 130}
+{time: 4/4}
+{tags: fiddle-tune, jam-standard, instrumental}
+{comment: Two chords and a hundred variations — everyone takes a different one.}
+
+{start_of_grid: A part}
+| A . . . | A . . . | A . . . | E . . . |
+| A . . . | A . . . | E . . . | A . . . |
+{end_of_grid}
+
+{start_of_grid: B part}
+| A . . . | A . . . | E . . . | E . . . |
+| A . . . | A . . . | E . . . | A . . . |
+{end_of_grid}`,
+
+`{title: Bill Cheatham}
+{artist: Traditional}
+{key: A}
+{tempo: 128}
+{time: 4/4}
+{tags: fiddle-tune, jam-standard, instrumental}
+
+{start_of_grid: A part}
+| A . . . | A . . . | D . . . | A . . . |
+| A . . . | A . . . | E . . . | A . . . |
+{end_of_grid}
+
+{start_of_grid: B part}
+| D . . . | D . . . | A . . . | A . . . |
+| D . . . | D . . . | A . E . | A . . . |
+{end_of_grid}`,
+
+`{title: Cluck Old Hen}
+{artist: Traditional}
+{key: A}
+{tempo: 118}
+{time: 4/4}
+{tags: fiddle-tune, modal, old-time, banjo}
+{comment: Modal A. Crooked in a lot of settings — follow whoever started it.}
+
+{start_of_grid: A part}
+| A . . . | A . . . | G . . . | A . . . |
+| A . . . | A . . . | G . . . | A . . . |
+{end_of_grid}
+
+{start_of_verse}
+[A]My old hen's a good old hen
+She lays eggs for the [G]railroad [A]men
+Sometimes one, sometimes two
+Sometimes enough for the [G]whole damn [A]crew
+{end_of_verse}`,
+
+`{title: Roll in My Sweet Baby's Arms}
+{artist: Traditional}
+{key: G}
+{tempo: 124}
+{time: 4/4}
+{tags: jam-standard, session-g, vocal}
+{comment: The first song most pickers learn to sing at a jam.}
+
+{start_of_chorus}
+[G]Roll in my sweet baby's arms
+Roll in my sweet baby's [D7]arms
+[C]Lay around the shack till the [G]mail train comes back
+Then I'll [D7]roll in my sweet baby's [G]arms
+{end_of_chorus}
+
+{start_of_verse}
+[G]Ain't gonna work on the railroad
+Ain't gonna work on the [D7]farm
+[C]Lay around the shack till the [G]mail train comes back
+And [D7]roll in my sweet baby's [G]arms
+{end_of_verse}
+
+{start_of_verse}
+[G]Now where were you last Friday night
+While I was lyin' in [D7]jail
+[C]Walkin' the streets with a[G]nother man
+Wouldn't even [D7]go my [G]bail
+{end_of_verse}
+
+{chorus}`,
+
+`{title: Banks of the Ohio}
+{artist: Traditional}
+{key: G}
+{tempo: 100}
+{time: 3/4}
+{tags: jam-standard, session-g, vocal, waltz}
+{comment: Waltz time — set the metronome to 3/4.}
+
+{start_of_verse}
+[G]I asked my love to take a walk
+To take a walk, just a little [D7]walk
+[C]Down beside where the waters [G]flow
+Down by the [D7]banks of the O[G]hio
+{end_of_verse}
+
+{start_of_chorus}
+And [G]only say that you'll be mine
+In no other arms entwined
+[C]Down beside where the waters [G]flow
+Down by the [D7]banks of the O[G]hio
+{end_of_chorus}`,
+
+`{title: Wayfaring Stranger}
+{artist: Traditional}
+{key: Am}
+{tempo: 84}
+{time: 4/4}
+{tags: gospel, minor, vocal}
+{comment: Slow and lonesome. Sounds good moved up to Bm or Cm — set the key and let the capo find the shape.}
+
+{start_of_verse}
+[Am]I am a poor wayfaring stranger
+A-[Dm]travelin' through this world of [Am]woe
+But there's no sickness, toil or danger
+In that [E7]bright land to which I [Am]go
+{end_of_verse}
+
+{start_of_chorus}
+[Am]I'm going there to see my father
+I'm [Dm]going there no more to [Am]roam
+I'm only going over Jordan
+I'm [E7]only going over [Am]home
+{end_of_chorus}`,
+
+`{title: Bury Me Beneath the Willow}
+{artist: Traditional}
+{key: G}
+{tempo: 104}
+{time: 4/4}
+{tags: jam-standard, session-g, vocal}
+
+{start_of_verse}
+[G]My heart is sad and I'm in sorrow
+For the [C]one I love so [G]dear
+When shall I see her, oh no never
+Till we [D7]meet in heaven a[G]bove
+{end_of_verse}
+
+{start_of_chorus}
+[G]Bury me beneath the willow
+Under the [C]weeping willow [G]tree
+When she hears that I am sleeping
+Maybe [D7]then she'll think of [G]me
+{end_of_chorus}`,
+
+`{title: John Hardy}
+{artist: Traditional}
+{key: G}
+{tempo: 126}
+{time: 4/4}
+{tags: jam-standard, session-g, vocal, banjo}
+
+{start_of_verse}
+[G]John Hardy was a desperate little man
+He carried two guns every [C]day
+He [G]shot a man on the West Virginia line
+You ought to seen John Hardy gettin' a[D7]way, poor [G]boy
+{end_of_verse}
+
+{start_of_verse}
+[G]John Hardy stood at the gamblin' table
+Didn't have no interest in the [C]game
+Up [G]stepped a yellow gal and threw a dollar down
+Said deal John Hardy in the [D7]game, poor [G]boy
+{end_of_verse}`,
+
+`{title: Amazing Grace}
+{artist: Traditional}
+{key: G}
+{tempo: 76}
+{time: 3/4}
+{tags: gospel, vocal, waltz}
+{comment: Waltz. Everyone knows the words, so pick a key the room can sing in.}
+
+{start_of_verse}
+A[G]mazing grace how [C]sweet the [G]sound
+That saved a wretch like [D7]me
+I [G]once was lost but [C]now am [G]found
+Was [D7]blind but now I [G]see
+{end_of_verse}
+
+{start_of_verse}
+'Twas [G]grace that taught my [C]heart to [G]fear
+And grace my fears re[D7]lieved
+How [G]precious did that [C]grace ap[G]pear
+The [D7]hour I first be[G]lieved
+{end_of_verse}`
 ];
 
 function seedSongs() { return SEED_SOURCES.map(src => makeSong(src)); }
