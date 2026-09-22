@@ -1,6 +1,15 @@
 {
   "apps": [
     {
+      "slug": "jam-book",
+      "name": "Jam Book",
+      "description": "Bluegrass song catalog and ChordPro chart reader — set the key and capo together and the chart shows the shapes you actually play",
+      "type": "static",
+      "status": "live",
+      "createdAt": "2026-09-22",
+      "tags": ["music", "tool", "pwa", "bluegrass"]
+    },
+    {
       "slug": "drink-tracker",
       "name": "Drink Tracker",
       "description": "Mobile-first alcohol unit tracker with scroll-wheel logging and reduction-focused streaks — trend your average down",
