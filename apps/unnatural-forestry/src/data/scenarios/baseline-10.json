@@ -1,0 +1,28 @@
+{
+  "_comment": "Ten teams, full district. The default scenario: use it to look at route fairness and collision frequency at full party size.",
+  "id": "baseline-10",
+  "name": "Baseline — 10 teams, Lower Quilsap",
+  "description": "Full-size party. Ten teams on the ten declared start positions of Ranger District 01.",
+  "mapId": "ranger-district-01",
+  "seed": 20261031,
+  "rules": {
+    "movesPerRound": 1,
+    "allowStayInPlace": true,
+    "allowSwaps": true,
+    "revealHiddenContents": true,
+    "collisionTriggersEncounter": true,
+    "maxRounds": 12
+  },
+  "teams": [
+    { "id": "team-fern", "name": "Fern Gully Irregulars", "color": "#4caf50", "startHexId": "F5", "characterId": "raccoon", "items": [] },
+    { "id": "team-nurse-log", "name": "Nurse Log Local 12", "color": "#8bc34a", "startHexId": "H7", "characterId": "elk", "items": [] },
+    { "id": "team-salal", "name": "Salal Thicket Crew", "color": "#00897b", "startHexId": "D7", "characterId": "raven", "items": [] },
+    { "id": "team-devils-club", "name": "Devil's Club Collective", "color": "#c0ca33", "startHexId": "F7", "characterId": "beaver", "items": ["headlamp"] },
+    { "id": "team-chanterelle", "name": "Chanterelle Detachment", "color": "#fb8c00", "startHexId": "H5", "characterId": "bobcat", "items": [] },
+    { "id": "team-skunk-cabbage", "name": "Skunk Cabbage Survey", "color": "#fdd835", "startHexId": "D5", "characterId": "banana-slug", "items": [] },
+    { "id": "team-widowmaker", "name": "Widowmaker Watch", "color": "#8d6e63", "startHexId": "G5", "characterId": "marmot", "items": [] },
+    { "id": "team-rain-shadow", "name": "Rain Shadow Division", "color": "#5c6bc0", "startHexId": "E5", "characterId": "black-bear", "items": [] },
+    { "id": "team-culvert", "name": "Culvert Inspection Unit", "color": "#26c6da", "startHexId": "G6", "characterId": "coyote", "items": ["topo-fragment"] },
+    { "id": "team-lichen", "name": "Lichen Appreciation Society", "color": "#ab47bc", "startHexId": "E6", "characterId": "barred-owl", "items": [] }
+  ]
+}

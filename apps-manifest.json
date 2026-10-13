@@ -1,6 +1,15 @@
 {
   "apps": [
     {
+      "slug": "unnatural-forestry",
+      "name": "Unnatural Forestry Sim",
+      "description": "Hex-map round simulator for prototyping the Department of Unnatural Forestry party game — simultaneous moves, encounters, and route analysis",
+      "type": "react",
+      "status": "wip",
+      "createdAt": "2026-10-13",
+      "tags": ["game", "tool", "simulation", "prototype", "phaser"]
+    },
+    {
       "slug": "jam-book",
       "name": "Jam Book",
       "description": "Bluegrass song catalog and ChordPro chart reader — set the key and capo together and the chart shows the shapes you actually play",

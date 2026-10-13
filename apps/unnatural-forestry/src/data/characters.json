@@ -1,0 +1,15 @@
+{
+  "_comment": "One animal per team, one short trait each. Traits are recorded but not yet applied by the rules engine.",
+  "characters": [
+    { "id": "raccoon", "name": "Raccoon", "species": "Procyon lotor", "trait": { "id": "opportunist", "label": "Opportunist", "description": "Takes an extra item from any hex it searches." } },
+    { "id": "elk", "name": "Elk", "species": "Cervus canadensis", "trait": { "id": "trailbreaker", "label": "Trailbreaker", "description": "Ignores the first delay it suffers each stage." } },
+    { "id": "raven", "name": "Raven", "species": "Corvus corax", "trait": { "id": "scout", "label": "Scout", "description": "Peeks at one adjacent hex before committing a move." } },
+    { "id": "beaver", "name": "Beaver", "species": "Castor canadensis", "trait": { "id": "engineer", "label": "Engineer", "description": "Crosses creek hexes as if they were trail." } },
+    { "id": "bobcat", "name": "Bobcat", "species": "Lynx rufus", "trait": { "id": "ambusher", "label": "Ambusher", "description": "Wins ties in a head-to-head encounter." } },
+    { "id": "banana-slug", "name": "Banana Slug", "species": "Ariolimax columbianus", "trait": { "id": "unhurried", "label": "Unhurried", "description": "Cannot be eliminated by its first hazard." } },
+    { "id": "marmot", "name": "Marmot", "species": "Marmota caligata", "trait": { "id": "sentinel", "label": "Sentinel", "description": "Learns the contents of a hex two steps away once per stage." } },
+    { "id": "black-bear", "name": "Black Bear", "species": "Ursus americanus", "trait": { "id": "forager", "label": "Forager", "description": "Converts any reward hex into a consumable." } },
+    { "id": "coyote", "name": "Coyote", "species": "Canis latrans", "trait": { "id": "trickster", "label": "Trickster", "description": "May swap one of its items with an encountered team." } },
+    { "id": "barred-owl", "name": "Barred Owl", "species": "Strix varia", "trait": { "id": "night-eyes", "label": "Night Eyes", "description": "Treats one misleading clue per stage as if it were accurate." } }
+  ]
+}

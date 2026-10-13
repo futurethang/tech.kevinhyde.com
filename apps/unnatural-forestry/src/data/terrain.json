@@ -1,0 +1,85 @@
+{
+  "_comment": "Terrain types. `signals` is what the PRINTED map appears to promise about a hex; hidden contents (in the map file) are the truth. A mismatch between the two is an intentional authoring tool, not a bug.",
+  "terrains": [
+    {
+      "id": "trail",
+      "label": "Maintained Trail",
+      "color": "#d9b26f",
+      "passable": true,
+      "visibleClue": "Blazed and boot-packed. Someone comes through here.",
+      "signals": { "risk": "low", "reward": "none" }
+    },
+    {
+      "id": "second-growth",
+      "label": "Second Growth",
+      "color": "#6f9f6a",
+      "passable": true,
+      "visibleClue": "Even-aged firs in rows. Unnervingly tidy.",
+      "signals": { "risk": "low", "reward": "low" }
+    },
+    {
+      "id": "old-growth",
+      "label": "Old Growth",
+      "color": "#2f6b4f",
+      "passable": true,
+      "visibleClue": "Trunks wider than a car. Very little light.",
+      "signals": { "risk": "medium", "reward": "medium" }
+    },
+    {
+      "id": "bog",
+      "label": "Sphagnum Bog",
+      "color": "#8a8450",
+      "passable": true,
+      "visibleClue": "Standing water and skunk cabbage. Slow going.",
+      "signals": { "risk": "high", "reward": "low" }
+    },
+    {
+      "id": "ridge",
+      "label": "Basalt Ridge",
+      "color": "#9a9391",
+      "passable": true,
+      "visibleClue": "Exposed rock. You can see a long way from up there.",
+      "signals": { "risk": "medium", "reward": "low" }
+    },
+    {
+      "id": "clearcut",
+      "label": "Clearcut Unit",
+      "color": "#c2a35c",
+      "passable": true,
+      "visibleClue": "Stumps, slash, and no cover whatsoever.",
+      "signals": { "risk": "high", "reward": "none" }
+    },
+    {
+      "id": "creek",
+      "label": "Creek Bottom",
+      "color": "#5f8fa8",
+      "passable": true,
+      "visibleClue": "Fast water over slick stones. Loud enough to hide things.",
+      "signals": { "risk": "medium", "reward": "medium" }
+    },
+    {
+      "id": "tarn",
+      "label": "Tarn",
+      "color": "#2e5f8a",
+      "passable": false,
+      "visibleClue": "Open water. Deeper than it looks.",
+      "signals": { "risk": "high", "reward": "none" }
+    },
+    {
+      "id": "blowdown",
+      "label": "Blowdown Tangle",
+      "color": "#4a3f35",
+      "passable": false,
+      "visibleClue": "Windthrow stacked three deep. Nobody is getting through.",
+      "signals": { "risk": "high", "reward": "none" }
+    },
+    {
+      "id": "station",
+      "label": "Field Station",
+      "color": "#b4472e",
+      "passable": true,
+      "visibleClue": "A Department outbuilding. Forms available at all hours.",
+      "signals": { "risk": "low", "reward": "high" }
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "_comment": "Deliberately cramped: four teams in a cluster so swaps and shared-hex encounters happen in round 1. `allowSwaps` is false here to exercise the blocked-swap path.",
+  "id": "collision-lab",
+  "name": "Collision Lab — 4 teams, forced contact",
+  "description": "Test rig. Four teams start adjacent to each other so encounters and blocked swaps are easy to trigger by hand.",
+  "mapId": "ranger-district-02",
+  "seed": 7,
+  "rules": {
+    "movesPerRound": 1,
+    "allowStayInPlace": true,
+    "allowSwaps": false,
+    "revealHiddenContents": true,
+    "collisionTriggersEncounter": true,
+    "maxRounds": 10
+  },
+  "teams": [
+    { "id": "team-a", "name": "Crew A", "color": "#ef5350", "startHexId": "E5", "characterId": "raccoon", "items": [] },
+    { "id": "team-b", "name": "Crew B", "color": "#42a5f5", "startHexId": "E4", "characterId": "elk", "items": [] },
+    { "id": "team-c", "name": "Crew C", "color": "#66bb6a", "startHexId": "F5", "characterId": "raven", "items": [] },
+    { "id": "team-d", "name": "Crew D", "color": "#ffa726", "startHexId": "D5", "characterId": "beaver", "items": [] }
+  ]
+}

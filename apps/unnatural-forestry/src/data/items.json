@@ -1,0 +1,35 @@
+{
+  "_comment": "Items are deliberately few. Milestone 1 tracks inventories but applies no item effects.",
+  "items": [
+    {
+      "id": "headlamp",
+      "name": "Headlamp (Dept. Issue)",
+      "description": "Batteries at 40%. Lets a team act in a hex that would otherwise stop them.",
+      "kind": "tool"
+    },
+    {
+      "id": "topo-fragment",
+      "name": "Torn Topo Fragment",
+      "description": "One quadrant of the map, with contour lines that do not match the ground.",
+      "kind": "document"
+    },
+    {
+      "id": "day-permit",
+      "name": "Form 7-B Day Use Permit",
+      "description": "Countersigned. Allegedly improves the outcome of an escape test.",
+      "kind": "document"
+    },
+    {
+      "id": "huckleberries",
+      "name": "Handful of Huckleberries",
+      "description": "One-time use. Cancels a delay.",
+      "kind": "consumable"
+    },
+    {
+      "id": "elk-charm",
+      "name": "Shed Antler Charm",
+      "description": "Carried for luck. Re-rolls one failed test.",
+      "kind": "charm"
+    }
+  ]
+}

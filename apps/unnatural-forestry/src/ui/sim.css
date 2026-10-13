@@ -1,0 +1,153 @@
+/* Low-fidelity development tool styling. Deliberately plain: the game's
+   visual identity comes later, and a dev tool should look like a dev tool. */
+
+:root {
+  --bg: #11150f;
+  --panel: #1a1f17;
+  --panel-2: #222820;
+  --line: #333b2d;
+  --text: #e9e4d6;
+  --muted: #9aa38c;
+  --accent: #ffd54f;
+  --info: #4fc3f7;
+  --warn: #ff8a65;
+  --ok: #81c784;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); }
+
+#app {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 420px;
+  height: 100vh;
+}
+
+#board { position: relative; overflow: hidden; }
+#board canvas { display: block; }
+
+#panel {
+  border-left: 1px solid var(--line);
+  background: var(--panel);
+  overflow-y: auto;
+  padding: 12px 14px 48px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+h1 { font-size: 14px; margin: 0 0 2px; letter-spacing: 0.04em; text-transform: uppercase; }
+h2 {
+  font-size: 11px;
+  margin: 18px 0 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 4px;
+}
+p { margin: 4px 0; }
+.sub { color: var(--muted); font-size: 11px; }
+
+select, button {
+  font-family: inherit;
+  font-size: 11px;
+  background: var(--panel-2);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 5px 8px;
+  cursor: pointer;
+}
+select { width: 100%; }
+button:hover:not(:disabled) { border-color: var(--accent); }
+button:disabled { opacity: 0.4; cursor: not-allowed; }
+button.primary { background: #2f3b26; border-color: var(--ok); }
+button.danger { border-color: var(--warn); }
+
+.row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.row.tight { gap: 4px; }
+.spread { display: flex; justify-content: space-between; gap: 8px; }
+
+.badge {
+  display: inline-block;
+  padding: 1px 5px;
+  border-radius: 3px;
+  border: 1px solid var(--line);
+  font-size: 10px;
+  color: var(--muted);
+}
+.badge.ok { color: var(--ok); border-color: var(--ok); }
+.badge.warn { color: var(--warn); border-color: var(--warn); }
+.badge.info { color: var(--info); border-color: var(--info); }
+
+ul { margin: 4px 0; padding-left: 16px; }
+li { margin: 1px 0; }
+
+table { width: 100%; border-collapse: collapse; font-size: 11px; }
+th, td { text-align: left; padding: 2px 4px; border-bottom: 1px solid var(--line); }
+th { color: var(--muted); font-weight: normal; }
+
+.team {
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 6px 8px;
+  margin-bottom: 5px;
+  background: var(--panel-2);
+  cursor: pointer;
+}
+.team.active { border-color: var(--accent); }
+.team.done { opacity: 0.75; }
+.swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 5px;
+  vertical-align: middle;
+  border: 1px solid #0006;
+}
+.team-name { font-weight: bold; }
+.team-meta { color: var(--muted); font-size: 10px; }
+
+.log {
+  max-height: 220px;
+  overflow-y: auto;
+  background: #0d100b;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 6px 8px;
+  font-size: 10.5px;
+}
+.log div { white-space: pre-wrap; }
+.log .t-encounter { color: var(--warn); }
+.log .t-trailhead-reached { color: var(--accent); }
+.log .t-content-revealed { color: var(--info); }
+.log .t-missing-choice, .log .t-blocked-swap { color: #ef9a9a; }
+.log .round-rule { color: var(--muted); border-top: 1px dashed var(--line); margin-top: 4px; padding-top: 2px; }
+
+label.check { display: flex; gap: 5px; align-items: center; cursor: pointer; font-size: 11px; }
+
+.error {
+  border: 1px solid var(--warn);
+  color: var(--warn);
+  padding: 6px 8px;
+  border-radius: 3px;
+  margin: 6px 0;
+}
+
+pre {
+  background: #0d100b;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 6px;
+  font-size: 10px;
+  max-height: 240px;
+  overflow: auto;
+}
+
+@media (max-width: 900px) {
+  #app { grid-template-columns: 1fr; grid-template-rows: 50vh 50vh; }
+  #panel { border-left: none; border-top: 1px solid var(--line); }
+}
