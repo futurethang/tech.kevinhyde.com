@@ -3,8 +3,14 @@
  *
  * The committed JSON map files are the canonical artefacts — this script exists
  * so a district can be re-rolled or retuned without hand-editing ~90 hexes.
- * Run `pnpm gen:map`; it rewrites every preset below and prints a route report
- * so you can see immediately whether the exits still sit 3-5 moves away.
+ * Run `pnpm gen:map`; it rewrites every preset below and prints a route report.
+ *
+ * The party allows no more than three rounds, and a round moves a team one hex,
+ * so a team has a budget of three moves. Starts are therefore chosen to sit
+ * EXACTLY `targetExitDistance` moves from the nearest open trailhead: identical
+ * for every team, so nobody can claim a worse draw, and with zero slack, so any
+ * detour has to pay for itself. That exactness is the whole risk/reward tension
+ * — change `targetExitDistance` to loosen or tighten it.
  *
  * Output is fully determined by each preset's seed and the tables below.
  */
@@ -13,7 +19,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { analyzeMap } from '../src/core/analysis';
+import { analyzeMap, exitDistanceField } from '../src/core/analysis';
 import { createBoard } from '../src/core/board';
 import { mapWarnings, parseMap, parseTerrains } from '../src/core/config';
 import { axialDistance, axialKey, axialRing, gridLabel, hexDisc, hexRing } from '../src/core/hex';
@@ -30,8 +36,10 @@ interface Preset {
   readonly hexSize: number;
   readonly trailheadCount: number;
   readonly startCount: number;
-  /** Rings that may hold a starting position. Keeps teams in the interior. */
-  readonly startRings: readonly number[];
+  /** Exact number of moves from every start to its nearest open trailhead. */
+  readonly targetExitDistance: number;
+  /** Starts must also sit this far inside the map, to keep them interior. */
+  readonly minStartRing: number;
   /** Hand-placed impassable hexes, so the topology stays deliberate. */
   readonly barriers: readonly { readonly coord: Axial; readonly terrain: string }[];
   readonly trailheadNames: readonly string[];
@@ -42,19 +50,15 @@ const PRESETS: readonly Preset[] = [
     id: 'ranger-district-01',
     name: 'Ranger District 01 — Lower Quilsap',
     seed: 19731031,
-    radius: 5,
-    hexSize: 40,
-    trailheadCount: 8,
+    radius: 4,
+    hexSize: 46,
+    trailheadCount: 6,
     startCount: 10,
-    startRings: [1, 2],
+    targetExitDistance: 3,
+    minStartRing: 1,
     barriers: [
-      { coord: { q: 3, r: -1 }, terrain: 'tarn' },
-      { coord: { q: 3, r: 0 }, terrain: 'tarn' },
-      { coord: { q: 2, r: 0 }, terrain: 'tarn' },
-      { coord: { q: -3, r: 2 }, terrain: 'blowdown' },
-      { coord: { q: -3, r: 3 }, terrain: 'blowdown' },
-      { coord: { q: -1, r: -3 }, terrain: 'blowdown' },
-      { coord: { q: 0, r: 3 }, terrain: 'blowdown' },
+      { coord: { q: 1, r: 1 }, terrain: 'tarn' },
+      { coord: { q: -1, r: -1 }, terrain: 'blowdown' },
     ],
     trailheadNames: [
       'Quilsap Pulloff',
@@ -63,19 +67,18 @@ const PRESETS: readonly Preset[] = [
       'Old Mill Grade',
       'Cedar Bight Landing',
       'Section 14 Fenceline',
-      'Weir Road Terminus',
-      'Lookout Switchback',
     ],
   },
   {
     id: 'ranger-district-02',
-    name: 'Ranger District 02 — Upper Quilsap (compact)',
+    name: 'Ranger District 02 — Upper Quilsap (small party)',
     seed: 20251031,
     radius: 4,
-    hexSize: 46,
+    hexSize: 52,
     trailheadCount: 6,
     startCount: 6,
-    startRings: [0, 1],
+    targetExitDistance: 3,
+    minStartRing: 0,
     barriers: [
       { coord: { q: 2, r: -1 }, terrain: 'tarn' },
       { coord: { q: -2, r: 2 }, terrain: 'blowdown' },
@@ -147,14 +150,41 @@ function buildMap(preset: Preset): Record<string, unknown> {
     };
   });
 
-  // Starts: farthest-point sampling so teams begin spread out, not clustered.
-  const candidates = coords.filter(
-    (c) =>
-      preset.startRings.includes(axialRing(c)) &&
-      !IMPASSABLE.has(terrainById.get(idByCoord.get(axialKey(c))!)!),
+  // Starts: every team exactly `targetExitDistance` moves from the nearest exit.
+  // The distance field needs a board, so build an interim map with no starts,
+  // measure it, then choose. Nothing downstream sees the interim version.
+  const hexList = coords.map((coord) => {
+    const id = idByCoord.get(axialKey(coord))!;
+    return { id, q: coord.q, r: coord.r, terrain: terrainById.get(id)! };
+  });
+  const interim = parseMap(
+    {
+      id: preset.id,
+      name: preset.name,
+      layout: { shape: 'hex-disc', radius: preset.radius, hexSize: preset.hexSize },
+      hexes: hexList,
+      trailheads,
+      startPositions: [],
+      contents: [],
+    },
+    terrains,
+    `${preset.id} (interim)`,
   );
+  const field = exitDistanceField(createBoard(interim, terrains));
+  const trailheadHexIds = new Set(trailheads.map((t) => t.hexId));
+  const candidates = coords.filter((c) => {
+    const id = idByCoord.get(axialKey(c))!;
+    if (trailheadHexIds.has(id)) return false;
+    if (axialRing(c) < preset.minStartRing) return false;
+    if (IMPASSABLE.has(terrainById.get(id)!)) return false;
+    return field.dist.get(id) === preset.targetExitDistance;
+  });
   if (candidates.length < preset.startCount) {
-    throw new Error(`${preset.id}: ${candidates.length} candidate start hexes for ${preset.startCount} starts`);
+    throw new Error(
+      `${preset.id}: only ${candidates.length} hexes sit exactly ${preset.targetExitDistance} moves ` +
+        `from an exit, but ${preset.startCount} starts are needed. Adjust the radius, the trailhead ` +
+        `count, or targetExitDistance.`,
+    );
   }
   const chosen: Axial[] = [candidates[0]!];
   while (chosen.length < preset.startCount) {
@@ -235,10 +265,7 @@ function buildMap(preset: Preset): Record<string, unknown> {
     id: preset.id,
     name: preset.name,
     layout: { shape: 'hex-disc', radius: preset.radius, hexSize: preset.hexSize },
-    hexes: coords.map((coord) => {
-      const id = idByCoord.get(axialKey(coord))!;
-      return { id, q: coord.q, r: coord.r, terrain: terrainById.get(id)! };
-    }),
+    hexes: hexList,
     trailheads,
     startPositions,
     contents,

@@ -4,6 +4,11 @@ A development tool for prototyping a physical Halloween party game: teams of
 woodland animals, lost in a Pacific Northwest forest, moving one hex per round
 across a shared map toward trailheads on the perimeter.
 
+The party is one night, one play, **three rounds**, up to ten teams, and one
+facilitator who only has everyone's attention twice. `DECISIONS.md` holds the
+constraints, what is settled, what is a placeholder, and what the simulator has
+actually measured — read it before changing rules or map shape.
+
 This is **not the game**. It is a low-fidelity simulator used to test map
 geometry and the simultaneous-round structure before any components get
 manufactured. The map, the teams and the rule knobs all live in JSON so the same
@@ -161,6 +166,8 @@ These are working assumptions, not settled rules. Each is a knob in a scenario's
 `rules` block or a map preset:
 
 - **One hex per round, always.** Terrain does not yet cost extra movement.
+- **Reaching a trailhead qualifies a team; it does not win.** The final
+  challenge is undecided and unimplemented.
 - **Holding position is legal** (`allowStayInPlace`).
 - **Two teams may swap hexes** (`allowSwaps`). When it is off, both teams bounce
   back and the round records a `blocked-swap`.
@@ -184,37 +191,25 @@ These are working assumptions, not settled rules. Each is a knob in a scenario's
 
 ## Measured, not assumed
 
-Numbers from `pnpm gen:map` on the committed districts:
+Route shape on the committed districts (`pnpm gen:map`):
 
-- **Ranger District 01** — 91 hexes (84 passable), 8 trailheads, 10 starts.
-  Nearest exit 3–4 moves (mean 3.70). No stranded hexes, no unreachable exits.
+- **Ranger District 01** — 61 hexes (59 passable), 6 trailheads, 10 starts.
 - **Ranger District 02** — 61 hexes (58 passable), 6 trailheads, 6 starts.
-  Nearest exit 3–4 moves (mean 3.50).
+- Every start is **exactly 3 moves** from its nearest trailhead — equal for every
+  team, and exactly the move budget, so any detour costs the exit.
 
-These are *optimal* route lengths with no hazards, detours or forced retreats, so
-a real game runs longer than this floor. Route choice is uneven: some starts have
-three or four first steps that all stay on an optimal route, while others have
-exactly one — worth looking at before the map is finalised.
+With a three-round cap, "reachable" is not enough; it has to be reachable *in
+time*. The route analysis panel reports the move budget, whether every start is
+feasible, whether starts are equidistant, and how many have zero slack.
 
-From 60 scripted runs per strategy on `baseline-10` (a throwaway batch, not a
-committed tool — scripted movement is not real play):
+Scripted-play findings (200 seeded runs each, 10 teams, 3 rounds) live in
+`DECISIONS.md` section E. The short version: near-optimal play lands on the
+target of 2–4 finalists 70% of the time, but a hard "reach the trailhead" gate
+yields **no finalists at all in 3% of runs** and far more often once teams play
+imperfectly; and teams meet each other only ~3.6 times per game, so most never
+get a head-to-head. Both are open design problems, not tuning issues.
 
-| | Beeline | Balanced | Wander |
-| --- | --- | --- | --- |
-| First team out | round 3.3 | round 4.6 | round 9.7 |
-| Last team out | round 8.3 | round 20.6 | round 33.9 |
-| First team then waits | 5.0 rounds | 16.0 rounds | 24.2 rounds |
-| Encounters per game | 14.9 | 34.4 | 48.3 |
-| Teams that met anyone | 80% | 85% | 95% |
-| Map covered | 48% | 63% | 73% |
-
-Two things that show up immediately and are structural rather than tuning:
-
-1. **The winner finishes early and then has nothing to do** for 5–24 rounds.
-   Whatever the rules end up being, the game needs an answer for a team that is
-   out while others are still playing.
-2. **Trailheads are not used evenly.** Under beeline, TH-02 takes 20% of exits
-   while TH-01 and TH-04 take 3% each — a placement asymmetry, not noise.
+Scripted movement is not real play. Treat the numbers as the shape of the space.
 
 ## Not built yet
 

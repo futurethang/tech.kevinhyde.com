@@ -1,7 +1,8 @@
 {
-  "_comment": "Deliberately cramped: four teams in a cluster so swaps and shared-hex encounters happen in round 1. `allowSwaps` is false here to exercise the blocked-swap path.",
+  "_comment": "Test rig, not a party configuration: four teams in a cluster so swaps and shared-hex encounters happen in round 1. `allowSwaps` is false here to exercise the blocked-swap path, and maxRounds is deliberately longer than the party's three so the rig can be run repeatedly.",
   "id": "collision-lab",
   "name": "Collision Lab — 4 teams, forced contact",
+  "purpose": "rig",
   "description": "Test rig. Four teams start adjacent to each other so encounters and blocked swaps are easy to trigger by hand.",
   "mapId": "ranger-district-02",
   "seed": 7,

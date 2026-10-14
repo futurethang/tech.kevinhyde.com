@@ -219,3 +219,56 @@ export function analyzeMap(board: Board, startHexIds?: readonly string[]): MapAn
     startDistance,
   });
 }
+
+// ---------------------------------------------------------------------------
+// Move budget
+// ---------------------------------------------------------------------------
+
+export interface StartBudget {
+  readonly hexId: string;
+  /** Moves to the nearest open trailhead; null when none is reachable. */
+  readonly distance: number | null;
+  /** Spare moves after walking a shortest route. Negative means unreachable in time. */
+  readonly slack: number | null;
+  readonly feasible: boolean;
+}
+
+export interface BudgetReport {
+  /** Total moves a team gets in a whole game: rounds x moves per round. */
+  readonly budget: number;
+  readonly starts: readonly StartBudget[];
+  /** Every start can reach an exit inside the budget. */
+  readonly allFeasible: boolean;
+  /** Every start sits the same number of moves from its nearest exit. */
+  readonly equidistant: boolean;
+  /** Starts whose shortest route uses the entire budget — no room to detour. */
+  readonly zeroSlackCount: number;
+}
+
+/**
+ * Checks the map against the move budget the party actually allows.
+ *
+ * With a hard round cap, "the exit is reachable" is not enough — it has to be
+ * reachable *in time*. Slack is what a team can spend on a detour and still get
+ * out; zero slack means every detour is fatal unless something refunds a move.
+ */
+export function analyzeBudget(analysis: MapAnalysis, budget: number): BudgetReport {
+  const starts = analysis.starts.map<StartBudget>((start) => {
+    const distance = start.nearestExitDistance;
+    const slack = distance === null ? null : budget - distance;
+    return Object.freeze({
+      hexId: start.hexId,
+      distance,
+      slack,
+      feasible: slack !== null && slack >= 0,
+    });
+  });
+  const distances = starts.map((s) => s.distance);
+  return Object.freeze({
+    budget,
+    starts: Object.freeze(starts),
+    allFeasible: starts.every((s) => s.feasible),
+    equidistant: new Set(distances).size <= 1,
+    zeroSlackCount: starts.filter((s) => s.slack === 0).length,
+  });
+}

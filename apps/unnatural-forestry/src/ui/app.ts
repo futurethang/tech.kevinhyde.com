@@ -440,8 +440,16 @@ export class SimulatorApp {
       })
       .join('');
     const spread = a.startDistance;
+    const budget = this.sim.budgetReport();
+    const rules = this.sim.resolved.scenario.rules;
+    const budgetLine = `move budget <b>${budget.budget}</b>
+      (${rules.maxRounds} rounds × ${rules.movesPerRound} hex)
+      · ${budget.allFeasible ? 'every start can reach an exit in time' : '<span class="badge warn">some starts cannot reach an exit in time</span>'}
+      · ${budget.equidistant ? 'all starts equidistant' : '<span class="badge warn">starts are not equidistant</span>'}
+      · ${budget.zeroSlackCount}/${budget.starts.length} starts have zero slack (any detour costs the exit)`;
     return `
       <h2>Route analysis</h2>
+      <p class="sub">${budgetLine}</p>
       <p class="sub">${a.passableHexCount}/${a.hexCount} hexes passable ·
         ${spread ? `nearest exit min ${spread.min}, max ${spread.max}, mean ${spread.mean.toFixed(2)}` : 'no reachable exits'}</p>
       <table>

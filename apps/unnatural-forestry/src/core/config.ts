@@ -269,6 +269,10 @@ export function parseScenario(raw: unknown, path = 'scenario.json'): ScenarioDef
     id: str(o.id, `${path}.id`),
     name: str(o.name, `${path}.name`),
     description: str(o.description, `${path}.description`),
+    purpose:
+      o.purpose === undefined
+        ? 'party'
+        : oneOf(o.purpose, `${path}.purpose`, ['party', 'rig'] as const),
     mapId: str(o.mapId, `${path}.mapId`),
     seed: int(o.seed, `${path}.seed`),
     rules: parseRules(o.rules, `${path}.rules`),

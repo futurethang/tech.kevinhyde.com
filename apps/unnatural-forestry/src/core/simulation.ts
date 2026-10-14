@@ -8,7 +8,7 @@
  */
 
 import { createBoard, type Board } from './board';
-import { analyzeMap, type MapAnalysis } from './analysis';
+import { analyzeBudget, analyzeMap, type BudgetReport, type MapAnalysis } from './analysis';
 import { createRng, type Rng } from './rng';
 import { summarizeRun, type RunStats } from './stats';
 import {
@@ -84,6 +84,17 @@ export class Simulation {
       this.resolved.scenario.teams.map((t) => t.startHexId),
     );
     return this.cachedAnalysis;
+  }
+
+  /** Total moves a team gets in a whole game: rounds x moves per round. */
+  get moveBudget(): number {
+    const { maxRounds, movesPerRound } = this.resolved.scenario.rules;
+    return maxRounds * movesPerRound;
+  }
+
+  /** Whether the map's exits are reachable inside that budget, and with what slack. */
+  budgetReport(): BudgetReport {
+    return analyzeBudget(this.analysis, this.moveBudget);
   }
 
   teamDefinition(teamId: string): TeamDefinition {

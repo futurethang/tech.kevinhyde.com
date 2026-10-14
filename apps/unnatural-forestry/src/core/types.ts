@@ -144,6 +144,12 @@ export interface ScenarioDefinition {
   readonly id: string;
   readonly name: string;
   readonly description: string;
+  /**
+   * "party" scenarios model a real configuration of the night and must satisfy
+   * the party invariants (equidistant starts, exits reachable inside the round
+   * budget). "rig" scenarios exist to exercise a mechanic and are exempt.
+   */
+  readonly purpose: 'party' | 'rig';
   readonly mapId: string;
   /** Seed for the deterministic PRNG used during resolution. */
   readonly seed: number;

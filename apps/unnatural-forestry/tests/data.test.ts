@@ -5,7 +5,7 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { analyzeMap } from '../src/core/analysis';
+import { analyzeMap, shortestPath } from '../src/core/analysis';
 import { createBoard } from '../src/core/board';
 import { mapWarnings } from '../src/core/config';
 import { Simulation } from '../src/core/simulation';
@@ -68,11 +68,18 @@ describe.each([...maps.keys()])('map %s', (mapId) => {
     expect(new Set(hexIds).size).toBe(hexIds.length);
   });
 
-  it('puts the nearest exit 3-5 moves from every start position', () => {
+  it('puts every start the SAME distance from its nearest exit', () => {
+    // The party is one night and one play: nobody gets to find out afterwards
+    // that their start was worse. Equal distance is a fairness guarantee, not a
+    // tuning preference.
+    const distances = analysis.starts.map((s) => s.nearestExitDistance);
+    expect(distances).not.toContain(null);
+    expect(new Set(distances).size).toBe(1);
+  });
+
+  it('keeps that distance inside the three-round move budget', () => {
     for (const start of analysis.starts) {
-      expect(start.nearestExitDistance).not.toBeNull();
-      expect(start.nearestExitDistance!).toBeGreaterThanOrEqual(3);
-      expect(start.nearestExitDistance!).toBeLessThanOrEqual(5);
+      expect(start.nearestExitDistance!).toBeLessThanOrEqual(3);
     }
   });
 
@@ -105,10 +112,26 @@ describe.each([...scenarios.keys()])('scenario %s', (scenarioId) => {
     }
   });
 
-  it('can be driven to an exit inside its own maxRounds', () => {
-    const resolved = loadScenario(scenarioId);
-    const sim = new Simulation(resolved);
-    const worst = Math.max(...sim.analysis.starts.map((s) => s.nearestExitDistance ?? Infinity));
-    expect(worst).toBeLessThanOrEqual(resolved.scenario.rules.maxRounds);
+  it('can be driven to an exit inside its own move budget', () => {
+    const sim = new Simulation(loadScenario(scenarioId));
+    if (sim.resolved.scenario.purpose !== 'party') return; // rigs are exempt
+    const budget = sim.budgetReport();
+    expect(budget.allFeasible).toBe(true);
+    expect(budget.equidistant).toBe(true);
+  });
+
+  it('lets a team that walks a shortest route reach an exit in time', () => {
+    // Deterministic: the optimal walk, not a scripted strategy. Whether a team
+    // playing imperfectly still gets out is a design question, not an invariant.
+    const sim = new Simulation(loadScenario(scenarioId));
+    if (sim.resolved.scenario.purpose !== 'party') return;
+    for (const team of sim.state.teams) {
+      const nearest = Math.min(
+        ...sim.board.openTrailheadHexIds.map(
+          (exitHex) => (shortestPath(sim.board, team.hexId, exitHex)?.length ?? Infinity) - 1,
+        ),
+      );
+      expect(nearest).toBeLessThanOrEqual(sim.moveBudget);
+    }
   });
 });

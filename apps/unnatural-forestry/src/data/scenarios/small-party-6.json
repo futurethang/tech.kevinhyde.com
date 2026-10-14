@@ -1,8 +1,8 @@
 {
-  "_comment": "Six teams on the compact district. Use this to check that a smaller board still gives 3+ move routes.",
+  "_comment": "Six teams for a smaller gathering. Same three-round budget, same zero slack.",
   "id": "small-party-6",
-  "name": "Small Party — 6 teams, Upper Quilsap",
-  "description": "Two-person-team gathering. Six teams on the compact 61-hex district.",
+  "name": "Small Party — 6 teams, three rounds",
+  "description": "Two-person-team gathering. Six teams on Ranger District 02.",
   "mapId": "ranger-district-02",
   "seed": 20261101,
   "rules": {
@@ -11,14 +11,14 @@
     "allowSwaps": true,
     "revealHiddenContents": true,
     "collisionTriggersEncounter": true,
-    "maxRounds": 10
+    "maxRounds": 3
   },
   "teams": [
-    { "id": "team-fern", "name": "Fern Gully Irregulars", "color": "#4caf50", "startHexId": "E5", "characterId": "raccoon", "items": [] },
-    { "id": "team-salal", "name": "Salal Thicket Crew", "color": "#00897b", "startHexId": "E4", "characterId": "raven", "items": [] },
-    { "id": "team-chanterelle", "name": "Chanterelle Detachment", "color": "#fb8c00", "startHexId": "F4", "characterId": "bobcat", "items": [] },
-    { "id": "team-widowmaker", "name": "Widowmaker Watch", "color": "#8d6e63", "startHexId": "D4", "characterId": "marmot", "items": [] },
+    { "id": "team-fern", "name": "Fern Gully Irregulars", "color": "#4caf50", "startHexId": "E4", "characterId": "raccoon", "items": [] },
+    { "id": "team-salal", "name": "Salal Thicket Crew", "color": "#00897b", "startHexId": "F6", "characterId": "raven", "items": [] },
+    { "id": "team-chanterelle", "name": "Chanterelle Detachment", "color": "#fb8c00", "startHexId": "D5", "characterId": "bobcat", "items": [] },
+    { "id": "team-widowmaker", "name": "Widowmaker Watch", "color": "#8d6e63", "startHexId": "G5", "characterId": "marmot", "items": [] },
     { "id": "team-culvert", "name": "Culvert Inspection Unit", "color": "#26c6da", "startHexId": "F5", "characterId": "coyote", "items": [] },
-    { "id": "team-lichen", "name": "Lichen Appreciation Society", "color": "#ab47bc", "startHexId": "D5", "characterId": "barred-owl", "items": [] }
+    { "id": "team-lichen", "name": "Lichen Appreciation Society", "color": "#ab47bc", "startHexId": "E6", "characterId": "barred-owl", "items": [] }
   ]
 }
