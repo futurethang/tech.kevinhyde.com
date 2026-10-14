@@ -9,6 +9,14 @@
 
 import { createBoard, type Board } from './board';
 import { analyzeMap, type MapAnalysis } from './analysis';
+import { createRng, type Rng } from './rng';
+import { summarizeRun, type RunStats } from './stats';
+import {
+  chooseAllMoves,
+  DEFAULT_STRATEGY_ID,
+  getStrategy,
+  type StrategyDefinition,
+} from './strategy';
 import {
   resolveRound,
   validateChoices,
@@ -39,10 +47,18 @@ export class Simulation {
   private summaries: RoundSummary[] = [];
   private events: SimEvent[] = [];
   private cachedAnalysis: MapAnalysis | null = null;
+  /**
+   * Draws for scripted movement come from their own stream, so auto-filling a
+   * round never perturbs the RNG that resolution carries in SimState. Re-rolling
+   * advances it, which is what makes the button give a different answer each
+   * press while a run replays identically from a reset.
+   */
+  private strategyRng: Rng;
 
   constructor(readonly resolved: ResolvedScenario) {
     this.board = createBoard(resolved.map, resolved.terrains);
     this.current = createInitialState(resolved);
+    this.strategyRng = createRng(resolved.scenario.seed ^ 0x5f3a7c1d);
   }
 
   get state(): SimState {
@@ -179,7 +195,59 @@ export class Simulation {
     this.current = createInitialState(this.resolved);
     this.summaries = [];
     this.events = [];
+    this.strategyRng = createRng(this.resolved.scenario.seed ^ 0x5f3a7c1d);
     this.cancelAll();
+  }
+
+  // --- scripted play -------------------------------------------------------
+
+  /**
+   * Replaces every active team's choice with one drawn from `strategyId`, and
+   * commits them. Returns the teams left without a choice because they have no
+   * legal move at all — normally none.
+   */
+  autoFillChoices(strategyId: string = DEFAULT_STRATEGY_ID): string[] {
+    const strategy: StrategyDefinition = getStrategy(strategyId);
+    this.cancelAll();
+    const picks = chooseAllMoves(
+      this.board,
+      this.resolved,
+      this.current,
+      this.analysis.exitDistance,
+      this.strategyRng,
+      strategy.weights,
+    );
+    for (const [teamId, hexId] of picks) this.selectAndCommit(teamId, hexId);
+    return this.activeTeams()
+      .filter((team) => !picks.has(team.id))
+      .map((team) => team.id);
+  }
+
+  /** Auto-fills and resolves one round. */
+  autoPlayRound(strategyId: string = DEFAULT_STRATEGY_ID): RoundSummary {
+    const stuck = this.autoFillChoices(strategyId);
+    return this.resolve(stuck.length > 0 ? { allowMissingChoices: true } : {});
+  }
+
+  /**
+   * Plays rounds until no team is active or the round cap is hit. The cap
+   * defaults to the scenario's advisory `maxRounds`, since a wandering strategy
+   * may never reach an exit.
+   */
+  autoPlayToEnd(
+    strategyId: string = DEFAULT_STRATEGY_ID,
+    maxRounds: number = this.resolved.scenario.rules.maxRounds,
+  ): RoundSummary[] {
+    const played: RoundSummary[] = [];
+    while (this.activeTeams().length > 0 && played.length < maxRounds) {
+      played.push(this.autoPlayRound(strategyId));
+    }
+    return played;
+  }
+
+  /** Measured outcomes of the run so far. */
+  stats(): RunStats {
+    return summarizeRun(this.board, this.current, this.summaries);
   }
 
   /** JSON-serialisable dump of everything mutable, for the inspector. */
@@ -194,6 +262,8 @@ export class Simulation {
         selections: Object.fromEntries(this.selections),
         committed: Object.fromEntries(this.committed),
       },
+      strategyRngState: this.strategyRng.state,
+      stats: this.stats(),
       history: this.summaries,
     };
   }

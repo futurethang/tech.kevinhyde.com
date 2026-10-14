@@ -10,7 +10,9 @@ import type { MapScene } from '../render/MapScene';
 import { Simulation } from '../core/simulation';
 import { listScenarios, loadScenario } from '../data/registry';
 import { buildViewModel, initials, type ViewOptions } from './viewModel';
+import { DEFAULT_STRATEGY_ID, STRATEGIES, getStrategy } from '../core/strategy';
 import type { RoundSummary } from '../core/rounds';
+import type { RunStats } from '../core/stats';
 
 interface UiState {
   scenarioId: string;
@@ -19,6 +21,8 @@ interface UiState {
   showExitDistance: boolean;
   showSecrets: boolean;
   allowMissingChoices: boolean;
+  revealAllPending: boolean;
+  strategyId: string;
   error: string | null;
   showSnapshot: boolean;
 }
@@ -47,6 +51,8 @@ export class SimulatorApp {
       showExitDistance: false,
       showSecrets: false,
       allowMissingChoices: false,
+      revealAllPending: true,
+      strategyId: DEFAULT_STRATEGY_ID,
       error: null,
       showSnapshot: false,
     };
@@ -95,6 +101,18 @@ export class SimulatorApp {
         case 'resolve':
           this.resolve();
           break;
+        case 'auto-fill':
+          this.reportStuck(this.sim.autoFillChoices(this.ui.strategyId));
+          this.ui.activeTeamId = this.sim.activeTeams()[0]?.id ?? null;
+          break;
+        case 'auto-round':
+          this.sim.autoPlayRound(this.ui.strategyId);
+          this.ui.activeTeamId = this.sim.activeTeams()[0]?.id ?? null;
+          break;
+        case 'auto-run':
+          this.sim.autoPlayToEnd(this.ui.strategyId);
+          this.ui.activeTeamId = this.sim.activeTeams()[0]?.id ?? null;
+          break;
         case 'reset':
           this.sim.reset();
           this.ui.activeTeamId = this.sim.activeTeams()[0]?.id ?? null;
@@ -127,7 +145,13 @@ export class SimulatorApp {
       return;
     }
     const checked = (target as HTMLInputElement).checked;
+    if (field === 'strategy') {
+      this.ui.strategyId = (target as HTMLSelectElement).value;
+      this.render();
+      return;
+    }
     if (field === 'showExitDistance') this.ui.showExitDistance = checked;
+    if (field === 'revealAllPending') this.ui.revealAllPending = checked;
     if (field === 'showSecrets') this.ui.showSecrets = checked;
     if (field === 'allowMissingChoices') this.ui.allowMissingChoices = checked;
     this.render();
@@ -156,6 +180,12 @@ export class SimulatorApp {
     this.ui.activeTeamId = this.sim.activeTeams()[0]?.id ?? null;
   }
 
+  /** Surfaces teams a strategy could not move, instead of failing silently. */
+  private reportStuck(stuck: readonly string[]): void {
+    if (stuck.length === 0) return;
+    this.ui.error = `no legal move for: ${stuck.join(', ')} — they will hold position`;
+  }
+
   private nextUncommittedTeamId(afterTeamId?: string): string | null {
     const active = this.sim.activeTeams();
     const startIndex = afterTeamId ? active.findIndex((t) => t.id === afterTeamId) + 1 : 0;
@@ -175,6 +205,7 @@ export class SimulatorApp {
       showExitDistance: this.ui.showExitDistance,
       showSecrets: this.ui.showSecrets,
       showExploration: true,
+      revealAllPending: this.ui.revealAllPending,
     };
   }
 
@@ -187,6 +218,7 @@ export class SimulatorApp {
       this.renderTeams(),
       this.renderInspector(),
       this.renderLastRound(),
+      this.renderStats(),
       this.renderLog(),
       this.renderAnalysis(),
       this.renderSnapshot(),
@@ -219,6 +251,10 @@ export class SimulatorApp {
     const committed = this.sim.committedCount();
     const canResolve = this.sim.canResolve() || this.ui.allowMissingChoices;
     const atTrailhead = this.sim.state.teams.filter((t) => t.status === 'at_trailhead').length;
+    const strategyOptions = STRATEGIES.map(
+      (s) =>
+        `<option value="${s.id}"${s.id === this.ui.strategyId ? ' selected' : ''}>${escapeHtml(s.label)}</option>`,
+    ).join('');
     return `
       <h2>Round ${this.sim.round}</h2>
       <p>
@@ -233,11 +269,23 @@ export class SimulatorApp {
         <button class="danger" data-action="reset">Reset scenario</button>
         <button data-action="recenter">Recentre map</button>
       </div>
+      <h2>Scripted play</h2>
+      <p class="sub">Fills every team's move from a strategy. A testing instrument,
+        not a model of how guests play.</p>
+      <select data-field="strategy">${strategyOptions}</select>
+      <p class="sub">${escapeHtml(getStrategy(this.ui.strategyId).description)}</p>
+      <div class="row">
+        <button data-action="auto-fill" ${active > 0 ? '' : 'disabled'}>Re-roll all moves</button>
+        <button data-action="auto-round" ${active > 0 ? '' : 'disabled'}>Auto round</button>
+        <button data-action="auto-run" ${active > 0 ? '' : 'disabled'}>Run to end</button>
+      </div>
       <div class="row" style="margin-top:6px">
         <label class="check"><input type="checkbox" data-field="showExitDistance"
           ${this.ui.showExitDistance ? 'checked' : ''}> distance-to-exit overlay</label>
         <label class="check"><input type="checkbox" data-field="showSecrets"
           ${this.ui.showSecrets ? 'checked' : ''}> show hidden contents</label>
+        <label class="check"><input type="checkbox" data-field="revealAllPending"
+          ${this.ui.revealAllPending ? 'checked' : ''}> debug: reveal every pending move</label>
         <label class="check"><input type="checkbox" data-field="allowMissingChoices"
           ${this.ui.allowMissingChoices ? 'checked' : ''}> debug: resolve without all choices</label>
       </div>
@@ -262,8 +310,10 @@ export class SimulatorApp {
         const pendingText = !canMove
           ? '<span class="badge info">awaiting escape test</span>'
           : committed
-            ? `<span class="badge ok">locked in${isActive && selection ? ` → ${escapeHtml(selection)}` : ''}</span>`
-            : isActive && selection
+            ? `<span class="badge ok">locked in${
+                (isActive || this.ui.revealAllPending) && selection ? ` → ${escapeHtml(selection)}` : ''
+              }</span>`
+            : (isActive || this.ui.revealAllPending) && selection
               ? `<span class="badge">aiming at ${escapeHtml(selection)}</span>`
               : '<span class="badge warn">no choice</span>';
         const buttons = canMove
@@ -408,6 +458,35 @@ export class SimulatorApp {
           ? `<p class="sub">unreachable trailheads: ${a.unreachableTrailheadIds.map(escapeHtml).join(', ')}</p>`
           : ''
       }`;
+  }
+
+  private renderStats(): string {
+    if (this.sim.history.length === 0) return '';
+    const s: RunStats = this.sim.stats();
+    const pct = (f: number) => `${Math.round(f * 100)}%`;
+    const spread = (v: { min: number; max: number; mean: number } | null) =>
+      v === null ? '—' : `${v.min}–${v.max} (mean ${v.mean.toFixed(1)})`;
+    const trailheads = Object.entries(s.trailheadUse)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([id, n]) => `${escapeHtml(id)} ×${n}`)
+      .join(', ');
+    return `
+      <h2>Run so far</h2>
+      <p class="sub">One run is an anecdote — compare several seeds before believing it.</p>
+      <table>
+        <tr><th>rounds</th><td>${s.roundsResolved}</td></tr>
+        <tr><th>teams out</th><td>${s.teams.atTrailhead}/${s.teams.total} at a trailhead,
+          ${s.teams.active} still moving</td></tr>
+        <tr><th>rounds to exit</th><td>${spread(s.roundsToTrailhead)}</td></tr>
+        <tr><th>moves per team</th><td>${spread(s.movesPerTeam)}</td></tr>
+        <tr><th>encounters</th><td>${s.encounters.total}
+          (${s.encounters.sharedHex} shared hex, ${s.encounters.swap} swap)</td></tr>
+        <tr><th>contact</th><td>${s.encounters.teamsInvolved}/${s.teams.total} teams met someone;
+          ${s.encounters.roundsWithContact}/${s.roundsResolved} rounds had contact</td></tr>
+        <tr><th>map covered</th><td>${s.coverage.visited}/${s.coverage.passable} hexes
+          (${pct(s.coverage.fraction)})</td></tr>
+        <tr><th>exits used</th><td>${trailheads || '—'}</td></tr>
+      </table>`;
   }
 
   private renderSnapshot(): string {

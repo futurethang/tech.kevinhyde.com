@@ -6,5 +6,7 @@ export * from './rng';
 export * from './rounds';
 export * from './simulation';
 export * from './state';
+export * from './stats';
+export * from './strategy';
 export * from './types';
 export * from './validate';

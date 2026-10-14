@@ -10,7 +10,8 @@ manufactured. The map, the teams and the rule knobs all live in JSON so the same
 definitions can later drive a printed board, cards and tokens.
 
 Milestone 1 scope: hex map, teams, simultaneous move selection, round
-resolution, encounters *reported* (not resolved), and route analysis.
+resolution, encounters *reported* (not resolved), route analysis, and scripted
+play so rounds can be advanced without hand-clicking every team.
 
 ## Running it
 
@@ -37,10 +38,50 @@ pnpm gen:map          # regenerate the map JSON files and print a route report
 A locked-in destination is shown only while that team is the one being handled,
 so the board does not leak other teams' pending moves.
 
-Checkboxes: distance-to-exit overlay, show hidden contents, and a debug override
-that resolves a round with teams that have not committed (they hold position).
+Checkboxes: distance-to-exit overlay, show hidden contents, reveal every
+pending move, and a debug override that resolves a round with teams that have
+not committed (they hold position).
 
 Map controls: drag to pan, scroll to zoom, **Recentre map** to fit.
+
+### Scripted play
+
+Hand-clicking 10 teams a round is fine for checking a rule and miserable for
+exploring one. The **Scripted play** block fills every team's move from a
+strategy instead:
+
+- **Re-roll all moves** — draws a fresh move for every active team and commits
+  them. Press it again for a different draw. Resolve when you like what you see.
+- **Auto round** — fill and resolve in one click.
+- **Run to end** — play until every team is at a trailhead or the scenario's
+  `maxRounds` is reached.
+
+Three strategies, each a weighted draw over the legal moves graded by what they
+do to the team's distance-to-exit (`src/core/strategy.ts`):
+
+| Strategy | Behaviour |
+| --- | --- |
+| Beeline | Almost always takes a shortest route out |
+| Balanced drift | Heads out, detours often enough to spread and collide |
+| Lost in the woods | Barely goal-directed; covers the map, lots of contact |
+
+These are a **testing instrument, not a model of how guests will play.** A real
+table reads clues, chases items and avoids each other on purpose. Treat the
+numbers as the shape of the space, not a prediction.
+
+Scripted draws come from their own RNG stream, so re-rolling never perturbs the
+seed that round resolution carries — and a run replays identically after
+**Reset scenario** if you press the same buttons.
+
+### Run report
+
+Once a round has resolved, the panel shows measured outcomes of the run: rounds
+to exit, moves per team, encounters split by kind, how many teams met anyone,
+map coverage, and which trailheads got used. `src/core/stats.ts` computes it; it
+is deliberately separate from `analysis.ts`, which measures what the *map*
+allows before anyone moves.
+
+One run is an anecdote. Compare seeds before believing anything.
 
 ## Architecture
 
@@ -132,6 +173,8 @@ These are working assumptions, not settled rules. Each is a knob in a scenario's
 - **Hidden contents only log.** With `revealHiddenContents` on, arriving at a hex
   announces its contents once; no hazard, item or delay is applied.
 - **Character traits and items are recorded but inert.**
+- **Scripted strategies ignore everything but exit distance.** They do not read
+  clues, seek items, avoid other teams or respond to hazards.
 - **Exploration** means "some team has stood here". There is no per-team fog.
 - **`maxRounds` is advisory** — the UI and analysis use it, resolution does not
   enforce it.
@@ -153,9 +196,29 @@ a real game runs longer than this floor. Route choice is uneven: some starts hav
 three or four first steps that all stay on an optimal route, while others have
 exactly one — worth looking at before the map is finalised.
 
+From 60 scripted runs per strategy on `baseline-10` (a throwaway batch, not a
+committed tool — scripted movement is not real play):
+
+| | Beeline | Balanced | Wander |
+| --- | --- | --- | --- |
+| First team out | round 3.3 | round 4.6 | round 9.7 |
+| Last team out | round 8.3 | round 20.6 | round 33.9 |
+| First team then waits | 5.0 rounds | 16.0 rounds | 24.2 rounds |
+| Encounters per game | 14.9 | 34.4 | 48.3 |
+| Teams that met anyone | 80% | 85% | 95% |
+| Map covered | 48% | 63% | 73% |
+
+Two things that show up immediately and are structural rather than tuning:
+
+1. **The winner finishes early and then has nothing to do** for 5–24 rounds.
+   Whatever the rules end up being, the game needs an answer for a team that is
+   out while others are still playing.
+2. **Trailheads are not used evenly.** Under beeline, TH-02 takes 20% of exits
+   while TH-01 and TH-04 take 3% each — a placement asymmetry, not noise.
+
 ## Not built yet
 
 Deliberately out of scope for milestone 1, roughly in the order they matter:
 hazard and reward effects, elimination, trailhead escape tests, head-to-head
-encounter resolution, per-team fog of war, batch simulation with scripted
-strategies, and an SVG/print export derived from the same map JSON.
+encounter resolution, per-team fog of war, a committed batch runner over many
+seeds, and an SVG/print export derived from the same map JSON.

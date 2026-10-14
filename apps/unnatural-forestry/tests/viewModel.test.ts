@@ -14,6 +14,7 @@ const BASE_OPTIONS: ViewOptions = {
   showExitDistance: false,
   showSecrets: false,
   showExploration: true,
+  revealAllPending: false,
 };
 
 function sim() {
@@ -63,6 +64,18 @@ describe('view model', () => {
     // ...but shows it when that team is the one being handled.
     const own = buildViewModel(s, { ...BASE_OPTIONS, activeTeamId: 'b' });
     expect(own.tokens.find((t) => t.teamId === 'b')!.pendingHexId).toBe(L(1, 0));
+  });
+
+  it('shows every pending move under the debug reveal override', () => {
+    const s = sim();
+    s.selectAndCommit('a', L(0, -1));
+    s.selectAndCommit('b', L(1, 0));
+    const vm = buildViewModel(s, { ...BASE_OPTIONS, activeTeamId: null, revealAllPending: true });
+    expect(vm.tokens.find((t) => t.teamId === 'a')!.pendingHexId).toBe(L(0, -1));
+    expect(vm.tokens.find((t) => t.teamId === 'b')!.pendingHexId).toBe(L(1, 0));
+    expect(vm.hexes.filter((h) => h.highlight === 'selected').map((h) => h.id).sort()).toEqual(
+      [L(0, -1), L(1, 0)].sort(),
+    );
   });
 
   it('marks exploration from the teams visited hexes', () => {

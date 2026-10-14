@@ -61,6 +61,12 @@ export interface ViewOptions {
   readonly showSecrets: boolean;
   /** Dim hexes no team has visited. */
   readonly showExploration: boolean;
+  /**
+   * Facilitator/debug override: draw every team's pending destination, not just
+   * the one being handled. Off during real play — it is exactly the information
+   * the normal selection interface is meant to hide.
+   */
+  readonly revealAllPending: boolean;
 }
 
 export function buildViewModel(
@@ -72,13 +78,25 @@ export function buildViewModel(
   const revealed = new Set(sim.state.revealedHexIds);
   const activeTeam = options.activeTeamId;
   const legal = activeTeam !== null ? new Set(sim.legalMoves(activeTeam)) : new Set<string>();
-  const pending = activeTeam !== null ? (sim.selectionFor(activeTeam) ?? null) : null;
+
+  // Which pending destinations may be drawn at all.
+  const pendingByTeam = new Map<string, string>();
+  if (options.revealAllPending) {
+    for (const team of sim.state.teams) {
+      const choice = sim.selectionFor(team.id);
+      if (choice !== undefined) pendingByTeam.set(team.id, choice);
+    }
+  } else if (activeTeam !== null) {
+    const choice = sim.selectionFor(activeTeam);
+    if (choice !== undefined) pendingByTeam.set(activeTeam, choice);
+  }
+  const pendingHexes = new Set(pendingByTeam.values());
 
   const hexes = sim.board.map.hexes.map<HexView>((hex) => {
     const terrain = sim.resolved.terrains.get(hex.terrain)!;
     const trailhead = sim.board.trailheadAt(hex.id);
     const highlight: HexHighlight =
-      pending === hex.id
+      pendingHexes.has(hex.id)
         ? 'selected'
         : options.inspectedHexId === hex.id
           ? 'inspected'
@@ -118,7 +136,7 @@ export function buildViewModel(
         status: team.status,
         dx,
         dy,
-        pendingHexId: teamId === activeTeam ? pending : null,
+        pendingHexId: pendingByTeam.get(teamId) ?? null,
       });
     });
   }
