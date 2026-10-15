@@ -20,102 +20,110 @@ Last teams standing meet at the Trailhead for a final five-question showdown.
 
 ---
 
-## What we need you to write
+## The ask: about 50 questions
 
-| Theme | Questions | Covers |
-| --- | --- | --- |
-| ⛏ **Rock & Ruin** | 12 | 3 matchups |
-| ❦ **Root & Rot** | 12 | 3 matchups |
-| ☙ **Fur & Feather** | 12 | 3 matchups |
-| ≈ **Rain & River** | 12 | 3 matchups |
-| ⚙ **Grease & Gravel** | 12 | 3 matchups |
-| ▤ **Forms & Procedures** | 12 | 3 matchups |
-| ✷ **Dark & Distant** | 12 | 3 matchups |
-| **Tiebreakers** (any subject) | 6 | see below |
-| **The Trailhead Five** | 5 | the finale |
-| | **107 total** | |
+| | Count |
+| --- | --- |
+| **The bank** — questions tagged to one or more themes | **40** |
+| **The Trailhead Five** | **5** |
+| **Bonus questions** — spares for ties and whatever else comes up | **6** |
+| | **~51** |
 
-If that's too much, the lean version is **8 per theme (56), 6 tiebreakers and
-the Trailhead Five = 67**. It covers about 95% of how the evening could go
-rather than 99%.
+On the night we'll get through roughly **25 to 30** of them. The rest are
+headroom, because we don't know in advance which themes the teams will pick.
 
-### Why it looks like more than we'll use
+### The tagging is what keeps this to 40
 
-On the night we'll only get through about **five to seven matchups** — roughly
-21 to 28 questions. But we don't know *in advance which themes* those matchups
-will land on, because the teams choose. We ran the game five thousand times: a
-single theme can take as many as four matchups in one evening, and which theme
-that is changes every time.
+A question doesn't belong to one theme. **Tag each question with every theme it
+could plausibly be asked under**, and the Director pulls live from whatever
+fits. A question about a flooded mine shaft is Rock & Ruin *and* Rain & River.
+Bigfoot tracks in a clearcut is Fur & Feather *and* Grease & Gravel.
 
-So the piles have to be deep enough individually even though most of them will
-barely be touched. **Write 107, expect to use 25.** The leftovers aren't waste,
-they're the reason we don't run dry in front of thirty people.
+That overlap is doing real work. Here's the arithmetic:
 
-Nothing can be reused during the game — everybody watches every matchup, so a
-question is burnt the moment it's asked.
+- A single theme can take up to **3 matchups** in one evening (we simulated it
+  5,000 times), which is **12 questions** on that theme.
+- Seven themes × 12 = **84 theme-slots** we need covered.
+- If each question is tagged to **2–3 themes**, 40 questions covers all 84.
+
+So **please tag generously** — it's not a nice-to-have, it's load-bearing. If
+everything ends up single-tagged, 40 questions won't be enough and we'll run
+dry on the night.
+
+**Check your coverage as you go**: aim for **at least 12 questions carrying each
+theme's tag**. A tracking column is enough.
+
+| Theme | Target tags |
+| --- | --- |
+| ⛏ Rock & Ruin | 12+ |
+| ❦ Root & Rot | 12+ |
+| ☙ Fur & Feather | 12+ |
+| ≈ Rain & River | 12+ |
+| ⚙ Grease & Gravel | 12+ |
+| ▤ Forms & Procedures | 12+ |
+| ✷ Dark & Distant | 12+ |
+
+A few questions tagged **WILD** — work under any theme — are very welcome as
+emergency cover.
 
 ---
 
-## Format rules
+## Question formats
 
-These aren't stylistic preferences. The game's power-up tokens only work if the
-questions are built this way.
+Mix them up. Variety keeps the matchups from feeling like a test, and some
+formats are much better than others when four or five teams are playing at once.
 
-**1. Four-option multiple choice. A, B, C, D.**
-One power-up removes two wrong answers, which only works if there are exactly
-three wrong ones to remove. No open-ended questions, no true/false.
+**Roughly 60% should be four-option multiple choice**, because that's the
+format all the power-up tokens work with. The rest can be whatever's fun.
 
-**2. The three wrong answers have to be genuinely plausible.**
-When two options are left, it should still be a real decision. A question with
-two joke answers is effectively a coin flip and the power-up that removes them
-is worthless.
-
-**3. Both teams answer at the same time, in writing, then reveal.**
-Several power-ups turn on this — one makes the other team answer *first and out
-loud*, another lets you *hear their answer before giving yours*. Those only
-have teeth if simultaneous-and-hidden is the default.
-
-**4. One sentence, read aloud, understood first time.**
-Someone is reading this to a loud room. If it needs re-reading or a diagram,
-it's the wrong question.
-
-**5. Answerable in about twenty seconds of a team conferring.**
-Not thinking time — arguing time. Teams of two or three need something to
-disagree about.
-
-### What each power-up needs from you
-
-| Token | What it does | What that demands |
+| Format | How it works | Notes |
 | --- | --- | --- |
-| Owl's Counsel | Removes two wrong answers | Exactly four options, three plausible wrongs |
-| The Congress of Crows | Ask the party | Something a room would shout at |
-| The Nurse Log Almanac | Skip it, take another | **Spare questions in the same pile** |
-| Shed Antler | Hear their answer first | Simultaneous answering as default |
-| Fog | They answer first, aloud, no conferring | Simultaneous answering as default |
-| The Hum | They get ten seconds | Questions where speed actually hurts |
-| The Lost Page | The Director picks their category | **Every pile at the table, always** |
+| **Four-option multiple choice** | A/B/C/D, teams write their answer and reveal together | The default. Every token works. Make all three wrong answers plausible — a question with two joke options is a coin flip, and the token that removes two wrong answers becomes worthless |
+| **Closest guess** | A number. No options. Nearest wins | Can't tie, so it's the Director's friend. Great as a tiebreaker |
+| **Name as many as you can** | 20 seconds, most correct wins | Brilliant for 3+ team matchups, and the whole room joins in |
+| **One of these is true** | Two short stories, which is the real one | Made for Dark & Distant. Very Halloween |
+| **What is this?** | Hold up an object, a photo, a sound | Visual fun, works across a loud room, good for Grease & Gravel and Fur & Feather |
+
+**A quarter of matchups have three or more teams** (we measured it), so favour
+formats that work for a crowd, not just head-to-head.
+
+### What the power-up tokens need
+
+Teams carry tokens that bend a matchup. Most need multiple choice; the Director
+will simply rule a token unusable on a format it doesn't suit.
+
+| Token | What it does | Needs |
+| --- | --- | --- |
+| Owl's Counsel | Removes two wrong answers | Multiple choice, three plausible wrongs |
+| The Congress of Crows | Ask the party | Anything a room would shout at |
+| The Nurse Log Almanac | Skip it, take another | A spare on the same theme |
+| Shed Antler | Hear their answer first | Simultaneous, hidden answering |
+| Fog | They answer first, aloud, no conferring | Simultaneous, hidden answering |
+| The Hum | They get ten seconds | Questions where speed hurts |
+| The Lost Page | The Director picks their theme | The whole bank to hand |
+
+**Default to simultaneous and hidden**: teams write, then reveal together. Two
+tokens are worthless otherwise.
 
 ---
 
 ## Aim for about 60% of teams getting it right
 
-Too easy and every matchup is a coin flip on the last question. Too hard and
-the power-ups decide everything, which we've specifically designed against.
+Too easy and every matchup comes down to the last question. Too hard and the
+tokens decide everything, which we've specifically designed against.
 
 **Good**: things people half-know. Surprising-but-believable facts. Questions
-where someone at the table will say "no, wait, I actually know this."
+where someone will say *"no, wait, I actually know this."*
 
 **Bad**: dates. Pure recall. Anything that rewards one specialist and leaves
-their teammates silent. Anything that feels like it has a correct answer you'd
-look up rather than one you'd argue about.
+their teammates with nothing to say.
 
-Remember the whole point of the themes: a team chose to be here because they
-*thought* they knew this subject. The best question is one where that
-confidence is tested and about half the time turns out to be misplaced.
+The point of the themes is that a team chose to be there because they *thought*
+they knew the subject. The best question tests that confidence and about half
+the time proves it misplaced.
 
-**Tone**: it's Halloween, so a spooky tinge where it comes naturally — don't
-force it. Deadpan forest-service bureaucracy is the house style. Funny wrong
-answers are welcome as long as they're still plausible (see rule 2).
+**Tone**: Halloween, so a spooky tinge where it comes naturally — don't force
+it. Deadpan forest-service bureaucracy is the house style.
 
 ---
 
@@ -123,81 +131,73 @@ answers are welcome as long as they're still plausible (see rule 2).
 
 | Theme | Scope |
 | --- | --- |
-| ⛏ **Rock & Ruin** | Quarries, mining, masonry, geology. Things dug up and things built. The map region is bare rock and broken stonework. |
-| ❦ **Root & Rot** | Trees, fungi, moss, forestry. What grows and what breaks it down. Deep dank forest. |
-| ☙ **Fur & Feather** | Animals, birds, tracks — and the creatures people claim to have seen. Meadow and light woods. Cryptids absolutely count. |
-| ≈ **Rain & River** | Weather, water, floods, fish, tides, the shipping forecast. A creek bottom that runs the length of the map. |
-| ⚙ **Grease & Gravel** | Logging equipment, trucks, chainsaws, roads. Anything with a motor. Logged-out ground, stumps and slash. |
-| ▤ **Forms & Procedures** | Government, paperwork, signage, regulations, bureaucracy. An abandoned ranger station. This is where the joke lives. |
-| ✷ **Dark & Distant** | Night sky, folklore, ghost stories, what the old-timers say. The same forest, at night. |
+| ⛏ **Rock & Ruin** | Quarries, mining, masonry, geology. Things dug up and things built |
+| ❦ **Root & Rot** | Trees, fungi, moss, forestry. What grows and what breaks it down |
+| ☙ **Fur & Feather** | Animals, birds, tracks — and the creatures people claim to have seen. Cryptids count |
+| ≈ **Rain & River** | Weather, water, floods, fish, tides, the shipping forecast |
+| ⚙ **Grease & Gravel** | Logging equipment, trucks, chainsaws, roads. Anything with a motor |
+| ▤ **Forms & Procedures** | Government, paperwork, signage, regulations. This is where the joke lives |
+| ✷ **Dark & Distant** | Night sky, folklore, ghost stories, what the old-timers say |
 
-Pacific Northwest flavour is welcome throughout but don't let it narrow the
-questions to things only a local would get.
+Pacific Northwest flavour is welcome throughout, but don't narrow it to things
+only a local would get.
 
 ---
 
-## Tiebreakers — please don't skip these
+## Ties
 
-**Four questions can end 2–2.** We modelled it: with two reasonably matched
-teams, roughly **28% of matchups will tie**, and three-way matchups tie more
-often than that. At five-ish matchups an evening that's about one or two ties,
-and we'd rather not be improvising in front of everyone.
+Four questions can end 2–2 — we reckon around a quarter of matchups will. The
+Director settles it on the spot: a bonus question, a closest-guess, or just a
+ruling. Nobody at a party minds an arbitrary call made confidently.
 
-Write **six tiebreakers**, and make them **"closest guess wins" number
-questions** rather than multiple choice:
-
-> *How many board feet of timber came off this district in 1961?*
-
-No options, no second tie, settled in ten seconds, and the Director can call it
-instantly. Subject doesn't matter — pull them from anywhere.
+The **six bonus questions** exist so the Director has something in hand rather
+than inventing one cold. Closest-guess numbers are the most useful kind.
 
 ---
 
 ## The Trailhead Five
 
-The finale. Two or three teams left, everyone in the room watching, the only
-moment all evening where we have the whole party's attention.
+The finale. Two or three teams left, everyone watching, the only point in the
+evening when we have the whole party's attention.
 
-- **Five questions**, same four-option format.
-- **Mixed subjects** — not one theme. These teams earned their way here; the
+- **Five questions**, mostly multiple choice.
+- **Mixed subjects**, not one theme — these teams earned their way here and the
   final shouldn't reward one more specialism.
-- **Escalating.** Start approachable, end with one that's genuinely hard.
+- **Escalating.** Start approachable, end genuinely hard.
 - **Make the last one a performance.** Longest setup, best wrong answers, the
-  one people will still be repeating at the next party.
-- Needs its own tiebreaker, so write **one extra** closest-guess question
-  reserved for the finale.
+  one people repeat at the next party.
 
 ---
 
 ## How to hand it over
 
-One question per index card, or a spreadsheet we'll print onto cards. Either
-way each question needs:
+A spreadsheet is ideal — we'll print it onto cards.
 
 ```
-THEME:    Rock & Ruin
+THEMES:   Rock & Ruin, Rain & River
+FORMAT:   multiple choice
 QUESTION: ...
-A)  ...     B)  ...     C)  ...     D)  ...
+A) ...    B) ...    C) ...    D) ...
 ANSWER:   C
-NOTE:     (optional — the fact that makes it fun to explain after)
+NOTE:     (optional — the fact that makes it fun to explain afterwards)
 ```
 
-That `NOTE` line matters more than it looks. The Director reads it out after
-the reveal, and it's what turns a question people got wrong into a moment
-rather than a disappointment.
+That `NOTE` line matters more than it looks. The Director reads it out after the
+reveal, and it's what turns a question people got wrong into a moment rather
+than a let-down.
 
-Keep the piles physically separate and labelled by theme — on the night the
-Director is pulling from one pile under pressure, with a loud room, and
-sometimes being told by a power-up to grab a different pile entirely.
+**Theme tags need to be visible at a glance on the printed card** — coloured
+dots or letters along the top edge. The Director is scanning for a theme under
+pressure in a loud room, and sometimes a token sends them hunting for a
+different one entirely.
 
 ---
 
 ## For the Director, not the writer
 
-- All seven piles plus the tiebreakers stay on the table the whole game. The
-  Lost Page token can send you to any pile at any time.
-- Burn every question after it's asked, wrong answers and all.
-- The Trailhead Five stay sealed until the finale.
-- You make the ambiguous calls. If a question turns out to be badly worded on
-  the night, bin it and pull the next one — nobody will mind, and arguing about
-  it costs more than the question was worth.
+- The whole bank stays on the table. Tagging means you're choosing live, not
+  drawing from sealed piles.
+- Burn each question once it's asked — everyone hears every matchup.
+- Keep the Trailhead Five sealed until the finale.
+- You make the ambiguous calls. If a question lands badly on the night, bin it
+  and pull another. Arguing about it costs more than the question is worth.

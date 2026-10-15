@@ -69,7 +69,7 @@ the measurements say cutting it makes the game both simpler and more reliable.)*
 | B11 | **Items are quiz helpers and hindrances.** A helper makes your own question easier (Owl's Counsel, The Congress of Crows, The Nurse Log Almanac, Shed Antler); a hindrance makes theirs harder (Fog, The Hum, The Lost Page). Seven, all with good tokens. |
 | B12 | **Eliminated teams place hidden traps.** A trap strips one power-up. It never eliminates. |
 | B13 | **Surviving on open ground earns a whisper from the Director** — normally where a trap is, which lets you avoid one. |
-| B14 | **The matchup is a trivia quiz: 4 questions, four-option multiple choice, both teams answering at once in writing. The Trailhead is 5.** Four questions can tie, so tiebreakers are a closest-guess number question. Content requirements are in `QUIZ-BRIEF.md`. |
+| B14 | **The matchup is a trivia quiz: 4 questions. The Trailhead is 5.** Several formats, with four-option multiple choice the default because the tokens need it; teams answer simultaneously and hidden. Questions are tagged to several themes and the Director picks live rather than drawing from sealed per-theme piles. Ties are the Director's call. Content requirements are in `QUIZ-BRIEF.md`. |
 | B15 | **No hide tokens.** Hiding is limited by its own cost — you arrive at the Trailhead with nothing — not by a resource. |
 | B16 | **Public information:** the map, every location's terrain and visible loot, how many teams are alive, who died last round. **Private:** your own inventory. **Hidden:** where everyone else is, where they are going, where the traps are. |
 
@@ -288,11 +288,17 @@ games. Matchups are 2-way 68% of the time, 3-way 25%, 4-way 6%, 5-way 1%.
 
 The writing ask is set by the per-theme ceiling, not the total, because the
 teams choose where to go and we cannot know in advance which themes will be
-used: a single theme can take up to **4 matchups** in one evening. At 12
-questions a theme that covers 99% of evenings.
+used: a single theme can take up to 3 matchups in a typical worst case, which
+is **12 questions on one theme**.
 
-Roughly **28%** of 4-question matchups end level, so tiebreakers are a real
-requirement rather than a nicety.
+Seven themes at 12 slots each is 84 slots to cover. **Tagging each question to
+two or three themes brings that down to about 40 questions written**, against
+107 if every question served one theme only. The tagging is load-bearing, not a
+convenience — single-tagged questions would leave the bank too thin.
+
+Roughly **28%** of 4-question matchups end level, and a quarter of matchups
+involve three or more teams, so formats that work for a crowd matter more than
+head-to-head ones.
 
 ### F13 — Trivia themes are the best mechanic in the game
 
