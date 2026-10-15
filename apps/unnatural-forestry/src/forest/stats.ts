@@ -49,6 +49,8 @@ export interface BatchStats {
     /** Share of wins taken by each archetype. */
     readonly byArchetype: Readonly<Record<string, number>>;
   };
+  /** How often the team that knew the theme best actually won the matchup. */
+  readonly themeExpertWins: number;
   readonly contact: {
     /** Mean share of teams that played at least one matchup. */
     readonly teamsInAFight: number;
@@ -133,6 +135,18 @@ export function summarize(records: readonly GameRecord[], rules: RuleParameters)
     byArchetype[key] = share(byArchetype[key]!, championed);
   }
 
+  let themeExpertWon = 0;
+  let themedMatchups = 0;
+  for (const record of records) {
+    for (const round of [...record.rounds, ...(record.finale ? [record.finale] : [])]) {
+      for (const outcome of round.outcomes) {
+        if (outcome.winnerKnewTheTheme === null) continue;
+        themedMatchups += 1;
+        if (outcome.winnerKnewTheTheme) themeExpertWon += 1;
+      }
+    }
+  }
+
   const inAFight: number[] = [];
   const fightsPerGame: number[] = [];
   const trapsPerGame: number[] = [];
@@ -174,6 +188,7 @@ export function summarize(records: readonly GameRecord[], rules: RuleParameters)
       neverFought: share(neverFought, championed),
       byArchetype,
     },
+    themeExpertWins: share(themeExpertWon, themedMatchups),
     contact: {
       teamsInAFight: spread(inAFight).mean,
       fightsPerGame: spread(fightsPerGame).mean,

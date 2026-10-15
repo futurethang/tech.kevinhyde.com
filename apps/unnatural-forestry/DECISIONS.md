@@ -57,7 +57,9 @@ the measurements say cutting it makes the game both simpler and more reliable.)*
 | B4 | **A team may name any location in the next band.** No adjacency. |
 | B5 | **No hunting or hiding.** Cut — it only ever decided *whether* a meeting became a matchup, and that was where every stall came from. One decision a round: where do we go. |
 | B6 | **If two teams meet, there is a fight, and only one walks away.** One rule for two teams or five. |
-| B7 | **Terrain says how rich a place is** — open ground has the best treasure, deep cover has none. It no longer decides whether teams meet. See D9 for whether it should do more. |
+| B7 | **Terrain says how rich a place is** — open ground has the best treasure, deep cover has none. |
+| B7a | **Every place carries a trivia theme**, printed on the map: Rock & Ruin, Root & Rot, Fur & Feather, Rain & River, Grease & Gravel, Forms & Procedures, Dark & Distant. A matchup fought there is asked on that subject. Choosing a place is therefore also choosing the subject you would rather be asked about — and teams badly overestimate what they know. Seven themes shared across twenty-two places, so there are seven sets of questions to write, not twenty-two. |
+| B7b | **The Trailhead showdown is quick and chaotic** — the same matchup with the dice thrown in, so the best-equipped team is not a foregone conclusion. |
 | B8 | **Every team draws three items before the game starts.** Nobody arrives empty-handed, and the first matchup already has something to spend. |
 | B8a | **Win a matchup, draw a treasure. Lose a matchup, you are out and you set a hidden trap.** The symmetry is the whole after-match. |
 | B8b | **The winner does NOT take the loser's items.** Tested both ways — taking them makes the leader unbeatable; see Finding F10. |
@@ -102,8 +104,9 @@ edit, not a code change.
 | D6 | **Can a team decline a fight it knows it will lose?** |
 | D7 | **What exactly does the board teach without words?** A6 is the hardest constraint and nothing is drawn yet. |
 | D8 | **How do teams submit moves?** Proposal: text the Director, so it works across three rooms and the deadline is announceable. |
-| D9 | **Should terrain do more than hold treasure?** One option that adds no new decision: terrain changes the *flavour of the matchup* — sudden death on the ridge, a bonus question in the bog, the Director picks the category in the fog. |
-| D11 | **Does the Trailhead showdown need its own rules**, or is it just a bigger matchup with everyone watching? |
+| D9 | ~~Should terrain do more than hold treasure?~~ **Decided: it carries the trivia theme.** See B7a and F13. |
+| D11 | ~~Does the Trailhead showdown need its own rules?~~ **Decided: quick, with a chaos element.** See B7b. |
+| D12 | **Which seven themes, and how many questions each?** Seven sets is the writing job. Ten questions each is probably the floor. |
 | D10 | **What stops the field converging on one location?** F9 shows a uniform field wipes itself out. Spread loot evenly (done) and rely on teams reasoning about crowds — but that reasoning is exactly what the archetypes do not model. |
 
 ---
@@ -269,12 +272,38 @@ Director always has something to read out.
 Ten teams, 800 games:
 
 - **92%** end with 2–3 teams at the Trailhead (mean 2.5)
-- **3%** end with only one team, so no final showdown
+- **3%** end with only one team, so no final showdown — **accepted, not a concern**
 - **100%** of teams play at least one matchup; about 6 matchups per game
 - **0%** empty rounds
 
 Six teams: 93% on target, 4% with no showdown. The only flagged problem left in
 normal play is that 3–4%.
+
+### F13 — Trivia themes are the best mechanic in the game
+
+Giving every place a subject, and giving every team an ability per subject
+rather than one flat trivia rating, changed three things at once:
+
+| | Before themes | **With themes** |
+| --- | --- | --- |
+| Winner was the best-equipped team | 70% | **58%** |
+| Matchups won by the team that knew the subject best | — | **61%** |
+| Wins taken by the leading style of play | 47% | **29%** |
+
+Wins now spread almost evenly across every style: adaptive 29%, greedy 25%,
+specialist 22%, contrarian 12%, cautious 12%. Nobody has the obviously right
+approach, which is what you want when ten different groups of friends play it
+once.
+
+**It also cures the crowding collapse.** A field where every team chases the
+richest spot still wipes itself out — 54% of games end with a single survivor.
+A field where every team plays to its strengths does not: 84% land on 2–3 teams
+at the Trailhead, only 2% on one.
+
+The reason is worth keeping hold of: **treasure is an attractor everybody values
+identically, so it concentrates the field. Knowledge is valued differently by
+every team, so it spreads them out.** Putting a subject on each place is what
+makes ten teams choose ten different things without being told to.
 
 ---
 
@@ -291,6 +320,8 @@ normal play is that 3–4%.
 | Hunting vs hiding as a second decision each round | One decision: where do we go | F6 — it only decided whether a meeting happened, and that caused every stall. |
 | The winner takes the loser's items | The winner draws one treasure | F10 — taking them compounds into an unbeatable leader. |
 | Teams start empty-handed | Everyone draws three items | B8. |
+| Terrain decided whether teams met | Terrain holds treasure and carries the trivia theme | B7a — and themes turned out to be the mechanic that spreads the field out. |
+| One flat trivia rating per team | An ability per theme | F13. |
 | 91-hex and 61-hex boards | 8/5/3/1 and 5/3/2/1 wedges | B2. |
 | "Elimination is a problem to be avoided" | Elimination from round 2 is welcome | A8. |
 

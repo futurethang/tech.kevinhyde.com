@@ -1,0 +1,47 @@
+{
+  "_comment": "Every place on the map carries a trivia theme. Teams can see it before they choose, so picking a place is also picking the subject you would rather be asked about — and teams badly overestimate what they know. Seven themes, shared across places, so there are seven sets of questions to write rather than twenty-two.",
+  "topics": [
+    {
+      "id": "rock-and-ruin",
+      "name": "Rock & Ruin",
+      "description": "Quarries, mining, masonry, geology, things dug up and things built.",
+      "symbol": "⛏"
+    },
+    {
+      "id": "root-and-rot",
+      "name": "Root & Rot",
+      "description": "Trees, fungi, moss, forestry, what grows and what breaks it down.",
+      "symbol": "❦"
+    },
+    {
+      "id": "fur-and-feather",
+      "name": "Fur & Feather",
+      "description": "Animals, birds, tracks, and the creatures people claim to have seen.",
+      "symbol": "☙"
+    },
+    {
+      "id": "rain-and-river",
+      "name": "Rain & River",
+      "description": "Weather, water, floods, fish, tides and the shipping forecast.",
+      "symbol": "≈"
+    },
+    {
+      "id": "grease-and-gravel",
+      "name": "Grease & Gravel",
+      "description": "Logging equipment, trucks, roads, chainsaws, anything with a motor.",
+      "symbol": "⚙"
+    },
+    {
+      "id": "forms-and-procedures",
+      "name": "Forms & Procedures",
+      "description": "Government, paperwork, signage, regulations, the Department itself.",
+      "symbol": "▤"
+    },
+    {
+      "id": "dark-and-distant",
+      "name": "Dark & Distant",
+      "description": "Night sky, folklore, ghost stories, and what the old-timers say.",
+      "symbol": "✷"
+    }
+  ]
+}

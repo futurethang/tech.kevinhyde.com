@@ -4,17 +4,17 @@
     {
       "id": "extraction-mixed",
       "name": "CURRENT — 10 teams, mixed play",
-      "description": "The current design: three items each, one decision a round (where do we go), and a trivia matchup wherever two teams land together.",
+      "description": "The current design: three items each, one decision a round (where do we go, and which subject do we fancy being asked about), and a trivia matchup wherever two teams land together.",
       "mapId": "quilsap-extraction",
       "seed": 20261031,
       "teams": [
         {
           "archetype": "greedy",
-          "count": 3
+          "count": 2
         },
         {
           "archetype": "cautious",
-          "count": 3
+          "count": 2
         },
         {
           "archetype": "contrarian",
@@ -23,6 +23,26 @@
         {
           "archetype": "adaptive",
           "count": 2
+        },
+        {
+          "archetype": "specialist",
+          "count": 2
+        }
+      ],
+      "rules": {
+        "everyMeetingIsAMatchup": true
+      }
+    },
+    {
+      "id": "extraction-specialists",
+      "name": "CURRENT — everybody plays to their strengths",
+      "description": "Every team heads for the subject it reckons it knows. Does picking your theme beat chasing treasure?",
+      "mapId": "quilsap-extraction",
+      "seed": 20261031,
+      "teams": [
+        {
+          "archetype": "specialist",
+          "count": 10
         }
       ],
       "rules": {

@@ -34,17 +34,29 @@ export interface GameRecord {
 export function buildTeams(scenario: ScenarioDefinition, ruleset: Ruleset, rng: Rng): TeamState[] {
   const rules = mergeRules(ruleset.rules, scenario.rules);
   const itemPool = [...ruleset.items.keys()].sort();
+  const topicIds = [...ruleset.topics.keys()].sort();
+  const { triviaSkillRange, howMuchDependsOnTheTheme } = rules.matchup;
   const teams: TeamState[] = [];
   let n = 0;
   for (const setup of scenario.teams) {
     for (let i = 0; i < setup.count; i++) {
       n += 1;
+      // Part of a team's ability is general trivia nous, part is knowing a
+      // particular subject. The split is a tunable in rules.json.
+      const general = rng.next() * triviaSkillRange * (1 - howMuchDependsOnTheTheme);
+      const skillByTopic: Record<string, number> = {};
+      for (const topicId of topicIds) {
+        skillByTopic[topicId] =
+          general + rng.next() * triviaSkillRange * howMuchDependsOnTheTheme;
+      }
+      const values = Object.values(skillByTopic);
       teams.push(
         Object.freeze({
           id: `t${String(n).padStart(2, '0')}`,
           name: `${getArchetype(setup.archetype).label} ${i + 1}`,
           archetype: setup.archetype,
-          skill: rng.next() * rules.matchup.triviaSkillRange,
+          skill: values.reduce((a, b) => a + b, 0) / values.length,
+          skillByTopic: Object.freeze(skillByTopic),
           // Everyone draws their starting items at random before the game.
           items: Object.freeze(
             Array.from({ length: rules.itemsDrawnAtStart }, () => itemPool[rng.int(itemPool.length)]!),

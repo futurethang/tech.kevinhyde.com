@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
 import { createRng } from '../../src/core/rng';
-import { parseItems, parseMap, parseRules, parseTerrains } from '../../src/forest/config';
+import {
+  parseItems,
+  parseMap,
+  parseRules,
+  parseTerrains,
+  parseTopics,
+} from '../../src/forest/config';
 import { resolveBand, type Choice, type GameState, type TeamState } from '../../src/forest/resolve';
 import type { RuleParameters } from '../../src/forest/types';
 
@@ -21,6 +27,11 @@ const items = parseItems(
   'fixture/items',
 );
 
+const topics = parseTopics(
+  { topics: [{ id: 'rocks', name: 'Rocks', description: 'r', symbol: 'R' }] },
+  'fixture/topics',
+);
+
 const map = parseMap(
   {
     id: 'm',
@@ -30,22 +41,29 @@ const map = parseMap(
         id: 'b1',
         name: 'Band 1',
         locations: [
-          { id: 'ridge', name: 'Ridge', terrain: 'open', loot: ['lamp'] },
-          { id: 'trail', name: 'Trail', terrain: 'mixed', loot: ['lamp'] },
-          { id: 'bog', name: 'Bog', terrain: 'deep', loot: [] },
+          { id: 'ridge', name: 'Ridge', terrain: 'open', topic: 'rocks', loot: ['lamp'] },
+          { id: 'trail', name: 'Trail', terrain: 'mixed', topic: 'rocks', loot: ['lamp'] },
+          { id: 'bog', name: 'Bog', terrain: 'deep', topic: 'rocks', loot: [] },
         ],
       },
-      { id: 'end', name: 'Trailhead', locations: [{ id: 'station', name: 'Station', terrain: 'open', loot: [] }] },
+      { id: 'end', name: 'Trailhead', locations: [{ id: 'station', name: 'Station', terrain: 'open', topic: 'rocks', loot: [] }] },
     ],
   },
   terrains,
+  topics,
   items,
   'fixture/map',
 );
 
 const rules = parseRules(
   {
-    matchup: { triviaSkillRange: 3, helpPerItem: 1, luckRange: 3 },
+    matchup: {
+      triviaSkillRange: 3,
+      howMuchDependsOnTheTheme: 0.6,
+      helpPerItem: 1,
+      luckRange: 3,
+      extraChaosAtTheTrailhead: 3,
+    },
     itemsDrawnAtStart: 0,
     treasureForWinningAMatchup: 0,
     winnerAlsoTakesTheLosersItems: true,
@@ -70,6 +88,7 @@ function team(id: string, over: Partial<TeamState> = {}): TeamState {
     name: id,
     archetype: 'test',
     skill: 1,
+    skillByTopic: { rocks: 1 },
     items: [],
     alive: true,
     locationId: null,

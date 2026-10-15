@@ -7,35 +7,115 @@
       "id": "band-deep-woods",
       "name": "The Deep Woods",
       "locations": [
-        { "id": "bone-orchard", "name": "The Bone Orchard", "terrain": "open", "loot": ["owls-counsel", "fog"] },
-        { "id": "weir-road", "name": "Weir Road Landing", "terrain": "open", "loot": ["shed-antler"] },
-        { "id": "section-14", "name": "Section 14 Fenceline", "terrain": "mixed", "loot": ["congress-of-crows"] },
-        { "id": "old-mill-grade", "name": "Old Mill Grade", "terrain": "mixed", "loot": [] },
-        { "id": "drowned-nursery", "name": "The Drowned Nursery", "terrain": "deep", "loot": [] }
+        {
+          "id": "bone-orchard",
+          "name": "The Bone Orchard",
+          "terrain": "open",
+          "loot": [
+            "owls-counsel",
+            "fog"
+          ],
+          "topic": "dark-and-distant"
+        },
+        {
+          "id": "weir-road",
+          "name": "Weir Road Landing",
+          "terrain": "open",
+          "loot": [
+            "shed-antler"
+          ],
+          "topic": "grease-and-gravel"
+        },
+        {
+          "id": "section-14",
+          "name": "Section 14 Fenceline",
+          "terrain": "mixed",
+          "loot": [
+            "congress-of-crows"
+          ],
+          "topic": "forms-and-procedures"
+        },
+        {
+          "id": "old-mill-grade",
+          "name": "Old Mill Grade",
+          "terrain": "mixed",
+          "loot": [],
+          "topic": "rock-and-ruin"
+        },
+        {
+          "id": "drowned-nursery",
+          "name": "The Drowned Nursery",
+          "terrain": "deep",
+          "loot": [],
+          "topic": "root-and-rot"
+        }
       ]
     },
     {
       "id": "band-narrows",
       "name": "The Narrows",
       "locations": [
-        { "id": "lookout-switchback", "name": "Lookout Switchback", "terrain": "open", "loot": ["owls-counsel", "shed-antler"] },
-        { "id": "wye-creek", "name": "Wye Creek Bridge", "terrain": "mixed", "loot": ["fog"] },
-        { "id": "the-sink", "name": "The Sink", "terrain": "deep", "loot": [] }
+        {
+          "id": "lookout-switchback",
+          "name": "Lookout Switchback",
+          "terrain": "open",
+          "loot": [
+            "owls-counsel",
+            "shed-antler"
+          ],
+          "topic": "dark-and-distant"
+        },
+        {
+          "id": "wye-creek",
+          "name": "Wye Creek Bridge",
+          "terrain": "mixed",
+          "loot": [
+            "fog"
+          ],
+          "topic": "rain-and-river"
+        },
+        {
+          "id": "the-sink",
+          "name": "The Sink",
+          "terrain": "deep",
+          "loot": [],
+          "topic": "rock-and-ruin"
+        }
       ]
     },
     {
       "id": "band-last-mile",
       "name": "The Last Mile",
       "locations": [
-        { "id": "burn-scar", "name": "The Burn Scar", "terrain": "open", "loot": ["owls-counsel"] },
-        { "id": "culvert", "name": "The Culvert", "terrain": "mixed", "loot": [] }
+        {
+          "id": "burn-scar",
+          "name": "The Burn Scar",
+          "terrain": "open",
+          "loot": [
+            "owls-counsel"
+          ],
+          "topic": "rock-and-ruin"
+        },
+        {
+          "id": "culvert",
+          "name": "The Culvert",
+          "terrain": "mixed",
+          "loot": [],
+          "topic": "grease-and-gravel"
+        }
       ]
     },
     {
       "id": "band-trailhead",
       "name": "The Trailhead",
       "locations": [
-        { "id": "field-station", "name": "Field Station — Form 7-B Issued Here", "terrain": "open", "loot": [] }
+        {
+          "id": "field-station",
+          "name": "Field Station — Form 7-B Issued Here",
+          "terrain": "open",
+          "loot": [],
+          "topic": "forms-and-procedures"
+        }
       ]
     }
   ]

@@ -98,7 +98,19 @@ const ADAPTIVE: Archetype = {
     if (!strong) return CAUTIOUS.choose(team, context);
     const { band, terrains, rng } = context;
     const score = (l: LocationDefinition) =>
-      (terrains.get(l.terrain)!.fightRule === 'always' ? 10 : 0) + lootCount(l);
+      (terrains.get(l.terrain)!.fightRule === 'always' ? 10 : 0) +
+      lootCount(l) +
+      (team.skillByTopic[l.topic] ?? team.skill);
+    return { locationId: pickBest(band.locations, score, rng).id, posture: 'hunt' };
+  },
+};
+
+const SPECIALIST: Archetype = {
+  id: 'specialist',
+  label: 'Specialist',
+  description: 'Goes wherever the trivia theme is one it reckons it knows, and ignores the treasure.',
+  choose(team, { band, rng }) {
+    const score = (l: LocationDefinition) => team.skillByTopic[l.topic] ?? team.skill;
     return { locationId: pickBest(band.locations, score, rng).id, posture: 'hunt' };
   },
 };
@@ -121,6 +133,7 @@ export const ARCHETYPES: readonly Archetype[] = Object.freeze([
   CAUTIOUS,
   CONTRARIAN,
   ADAPTIVE,
+  SPECIALIST,
   RANDOM,
 ]);
 

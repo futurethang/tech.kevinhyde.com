@@ -25,8 +25,10 @@ export interface TeamState {
   readonly id: string;
   readonly name: string;
   readonly archetype: string;
-  /** Latent trivia ability, drawn once per team. Stands in for "do they know it". */
+  /** Overall trivia ability — the mean of the per-theme figures below. */
   readonly skill: number;
+  /** How good this team is at each theme. Picking your subject is half the game. */
+  readonly skillByTopic: Readonly<Record<string, number>>;
   readonly items: readonly string[];
   readonly alive: boolean;
   /** Where the team stands now; null before the first round. */
@@ -80,6 +82,10 @@ export interface LocationOutcome {
   readonly lootTakenBy: string | null;
   readonly lootTaken: readonly string[];
   readonly intelEarnedBy: readonly string[];
+  /** The trivia theme this place was fought over. */
+  readonly topicId: string;
+  /** True when the winner was also the best of them at that theme. */
+  readonly winnerKnewTheTheme: boolean | null;
 }
 
 export interface RoundSummary {
@@ -96,22 +102,32 @@ export interface ResolveResult {
   readonly summary: RoundSummary;
 }
 
-/** Trivia stand-in: how good they are, plus what their items buy, plus luck. */
-export function matchupScore(team: TeamState, rules: RuleParameters, rng: Rng): number {
-  return (
-    team.skill + rules.matchup.helpPerItem * team.items.length + rng.next() * rules.matchup.luckRange
-  );
+/**
+ * Trivia stand-in: how good this team is at THIS theme, plus what their items
+ * buy them, plus the luck of the question (and the dice, at the Trailhead).
+ */
+export function matchupScore(
+  team: TeamState,
+  topicId: string,
+  rules: RuleParameters,
+  luckRange: number,
+  rng: Rng,
+): number {
+  const ability = team.skillByTopic[topicId] ?? team.skill;
+  return ability + rules.matchup.helpPerItem * team.items.length + rng.next() * luckRange;
 }
 
 /** Decides a matchup. Ties break on team id so the result is reproducible. */
 export function resolveMatchup(
   teams: readonly TeamState[],
+  topicId: string,
   rules: RuleParameters,
+  luckRange: number,
   rng: Rng,
 ): { winnerId: string; scores: ReadonlyMap<string, number> } {
   const ordered = [...teams].sort((a, b) => a.id.localeCompare(b.id));
   const scores = new Map<string, number>();
-  for (const team of ordered) scores.set(team.id, matchupScore(team, rules, rng));
+  for (const team of ordered) scores.set(team.id, matchupScore(team, topicId, rules, luckRange, rng));
   let winner = ordered[0]!;
   for (const team of ordered.slice(1)) {
     if (scores.get(team.id)! > scores.get(winner.id)!) winner = team;
@@ -139,6 +155,10 @@ export function resolveBand(
 ): ResolveResult {
   const band = map.bands[state.band];
   if (!band) throw new Error(`band ${state.band} is past the end of map "${map.id}"`);
+  // The showdown at the Trailhead is deliberately chaotic.
+  const isTrailhead = state.band === map.bands.length - 1;
+  const luckRange =
+    rules.matchup.luckRange + (isTrailhead ? rules.matchup.extraChaosAtTheTrailhead : 0);
 
   const living = state.teams.filter((t) => t.alive).sort((a, b) => a.id.localeCompare(b.id));
   const byLocation = new Map<string, TeamState[]>();
@@ -181,6 +201,7 @@ export function resolveBand(
       trapsHere.get(location.id),
       rules,
       itemPool,
+      luckRange,
       rng,
     );
     outcomes.push(outcome);
@@ -234,6 +255,7 @@ function resolveLocation(
   trap: TrapState | undefined,
   rules: RuleParameters,
   itemPool: readonly string[],
+  luckRange: number,
   rng: Rng,
 ): LocationOutcome {
   const teamIds = present.map((a) => a.team.id).sort();
@@ -245,6 +267,8 @@ function resolveLocation(
     lootTakenBy: null as string | null,
     lootTaken: Object.freeze([] as string[]),
     intelEarnedBy: Object.freeze([] as string[]),
+    topicId: location.topic,
+    winnerKnewTheTheme: null as boolean | null,
   };
 
   if (present.length === 0) {
@@ -289,7 +313,11 @@ function resolveLocation(
   const intelEarned: string[] = [];
 
   if (fight) {
-    const { winnerId } = resolveMatchup(present.map((a) => a.team), rules, rng);
+    const contenders = present.map((a) => a.team);
+    const { winnerId } = resolveMatchup(contenders, location.topic, rules, luckRange, rng);
+    const bestAtTheme = Math.max(
+      ...contenders.map((t) => t.skillByTopic[location.topic] ?? t.skill),
+    );
     const winner = present.find((a) => a.team.id === winnerId)!.team;
     const losers = present.filter((a) => a.team.id !== winnerId).map((a) => a.team);
     const spoils: string[] = [];
@@ -316,6 +344,7 @@ function resolveLocation(
       lootTakenBy: loot.length > 0 ? winnerId : null,
       lootTaken: Object.freeze(loot),
       intelEarnedBy: Object.freeze(intelEarned),
+      winnerKnewTheTheme: (winner.skillByTopic[location.topic] ?? winner.skill) >= bestAtTheme,
     });
   }
 

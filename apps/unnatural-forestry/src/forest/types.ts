@@ -40,11 +40,20 @@ export interface ItemDefinition {
   readonly symbol: string;
 }
 
+export interface TopicDefinition {
+  readonly id: string;
+  readonly name: string;
+  readonly description: string;
+  readonly symbol: string;
+}
+
 export interface LocationDefinition {
   readonly id: string;
   readonly name: string;
   readonly terrain: string;
-  /** Items visible on the printed map. Visible loot is the bait that crowds. */
+  /** The trivia theme of a matchup fought here. Printed on the map. */
+  readonly topic: string;
+  /** Treasure visible on the printed map. It is the bait that makes crowds. */
   readonly loot: readonly string[];
 }
 
@@ -71,10 +80,18 @@ export interface MapDefinition {
 export interface MatchupModel {
   /** How much team-to-team trivia ability varies. Bigger = skill matters more. */
   readonly triviaSkillRange: number;
+  /**
+   * How much of a team's ability is tied to the specific theme rather than
+   * being good at trivia generally. 0 = themes are decoration; 1 = all that
+   * matters is whether you picked a subject you know.
+   */
+  readonly howMuchDependsOnTheTheme: number;
   /** What one item is worth. Bigger = the items decide it. */
   readonly helpPerItem: number;
   /** How much the luck of the question matters. Bigger = anyone can win. */
   readonly luckRange: number;
+  /** Extra luck in the showdown at the Trailhead — the dice, the chaos. */
+  readonly extraChaosAtTheTrailhead: number;
 }
 
 export interface RuleParameters {
@@ -132,6 +149,7 @@ export interface ScenarioDefinition {
 
 export interface Ruleset {
   readonly terrains: ReadonlyMap<string, TerrainType>;
+  readonly topics: ReadonlyMap<string, TopicDefinition>;
   readonly items: ReadonlyMap<string, ItemDefinition>;
   readonly maps: ReadonlyMap<string, MapDefinition>;
   readonly rules: RuleParameters;

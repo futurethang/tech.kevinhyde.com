@@ -60,6 +60,9 @@ for (const scenario of ruleset.scenarios.values()) {
       `${stats.contact.trapsTriggeredPerGame.toFixed(1)} traps sprung per game`,
   );
   console.log(
+    `matchups won by the team that knew the theme best: ${pct(stats.themeExpertWins)}`,
+  );
+  console.log(
     `winner: carried ${stats.champion.items.mean.toFixed(1)} items into the Trailhead · ` +
       `best equipped ${pct(stats.champion.hadMostItems)} of the time · ` +
       `sharpest at trivia ${pct(stats.champion.hadBestSkill)} of the time · ` +

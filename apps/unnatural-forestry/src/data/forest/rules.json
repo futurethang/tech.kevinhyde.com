@@ -2,10 +2,12 @@
   "_comment": "Every number that decides how the game feels. The branching of a round is logic and lives in src/forest/resolve.ts; the numbers live here.",
 
   "matchup": {
-    "_comment": "A matchup is the trivia duel. The simulator scores it as: how good the team is at trivia, plus what their items are worth, plus the luck of which question came up. Raise triviaSkillRange and the sharpest team usually wins. Raise helpPerItem and the items decide it instead. Raise luckRange and anyone can win on the night.",
+    "_comment": "A matchup is the trivia duel. The simulator scores it as: how good the team is at trivia, plus what their items are worth, plus the luck of which question came up. Raise triviaSkillRange and the sharpest team usually wins. Raise helpPerItem and the items decide it instead. Raise luckRange and anyone can win. howMuchDependsOnTheTheme decides whether a team is just good at trivia or good at particular subjects, which is what makes choosing a place a knowledge bet. extraChaosAtTheTrailhead is the dice in the final showdown.",
     "triviaSkillRange": 3,
+    "howMuchDependsOnTheTheme": 0.6,
     "helpPerItem": 0.25,
-    "luckRange": 3
+    "luckRange": 3,
+    "extraChaosAtTheTrailhead": 3
   },
 
   "itemsDrawnAtStart": 3,

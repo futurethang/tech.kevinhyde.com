@@ -16,6 +16,7 @@ import {
 } from '../core/validate';
 import type {
   BandDefinition,
+  TopicDefinition,
   MatchupModel,
   ItemDefinition,
   LocationDefinition,
@@ -59,9 +60,24 @@ export function parseItems(raw: unknown, path = 'items.json'): Map<string, ItemD
   return indexById(list, `${path}.items`);
 }
 
+export function parseTopics(raw: unknown, path = 'topics.json'): Map<string, TopicDefinition> {
+  const list = arr(obj(raw, path).topics, `${path}.topics`).map((item, i) => {
+    const p = `${path}.topics[${i}]`;
+    const o = obj(item, p);
+    return Object.freeze({
+      id: str(o.id, `${p}.id`),
+      name: str(o.name, `${p}.name`),
+      description: str(o.description, `${p}.description`),
+      symbol: str(o.symbol, `${p}.symbol`),
+    }) satisfies TopicDefinition;
+  });
+  return indexById(list, `${path}.topics`);
+}
+
 export function parseMap(
   raw: unknown,
   terrains: ReadonlyMap<string, TerrainType>,
+  topics: ReadonlyMap<string, TopicDefinition>,
   items: ReadonlyMap<string, ItemDefinition>,
   path = 'map.json',
 ): MapDefinition {
@@ -76,9 +92,11 @@ export function parseMap(
         id: str(lo.id, `${lp}.id`),
         name: str(lo.name, `${lp}.name`),
         terrain: str(lo.terrain, `${lp}.terrain`),
+        topic: str(lo.topic, `${lp}.topic`),
         loot: Object.freeze(lo.loot === undefined ? [] : strArray(lo.loot, `${lp}.loot`)),
       });
       requireRef(terrains, def.terrain, 'terrain', `${lp}.terrain`);
+      requireRef(topics, def.topic, 'topic', `${lp}.topic`);
       def.loot.forEach((id, k) => requireRef(items, id, 'item', `${lp}.loot[${k}]`));
       return def;
     });
@@ -110,8 +128,13 @@ function parseMatchupModel(raw: unknown, path: string): MatchupModel {
   const o = obj(raw, path);
   return Object.freeze({
     triviaSkillRange: num(o.triviaSkillRange, `${path}.triviaSkillRange`),
+    howMuchDependsOnTheTheme: num(o.howMuchDependsOnTheTheme, `${path}.howMuchDependsOnTheTheme`),
     helpPerItem: num(o.helpPerItem, `${path}.helpPerItem`),
     luckRange: num(o.luckRange, `${path}.luckRange`),
+    extraChaosAtTheTrailhead: num(
+      o.extraChaosAtTheTrailhead,
+      `${path}.extraChaosAtTheTrailhead`,
+    ),
   });
 }
 
