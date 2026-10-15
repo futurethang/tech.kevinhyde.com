@@ -7,6 +7,7 @@ import type { MapDefinition, Ruleset } from './types';
 import itemsJson from '../data/forest/items.json';
 import mapJson from '../data/forest/map-quilsap-wedge.json';
 import narrowMapJson from '../data/forest/map-quilsap-narrow.json';
+import extractionMapJson from '../data/forest/map-quilsap-extraction.json';
 import rulesJson from '../data/forest/rules.json';
 import scenariosJson from '../data/forest/scenarios.json';
 import terrainJson from '../data/forest/terrain.json';
@@ -17,6 +18,7 @@ export function loadRuleset(): Ruleset {
   const parsedMaps = [
     parseMap(mapJson, terrains, items, 'data/forest/map-quilsap-wedge.json'),
     parseMap(narrowMapJson, terrains, items, 'data/forest/map-quilsap-narrow.json'),
+    parseMap(extractionMapJson, terrains, items, 'data/forest/map-quilsap-extraction.json'),
   ];
   const maps: ReadonlyMap<string, MapDefinition> = new Map(parsedMaps.map((m) => [m.id, m]));
   const rules = parseRules(rulesJson, 'data/forest/rules.json');

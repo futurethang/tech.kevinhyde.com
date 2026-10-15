@@ -88,6 +88,13 @@ export interface RuleParameters {
   /** From which round (1-based) the dead may start placing traps. */
   readonly trapsFromRound: number;
   /**
+   * When true, posture is removed from the game entirely: any two teams that
+   * pick the same location meet and fight, whatever the terrain. The quiz
+   * decides everything, which is what the quiz was always going to do. Set it
+   * to compare the two-decision game against the one-decision game.
+   */
+  readonly allMeetingsFight: boolean;
+  /**
    * When true, deep cover ("never") is an absolute sanctuary: no fight can
    * happen there, so a team that wants to avoid all contact can do so with
    * certainty. When false, deep cover is merely quiet ground and behaves like

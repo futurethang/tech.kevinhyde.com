@@ -1,0 +1,53 @@
+{
+  "_comment": "The 10/7/4 wedge, sized for the no-posture design where every meeting is a fight. Band widths were swept against 800 seeded runs each: this shape lands 2-3 finalists 92% of the time with a 4% chance of a single finalist. Loot is spread across each band rather than concentrated, so the field does not all converge on one prize and wipe itself out in round 1.",
+  "id": "quilsap-extraction",
+  "name": "Lower Quilsap — Extraction Wedge",
+  "bands": [
+    {
+      "id": "band-deep-woods",
+      "name": "The Deep Woods",
+      "locations": [
+        { "id": "bone-orchard", "name": "The Bone Orchard", "terrain": "open", "loot": ["owls-counsel", "fog"] },
+        { "id": "weir-road", "name": "Weir Road Landing", "terrain": "open", "loot": ["shed-antler", "congress-of-crows"] },
+        { "id": "spur-2200", "name": "Spur 2200 Gate", "terrain": "open", "loot": ["owls-counsel", "shed-antler"] },
+        { "id": "section-14", "name": "Section 14 Fenceline", "terrain": "mixed", "loot": ["congress-of-crows"] },
+        { "id": "old-mill-grade", "name": "Old Mill Grade", "terrain": "mixed", "loot": ["fog"] },
+        { "id": "elk-wallow", "name": "The Elk Wallow", "terrain": "mixed", "loot": ["owls-counsel"] },
+        { "id": "drowned-nursery", "name": "The Drowned Nursery", "terrain": "deep", "loot": [] },
+        { "id": "sphagnum-flats", "name": "Sphagnum Flats", "terrain": "deep", "loot": [] },
+        { "id": "widowmaker-tangle", "name": "Widowmaker Tangle", "terrain": "deep", "loot": [] },
+        { "id": "sitka-blowdown", "name": "The Sitka Blowdown", "terrain": "deep", "loot": [] }
+      ]
+    },
+    {
+      "id": "band-narrows",
+      "name": "The Narrows",
+      "locations": [
+        { "id": "lookout-switchback", "name": "Lookout Switchback", "terrain": "open", "loot": ["owls-counsel", "shed-antler"] },
+        { "id": "cedar-bight", "name": "Cedar Bight Landing", "terrain": "open", "loot": ["congress-of-crows", "fog"] },
+        { "id": "hoh-junction", "name": "Hoh Ridge Junction", "terrain": "open", "loot": ["shed-antler", "owls-counsel"] },
+        { "id": "wye-creek", "name": "Wye Creek Bridge", "terrain": "mixed", "loot": ["fog"] },
+        { "id": "repeater-spur", "name": "Radio Repeater Spur", "terrain": "mixed", "loot": ["congress-of-crows"] },
+        { "id": "the-sink", "name": "The Sink", "terrain": "deep", "loot": [] },
+        { "id": "cold-seep", "name": "The Cold Seep", "terrain": "deep", "loot": [] }
+      ]
+    },
+    {
+      "id": "band-last-mile",
+      "name": "The Last Mile",
+      "locations": [
+        { "id": "burn-scar", "name": "The Burn Scar", "terrain": "open", "loot": ["owls-counsel", "fog"] },
+        { "id": "gate-9", "name": "Gate 9", "terrain": "mixed", "loot": ["congress-of-crows"] },
+        { "id": "permit-kiosk", "name": "The Permit Kiosk", "terrain": "mixed", "loot": ["shed-antler"] },
+        { "id": "culvert", "name": "The Culvert", "terrain": "deep", "loot": [] }
+      ]
+    },
+    {
+      "id": "band-trailhead",
+      "name": "The Trailhead",
+      "locations": [
+        { "id": "field-station", "name": "Field Station — Form 7-B Issued Here", "terrain": "open", "loot": [] }
+      ]
+    }
+  ]
+}

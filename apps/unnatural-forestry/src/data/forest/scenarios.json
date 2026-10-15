@@ -2,6 +2,90 @@
   "_comment": "Named test scenarios. `teams` is a mix of behaviour archetypes, which stand in for how guests might actually play. They are a testing instrument, not a prediction.",
   "scenarios": [
     {
+      "id": "extraction-mixed",
+      "name": "CURRENT — 10 teams, no postures, 10/7/4",
+      "description": "The current design: one decision a round (where do we go), every meeting is a fight, the quiz decides it.",
+      "mapId": "quilsap-extraction",
+      "seed": 20261031,
+      "teams": [
+        {
+          "archetype": "greedy",
+          "count": 3
+        },
+        {
+          "archetype": "cautious",
+          "count": 3
+        },
+        {
+          "archetype": "contrarian",
+          "count": 2
+        },
+        {
+          "archetype": "adaptive",
+          "count": 2
+        }
+      ],
+      "rules": {
+        "allMeetingsFight": true
+      }
+    },
+    {
+      "id": "extraction-cautious",
+      "name": "CURRENT — everybody plays it safe",
+      "description": "The old stall scenario against the current design. Posture is gone, so timidity cannot produce a dead night.",
+      "mapId": "quilsap-extraction",
+      "seed": 20261031,
+      "teams": [
+        {
+          "archetype": "cautious",
+          "count": 10
+        }
+      ],
+      "rules": {
+        "allMeetingsFight": true
+      }
+    },
+    {
+      "id": "extraction-greedy",
+      "name": "CURRENT — everybody chases the loot",
+      "description": "The collapse scenario against the current design, with loot spread across each band instead of concentrated.",
+      "mapId": "quilsap-extraction",
+      "seed": 20261031,
+      "teams": [
+        {
+          "archetype": "greedy",
+          "count": 10
+        }
+      ],
+      "rules": {
+        "allMeetingsFight": true
+      }
+    },
+    {
+      "id": "extraction-small",
+      "name": "CURRENT — 6 teams",
+      "description": "A smaller gathering on the same wedge.",
+      "mapId": "quilsap-extraction",
+      "seed": 20261031,
+      "teams": [
+        {
+          "archetype": "greedy",
+          "count": 2
+        },
+        {
+          "archetype": "cautious",
+          "count": 2
+        },
+        {
+          "archetype": "adaptive",
+          "count": 2
+        }
+      ],
+      "rules": {
+        "allMeetingsFight": true
+      }
+    },
+    {
       "id": "full-party-mixed",
       "name": "Full party — mixed behaviour",
       "description": "Ten teams, a realistic spread of greedy, cautious, contrarian and adaptive play.",
@@ -172,6 +256,78 @@
       ],
       "rules": {
         "deepCoverIsSanctuary": false
+      }
+    },
+    {
+      "id": "nopose-wide",
+      "name": "No postures — wide wedge (8/5/3)",
+      "description": "Posture removed: every meeting is a fight. Ten teams on the wider board.",
+      "mapId": "quilsap-wedge",
+      "seed": 20261031,
+      "teams": [
+        {
+          "archetype": "greedy",
+          "count": 3
+        },
+        {
+          "archetype": "cautious",
+          "count": 3
+        },
+        {
+          "archetype": "contrarian",
+          "count": 2
+        },
+        {
+          "archetype": "adaptive",
+          "count": 2
+        }
+      ],
+      "rules": {
+        "allMeetingsFight": true
+      }
+    },
+    {
+      "id": "nopose-narrow",
+      "name": "No postures — tight wedge (5/3/2)",
+      "description": "Posture removed, on the tighter board. Expected to collapse.",
+      "mapId": "quilsap-narrow",
+      "seed": 20261031,
+      "teams": [
+        {
+          "archetype": "greedy",
+          "count": 3
+        },
+        {
+          "archetype": "cautious",
+          "count": 3
+        },
+        {
+          "archetype": "contrarian",
+          "count": 2
+        },
+        {
+          "archetype": "adaptive",
+          "count": 2
+        }
+      ],
+      "rules": {
+        "allMeetingsFight": true
+      }
+    },
+    {
+      "id": "nopose-cautious",
+      "name": "No postures — everybody plays it safe",
+      "description": "The old stall scenario with posture removed. Can a timid field still produce nothing?",
+      "mapId": "quilsap-wedge",
+      "seed": 20261031,
+      "teams": [
+        {
+          "archetype": "cautious",
+          "count": 10
+        }
+      ],
+      "rules": {
+        "allMeetingsFight": true
       }
     }
   ]

@@ -261,10 +261,13 @@ function resolveLocation(
   // 2. Is there a fight?
   const hunters = present.filter((a) => a.posture === 'hunt').map((a) => a.team.id);
   const hunterSet = new Set(hunters);
-  // With sanctuary off, deep cover stops being an opt-out and behaves like
-  // mixed cover: quiet unless somebody came looking.
-  const effectiveRule =
-    terrain.fightRule === 'never' && !rules.deepCoverIsSanctuary ? 'if-hunted' : terrain.fightRule;
+  // With postures removed, any meeting is a fight. Otherwise, with sanctuary
+  // off, deep cover stops being an opt-out and behaves like mixed cover.
+  const effectiveRule = rules.allMeetingsFight
+    ? 'always'
+    : terrain.fightRule === 'never' && !rules.deepCoverIsSanctuary
+      ? 'if-hunted'
+      : terrain.fightRule;
   const fight =
     present.length >= 2 &&
     (effectiveRule === 'always' || (effectiveRule === 'if-hunted' && hunters.length > 0));

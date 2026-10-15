@@ -124,6 +124,7 @@ export function parseRules(raw: unknown, path = 'rules.json'): RuleParameters {
     trapPenalty: int(o.trapPenalty, `${path}.trapPenalty`),
     trapsPerDeadTeam: int(o.trapsPerDeadTeam, `${path}.trapsPerDeadTeam`),
     trapsFromRound: int(o.trapsFromRound, `${path}.trapsFromRound`),
+    allMeetingsFight: optBool(o.allMeetingsFight, `${path}.allMeetingsFight`, false),
     deepCoverIsSanctuary: optBool(o.deepCoverIsSanctuary, `${path}.deepCoverIsSanctuary`, true),
     soloTakesLoot: optBool(o.soloTakesLoot, `${path}.soloTakesLoot`, true),
     winnerTakesItems: optBool(o.winnerTakesItems, `${path}.winnerTakesItems`, true),

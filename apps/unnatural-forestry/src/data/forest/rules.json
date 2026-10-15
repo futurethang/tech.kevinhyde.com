@@ -11,6 +11,7 @@
   "trapPenalty": 1,
   "trapsPerDeadTeam": 1,
   "trapsFromRound": 2,
+  "allMeetingsFight": false,
   "deepCoverIsSanctuary": true,
   "soloTakesLoot": true,
   "winnerTakesItems": true,
