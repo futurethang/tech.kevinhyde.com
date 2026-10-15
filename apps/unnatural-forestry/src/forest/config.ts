@@ -25,25 +25,7 @@ import type {
   Ruleset,
   ScenarioDefinition,
   TeamSetup,
-  TerrainType,
 } from './types';
-
-export function parseTerrains(raw: unknown, path = 'terrain.json'): Map<string, TerrainType> {
-  const list = arr(obj(raw, path).terrains, `${path}.terrains`).map((item, i) => {
-    const p = `${path}.terrains[${i}]`;
-    const o = obj(item, p);
-    return Object.freeze({
-      id: str(o.id, `${p}.id`),
-      label: str(o.label, `${p}.label`),
-      description: str(o.description, `${p}.description`),
-      fightRule: oneOf(o.fightRule, `${p}.fightRule`, ['always', 'if-hunted', 'never'] as const),
-      grantsIntel: bool(o.grantsIntel, `${p}.grantsIntel`),
-      lootTier: int(o.lootTier, `${p}.lootTier`),
-      symbol: str(o.symbol, `${p}.symbol`),
-    }) satisfies TerrainType;
-  });
-  return indexById(list, `${path}.terrains`);
-}
 
 export function parseItems(raw: unknown, path = 'items.json'): Map<string, ItemDefinition> {
   const list = arr(obj(raw, path).items, `${path}.items`).map((item, i) => {
@@ -69,6 +51,9 @@ export function parseTopics(raw: unknown, path = 'topics.json'): Map<string, Top
       name: str(o.name, `${p}.name`),
       description: str(o.description, `${p}.description`),
       symbol: str(o.symbol, `${p}.symbol`),
+      terrainStyle: str(o.terrainStyle, `${p}.terrainStyle`),
+      colour: str(o.colour, `${p}.colour`),
+      spookiness: int(o.spookiness, `${p}.spookiness`),
     }) satisfies TopicDefinition;
   });
   return indexById(list, `${path}.topics`);
@@ -76,7 +61,6 @@ export function parseTopics(raw: unknown, path = 'topics.json'): Map<string, Top
 
 export function parseMap(
   raw: unknown,
-  terrains: ReadonlyMap<string, TerrainType>,
   topics: ReadonlyMap<string, TopicDefinition>,
   items: ReadonlyMap<string, ItemDefinition>,
   path = 'map.json',
@@ -91,11 +75,10 @@ export function parseMap(
       const def: LocationDefinition = Object.freeze({
         id: str(lo.id, `${lp}.id`),
         name: str(lo.name, `${lp}.name`),
-        terrain: str(lo.terrain, `${lp}.terrain`),
         topic: str(lo.topic, `${lp}.topic`),
+        vantage: bool(lo.vantage, `${lp}.vantage`),
         loot: Object.freeze(lo.loot === undefined ? [] : strArray(lo.loot, `${lp}.loot`)),
       });
-      requireRef(terrains, def.terrain, 'terrain', `${lp}.terrain`);
       requireRef(topics, def.topic, 'topic', `${lp}.topic`);
       def.loot.forEach((id, k) => requireRef(items, id, 'item', `${lp}.loot[${k}]`));
       return def;
@@ -105,6 +88,7 @@ export function parseMap(
     return Object.freeze({
       id: str(bo.id, `${bp}.id`),
       name: str(bo.name, `${bp}.name`),
+      timeOfDay: str(bo.timeOfDay, `${bp}.timeOfDay`),
       locations: Object.freeze(locations),
     }) satisfies BandDefinition;
   });
@@ -131,10 +115,6 @@ function parseMatchupModel(raw: unknown, path: string): MatchupModel {
     howMuchDependsOnTheTheme: num(o.howMuchDependsOnTheTheme, `${path}.howMuchDependsOnTheTheme`),
     helpPerItem: num(o.helpPerItem, `${path}.helpPerItem`),
     luckRange: num(o.luckRange, `${path}.luckRange`),
-    extraChaosAtTheTrailhead: num(
-      o.extraChaosAtTheTrailhead,
-      `${path}.extraChaosAtTheTrailhead`,
-    ),
   });
 }
 
@@ -170,20 +150,12 @@ export function parseRules(raw: unknown, path = 'rules.json'): RuleParameters {
       true,
     ),
 
-    everyMeetingIsAMatchup: optBool(
-      o.everyMeetingIsAMatchup,
-      `${path}.everyMeetingIsAMatchup`,
+    chaosDrawAtTheTrailhead: optBool(
+      o.chaosDrawAtTheTrailhead,
+      `${path}.chaosDrawAtTheTrailhead`,
       true,
     ),
-    hidingInDeepCoverAlwaysWorks: optBool(
-      o.hidingInDeepCoverAlwaysWorks,
-      `${path}.hidingInDeepCoverAlwaysWorks`,
-      false,
-    ),
-    itemsLostByHuntingAndFindingNobody: int(
-      o.itemsLostByHuntingAndFindingNobody,
-      `${path}.itemsLostByHuntingAndFindingNobody`,
-    ),
+    chanceTheChaosDrawIsGood: num(o.chanceTheChaosDrawIsGood, `${path}.chanceTheChaosDrawIsGood`),
 
     targetTeamsAtTheTrailhead: Object.freeze({
       min: int(target.min, `${path}.targetTeamsAtTheTrailhead.min`),

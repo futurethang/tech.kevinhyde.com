@@ -1,47 +1,68 @@
 {
-  "_comment": "Every place on the map carries a trivia theme. Teams can see it before they choose, so picking a place is also picking the subject you would rather be asked about — and teams badly overestimate what they know. Seven themes, shared across places, so there are seven sets of questions to write rather than twenty-two.",
+  "_comment": "Every place on the map carries a trivia theme, and the theme is also what that part of the map LOOKS like. Teams can see both before they choose, so picking a place is picking the subject you would rather be asked about. `spookiness` runs 1-4 and should read as flavour, not as a haunted house: the further in you go, the later it gets.",
   "topics": [
     {
       "id": "rock-and-ruin",
       "name": "Rock & Ruin",
       "description": "Quarries, mining, masonry, geology, things dug up and things built.",
-      "symbol": "⛏"
+      "symbol": "⛏",
+      "terrainStyle": "Bare rock. Scree, quarry faces, broken masonry, nothing growing.",
+      "colour": "#8b8178",
+      "spookiness": 2
     },
     {
       "id": "root-and-rot",
       "name": "Root & Rot",
       "description": "Trees, fungi, moss, forestry, what grows and what breaks it down.",
-      "symbol": "❦"
+      "symbol": "❦",
+      "terrainStyle": "Deep dank forest. Closed canopy, moss to the knee, standing deadwood.",
+      "colour": "#2f4a39",
+      "spookiness": 3
     },
     {
       "id": "fur-and-feather",
       "name": "Fur & Feather",
       "description": "Animals, birds, tracks, and the creatures people claim to have seen.",
-      "symbol": "☙"
+      "symbol": "☙",
+      "terrainStyle": "Meadow and light woods. Open grass, scattered alder, good sightlines.",
+      "colour": "#7d9455",
+      "spookiness": 1
     },
     {
       "id": "rain-and-river",
       "name": "Rain & River",
       "description": "Weather, water, floods, fish, tides and the shipping forecast.",
-      "symbol": "≈"
+      "symbol": "≈",
+      "terrainStyle": "Woodsy creek bottom. Runs right through the map rather than sitting in one place.",
+      "colour": "#4e7b88",
+      "spookiness": 2
     },
     {
       "id": "grease-and-gravel",
       "name": "Grease & Gravel",
       "description": "Logging equipment, trucks, roads, chainsaws, anything with a motor.",
-      "symbol": "⚙"
+      "symbol": "⚙",
+      "terrainStyle": "Logged out. Stumps, slash piles, churned mud, a road going nowhere.",
+      "colour": "#9c7f4e",
+      "spookiness": 2
     },
     {
       "id": "forms-and-procedures",
       "name": "Forms & Procedures",
       "description": "Government, paperwork, signage, regulations, the Department itself.",
-      "symbol": "▤"
+      "symbol": "▤",
+      "terrainStyle": "An abandoned, dilapidated ranger station and its outbuildings.",
+      "colour": "#a8553c",
+      "spookiness": 3
     },
     {
       "id": "dark-and-distant",
       "name": "Dark & Distant",
       "description": "Night sky, folklore, ghost stories, and what the old-timers say.",
-      "symbol": "✷"
+      "symbol": "✷",
+      "terrainStyle": "The same forest, at night. Identical ground, wrong light.",
+      "colour": "#2b2a46",
+      "spookiness": 4
     }
   ]
 }

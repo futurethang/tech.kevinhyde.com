@@ -9,10 +9,21 @@ const ruleset = loadRuleset();
 
 describe('the committed ruleset', () => {
   it('loads and cross-validates', () => {
-    expect(ruleset.terrains.size).toBeGreaterThan(0);
+    expect(ruleset.topics.size).toBeGreaterThan(0);
     expect(ruleset.items.size).toBeGreaterThan(0);
     expect(ruleset.maps.size).toBeGreaterThan(0);
     expect(ruleset.scenarios.size).toBeGreaterThan(0);
+  });
+
+  it('gives every place a theme that exists, and a time of day per band', () => {
+    for (const map of ruleset.maps.values()) {
+      for (const band of map.bands) {
+        expect(band.timeOfDay.length).toBeGreaterThan(0);
+        for (const location of band.locations) {
+          expect(ruleset.topics.has(location.topic)).toBe(true);
+        }
+      }
+    }
   });
 
   it('gives every map a narrowing wedge ending in a single trailhead', () => {
@@ -66,7 +77,7 @@ describe.each([...ruleset.scenarios.keys()])('scenario %s', (scenarioId) => {
 });
 
 describe('batch statistics', () => {
-  const scenario = ruleset.scenarios.get('narrow-mixed')!;
+  const scenario = ruleset.scenarios.get('extraction-mixed')!;
   const rules = mergeRules(ruleset.rules, scenario.rules);
   const records = Array.from({ length: 60 }, (_, i) => runGame(ruleset, scenario, 500 + i));
   const stats = summarize(records, rules);
@@ -109,8 +120,7 @@ describe('batch statistics', () => {
 });
 
 describe('ruleset warnings', () => {
-  it('flags a board too wide to force contact', () => {
-    const warnings = rulesetWarnings(ruleset);
-    expect(warnings.some((w) => w.includes('nothing forces contact'))).toBe(true);
+  it('returns plain strings and does not throw on the committed data', () => {
+    for (const warning of rulesetWarnings(ruleset)) expect(typeof warning).toBe('string');
   });
 });

@@ -11,7 +11,8 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "gen:map": "tsx tools/generate-map.ts",
-    "playtest": "tsx tools/playtest.ts"
+    "playtest": "tsx tools/playtest.ts",
+    "map:draw": "tsx tools/draw-map.ts"
   },
   "dependencies": {
     "phaser": "^3.87.0"

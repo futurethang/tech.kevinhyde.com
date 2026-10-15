@@ -19,7 +19,7 @@
  */
 
 import type { Rng } from '../core/rng';
-import type { LocationDefinition, MapDefinition, RuleParameters, TerrainType } from './types';
+import type { LocationDefinition, MapDefinition, RuleParameters } from './types';
 
 export interface TeamState {
   readonly id: string;
@@ -40,11 +40,8 @@ export interface TeamState {
   readonly hasIntel: boolean;
 }
 
-export type Posture = 'hunt' | 'hide';
-
 export interface Choice {
   readonly locationId: string;
-  readonly posture: Posture;
 }
 
 export interface TrapState {
@@ -73,12 +70,9 @@ export interface LocationOutcome {
   readonly locationId: string;
   readonly kind: LocationOutcomeKind;
   readonly teamIds: readonly string[];
-  readonly hunterIds: readonly string[];
   readonly winnerId: string | null;
   readonly eliminatedIds: readonly string[];
   readonly trapTriggeredOn: readonly string[];
-  /** Teams that hunted, found nobody, and dropped an item for their trouble. */
-  readonly noisyHunterIds: readonly string[];
   readonly lootTakenBy: string | null;
   readonly lootTaken: readonly string[];
   readonly intelEarnedBy: readonly string[];
@@ -145,7 +139,6 @@ function drop(items: readonly string[], count: number): string[] {
  */
 export function resolveBand(
   map: MapDefinition,
-  terrains: ReadonlyMap<string, TerrainType>,
   rules: RuleParameters,
   /** Every item id that can be drawn as treasure. */
   itemPool: readonly string[],
@@ -155,10 +148,7 @@ export function resolveBand(
 ): ResolveResult {
   const band = map.bands[state.band];
   if (!band) throw new Error(`band ${state.band} is past the end of map "${map.id}"`);
-  // The showdown at the Trailhead is deliberately chaotic.
-  const isTrailhead = state.band === map.bands.length - 1;
-  const luckRange =
-    rules.matchup.luckRange + (isTrailhead ? rules.matchup.extraChaosAtTheTrailhead : 0);
+  const luckRange = rules.matchup.luckRange;
 
   const living = state.teams.filter((t) => t.alive).sort((a, b) => a.id.localeCompare(b.id));
   const byLocation = new Map<string, TeamState[]>();
@@ -189,14 +179,9 @@ export function resolveBand(
   // Locations resolve in a fixed order; they do not interact, but sorting keeps
   // the rng draw sequence stable.
   for (const location of [...band.locations].sort((a, b) => a.id.localeCompare(b.id))) {
-    const present = (byLocation.get(location.id) ?? []).map((t) => ({
-      team: next.get(t.id)!,
-      posture: choices.get(t.id)!.posture,
-    }));
-    const terrain = terrains.get(location.terrain)!;
+    const present = (byLocation.get(location.id) ?? []).map((t) => next.get(t.id)!);
     const outcome = resolveLocation(
       location,
-      terrain,
       present,
       trapsHere.get(location.id),
       rules,
@@ -242,28 +227,20 @@ export function resolveBand(
 
 type MutableTeam = { -readonly [K in keyof TeamState]: TeamState[K] };
 
-/** A team standing on a location this round, with the posture it committed. */
-interface Arrival {
-  readonly team: MutableTeam;
-  readonly posture: Posture;
-}
-
 function resolveLocation(
   location: LocationDefinition,
-  terrain: TerrainType,
-  present: Arrival[],
+  present: MutableTeam[],
   trap: TrapState | undefined,
   rules: RuleParameters,
   itemPool: readonly string[],
   luckRange: number,
   rng: Rng,
 ): LocationOutcome {
-  const teamIds = present.map((a) => a.team.id).sort();
+  const teamIds = present.map((t) => t.id).sort();
   const base = {
     locationId: location.id,
     teamIds: Object.freeze(teamIds),
     trapTriggeredOn: Object.freeze([] as string[]),
-    noisyHunterIds: Object.freeze([] as string[]),
     lootTakenBy: null as string | null,
     lootTaken: Object.freeze([] as string[]),
     intelEarnedBy: Object.freeze([] as string[]),
@@ -275,7 +252,6 @@ function resolveLocation(
     return Object.freeze({
       ...base,
       kind: 'empty' as const,
-      hunterIds: Object.freeze([]),
       winnerId: null,
       eliminatedIds: Object.freeze([]),
     });
@@ -284,7 +260,7 @@ function resolveLocation(
   // 1. Traps. Intel dodges one, and is spent doing so.
   const trapped: string[] = [];
   if (trap) {
-    for (const { team } of present) {
+    for (const team of present) {
       if (team.hasIntel) {
         team.hasIntel = false;
         continue;
@@ -296,30 +272,19 @@ function resolveLocation(
     }
   }
 
-  // 2. Is there a fight?
-  const hunters = present.filter((a) => a.posture === 'hunt').map((a) => a.team.id);
-  const hunterSet = new Set(hunters);
-  // With postures removed, any meeting is a fight. Otherwise, with sanctuary
-  // off, deep cover stops being an opt-out and behaves like mixed cover.
-  const effectiveRule = rules.everyMeetingIsAMatchup
-    ? 'always'
-    : terrain.fightRule === 'never' && !rules.hidingInDeepCoverAlwaysWorks
-      ? 'if-hunted'
-      : terrain.fightRule;
-  const fight =
-    present.length >= 2 &&
-    (effectiveRule === 'always' || (effectiveRule === 'if-hunted' && hunters.length > 0));
+  // 2. Two or more teams in the same place is a matchup. No exceptions.
+  const fight = present.length >= 2;
 
   const intelEarned: string[] = [];
 
   if (fight) {
-    const contenders = present.map((a) => a.team);
+    const contenders = present;
     const { winnerId } = resolveMatchup(contenders, location.topic, rules, luckRange, rng);
     const bestAtTheme = Math.max(
       ...contenders.map((t) => t.skillByTopic[location.topic] ?? t.skill),
     );
-    const winner = present.find((a) => a.team.id === winnerId)!.team;
-    const losers = present.filter((a) => a.team.id !== winnerId).map((a) => a.team);
+    const winner = present.find((t) => t.id === winnerId)!;
+    const losers = present.filter((t) => t.id !== winnerId);
     const spoils: string[] = [];
     for (const loser of losers) {
       if (rules.winnerAlsoTakesTheLosersItems) spoils.push(...loser.items);
@@ -333,11 +298,10 @@ function resolveLocation(
     winner.items = [...winner.items, ...spoils, ...loot, ...treasure];
     winner.fightsWon += 1;
     winner.fightsSurvived += 1;
-    if (terrain.grantsIntel) intelEarned.push(winner.id);
+    if (location.vantage) intelEarned.push(winner.id);
     return Object.freeze({
       ...base,
       kind: 'fight' as const,
-      hunterIds: Object.freeze([...hunters].sort()),
       winnerId,
       eliminatedIds: Object.freeze(losers.map((t) => t.id).sort()),
       trapTriggeredOn: Object.freeze(trapped.sort()),
@@ -348,34 +312,24 @@ function resolveLocation(
     });
   }
 
-  // 3. No fight. Hunters who found nobody make noise and drop something.
-  const noisy: string[] = [];
-  for (const { team } of present) {
-    if (!hunterSet.has(team.id)) continue;
-    if (team.items.length === 0) continue;
-    team.items = drop(team.items, rules.itemsLostByHuntingAndFindingNobody);
-    noisy.push(team.id);
-  }
-
+  // 3. Nobody met. A team on its own picks up what was lying there.
   let lootTakenBy: string | null = null;
   let lootTaken: string[] = [];
   if (present.length === 1 && rules.aTeamAloneTakesWhatIsLyingThere && location.loot.length > 0) {
-    const team = present[0]!.team;
+    const team = present[0]!;
     lootTaken = [...location.loot];
     team.items = [...team.items, ...lootTaken];
     lootTakenBy = team.id;
   }
 
-  if (terrain.grantsIntel) for (const { team } of present) intelEarned.push(team.id);
+  if (location.vantage) for (const team of present) intelEarned.push(team.id);
 
   return Object.freeze({
     ...base,
     kind: present.length === 1 ? ('solo' as const) : ('passed-in-the-dark' as const),
-    hunterIds: Object.freeze([...hunters].sort()),
     winnerId: null,
     eliminatedIds: Object.freeze([]),
     trapTriggeredOn: Object.freeze(trapped.sort()),
-    noisyHunterIds: Object.freeze(noisy.sort()),
     lootTakenBy,
     lootTaken: Object.freeze(lootTaken),
     intelEarnedBy: Object.freeze(intelEarned),

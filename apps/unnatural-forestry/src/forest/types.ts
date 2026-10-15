@@ -8,28 +8,6 @@
  * because those are the knobs that decide whether the game works.
  */
 
-/** What happens when two or more teams arrive at the same location. */
-export type FightRule =
-  /** Open ground: you cannot hide. Any two teams here fight. */
-  | 'always'
-  /** Mixed cover: a fight only happens if at least one team hunted. */
-  | 'if-hunted'
-  /** Deep cover: hiding always works. No fight is possible here. */
-  | 'never';
-
-export interface TerrainType {
-  readonly id: string;
-  readonly label: string;
-  readonly description: string;
-  readonly fightRule: FightRule;
-  /** Surviving a round here earns one whispered fact (a trap location). */
-  readonly grantsIntel: boolean;
-  /** Relative richness; the map author places actual loot per location. */
-  readonly lootTier: number;
-  /** Map symbol, for the eventual printed board. */
-  readonly symbol: string;
-}
-
 export interface ItemDefinition {
   readonly id: string;
   readonly name: string;
@@ -45,14 +23,21 @@ export interface TopicDefinition {
   readonly name: string;
   readonly description: string;
   readonly symbol: string;
+  /** What this part of the map looks like. Direction for the illustration. */
+  readonly terrainStyle: string;
+  /** Base colour for the layout drawing; the artwork can depart from it. */
+  readonly colour: string;
+  /** 1-4. Flavour, not a haunted house. */
+  readonly spookiness: number;
 }
 
 export interface LocationDefinition {
   readonly id: string;
   readonly name: string;
-  readonly terrain: string;
-  /** The trivia theme of a matchup fought here. Printed on the map. */
+  /** The trivia theme of a matchup fought here, and what the place looks like. */
   readonly topic: string;
+  /** You can see a long way from here: survive and the Director tells you something. */
+  readonly vantage: boolean;
   /** Treasure visible on the printed map. It is the bait that makes crowds. */
   readonly loot: readonly string[];
 }
@@ -60,6 +45,8 @@ export interface LocationDefinition {
 export interface BandDefinition {
   readonly id: string;
   readonly name: string;
+  /** Light and mood for this ring of the map. It gets later as you go in. */
+  readonly timeOfDay: string;
   readonly locations: readonly LocationDefinition[];
 }
 
@@ -90,8 +77,6 @@ export interface MatchupModel {
   readonly helpPerItem: number;
   /** How much the luck of the question matters. Bigger = anyone can win. */
   readonly luckRange: number;
-  /** Extra luck in the showdown at the Trailhead — the dice, the chaos. */
-  readonly extraChaosAtTheTrailhead: number;
 }
 
 export interface RuleParameters {
@@ -117,14 +102,12 @@ export interface RuleParameters {
   readonly theWinnerTakesWhatIsLyingThere: boolean;
 
   /**
-   * When true there is no hunting or hiding: any two teams in the same place
-   * have a matchup. When false, terrain and posture decide whether they meet.
+   * Before the showdown, every team left draws one card: half the pile helps,
+   * half of it bites. A curveball, not a new rule.
    */
-  readonly everyMeetingIsAMatchup: boolean;
-  /** Only read when `everyMeetingIsAMatchup` is false. */
-  readonly hidingInDeepCoverAlwaysWorks: boolean;
-  /** Only read when `everyMeetingIsAMatchup` is false. */
-  readonly itemsLostByHuntingAndFindingNobody: number;
+  readonly chaosDrawAtTheTrailhead: boolean;
+  /** The share of that pile that is good news. */
+  readonly chanceTheChaosDrawIsGood: number;
 
   /** How many teams we want to reach the Trailhead. Used to report problems. */
   readonly targetTeamsAtTheTrailhead: { readonly min: number; readonly max: number };
@@ -148,7 +131,6 @@ export interface ScenarioDefinition {
 }
 
 export interface Ruleset {
-  readonly terrains: ReadonlyMap<string, TerrainType>;
   readonly topics: ReadonlyMap<string, TopicDefinition>;
   readonly items: ReadonlyMap<string, ItemDefinition>;
   readonly maps: ReadonlyMap<string, MapDefinition>;

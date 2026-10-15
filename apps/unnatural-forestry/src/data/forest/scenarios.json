@@ -1,9 +1,9 @@
 {
-  "_comment": "Named test scenarios. `teams` is a mix of behaviour archetypes, which stand in for how guests might actually play. They are a testing instrument, not a prediction.",
+  "_comment": "Named test games. `teams` is a mix of styles of play, standing in for how guests might actually behave. They are a testing instrument, not a prediction.",
   "scenarios": [
     {
       "id": "extraction-mixed",
-      "name": "CURRENT — 10 teams, mixed play",
+      "name": "10 teams, mixed play",
       "description": "The current design: three items each, one decision a round (where do we go, and which subject do we fancy being asked about), and a trivia matchup wherever two teams land together.",
       "mapId": "quilsap-extraction",
       "seed": 20261031,
@@ -28,14 +28,11 @@
           "archetype": "specialist",
           "count": 2
         }
-      ],
-      "rules": {
-        "everyMeetingIsAMatchup": true
-      }
+      ]
     },
     {
       "id": "extraction-specialists",
-      "name": "CURRENT — everybody plays to their strengths",
+      "name": "everybody plays to their strengths",
       "description": "Every team heads for the subject it reckons it knows. Does picking your theme beat chasing treasure?",
       "mapId": "quilsap-extraction",
       "seed": 20261031,
@@ -44,14 +41,11 @@
           "archetype": "specialist",
           "count": 10
         }
-      ],
-      "rules": {
-        "everyMeetingIsAMatchup": true
-      }
+      ]
     },
     {
       "id": "extraction-cautious",
-      "name": "CURRENT — everybody plays it safe",
+      "name": "everybody plays it safe",
       "description": "Worst case: every team avoids the busy places. Does the game still produce a showdown?",
       "mapId": "quilsap-extraction",
       "seed": 20261031,
@@ -60,14 +54,11 @@
           "archetype": "cautious",
           "count": 10
         }
-      ],
-      "rules": {
-        "everyMeetingIsAMatchup": true
-      }
+      ]
     },
     {
       "id": "extraction-greedy",
-      "name": "CURRENT — everybody chases the treasure",
+      "name": "everybody chases the treasure",
       "description": "Worst case: every team goes for the richest spot. Does the field wipe itself out?",
       "mapId": "quilsap-extraction",
       "seed": 20261031,
@@ -76,14 +67,11 @@
           "archetype": "greedy",
           "count": 10
         }
-      ],
-      "rules": {
-        "everyMeetingIsAMatchup": true
-      }
+      ]
     },
     {
       "id": "extraction-small",
-      "name": "CURRENT — 6 teams",
+      "name": "6 teams",
       "description": "A smaller gathering on the same board.",
       "mapId": "quilsap-extraction",
       "seed": 20261031,
@@ -100,255 +88,7 @@
           "archetype": "adaptive",
           "count": 2
         }
-      ],
-      "rules": {
-        "everyMeetingIsAMatchup": true
-      }
-    },
-    {
-      "id": "full-party-mixed",
-      "name": "Full party — mixed behaviour",
-      "description": "Ten teams, a realistic spread of greedy, cautious, contrarian and adaptive play.",
-      "mapId": "quilsap-wedge",
-      "seed": 20261031,
-      "teams": [
-        {
-          "archetype": "greedy",
-          "count": 3
-        },
-        {
-          "archetype": "cautious",
-          "count": 3
-        },
-        {
-          "archetype": "contrarian",
-          "count": 2
-        },
-        {
-          "archetype": "adaptive",
-          "count": 2
-        }
       ]
-    },
-    {
-      "id": "all-cautious",
-      "name": "Worst case — everybody hides",
-      "description": "The stall scenario. If every team plays it safe, does the night still produce a finale?",
-      "mapId": "quilsap-wedge",
-      "seed": 7,
-      "teams": [
-        {
-          "archetype": "cautious",
-          "count": 10
-        }
-      ]
-    },
-    {
-      "id": "all-greedy",
-      "name": "Worst case — everybody hunts the loot",
-      "description": "The bloodbath scenario. If everyone chases the same visible power-ups, does the field collapse too early?",
-      "mapId": "quilsap-wedge",
-      "seed": 11,
-      "teams": [
-        {
-          "archetype": "greedy",
-          "count": 10
-        }
-      ]
-    },
-    {
-      "id": "small-party",
-      "name": "Small party — 6 teams",
-      "description": "A smaller gathering on the same wedge. Does the funnel still land on 2-3?",
-      "mapId": "quilsap-wedge",
-      "seed": 20261101,
-      "teams": [
-        {
-          "archetype": "greedy",
-          "count": 2
-        },
-        {
-          "archetype": "cautious",
-          "count": 2
-        },
-        {
-          "archetype": "adaptive",
-          "count": 2
-        }
-      ]
-    },
-    {
-      "id": "random-table",
-      "name": "Drunk table — everybody guesses",
-      "description": "Nobody is playing strategically at all. The true floor.",
-      "mapId": "quilsap-wedge",
-      "seed": 99,
-      "teams": [
-        {
-          "archetype": "random",
-          "count": 10
-        }
-      ]
-    },
-    {
-      "id": "full-party-no-sanctuary",
-      "name": "Full party — deep cover is not a sanctuary",
-      "description": "The same ten teams, but hiding in deep cover no longer makes a team untouchable: a hunter who comes to the same place still finds them.",
-      "mapId": "quilsap-wedge",
-      "seed": 20261031,
-      "teams": [
-        {
-          "archetype": "greedy",
-          "count": 3
-        },
-        {
-          "archetype": "cautious",
-          "count": 3
-        },
-        {
-          "archetype": "contrarian",
-          "count": 2
-        },
-        {
-          "archetype": "adaptive",
-          "count": 2
-        }
-      ],
-      "rules": {
-        "hidingInDeepCoverAlwaysWorks": false
-      }
-    },
-    {
-      "id": "all-cautious-no-sanctuary",
-      "name": "Everybody hides — without the sanctuary",
-      "description": "The stall scenario again, with deep cover downgraded to ordinary quiet ground.",
-      "mapId": "quilsap-wedge",
-      "seed": 7,
-      "teams": [
-        {
-          "archetype": "cautious",
-          "count": 10
-        }
-      ],
-      "rules": {
-        "hidingInDeepCoverAlwaysWorks": false
-      }
-    },
-    {
-      "id": "narrow-mixed",
-      "name": "Tight wedge — mixed behaviour",
-      "description": "Ten teams on the 5/3/2 wedge. Does a narrower board fix the dead rounds?",
-      "mapId": "quilsap-narrow",
-      "seed": 20261031,
-      "teams": [
-        {
-          "archetype": "greedy",
-          "count": 3
-        },
-        {
-          "archetype": "cautious",
-          "count": 3
-        },
-        {
-          "archetype": "contrarian",
-          "count": 2
-        },
-        {
-          "archetype": "adaptive",
-          "count": 2
-        }
-      ],
-      "rules": {
-        "hidingInDeepCoverAlwaysWorks": false
-      }
-    },
-    {
-      "id": "narrow-cautious",
-      "name": "Tight wedge — everybody hides",
-      "description": "The stall scenario on the narrower board, with no sanctuary.",
-      "mapId": "quilsap-narrow",
-      "seed": 20261031,
-      "teams": [
-        {
-          "archetype": "cautious",
-          "count": 10
-        }
-      ],
-      "rules": {
-        "hidingInDeepCoverAlwaysWorks": false
-      }
-    },
-    {
-      "id": "nopose-wide",
-      "name": "No postures — wide wedge (8/5/3)",
-      "description": "Posture removed: every meeting is a fight. Ten teams on the wider board.",
-      "mapId": "quilsap-wedge",
-      "seed": 20261031,
-      "teams": [
-        {
-          "archetype": "greedy",
-          "count": 3
-        },
-        {
-          "archetype": "cautious",
-          "count": 3
-        },
-        {
-          "archetype": "contrarian",
-          "count": 2
-        },
-        {
-          "archetype": "adaptive",
-          "count": 2
-        }
-      ],
-      "rules": {
-        "everyMeetingIsAMatchup": true
-      }
-    },
-    {
-      "id": "nopose-narrow",
-      "name": "No postures — tight wedge (5/3/2)",
-      "description": "Posture removed, on the tighter board. Expected to collapse.",
-      "mapId": "quilsap-narrow",
-      "seed": 20261031,
-      "teams": [
-        {
-          "archetype": "greedy",
-          "count": 3
-        },
-        {
-          "archetype": "cautious",
-          "count": 3
-        },
-        {
-          "archetype": "contrarian",
-          "count": 2
-        },
-        {
-          "archetype": "adaptive",
-          "count": 2
-        }
-      ],
-      "rules": {
-        "everyMeetingIsAMatchup": true
-      }
-    },
-    {
-      "id": "nopose-cautious",
-      "name": "No postures — everybody plays it safe",
-      "description": "The old stall scenario with posture removed. Can a timid field still produce nothing?",
-      "mapId": "quilsap-wedge",
-      "seed": 20261031,
-      "teams": [
-        {
-          "archetype": "cautious",
-          "count": 10
-        }
-      ],
-      "rules": {
-        "everyMeetingIsAMatchup": true
-      }
     }
   ]
 }

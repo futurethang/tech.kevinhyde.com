@@ -1,5 +1,5 @@
 {
-  "_comment": "The 10/7/4 wedge, sized for the no-posture design where every meeting is a fight. Band widths were swept against 800 seeded runs each: this shape lands 2-3 finalists 92% of the time with a 4% chance of a single finalist. Loot is spread across each band rather than concentrated, so the field does not all converge on one prize and wipe itself out in round 1.",
+  "_comment": "The 10/7/4 board. Band widths were swept against 800 games each: this shape lands 2-3 teams at the Trailhead 88% of the time. Treasure is spread across each band so the field does not all converge on one prize. Themes are arranged so the dark runs inward - the deeper you go the later it gets - and Rain & River appears in every band because the creek runs right through the map. A place has a name, a theme (which is both its trivia subject and what it looks like), whether it is a vantage point, and the treasure lying there. There is no separate terrain layer: the theme is the terrain.",
   "id": "quilsap-extraction",
   "name": "Lower Quilsap — Extraction Wedge",
   "bands": [
@@ -10,89 +10,90 @@
         {
           "id": "bone-orchard",
           "name": "The Bone Orchard",
-          "terrain": "open",
+          "topic": "fur-and-feather",
+          "vantage": true,
           "loot": [
             "owls-counsel",
             "fog"
-          ],
-          "topic": "dark-and-distant"
+          ]
         },
         {
           "id": "weir-road",
           "name": "Weir Road Landing",
-          "terrain": "open",
+          "topic": "grease-and-gravel",
+          "vantage": true,
           "loot": [
             "shed-antler",
             "congress-of-crows"
-          ],
-          "topic": "grease-and-gravel"
+          ]
         },
         {
           "id": "spur-2200",
           "name": "Spur 2200 Gate",
-          "terrain": "open",
+          "topic": "grease-and-gravel",
+          "vantage": true,
           "loot": [
             "owls-counsel",
             "shed-antler"
-          ],
-          "topic": "grease-and-gravel"
+          ]
         },
         {
           "id": "section-14",
           "name": "Section 14 Fenceline",
-          "terrain": "mixed",
+          "topic": "forms-and-procedures",
+          "vantage": false,
           "loot": [
             "congress-of-crows"
-          ],
-          "topic": "forms-and-procedures"
+          ]
         },
         {
           "id": "old-mill-grade",
           "name": "Old Mill Grade",
-          "terrain": "mixed",
+          "topic": "rock-and-ruin",
+          "vantage": false,
           "loot": [
             "fog"
-          ],
-          "topic": "rock-and-ruin"
+          ]
         },
         {
           "id": "elk-wallow",
           "name": "The Elk Wallow",
-          "terrain": "mixed",
+          "topic": "fur-and-feather",
+          "vantage": false,
           "loot": [
             "owls-counsel"
-          ],
-          "topic": "fur-and-feather"
+          ]
         },
         {
           "id": "drowned-nursery",
           "name": "The Drowned Nursery",
-          "terrain": "deep",
-          "loot": [],
-          "topic": "root-and-rot"
+          "topic": "rain-and-river",
+          "vantage": false,
+          "loot": []
         },
         {
           "id": "sphagnum-flats",
           "name": "Sphagnum Flats",
-          "terrain": "deep",
-          "loot": [],
-          "topic": "rain-and-river"
+          "topic": "rain-and-river",
+          "vantage": false,
+          "loot": []
         },
         {
           "id": "widowmaker-tangle",
           "name": "Widowmaker Tangle",
-          "terrain": "deep",
-          "loot": [],
-          "topic": "root-and-rot"
+          "topic": "root-and-rot",
+          "vantage": false,
+          "loot": []
         },
         {
           "id": "sitka-blowdown",
           "name": "The Sitka Blowdown",
-          "terrain": "deep",
-          "loot": [],
-          "topic": "root-and-rot"
+          "topic": "root-and-rot",
+          "vantage": false,
+          "loot": []
         }
-      ]
+      ],
+      "timeOfDay": "Late afternoon. The light is going."
     },
     {
       "id": "band-narrows",
@@ -101,66 +102,67 @@
         {
           "id": "lookout-switchback",
           "name": "Lookout Switchback",
-          "terrain": "open",
+          "topic": "rock-and-ruin",
+          "vantage": true,
           "loot": [
             "owls-counsel",
             "shed-antler"
-          ],
-          "topic": "dark-and-distant"
+          ]
         },
         {
           "id": "cedar-bight",
           "name": "Cedar Bight Landing",
-          "terrain": "open",
+          "topic": "root-and-rot",
+          "vantage": true,
           "loot": [
             "congress-of-crows",
             "fog"
-          ],
-          "topic": "rain-and-river"
+          ]
         },
         {
           "id": "hoh-junction",
           "name": "Hoh Ridge Junction",
-          "terrain": "open",
+          "topic": "forms-and-procedures",
+          "vantage": true,
           "loot": [
             "shed-antler",
             "owls-counsel"
-          ],
-          "topic": "forms-and-procedures"
+          ]
         },
         {
           "id": "wye-creek",
           "name": "Wye Creek Bridge",
-          "terrain": "mixed",
+          "topic": "rain-and-river",
+          "vantage": false,
           "loot": [
             "fog"
-          ],
-          "topic": "rain-and-river"
+          ]
         },
         {
           "id": "repeater-spur",
           "name": "Radio Repeater Spur",
-          "terrain": "mixed",
+          "topic": "grease-and-gravel",
+          "vantage": false,
           "loot": [
             "congress-of-crows"
-          ],
-          "topic": "grease-and-gravel"
+          ]
         },
         {
           "id": "the-sink",
           "name": "The Sink",
-          "terrain": "deep",
-          "loot": [],
-          "topic": "rock-and-ruin"
+          "topic": "rock-and-ruin",
+          "vantage": false,
+          "loot": []
         },
         {
           "id": "cold-seep",
           "name": "The Cold Seep",
-          "terrain": "deep",
-          "loot": [],
-          "topic": "fur-and-feather"
+          "topic": "dark-and-distant",
+          "vantage": false,
+          "loot": []
         }
-      ]
+      ],
+      "timeOfDay": "Dusk. You can still see the ground."
     },
     {
       "id": "band-last-mile",
@@ -169,39 +171,40 @@
         {
           "id": "burn-scar",
           "name": "The Burn Scar",
-          "terrain": "open",
+          "topic": "dark-and-distant",
+          "vantage": true,
           "loot": [
             "owls-counsel",
             "fog"
-          ],
-          "topic": "rock-and-ruin"
+          ]
         },
         {
           "id": "gate-9",
-          "name": "Gate 9",
-          "terrain": "mixed",
+          "name": "The Quarry Gate",
+          "topic": "rock-and-ruin",
+          "vantage": false,
           "loot": [
             "congress-of-crows"
-          ],
-          "topic": "forms-and-procedures"
+          ]
         },
         {
           "id": "permit-kiosk",
           "name": "The Permit Kiosk",
-          "terrain": "mixed",
+          "topic": "forms-and-procedures",
+          "vantage": false,
           "loot": [
             "shed-antler"
-          ],
-          "topic": "forms-and-procedures"
+          ]
         },
         {
           "id": "culvert",
           "name": "The Culvert",
-          "terrain": "deep",
-          "loot": [],
-          "topic": "grease-and-gravel"
+          "topic": "rain-and-river",
+          "vantage": false,
+          "loot": []
         }
-      ]
+      ],
+      "timeOfDay": "Full dark. Whatever is out here can see better than you."
     },
     {
       "id": "band-trailhead",
@@ -210,11 +213,12 @@
         {
           "id": "field-station",
           "name": "Field Station — Form 7-B Issued Here",
-          "terrain": "open",
-          "loot": [],
-          "topic": "forms-and-procedures"
+          "topic": "forms-and-procedures",
+          "vantage": true,
+          "loot": []
         }
-      ]
+      ],
+      "timeOfDay": "Dark."
     }
   ]
 }

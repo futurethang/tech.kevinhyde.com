@@ -11,12 +11,11 @@
  */
 
 import type { Rng } from '../core/rng';
-import type { Posture, TeamState, TrapState } from './resolve';
-import type { BandDefinition, LocationDefinition, TerrainType } from './types';
+import type { TeamState, TrapState } from './resolve';
+import type { BandDefinition, LocationDefinition } from './types';
 
 export interface ChoiceContext {
   readonly band: BandDefinition;
-  readonly terrains: ReadonlyMap<string, TerrainType>;
   readonly teamsAlive: number;
   readonly rng: Rng;
 }
@@ -25,7 +24,7 @@ export interface Archetype {
   readonly id: string;
   readonly label: string;
   readonly description: string;
-  choose(team: TeamState, context: ChoiceContext): { locationId: string; posture: Posture };
+  choose(team: TeamState, context: ChoiceContext): { locationId: string };
 }
 
 function lootCount(location: LocationDefinition): number {
@@ -63,7 +62,7 @@ const GREEDY: Archetype = {
   label: 'Greedy',
   description: 'Goes where the power-ups are and comes in loud. Assumes it will win the quiz.',
   choose(_team, { band, rng }) {
-    return { locationId: pickBest(band.locations, lootCount, rng).id, posture: 'hunt' };
+    return { locationId: pickBest(band.locations, lootCount, rng).id };
   },
 };
 
@@ -71,12 +70,10 @@ const CAUTIOUS: Archetype = {
   id: 'cautious',
   label: 'Cautious',
   description: 'Heads for deep cover and hides. Survives early, arrives empty-handed.',
-  choose(_team, { band, terrains, rng }) {
-    const score = (l: LocationDefinition) => {
-      const rule = terrains.get(l.terrain)!.fightRule;
-      return rule === 'never' ? 2 : rule === 'if-hunted' ? 1 : 0;
-    };
-    return { locationId: pickBest(band.locations, score, rng).id, posture: 'hide' };
+  choose(_team, { band, rng }) {
+    // Quiet ground means the places nobody is drawn to: no treasure, no vantage.
+    const score = (l: LocationDefinition) => -lootCount(l) - (l.vantage ? 1 : 0);
+    return { locationId: pickBest(band.locations, score, rng).id };
   },
 };
 
@@ -85,7 +82,7 @@ const CONTRARIAN: Archetype = {
   label: 'Contrarian',
   description: 'Reasons that everyone else chases the loot, so goes where the loot is not.',
   choose(_team, { band, rng }) {
-    return { locationId: pickBest(band.locations, (l) => -lootCount(l), rng).id, posture: 'hide' };
+    return { locationId: pickBest(band.locations, (l) => -lootCount(l), rng).id };
   },
 };
 
@@ -96,12 +93,10 @@ const ADAPTIVE: Archetype = {
   choose(team, context) {
     const strong = team.items.length >= 2;
     if (!strong) return CAUTIOUS.choose(team, context);
-    const { band, terrains, rng } = context;
+    const { band, rng } = context;
     const score = (l: LocationDefinition) =>
-      (terrains.get(l.terrain)!.fightRule === 'always' ? 10 : 0) +
-      lootCount(l) +
-      (team.skillByTopic[l.topic] ?? team.skill);
-    return { locationId: pickBest(band.locations, score, rng).id, posture: 'hunt' };
+      lootCount(l) + (l.vantage ? 1 : 0) + (team.skillByTopic[l.topic] ?? team.skill);
+    return { locationId: pickBest(band.locations, score, rng).id };
   },
 };
 
@@ -111,7 +106,7 @@ const SPECIALIST: Archetype = {
   description: 'Goes wherever the trivia theme is one it reckons it knows, and ignores the treasure.',
   choose(team, { band, rng }) {
     const score = (l: LocationDefinition) => team.skillByTopic[l.topic] ?? team.skill;
-    return { locationId: pickBest(band.locations, score, rng).id, posture: 'hunt' };
+    return { locationId: pickBest(band.locations, score, rng).id };
   },
 };
 
@@ -121,10 +116,7 @@ const RANDOM: Archetype = {
   description: 'Nobody is playing strategically. The true floor.',
   choose(_team, { band, rng }) {
     const ordered = [...band.locations].sort((a, b) => a.id.localeCompare(b.id));
-    return {
-      locationId: ordered[rng.int(ordered.length)]!.id,
-      posture: rng.next() < 0.5 ? 'hunt' : 'hide',
-    };
+    return { locationId: ordered[rng.int(ordered.length)]!.id };
   },
 };
 

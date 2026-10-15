@@ -98,12 +98,7 @@ export function runGame(ruleset: Ruleset, scenario: ScenarioDefinition, seed: nu
     const choices = new Map<string, Choice>();
     for (const team of living) {
       const archetype = getArchetype(team.archetype);
-      const choice = archetype.choose(team, {
-        band,
-        terrains: ruleset.terrains,
-        teamsAlive: living.length,
-        rng,
-      });
+      const choice = archetype.choose(team, { band, teamsAlive: living.length, rng });
       choices.set(team.id, choice);
     }
 
@@ -113,7 +108,7 @@ export function runGame(ruleset: Ruleset, scenario: ScenarioDefinition, seed: nu
         ? placeTraps(band, dead, rules.trapsSetByEachLoser, rng)
         : [];
 
-    const result = resolveBand(map, ruleset.terrains, rules, itemPool, { ...state, traps }, choices, rng);
+    const result = resolveBand(map, rules, itemPool, { ...state, traps }, choices, rng);
     state = result.state;
     rounds.push(result.summary);
   }
@@ -121,6 +116,19 @@ export function runGame(ruleset: Ruleset, scenario: ScenarioDefinition, seed: nu
   const finalists = state.teams.filter((t) => t.alive).map((t) => t.id).sort();
 
   // The finale: everyone left converges on the trailhead. No choice to make.
+  // Before the showdown, every team left draws one card from the chaos pile.
+  if (rules.chaosDrawAtTheTrailhead && finalists.length >= 2) {
+    const drawn = state.teams.map((team) => {
+      if (!team.alive) return team;
+      const good = rng.next() < rules.chanceTheChaosDrawIsGood;
+      if (good) {
+        return { ...team, items: [...team.items, itemPool[rng.int(itemPool.length)]!] };
+      }
+      return { ...team, items: team.items.slice(0, Math.max(0, team.items.length - 1)) };
+    });
+    state = { ...state, teams: Object.freeze(drawn) };
+  }
+
   let finale: RoundSummary | null = null;
   let championId: string | null = finalists[0] ?? null;
   const itemsAtFinale: Record<string, number> = {};
@@ -130,11 +138,10 @@ export function runGame(ruleset: Ruleset, scenario: ScenarioDefinition, seed: nu
   if (finalists.length >= 2) {
     const trailhead = map.bands[map.bands.length - 1]!;
     const choices = new Map<string, Choice>(
-      finalists.map((id) => [id, { locationId: trailhead.locations[0]!.id, posture: 'hunt' as const }]),
+      finalists.map((id) => [id, { locationId: trailhead.locations[0]!.id }]),
     );
     const result = resolveBand(
       map,
-      ruleset.terrains,
       rules,
       itemPool,
       { ...state, band: map.bands.length - 1, traps: [] },
