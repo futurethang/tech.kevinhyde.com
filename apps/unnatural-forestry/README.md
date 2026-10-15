@@ -7,7 +7,35 @@ across a shared map toward trailheads on the perimeter.
 The party is one night, one play, **three rounds**, up to ten teams, and one
 facilitator who only has everyone's attention twice. `DECISIONS.md` holds the
 constraints, what is settled, what is a placeholder, and what the simulator has
-actually measured — read it before changing rules or map shape.
+actually measured — **read it first**.
+
+> **Two designs live here.** `src/forest/` is the current one: a Dark Forest
+> game of secret location choice on a narrowing wedge, converging on a single
+> exit. Run it with `pnpm playtest`. `src/core/` + `src/render/` + `src/ui/` is
+> the superseded hex prototype, kept until the new design settles; it is the
+> thing `pnpm dev` still opens.
+
+## The current design in one command
+
+```bash
+pnpm playtest          # 500 seeded runs of every scenario, with dead-end detection
+pnpm playtest 2000     # more runs
+pnpm playtest 400 narrow-mixed    # one scenario
+```
+
+Its ruleset is entirely JSON, in `src/data/forest/`:
+
+| File | What it holds |
+| --- | --- |
+| `terrain.json` | Whether hiding works, whether loot is rich, whether intel is earned |
+| `items.json` | The four quiz lifelines |
+| `map-*.json` | Bands of named locations, their terrain and visible loot |
+| `rules.json` | The fight model and every penalty, in numbers |
+| `scenarios.json` | Named test nights: team counts, behaviour mixes, rule overrides |
+
+The branching of a round is code (`src/forest/resolve.ts`) because it is
+genuinely conditional logic. Everything that is a *number* is data, because the
+numbers are what decide whether the game works.
 
 This is **not the game**. It is a low-fidelity simulator used to test map
 geometry and the simultaneous-round structure before any components get

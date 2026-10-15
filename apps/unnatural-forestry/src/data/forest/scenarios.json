@@ -1,0 +1,178 @@
+{
+  "_comment": "Named test scenarios. `teams` is a mix of behaviour archetypes, which stand in for how guests might actually play. They are a testing instrument, not a prediction.",
+  "scenarios": [
+    {
+      "id": "full-party-mixed",
+      "name": "Full party — mixed behaviour",
+      "description": "Ten teams, a realistic spread of greedy, cautious, contrarian and adaptive play.",
+      "mapId": "quilsap-wedge",
+      "seed": 20261031,
+      "teams": [
+        {
+          "archetype": "greedy",
+          "count": 3
+        },
+        {
+          "archetype": "cautious",
+          "count": 3
+        },
+        {
+          "archetype": "contrarian",
+          "count": 2
+        },
+        {
+          "archetype": "adaptive",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "id": "all-cautious",
+      "name": "Worst case — everybody hides",
+      "description": "The stall scenario. If every team plays it safe, does the night still produce a finale?",
+      "mapId": "quilsap-wedge",
+      "seed": 7,
+      "teams": [
+        {
+          "archetype": "cautious",
+          "count": 10
+        }
+      ]
+    },
+    {
+      "id": "all-greedy",
+      "name": "Worst case — everybody hunts the loot",
+      "description": "The bloodbath scenario. If everyone chases the same visible power-ups, does the field collapse too early?",
+      "mapId": "quilsap-wedge",
+      "seed": 11,
+      "teams": [
+        {
+          "archetype": "greedy",
+          "count": 10
+        }
+      ]
+    },
+    {
+      "id": "small-party",
+      "name": "Small party — 6 teams",
+      "description": "A smaller gathering on the same wedge. Does the funnel still land on 2-3?",
+      "mapId": "quilsap-wedge",
+      "seed": 20261101,
+      "teams": [
+        {
+          "archetype": "greedy",
+          "count": 2
+        },
+        {
+          "archetype": "cautious",
+          "count": 2
+        },
+        {
+          "archetype": "adaptive",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "id": "random-table",
+      "name": "Drunk table — everybody guesses",
+      "description": "Nobody is playing strategically at all. The true floor.",
+      "mapId": "quilsap-wedge",
+      "seed": 99,
+      "teams": [
+        {
+          "archetype": "random",
+          "count": 10
+        }
+      ]
+    },
+    {
+      "id": "full-party-no-sanctuary",
+      "name": "Full party — deep cover is not a sanctuary",
+      "description": "The same ten teams, but hiding in deep cover no longer makes a team untouchable: a hunter who comes to the same place still finds them.",
+      "mapId": "quilsap-wedge",
+      "seed": 20261031,
+      "teams": [
+        {
+          "archetype": "greedy",
+          "count": 3
+        },
+        {
+          "archetype": "cautious",
+          "count": 3
+        },
+        {
+          "archetype": "contrarian",
+          "count": 2
+        },
+        {
+          "archetype": "adaptive",
+          "count": 2
+        }
+      ],
+      "rules": {
+        "deepCoverIsSanctuary": false
+      }
+    },
+    {
+      "id": "all-cautious-no-sanctuary",
+      "name": "Everybody hides — without the sanctuary",
+      "description": "The stall scenario again, with deep cover downgraded to ordinary quiet ground.",
+      "mapId": "quilsap-wedge",
+      "seed": 7,
+      "teams": [
+        {
+          "archetype": "cautious",
+          "count": 10
+        }
+      ],
+      "rules": {
+        "deepCoverIsSanctuary": false
+      }
+    },
+    {
+      "id": "narrow-mixed",
+      "name": "Tight wedge — mixed behaviour",
+      "description": "Ten teams on the 5/3/2 wedge. Does a narrower board fix the dead rounds?",
+      "mapId": "quilsap-narrow",
+      "seed": 20261031,
+      "teams": [
+        {
+          "archetype": "greedy",
+          "count": 3
+        },
+        {
+          "archetype": "cautious",
+          "count": 3
+        },
+        {
+          "archetype": "contrarian",
+          "count": 2
+        },
+        {
+          "archetype": "adaptive",
+          "count": 2
+        }
+      ],
+      "rules": {
+        "deepCoverIsSanctuary": false
+      }
+    },
+    {
+      "id": "narrow-cautious",
+      "name": "Tight wedge — everybody hides",
+      "description": "The stall scenario on the narrower board, with no sanctuary.",
+      "mapId": "quilsap-narrow",
+      "seed": 20261031,
+      "teams": [
+        {
+          "archetype": "cautious",
+          "count": 10
+        }
+      ],
+      "rules": {
+        "deepCoverIsSanctuary": false
+      }
+    }
+  ]
+}

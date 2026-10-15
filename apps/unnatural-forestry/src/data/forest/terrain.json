@@ -1,0 +1,32 @@
+{
+  "_comment": "Terrain decides whether hiding works. This is the coupling that makes location choice and posture choice one decision instead of two.",
+  "terrains": [
+    {
+      "id": "open",
+      "label": "Open Ground",
+      "description": "Ridge lines, clearcuts, gravel pits. You can see and be seen. You cannot hide here — if anyone else shows up, there is a fight whatever you intended.",
+      "fightRule": "always",
+      "grantsIntel": true,
+      "lootTier": 2,
+      "symbol": "▲"
+    },
+    {
+      "id": "mixed",
+      "label": "Mixed Cover",
+      "description": "Trail, second growth, old roads. A fight happens only if somebody came hunting.",
+      "fightRule": "if-hunted",
+      "grantsIntel": false,
+      "lootTier": 1,
+      "symbol": "≡"
+    },
+    {
+      "id": "deep",
+      "label": "Deep Cover",
+      "description": "Blowdown, fog bog, old growth. Hiding always works here. Nobody finds anybody — and a hunter who comes looking finds nothing and makes noise.",
+      "fightRule": "never",
+      "grantsIntel": false,
+      "lootTier": 0,
+      "symbol": "✶"
+    }
+  ]
+}

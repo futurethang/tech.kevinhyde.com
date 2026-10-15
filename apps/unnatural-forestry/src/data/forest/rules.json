@@ -1,0 +1,19 @@
+{
+  "_comment": "Tunable parameters. The branching of a round is logic and lives in src/forest/resolve.ts; everything that is a number lives here, because the numbers are what decide whether the game works.",
+  "fight": {
+    "_comment": "A fight stands in for the trivia quiz: score = skill + itemEdge x items + uniform(0, luck). Raise skillSpread and the sharpest team wins; raise itemEdge and power-ups decide it; raise luck and anyone can win.",
+    "skillSpread": 3,
+    "itemEdge": 1,
+    "luck": 3
+  },
+  "startingItems": 0,
+  "hunterNoPreyPenalty": 1,
+  "trapPenalty": 1,
+  "trapsPerDeadTeam": 1,
+  "trapsFromRound": 2,
+  "deepCoverIsSanctuary": true,
+  "soloTakesLoot": true,
+  "winnerTakesItems": true,
+  "winnerTakesLoot": true,
+  "targetFinalists": { "min": 2, "max": 3 }
+}

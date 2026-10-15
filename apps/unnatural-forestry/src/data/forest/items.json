@@ -1,0 +1,9 @@
+{
+  "_comment": "Power-ups are quiz lifelines, forest-themed so they make good physical tokens. Deliberately few.",
+  "items": [
+    { "id": "owls-counsel", "name": "Owl's Counsel", "effect": "Remove two wrong answers.", "symbol": "◉" },
+    { "id": "congress-of-crows", "name": "The Congress of Crows", "effect": "Ask the party.", "symbol": "✦" },
+    { "id": "fog", "name": "Fog", "effect": "The other team must answer first.", "symbol": "☁" },
+    { "id": "shed-antler", "name": "Shed Antler", "effect": "Steal their answer after they give it.", "symbol": "⋔" }
+  ]
+}
