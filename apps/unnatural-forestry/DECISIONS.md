@@ -52,7 +52,7 @@ the measurements say cutting it makes the game both simpler and more reliable.)*
 | # | Decision |
 | --- | --- |
 | B1 | **One exit.** Everyone converges on the Trailhead. No perimeter, no choice of destination. |
-| B2 | **The board is a wedge of named places in bands**, narrowing toward the Trailhead. Not a hex grid — moves are not adjacency-constrained, so a tiling would be decoration. Places are named, not coordinates, because people shout names across a room. |
+| B2 | **The board is a valley narrowing to a single road out.** Teams start spread across the wide end, deep in the woods; each round the ground gets tighter; the Trailhead sits on the bottom EDGE of the board, where the road is — a trailhead is by definition where the forest meets a road, so it cannot be surrounded. The valley walls are impassable, so the funnel is the whole board. Not a hex grid. Not a hex grid — moves are not adjacency-constrained, so a tiling would be decoration. Places are named, not coordinates, because people shout names across a room. |
 | B3 | **Moves are secret.** A team tells the Director its location and posture; nothing is placed on the board. The Director reveals everything at the round change. |
 | B4 | **A team may name any location in the next band.** No adjacency. |
 | B5 | **No hunting or hiding.** Cut — it only ever decided *whether* a meeting became a matchup, and that was where every stall came from. One decision a round: where do we go. |
@@ -320,6 +320,7 @@ makes ten teams choose ten different things without being told to.
 | Hunting vs hiding as a second decision each round | One decision: where do we go | F6 — it only decided whether a meeting happened, and that caused every stall. |
 | The winner takes the loser's items | The winner draws one treasure | F10 — taking them compounds into an unbeatable leader. |
 | Teams start empty-handed | Everyone draws three items | B8. |
+| A ring layout with the Trailhead in the middle | A funnel with the Trailhead on the bottom edge | A trailhead is where the forest meets a road. Surrounding it with forest is nonsense. |
 | Terrain decided whether teams met | Terrain holds treasure and carries the trivia theme | B7a — and themes turned out to be the mechanic that spreads the field out. |
 | One flat trivia rating per team | An ability per theme | F13. |
 | 91-hex and 61-hex boards | 8/5/3/1 and 5/3/2/1 wedges | B2. |
