@@ -69,7 +69,7 @@ the measurements say cutting it makes the game both simpler and more reliable.)*
 | B11 | **Items are quiz helpers and hindrances.** A helper makes your own question easier (Owl's Counsel, The Congress of Crows, The Nurse Log Almanac, Shed Antler); a hindrance makes theirs harder (Fog, The Hum, The Lost Page). Seven, all with good tokens. |
 | B12 | **Eliminated teams place hidden traps.** A trap strips one power-up. It never eliminates. |
 | B13 | **Surviving on open ground earns a whisper from the Director** — normally where a trap is, which lets you avoid one. |
-| B14 | **The fight is a trivia quiz.** Known-good at this party. |
+| B14 | **The matchup is a trivia quiz: 4 questions, four-option multiple choice, both teams answering at once in writing. The Trailhead is 5.** Four questions can tie, so tiebreakers are a closest-guess number question. Content requirements are in `QUIZ-BRIEF.md`. |
 | B15 | **No hide tokens.** Hiding is limited by its own cost — you arrive at the Trailhead with nothing — not by a resource. |
 | B16 | **Public information:** the map, every location's terrain and visible loot, how many teams are alive, who died last round. **Private:** your own inventory. **Hidden:** where everyone else is, where they are going, where the traps are. |
 
@@ -106,7 +106,8 @@ edit, not a code change.
 | D8 | **How do teams submit moves?** Proposal: text the Director, so it works across three rooms and the deadline is announceable. |
 | D9 | ~~Should terrain do more than hold treasure?~~ **Decided: it carries the trivia theme.** See B7a and F13. |
 | D11 | ~~Does the Trailhead showdown need its own rules?~~ **Decided: quick, with a chaos element.** See B7b. |
-| D12 | **Which seven themes, and how many questions each?** Seven sets is the writing job. Ten questions each is probably the floor. |
+| D12 | ~~Which seven themes, and how many questions each?~~ **Answered: see `QUIZ-BRIEF.md`.** 12 per theme, 6 tiebreakers, 5 for the Trailhead. |
+| D13 | **Does the Trailhead keep its Forms & Procedures theme?** The brief says the final five should be mixed subjects rather than one theme; the map data still themes the Trailhead. Harmless either way, but worth settling. |
 | D10 | **What stops the field converging on one location?** F9 shows a uniform field wipes itself out. Spread loot evenly (done) and rely on teams reasoning about crowds — but that reasoning is exactly what the archetypes do not model. |
 
 ---
@@ -278,6 +279,20 @@ Ten teams, 800 games:
 
 Six teams: 93% on target, 4% with no showdown. The only flagged problem left in
 normal play is that 3–4%.
+
+### F14 — How many questions the evening needs
+
+Over 5,000 games: about **5.2 matchups** happen on the board, 99% of games have
+7 or fewer, the worst seen was 8. A Trailhead showdown happens in **98%** of
+games. Matchups are 2-way 68% of the time, 3-way 25%, 4-way 6%, 5-way 1%.
+
+The writing ask is set by the per-theme ceiling, not the total, because the
+teams choose where to go and we cannot know in advance which themes will be
+used: a single theme can take up to **4 matchups** in one evening. At 12
+questions a theme that covers 99% of evenings.
+
+Roughly **28%** of 4-question matchups end level, so tiebreakers are a real
+requirement rather than a nicety.
 
 ### F13 — Trivia themes are the best mechanic in the game
 
