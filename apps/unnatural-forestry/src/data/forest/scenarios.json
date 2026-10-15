@@ -3,8 +3,8 @@
   "scenarios": [
     {
       "id": "extraction-mixed",
-      "name": "CURRENT — 10 teams, no postures, 10/7/4",
-      "description": "The current design: one decision a round (where do we go), every meeting is a fight, the quiz decides it.",
+      "name": "CURRENT — 10 teams, mixed play",
+      "description": "The current design: three items each, one decision a round (where do we go), and a trivia matchup wherever two teams land together.",
       "mapId": "quilsap-extraction",
       "seed": 20261031,
       "teams": [
@@ -26,13 +26,13 @@
         }
       ],
       "rules": {
-        "allMeetingsFight": true
+        "everyMeetingIsAMatchup": true
       }
     },
     {
       "id": "extraction-cautious",
       "name": "CURRENT — everybody plays it safe",
-      "description": "The old stall scenario against the current design. Posture is gone, so timidity cannot produce a dead night.",
+      "description": "Worst case: every team avoids the busy places. Does the game still produce a showdown?",
       "mapId": "quilsap-extraction",
       "seed": 20261031,
       "teams": [
@@ -42,13 +42,13 @@
         }
       ],
       "rules": {
-        "allMeetingsFight": true
+        "everyMeetingIsAMatchup": true
       }
     },
     {
       "id": "extraction-greedy",
-      "name": "CURRENT — everybody chases the loot",
-      "description": "The collapse scenario against the current design, with loot spread across each band instead of concentrated.",
+      "name": "CURRENT — everybody chases the treasure",
+      "description": "Worst case: every team goes for the richest spot. Does the field wipe itself out?",
       "mapId": "quilsap-extraction",
       "seed": 20261031,
       "teams": [
@@ -58,13 +58,13 @@
         }
       ],
       "rules": {
-        "allMeetingsFight": true
+        "everyMeetingIsAMatchup": true
       }
     },
     {
       "id": "extraction-small",
       "name": "CURRENT — 6 teams",
-      "description": "A smaller gathering on the same wedge.",
+      "description": "A smaller gathering on the same board.",
       "mapId": "quilsap-extraction",
       "seed": 20261031,
       "teams": [
@@ -82,7 +82,7 @@
         }
       ],
       "rules": {
-        "allMeetingsFight": true
+        "everyMeetingIsAMatchup": true
       }
     },
     {
@@ -195,7 +195,7 @@
         }
       ],
       "rules": {
-        "deepCoverIsSanctuary": false
+        "hidingInDeepCoverAlwaysWorks": false
       }
     },
     {
@@ -211,7 +211,7 @@
         }
       ],
       "rules": {
-        "deepCoverIsSanctuary": false
+        "hidingInDeepCoverAlwaysWorks": false
       }
     },
     {
@@ -239,7 +239,7 @@
         }
       ],
       "rules": {
-        "deepCoverIsSanctuary": false
+        "hidingInDeepCoverAlwaysWorks": false
       }
     },
     {
@@ -255,7 +255,7 @@
         }
       ],
       "rules": {
-        "deepCoverIsSanctuary": false
+        "hidingInDeepCoverAlwaysWorks": false
       }
     },
     {
@@ -283,7 +283,7 @@
         }
       ],
       "rules": {
-        "allMeetingsFight": true
+        "everyMeetingIsAMatchup": true
       }
     },
     {
@@ -311,7 +311,7 @@
         }
       ],
       "rules": {
-        "allMeetingsFight": true
+        "everyMeetingIsAMatchup": true
       }
     },
     {
@@ -327,7 +327,7 @@
         }
       ],
       "rules": {
-        "allMeetingsFight": true
+        "everyMeetingIsAMatchup": true
       }
     }
   ]

@@ -40,30 +40,30 @@ for (const scenario of ruleset.scenarios.values()) {
     .sort(([a], [b]) => Number(a) - Number(b))
     .map(([k, v]) => `${k}→${pct(v / runs)}`)
     .join('  ');
-  console.log(`finalists at the trailhead: ${dist}`);
+  console.log(`teams reaching the Trailhead: ${dist}`);
   console.log(
     `  mean ${stats.finalists.spread.mean.toFixed(2)} · ` +
-      `on target (${rules.targetFinalists.min}-${rules.targetFinalists.max}) ${pct(stats.finalists.inTarget)} · ` +
-      `no finale ${pct(stats.finalists.noFinale)}`,
+      `in the target range of ${rules.targetTeamsAtTheTrailhead.min}-${rules.targetTeamsAtTheTrailhead.max}: ${pct(stats.finalists.inTarget)} · ` +
+      `no final showdown ${pct(stats.finalists.noFinale)}`,
   );
   console.log(
-    `fights per round: ${stats.rounds.fightsPerRound.map((n) => n.toFixed(1)).join(' / ')}` +
-      `   eliminations per round: ${stats.rounds.eliminationsPerRound.map((n) => n.toFixed(1)).join(' / ')}`,
+    `matchups per round: ${stats.rounds.fightsPerRound.map((n) => n.toFixed(1)).join(' / ')}` +
+      `   knocked out per round: ${stats.rounds.eliminationsPerRound.map((n) => n.toFixed(1)).join(' / ')}`,
   );
   console.log(
-    `dead rounds: ${pct(stats.rounds.deadRoundShare)} of rounds, ` +
-      `${pct(stats.rounds.gamesWithDeadRound)} of nights have one`,
+    `rounds where nothing happened: ${pct(stats.rounds.deadRoundShare)} of rounds, ` +
+      `${pct(stats.rounds.gamesWithDeadRound)} of games have one`,
   );
   console.log(
-    `contact: ${pct(stats.contact.teamsInAFight)} of teams fight at least once · ` +
-      `${stats.contact.fightsPerGame.toFixed(1)} fights/night · ` +
-      `${stats.contact.trapsTriggeredPerGame.toFixed(1)} traps sprung/night`,
+    `contact: ${pct(stats.contact.teamsInAFight)} of teams play at least one matchup · ` +
+      `${stats.contact.fightsPerGame.toFixed(1)} matchups per game · ` +
+      `${stats.contact.trapsTriggeredPerGame.toFixed(1)} traps sprung per game`,
   );
   console.log(
-    `champion: ${stats.champion.items.mean.toFixed(1)} items · ` +
-      `had most items ${pct(stats.champion.hadMostItems)} · ` +
-      `had best trivia ${pct(stats.champion.hadBestSkill)} · ` +
-      `never fought ${pct(stats.champion.neverFought)}`,
+    `winner: carried ${stats.champion.items.mean.toFixed(1)} items into the Trailhead · ` +
+      `best equipped ${pct(stats.champion.hadMostItems)} of the time · ` +
+      `sharpest at trivia ${pct(stats.champion.hadBestSkill)} of the time · ` +
+      `never played a matchup ${pct(stats.champion.neverFought)}`,
   );
   const winners = Object.entries(stats.champion.byArchetype)
     .sort(([, a], [, b]) => b - a)
@@ -73,9 +73,9 @@ for (const scenario of ruleset.scenarios.values()) {
 
   const problems = deadEnds(stats, rules);
   if (problems.length === 0) {
-    console.log('dead ends: none detected');
+    console.log('problems: none detected');
   } else {
-    console.log('DEAD ENDS:');
+    console.log('PROBLEMS:');
     for (const p of problems) console.log(`  ! ${p}`);
   }
 }

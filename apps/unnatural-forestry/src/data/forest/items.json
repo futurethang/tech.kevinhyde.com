@@ -1,9 +1,54 @@
 {
-  "_comment": "Power-ups are quiz lifelines, forest-themed so they make good physical tokens. Deliberately few.",
+  "_comment": "Quiz helpers and hindrances. A helper makes your own question easier; a hindrance makes theirs harder. Every team draws three at the start of the game, and the winner of a matchup draws one more. Forest-themed so they make good physical tokens.",
   "items": [
-    { "id": "owls-counsel", "name": "Owl's Counsel", "effect": "Remove two wrong answers.", "symbol": "◉" },
-    { "id": "congress-of-crows", "name": "The Congress of Crows", "effect": "Ask the party.", "symbol": "✦" },
-    { "id": "fog", "name": "Fog", "effect": "The other team must answer first.", "symbol": "☁" },
-    { "id": "shed-antler", "name": "Shed Antler", "effect": "Steal their answer after they give it.", "symbol": "⋔" }
+    {
+      "id": "owls-counsel",
+      "name": "Owl's Counsel",
+      "kind": "helper",
+      "effect": "Two wrong answers are removed from your question.",
+      "symbol": "◉"
+    },
+    {
+      "id": "congress-of-crows",
+      "name": "The Congress of Crows",
+      "kind": "helper",
+      "effect": "Ask the party. You may take the loudest answer or ignore it.",
+      "symbol": "✦"
+    },
+    {
+      "id": "nurse-log-almanac",
+      "name": "The Nurse Log Almanac",
+      "kind": "helper",
+      "effect": "Skip this question and take another.",
+      "symbol": "❧"
+    },
+    {
+      "id": "shed-antler",
+      "name": "Shed Antler",
+      "kind": "helper",
+      "effect": "Hear their answer before you give yours.",
+      "symbol": "⋔"
+    },
+    {
+      "id": "fog",
+      "name": "Fog",
+      "kind": "hindrance",
+      "effect": "They must answer first, out loud, with no conferring.",
+      "symbol": "☁"
+    },
+    {
+      "id": "the-hum",
+      "name": "The Hum",
+      "kind": "hindrance",
+      "effect": "They have ten seconds. Count out loud.",
+      "symbol": "〜"
+    },
+    {
+      "id": "lost-page",
+      "name": "The Lost Page",
+      "kind": "hindrance",
+      "effect": "The Director picks their category.",
+      "symbol": "✂"
+    }
   ]
 }

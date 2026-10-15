@@ -9,9 +9,9 @@ facilitator who only has everyone's attention twice. `DECISIONS.md` holds the
 constraints, what is settled, what is a placeholder, and what the simulator has
 actually measured — **read it first**.
 
-> **Two designs live here.** `src/forest/` is the current one: a Dark Forest
-> game of secret location choice on a narrowing wedge, converging on a single
-> exit. Run it with `pnpm playtest`. `src/core/` + `src/render/` + `src/ui/` is
+> **Two designs live here.** `src/forest/` is the current one: a game of secret
+> location choice on a narrowing board, converging on a single exit, where any
+> two teams that land together play a trivia matchup. Run it with `pnpm playtest`. `src/core/` + `src/render/` + `src/ui/` is
 > the superseded hex prototype, kept until the new design settles; it is the
 > thing `pnpm dev` still opens.
 
@@ -27,11 +27,11 @@ Its ruleset is entirely JSON, in `src/data/forest/`:
 
 | File | What it holds |
 | --- | --- |
-| `terrain.json` | Whether hiding works, whether loot is rich, whether intel is earned |
-| `items.json` | The four quiz lifelines |
-| `map-*.json` | Bands of named locations, their terrain and visible loot |
-| `rules.json` | The fight model and every penalty, in numbers |
-| `scenarios.json` | Named test nights: team counts, behaviour mixes, rule overrides |
+| `terrain.json` | How rich a place is, and whether surviving there earns a whisper from the Director |
+| `items.json` | The quiz helpers and hindrances |
+| `map-*.json` | Bands of named places, their terrain and the treasure lying there |
+| `rules.json` | Every number that decides how the game feels, in plain names |
+| `scenarios.json` | Named test games: team counts, styles of play, rule overrides |
 
 The branching of a round is code (`src/forest/resolve.ts`) because it is
 genuinely conditional logic. Everything that is a *number* is data, because the

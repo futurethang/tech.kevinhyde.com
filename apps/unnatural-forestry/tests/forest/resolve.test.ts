@@ -17,7 +17,7 @@ const terrains = parseTerrains(
 );
 
 const items = parseItems(
-  { items: [{ id: 'lamp', name: 'Lamp', effect: 'x', symbol: 'L' }] },
+  { items: [{ id: 'lamp', name: 'Lamp', kind: 'helper', effect: 'x', symbol: 'L' }] },
   'fixture/items',
 );
 
@@ -45,20 +45,24 @@ const map = parseMap(
 
 const rules = parseRules(
   {
-    fight: { skillSpread: 3, itemEdge: 1, luck: 3 },
-    startingItems: 0,
-    hunterNoPreyPenalty: 1,
-    trapPenalty: 1,
-    trapsPerDeadTeam: 1,
-    trapsFromRound: 2,
-    deepCoverIsSanctuary: true,
-    soloTakesLoot: true,
-    winnerTakesItems: true,
-    winnerTakesLoot: true,
-    targetFinalists: { min: 2, max: 3 },
+    matchup: { triviaSkillRange: 3, helpPerItem: 1, luckRange: 3 },
+    itemsDrawnAtStart: 0,
+    treasureForWinningAMatchup: 0,
+    winnerAlsoTakesTheLosersItems: true,
+    trapsSetByEachLoser: 1,
+    itemsLostToATrap: 1,
+    trapsStartFromRound: 2,
+    aTeamAloneTakesWhatIsLyingThere: true,
+    theWinnerTakesWhatIsLyingThere: true,
+    everyMeetingIsAMatchup: false,
+    hidingInDeepCoverAlwaysWorks: true,
+    itemsLostByHuntingAndFindingNobody: 1,
+    targetTeamsAtTheTrailhead: { min: 2, max: 3 },
   },
   'fixture/rules',
 );
+
+const itemPool = [...items.keys()];
 
 function team(id: string, over: Partial<TeamState> = {}): TeamState {
   return {
@@ -85,7 +89,15 @@ function run(
   seed = 1,
 ) {
   const state: GameState = { band: 0, teams, traps };
-  return resolveBand(map, terrains, { ...rules, ...over }, state, new Map(Object.entries(picks)), createRng(seed));
+  return resolveBand(
+    map,
+    terrains,
+    { ...rules, ...over },
+    itemPool,
+    state,
+    new Map(Object.entries(picks)),
+    createRng(seed),
+  );
 }
 
 const at = (locationId: string, posture: 'hunt' | 'hide'): Choice => ({ locationId, posture });
@@ -120,7 +132,7 @@ describe('the hunt / hide matrix', () => {
     expect(summary.outcomes.find((o) => o.locationId === 'ridge')!.kind).toBe('fight');
   });
 
-  it('never starts a fight in deep cover while it is a sanctuary', () => {
+  it('never starts a matchup in deep cover while hiding there works', () => {
     const { summary } = run([team('a'), team('b'), team('c')], {
       a: at('bog', 'hunt'),
       b: at('bog', 'hide'),
@@ -130,11 +142,11 @@ describe('the hunt / hide matrix', () => {
     expect(summary.eliminated).toEqual([]);
   });
 
-  it('downgrades deep cover to ordinary ground when the sanctuary is switched off', () => {
+  it('turns deep cover into ordinary ground when hiding there is switched off', () => {
     const { summary } = run(
       [team('a'), team('b')],
       { a: at('bog', 'hunt'), b: at('bog', 'hide') },
-      { deepCoverIsSanctuary: false },
+      { hidingInDeepCoverAlwaysWorks: false },
     );
     expect(summary.fights).toBe(1);
   });

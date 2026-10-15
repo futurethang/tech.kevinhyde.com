@@ -33,6 +33,7 @@ export interface GameRecord {
 
 export function buildTeams(scenario: ScenarioDefinition, ruleset: Ruleset, rng: Rng): TeamState[] {
   const rules = mergeRules(ruleset.rules, scenario.rules);
+  const itemPool = [...ruleset.items.keys()].sort();
   const teams: TeamState[] = [];
   let n = 0;
   for (const setup of scenario.teams) {
@@ -43,8 +44,11 @@ export function buildTeams(scenario: ScenarioDefinition, ruleset: Ruleset, rng: 
           id: `t${String(n).padStart(2, '0')}`,
           name: `${getArchetype(setup.archetype).label} ${i + 1}`,
           archetype: setup.archetype,
-          skill: rng.next() * rules.fight.skillSpread,
-          items: Object.freeze(Array.from({ length: rules.startingItems }, () => 'owls-counsel')),
+          skill: rng.next() * rules.matchup.triviaSkillRange,
+          // Everyone draws their starting items at random before the game.
+          items: Object.freeze(
+            Array.from({ length: rules.itemsDrawnAtStart }, () => itemPool[rng.int(itemPool.length)]!),
+          ),
           alive: true,
           locationId: null,
           eliminatedRound: null,
@@ -62,6 +66,7 @@ export function runGame(ruleset: Ruleset, scenario: ScenarioDefinition, seed: nu
   const map = ruleset.maps.get(scenario.mapId)!;
   const rules = mergeRules(ruleset.rules, scenario.rules);
   const rng = createRng(seed);
+  const itemPool = [...ruleset.items.keys()].sort();
 
   let state: GameState = {
     band: 0,
@@ -92,11 +97,11 @@ export function runGame(ruleset: Ruleset, scenario: ScenarioDefinition, seed: nu
 
     const dead = state.teams.filter((t) => !t.alive).map((t) => t.id);
     const traps =
-      bandIndex + 1 >= rules.trapsFromRound && dead.length > 0
-        ? placeTraps(band, dead, rules.trapsPerDeadTeam, rng)
+      bandIndex + 1 >= rules.trapsStartFromRound && dead.length > 0
+        ? placeTraps(band, dead, rules.trapsSetByEachLoser, rng)
         : [];
 
-    const result = resolveBand(map, ruleset.terrains, rules, { ...state, traps }, choices, rng);
+    const result = resolveBand(map, ruleset.terrains, rules, itemPool, { ...state, traps }, choices, rng);
     state = result.state;
     rounds.push(result.summary);
   }
@@ -119,6 +124,7 @@ export function runGame(ruleset: Ruleset, scenario: ScenarioDefinition, seed: nu
       map,
       ruleset.terrains,
       rules,
+      itemPool,
       { ...state, band: map.bands.length - 1, traps: [] },
       choices,
       rng,

@@ -10,7 +10,7 @@ Every entry carries a status:
   not the designer. A placeholder.
 - **OPEN** — not decided. Listed so it cannot be forgotten.
 
-Last updated: 2026-10-15 (second pass: posture under review). The machine-readable version of everything in
+Last updated: 2026-10-15 (third pass: hunting and hiding cut; items, treasure and traps settled). The machine-readable version of everything in
 sections B and C lives in `src/data/forest/*.json`.
 
 ---
@@ -18,7 +18,7 @@ sections B and C lives in `src/data/forest/*.json`.
 ## The game in six sentences
 
 Every team is lost in the same forest, and the Department will issue exactly
-one Form 7-B tonight. Each round, a team secretly tells the Director which
+one Form 7-B togame. Each round, a team secretly tells the Director which
 place it is heading for. The Director reveals all of it at once. If two teams
 end up in the same place there is a trivia duel, and only one team walks away,
 carrying the loser's power-ups. The forest narrows each round, so avoiding
@@ -34,7 +34,7 @@ the measurements say cutting it makes the game both simpler and more reliable.)*
 
 | # | Constraint | Consequence |
 | --- | --- | --- |
-| A1 | Played **exactly once**, at one party. | No iteration across sessions. The simulator exists to find nights that would break, not to balance a product. |
+| A1 | Played **exactly once**, at one party. | No iteration across sessions. The simulator exists to find games that would break, not to balance a product. |
 | A2 | 15–30 guests, teams of 2–3, **up to 10 teams**. | Everything resolves for 10 teams at once. |
 | A3 | **No more than 3 rounds**, then one winning team. | Three secret choices and a finale. |
 | A4 | Attention only in **brief windows** — the explanation and the finale. | Moves are submitted asynchronously while people mingle. |
@@ -55,15 +55,18 @@ the measurements say cutting it makes the game both simpler and more reliable.)*
 | B2 | **The board is a wedge of named places in bands**, narrowing toward the Trailhead. Not a hex grid — moves are not adjacency-constrained, so a tiling would be decoration. Places are named, not coordinates, because people shout names across a room. |
 | B3 | **Moves are secret.** A team tells the Director its location and posture; nothing is placed on the board. The Director reveals everything at the round change. |
 | B4 | **A team may name any location in the next band.** No adjacency. |
-| B5 | ~~**Posture: hunt or hide**~~ — **UNDER REVIEW**, see D3 / F6. |
+| B5 | **No hunting or hiding.** Cut — it only ever decided *whether* a meeting became a matchup, and that was where every stall came from. One decision a round: where do we go. |
 | B6 | **If two teams meet, there is a fight, and only one walks away.** One rule for two teams or five. |
-| B7 | ~~**Terrain decides whether hiding works**~~ — if posture goes, terrain's only mechanical roles are loot richness and intel. See D9. |
-| B8 | ~~**A hunter who finds nobody drops a power-up**~~ — meaningless without posture. |
+| B7 | **Terrain says how rich a place is** — open ground has the best treasure, deep cover has none. It no longer decides whether teams meet. See D9 for whether it should do more. |
+| B8 | **Every team draws three items before the game starts.** Nobody arrives empty-handed, and the first matchup already has something to spend. |
+| B8a | **Win a matchup, draw a treasure. Lose a matchup, you are out and you set a hidden trap.** The symmetry is the whole after-match. |
+| B8b | **The winner does NOT take the loser's items.** Tested both ways — taking them makes the leader unbeatable; see Finding F10. |
+| B8c | **The Director makes ambiguous calls.** The rules do not have to be airtight. Judgement fills the gaps, and that is a feature at a party, not a gap in the design. |
 | B9 | **Loot is visible on the printed map.** It is the bait that makes crowds form; hidden loot would make choices arbitrary. |
 | B10 | **A team alone on a location takes its loot. Teams that merely coexist take nothing.** Hiding is safe and poor. |
-| B11 | **Power-ups are quiz lifelines** — Owl's Counsel, The Congress of Crows, Fog, Shed Antler. Four, with good tokens. |
+| B11 | **Items are quiz helpers and hindrances.** A helper makes your own question easier (Owl's Counsel, The Congress of Crows, The Nurse Log Almanac, Shed Antler); a hindrance makes theirs harder (Fog, The Hum, The Lost Page). Seven, all with good tokens. |
 | B12 | **Eliminated teams place hidden traps.** A trap strips one power-up. It never eliminates. |
-| B13 | **Surviving on open ground earns intel** — one whispered fact from the Director, normally a trap location, which dodges one trap. |
+| B13 | **Surviving on open ground earns a whisper from the Director** — normally where a trap is, which lets you avoid one. |
 | B14 | **The fight is a trivia quiz.** Known-good at this party. |
 | B15 | **No hide tokens.** Hiding is limited by its own cost — you arrive at the Trailhead with nothing — not by a resource. |
 | B16 | **Public information:** the map, every location's terrain and visible loot, how many teams are alive, who died last round. **Private:** your own inventory. **Hidden:** where everyone else is, where they are going, where the traps are. |
@@ -78,8 +81,8 @@ edit, not a code change.
 | # | Placeholder | File |
 | --- | --- | --- |
 | C1 | Band widths **10 / 7 / 4 / 1** (`quilsap-extraction`, the current board) — swept against 800 runs per candidate, see F7. Also `quilsap-wedge` (8/5/3) and `quilsap-narrow` (5/3/2) kept for comparison. Width is the single biggest lever and it depends on whether posture stays. | `map-*.json` |
-| C2 | Fight model `score = skill + itemEdge×items + luck(0..3)`, skill drawn 0..3. `itemEdge` is currently **1**, which makes power-ups decisive; **0.25 is the recommended value** — see F8. | `rules.json` |
-| C7 | `allMeetingsFight` — the switch that removes posture from the game. Currently **false** by default; the `extraction-*` scenarios set it **true**. Flip the default once D3 is decided. | `rules.json` |
+| C2 | A matchup is scored as *how good the team is at trivia* + *what their items are worth* + *the luck of the question*. `helpPerItem` is now **0.25** — see F8 for why. | `rules.json` |
+| C7 | `everyMeetingIsAMatchup` is now **true** by default. The old hunting/hiding rules are still in the code behind the switch, for comparison only. | `rules.json` |
 | C3 | Teams start with **zero** power-ups. | `rules.json` |
 | C4 | A trap strips **1**; a noisy hunter drops **1**; one trap per dead team, from round 2. | `rules.json` |
 | C5 | Target of **2–3 finalists**. My invention, not yours — see **D1**. | `rules.json` |
@@ -92,14 +95,15 @@ edit, not a code change.
 | # | Question |
 | --- | --- |
 | D1 | **How many finalists can the Trailhead examination actually handle?** Everything downstream is tuned to this and it is currently a guess. A six-way quiz may be better theatre than a duel. |
-| D2 | **What is the Trailhead examination?** The night's climax and one of only two attention windows. |
-| D3 | **Does posture stay at all?** The live question. The quiz decides the winner regardless of how a team arrived, so posture's only job is deciding *whether* a fight happens — and that job is where every stall bug comes from. See F6: cutting it is simpler, removes the stall entirely, and lands the funnel on target 92% of the time. |
+| D2 | **What is the Trailhead examination?** The game's climax and one of only two attention windows. |
+| D3 | ~~Does hunting and hiding stay?~~ **Decided: cut.** See F6. |
 | D4 | **How attractive should open ground be?** If nobody can hide there, nobody goes unless the loot justifies it. |
 | D5 | **Does loot replenish between bands, or is the forest picked clean?** |
 | D6 | **Can a team decline a fight it knows it will lose?** |
 | D7 | **What exactly does the board teach without words?** A6 is the hardest constraint and nothing is drawn yet. |
 | D8 | **How do teams submit moves?** Proposal: text the Director, so it works across three rooms and the deadline is announceable. |
-| D9 | **If posture goes, what is terrain for?** It would carry loot richness and intel but nothing else. Option: terrain changes the *flavour of the duel* — sudden death on the ridge, a bonus question in the bog — so it stays meaningful without adding a decision. |
+| D9 | **Should terrain do more than hold treasure?** One option that adds no new decision: terrain changes the *flavour of the matchup* — sudden death on the ridge, a bonus question in the bog, the Director picks the category in the fog. |
+| D11 | **Does the Trailhead showdown need its own rules**, or is it just a bigger matchup with everyone watching? |
 | D10 | **What stops the field converging on one location?** F9 shows a uniform field wipes itself out. Spread loot evenly (done) and rely on teams reasoning about crowds — but that reasoning is exactly what the archetypes do not model. |
 
 ---
@@ -119,16 +123,16 @@ Ten teams, mixed behaviour:
 | Mean finalists | 6.1 | **3.0** |
 | On target (2–3) | 2% | **61%** |
 | Nights with a dead round | 60% | **25%** |
-| Fights per night | 3.6 | 4.4 |
+| Fights per game | 3.6 | 4.4 |
 
 With eight opening locations for ten teams, pigeonhole forces only two
 collisions, and most of those produce no fight because both teams hid. The
-tight wedge fixes the funnel almost entirely. Its one new cost: **8% of nights
+tight wedge fixes the funnel almost entirely. Its one new cost: **8% of games
 end with a single finalist** and therefore no final challenge.
 
 ### F2 — Mutual hiding is a stable, game-ending equilibrium
 
-If every team plays cautiously, **no fight ever happens**: 100% of those nights
+If every team plays cautiously, **no fight ever happens**: 100% of those games
 contain a dead round, and the field finishes with a mean of 6.9–9.3 teams
 standing. The reason is structural, not a tuning accident: two teams that both
 hide never interact, so a whole field of hiders is self-protecting.
@@ -143,11 +147,11 @@ intended.** Posture would then decide the *terms* of the fight — who gets the
 drop — rather than whether it happens at all. That removes the opt-out entirely
 and makes location choice carry all the risk.
 
-### F3 — Power-ups currently decide the night
+### F3 — Power-ups currently decide the game
 
 The champion was the best-equipped team entering the finale in **87–95%** of
 runs, while the sharpest trivia team won only **21–37%**. Under C2's fight
-model the quiz is close to decoration. Lowering `itemEdge` or raising `luck` in
+model the quiz is close to decoration. Lowering what one item is worth or raising `luck` in
 `rules.json` moves this directly, and it is worth deciding how much a lifeline
 *should* be worth before the tokens get made.
 
@@ -155,8 +159,8 @@ model the quiz is close to decoration. Lowering `itemEdge` or raising `luck` in
 
 | Scenario | Finalists | What goes wrong |
 | --- | --- | --- |
-| Everybody hides | mean 9.3 | Nothing happens all night |
-| Everybody hunts the loot | mean 1.6 | **49% of nights have no finale** — the field collapses in round 1 |
+| Everybody hides | mean 9.3 | Nothing happens all game |
+| Everybody hunts the loot | mean 1.6 | **49% of games have no finale** — the field collapses in round 1 |
 | Everybody guesses at random | mean 3.6 | Healthiest of the three |
 
 The greedy collapse is the sharper risk: when everyone converges on the single
@@ -178,7 +182,7 @@ Ten teams, mixed behaviour, 800 runs each:
 | --- | --- | --- |
 | Mean finalists | 5.5–6.1 | **2.5** |
 | Lands on 2–3 finalists | 2–12% | **92%** |
-| A timid field produces a dead night | always | **never** |
+| A timid field produces a dead game | always | **never** |
 
 Posture's only mechanical job was deciding whether a meeting became a fight,
 and that job is where the stall came from. Removing it also removes the second
@@ -208,9 +212,9 @@ their preferred places. Real teams would spread further, so this is conservative
 
 ### F8 — How much a lifeline should be worth
 
-`itemEdge` moves the whole thing, at 800 runs each:
+what one item is worth moves the whole thing, at 800 runs each:
 
-| itemEdge | Champion was best-equipped | Champion was sharpest at trivia |
+| what one item is worth | Champion was best-equipped | Champion was sharpest at trivia |
 | --- | --- | --- |
 | 0 (items do nothing) | 47% | 36% |
 | **0.25** | **74%** | **29%** |
@@ -227,7 +231,7 @@ should be worth to a team that does not know the answer.
 ### F9 — A uniform field still wipes itself out
 
 If every team behaves the same way — all cautious or all greedy — they crowd
-into the same two or three places and **54% of nights end with a single
+into the same two or three places and **54% of games end with a single
 finalist**. Spreading loot evenly across each band (done, in
 `map-quilsap-extraction.json`) helps but does not cure it.
 
@@ -236,6 +240,41 @@ model of crowding, whereas real teams visibly do reason *"everyone's going to
 the Bone Orchard, so let's not."* But it bounds the risk, and it says the
 Director should avoid naming a single obviously-best location when explaining
 the game.
+
+### F10 — The new item rules fixed the biggest remaining problem
+
+Drawing three items at the start, giving the winner a drawn treasure instead of
+the loser's whole inventory, and setting what one item is worth to 0.25:
+
+| | Before | **Now** |
+| --- | --- | --- |
+| Winner was the best-equipped team | 96% | **70%** |
+| Winner was the sharpest at trivia | 19% | **35%** |
+| Wins taken by one style of play | greedy 90%+ | greedy 47%, adaptive 30%, cautious 14%, contrarian 10% |
+
+Taking the loser's whole inventory was the cause: it compounded, so one early
+win made a team unbeatable. A single drawn treasure keeps the reward without
+the runaway.
+
+### F11 — There are no empty rounds
+
+An earlier version of this file reported that half of games contained a round
+where "nothing happened". That was my measurement being wrong, not the game: it
+only counted matchups, and ignored teams collecting treasure and springing
+traps. Counting those too, **0% of rounds are empty** in normal play. The
+Director always has something to read out.
+
+### F12 — Where the current design stands
+
+Ten teams, 800 games:
+
+- **92%** end with 2–3 teams at the Trailhead (mean 2.5)
+- **3%** end with only one team, so no final showdown
+- **100%** of teams play at least one matchup; about 6 matchups per game
+- **0%** empty rounds
+
+Six teams: 93% on target, 4% with no showdown. The only flagged problem left in
+normal play is that 3–4%.
 
 ---
 
@@ -249,6 +288,9 @@ the game.
 | Routes of 3–5 moves; equidistant starts | Three bands and a finale | A3. |
 | Reaching a trailhead qualifies you | Reaching the Trailhead *is* the finale's location | B1. |
 | Hide tokens as a scarce resource | No tokens | B15. |
+| Hunting vs hiding as a second decision each round | One decision: where do we go | F6 — it only decided whether a meeting happened, and that caused every stall. |
+| The winner takes the loser's items | The winner draws one treasure | F10 — taking them compounds into an unbeatable leader. |
+| Teams start empty-handed | Everyone draws three items | B8. |
 | 91-hex and 61-hex boards | 8/5/3/1 and 5/3/2/1 wedges | B2. |
 | "Elimination is a problem to be avoided" | Elimination from round 2 is welcome | A8. |
 

@@ -8,9 +8,10 @@
  * Resolution of one location, in order:
  *   1. A trap here strips items from every team that walked in (intel dodges it).
  *   2. Decide whether there is a fight, from the terrain and the postures.
- *   3. Fight  -> one team emerges, takes the losers' items and the loot.
- *      No fight -> hunters who found nobody drop an item; a team alone takes
- *                  the loot; teams that merely coexisted take nothing.
+ *   3. Matchup -> one team wins, draws a treasure, and takes what was lying
+ *                 there. The losers are out, and each of them sets a trap.
+ *      No matchup -> a team alone takes what was lying there; teams that merely
+ *                 coexisted take nothing.
  *   4. Surviving on open ground earns intel: one trap dodged next round.
  *
  * Pure. Same state, same choices, same seed -> same result. Nothing depends on
@@ -95,20 +96,22 @@ export interface ResolveResult {
   readonly summary: RoundSummary;
 }
 
-/** Trivia stand-in: skill, plus what the power-ups buy, plus the luck of the draw. */
-export function fightScore(team: TeamState, rules: RuleParameters, rng: Rng): number {
-  return team.skill + rules.fight.itemEdge * team.items.length + rng.next() * rules.fight.luck;
+/** Trivia stand-in: how good they are, plus what their items buy, plus luck. */
+export function matchupScore(team: TeamState, rules: RuleParameters, rng: Rng): number {
+  return (
+    team.skill + rules.matchup.helpPerItem * team.items.length + rng.next() * rules.matchup.luckRange
+  );
 }
 
-/** Decides a fight. Ties break on team id so the result is reproducible. */
-export function resolveFight(
+/** Decides a matchup. Ties break on team id so the result is reproducible. */
+export function resolveMatchup(
   teams: readonly TeamState[],
   rules: RuleParameters,
   rng: Rng,
 ): { winnerId: string; scores: ReadonlyMap<string, number> } {
   const ordered = [...teams].sort((a, b) => a.id.localeCompare(b.id));
   const scores = new Map<string, number>();
-  for (const team of ordered) scores.set(team.id, fightScore(team, rules, rng));
+  for (const team of ordered) scores.set(team.id, matchupScore(team, rules, rng));
   let winner = ordered[0]!;
   for (const team of ordered.slice(1)) {
     if (scores.get(team.id)! > scores.get(winner.id)!) winner = team;
@@ -128,6 +131,8 @@ export function resolveBand(
   map: MapDefinition,
   terrains: ReadonlyMap<string, TerrainType>,
   rules: RuleParameters,
+  /** Every item id that can be drawn as treasure. */
+  itemPool: readonly string[],
   state: GameState,
   choices: ReadonlyMap<string, Choice>,
   rng: Rng,
@@ -169,7 +174,15 @@ export function resolveBand(
       posture: choices.get(t.id)!.posture,
     }));
     const terrain = terrains.get(location.terrain)!;
-    const outcome = resolveLocation(location, terrain, present, trapsHere.get(location.id), rules, rng);
+    const outcome = resolveLocation(
+      location,
+      terrain,
+      present,
+      trapsHere.get(location.id),
+      rules,
+      itemPool,
+      rng,
+    );
     outcomes.push(outcome);
     for (const id of outcome.eliminatedIds) eliminated.push(id);
   }
@@ -220,6 +233,7 @@ function resolveLocation(
   present: Arrival[],
   trap: TrapState | undefined,
   rules: RuleParameters,
+  itemPool: readonly string[],
   rng: Rng,
 ): LocationOutcome {
   const teamIds = present.map((a) => a.team.id).sort();
@@ -252,7 +266,7 @@ function resolveLocation(
         continue;
       }
       if (team.items.length > 0) {
-        team.items = drop(team.items, rules.trapPenalty);
+        team.items = drop(team.items, rules.itemsLostToATrap);
         trapped.push(team.id);
       }
     }
@@ -263,9 +277,9 @@ function resolveLocation(
   const hunterSet = new Set(hunters);
   // With postures removed, any meeting is a fight. Otherwise, with sanctuary
   // off, deep cover stops being an opt-out and behaves like mixed cover.
-  const effectiveRule = rules.allMeetingsFight
+  const effectiveRule = rules.everyMeetingIsAMatchup
     ? 'always'
-    : terrain.fightRule === 'never' && !rules.deepCoverIsSanctuary
+    : terrain.fightRule === 'never' && !rules.hidingInDeepCoverAlwaysWorks
       ? 'if-hunted'
       : terrain.fightRule;
   const fight =
@@ -275,16 +289,20 @@ function resolveLocation(
   const intelEarned: string[] = [];
 
   if (fight) {
-    const { winnerId } = resolveFight(present.map((a) => a.team), rules, rng);
+    const { winnerId } = resolveMatchup(present.map((a) => a.team), rules, rng);
     const winner = present.find((a) => a.team.id === winnerId)!.team;
     const losers = present.filter((a) => a.team.id !== winnerId).map((a) => a.team);
     const spoils: string[] = [];
     for (const loser of losers) {
-      if (rules.winnerTakesItems) spoils.push(...loser.items);
+      if (rules.winnerAlsoTakesTheLosersItems) spoils.push(...loser.items);
       loser.items = [];
     }
-    const loot = rules.winnerTakesLoot ? [...location.loot] : [];
-    winner.items = [...winner.items, ...spoils, ...loot];
+    const loot = rules.theWinnerTakesWhatIsLyingThere ? [...location.loot] : [];
+    // Win a matchup, draw a treasure.
+    const treasure = Array.from({ length: rules.treasureForWinningAMatchup }, () =>
+      itemPool[rng.int(itemPool.length)]!,
+    );
+    winner.items = [...winner.items, ...spoils, ...loot, ...treasure];
     winner.fightsWon += 1;
     winner.fightsSurvived += 1;
     if (terrain.grantsIntel) intelEarned.push(winner.id);
@@ -306,13 +324,13 @@ function resolveLocation(
   for (const { team } of present) {
     if (!hunterSet.has(team.id)) continue;
     if (team.items.length === 0) continue;
-    team.items = drop(team.items, rules.hunterNoPreyPenalty);
+    team.items = drop(team.items, rules.itemsLostByHuntingAndFindingNobody);
     noisy.push(team.id);
   }
 
   let lootTakenBy: string | null = null;
   let lootTaken: string[] = [];
-  if (present.length === 1 && rules.soloTakesLoot && location.loot.length > 0) {
+  if (present.length === 1 && rules.aTeamAloneTakesWhatIsLyingThere && location.loot.length > 0) {
     const team = present[0]!.team;
     lootTaken = [...location.loot];
     team.items = [...team.items, ...lootTaken];

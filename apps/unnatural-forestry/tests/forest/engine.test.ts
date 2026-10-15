@@ -89,11 +89,18 @@ describe('batch statistics', () => {
     }
   });
 
-  it('measures the champion inventory entering the finale, not after it', () => {
-    // After the finale the winner holds everyone's items, so a mean equal to the
-    // whole field's inventory would mean we measured the wrong moment.
-    const totalItems = records[0]!.teams.reduce((sum, t) => sum + t.items.length, 0);
-    expect(stats.champion.items.mean).toBeLessThan(totalItems);
+  it('records what the winner carried INTO the Trailhead, not what it left with', () => {
+    // The winner draws a treasure for winning at the Trailhead, so the recorded
+    // figure must be the smaller one. Measuring after would overstate it.
+    let sawAGain = false;
+    for (const record of records) {
+      if (record.championId === null || record.finale === null) continue;
+      const champion = record.teams.find((t) => t.id === record.championId)!;
+      const entering = record.itemsAtFinale[champion.id]!;
+      expect(entering).toBeLessThanOrEqual(champion.items.length);
+      if (entering < champion.items.length) sawAGain = true;
+    }
+    expect(sawAGain).toBe(true);
   });
 
   it('names dead ends as plain strings', () => {

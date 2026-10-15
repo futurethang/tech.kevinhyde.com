@@ -1,20 +1,27 @@
 {
-  "_comment": "Tunable parameters. The branching of a round is logic and lives in src/forest/resolve.ts; everything that is a number lives here, because the numbers are what decide whether the game works.",
-  "fight": {
-    "_comment": "A fight stands in for the trivia quiz: score = skill + itemEdge x items + uniform(0, luck). Raise skillSpread and the sharpest team wins; raise itemEdge and power-ups decide it; raise luck and anyone can win.",
-    "skillSpread": 3,
-    "itemEdge": 1,
-    "luck": 3
+  "_comment": "Every number that decides how the game feels. The branching of a round is logic and lives in src/forest/resolve.ts; the numbers live here.",
+
+  "matchup": {
+    "_comment": "A matchup is the trivia duel. The simulator scores it as: how good the team is at trivia, plus what their items are worth, plus the luck of which question came up. Raise triviaSkillRange and the sharpest team usually wins. Raise helpPerItem and the items decide it instead. Raise luckRange and anyone can win on the night.",
+    "triviaSkillRange": 3,
+    "helpPerItem": 0.25,
+    "luckRange": 3
   },
-  "startingItems": 0,
-  "hunterNoPreyPenalty": 1,
-  "trapPenalty": 1,
-  "trapsPerDeadTeam": 1,
-  "trapsFromRound": 2,
-  "allMeetingsFight": false,
-  "deepCoverIsSanctuary": true,
-  "soloTakesLoot": true,
-  "winnerTakesItems": true,
-  "winnerTakesLoot": true,
-  "targetFinalists": { "min": 2, "max": 3 }
+
+  "itemsDrawnAtStart": 3,
+  "treasureForWinningAMatchup": 1,
+  "winnerAlsoTakesTheLosersItems": false,
+
+  "trapsSetByEachLoser": 1,
+  "itemsLostToATrap": 1,
+  "trapsStartFromRound": 2,
+
+  "aTeamAloneTakesWhatIsLyingThere": true,
+  "theWinnerTakesWhatIsLyingThere": true,
+
+  "everyMeetingIsAMatchup": true,
+  "hidingInDeepCoverAlwaysWorks": false,
+  "itemsLostByHuntingAndFindingNobody": 1,
+
+  "targetTeamsAtTheTrailhead": { "min": 2, "max": 3 }
 }

@@ -28,13 +28,13 @@ export interface BatchStats {
     readonly noFinale: number;
   };
   readonly rounds: {
-    /** Mean fights in each round of choice, outermost band first. */
+    /** Mean matchups in each round, outermost band first. */
     readonly fightsPerRound: readonly number[];
     /** Mean eliminations in each round. */
     readonly eliminationsPerRound: readonly number[];
-    /** Share of rounds across all games in which no fight happened at all. */
+    /** Share of rounds across all games in which no matchup happened at all. */
     readonly deadRoundShare: number;
-    /** Share of games containing at least one dead round. */
+    /** Share of games containing at least one round where nothing happened. */
     readonly gamesWithDeadRound: number;
   };
   readonly champion: {
@@ -50,9 +50,9 @@ export interface BatchStats {
     readonly byArchetype: Readonly<Record<string, number>>;
   };
   readonly contact: {
-    /** Mean share of teams that were in at least one fight. */
+    /** Mean share of teams that played at least one matchup. */
     readonly teamsInAFight: number;
-    /** Mean fights per game, including the finale. */
+    /** Mean matchups per game, including the one at the Trailhead. */
     readonly fightsPerGame: number;
     readonly trapsTriggeredPerGame: number;
   };
@@ -86,6 +86,9 @@ export function summarize(records: readonly GameRecord[], rules: RuleParameters)
     eliminationsPerRound.push(spread(rows.map((r) => r!.eliminated.length)).mean);
   }
 
+  // A round only counts as "nothing happened" if there was no matchup AND
+  // nobody sprang a trap AND nobody picked anything up. A round where teams
+  // quietly collect treasure still gives the Director something to read out.
   let deadRounds = 0;
   let totalRounds = 0;
   let gamesWithDeadRound = 0;
@@ -93,7 +96,10 @@ export function summarize(records: readonly GameRecord[], rules: RuleParameters)
     let hasDead = false;
     for (const round of record.rounds) {
       totalRounds += 1;
-      if (round.fights === 0) {
+      const somethingHappened =
+        round.fights > 0 ||
+        round.outcomes.some((o) => o.trapTriggeredOn.length > 0 || o.lootTaken.length > 0);
+      if (!somethingHappened) {
         deadRounds += 1;
         hasDead = true;
       }
@@ -145,7 +151,7 @@ export function summarize(records: readonly GameRecord[], rules: RuleParameters)
     trapsPerGame.push(traps);
   }
 
-  const { min, max } = rules.targetFinalists;
+  const { min, max } = rules.targetTeamsAtTheTrailhead;
   return Object.freeze({
     games,
     teams,
@@ -183,47 +189,47 @@ export function summarize(records: readonly GameRecord[], rules: RuleParameters)
 export function deadEnds(stats: BatchStats, rules: RuleParameters): string[] {
   const pct = (v: number) => `${Math.round(v * 100)}%`;
   const found: string[] = [];
-  const { min, max } = rules.targetFinalists;
+  const { min, max } = rules.targetTeamsAtTheTrailhead;
 
   if (stats.finalists.noFinale > 0.02) {
     found.push(
-      `NO FINALE: ${pct(stats.finalists.noFinale)} of nights end with fewer than two teams at the trailhead.`,
+      `NO FINALE: ${pct(stats.finalists.noFinale)} of games end with fewer than two teams at the Trailhead.`,
     );
   }
   if (stats.finalists.inTarget < 0.6) {
     found.push(
-      `FUNNEL OFF TARGET: only ${pct(stats.finalists.inTarget)} of nights land on ${min}-${max} finalists ` +
+      `FUNNEL OFF TARGET: only ${pct(stats.finalists.inTarget)} of games end with ${min}-${max} finalists ` +
         `(mean ${stats.finalists.spread.mean.toFixed(1)}, range ${stats.finalists.spread.min}-${stats.finalists.spread.max}).`,
     );
   }
   if (stats.rounds.gamesWithDeadRound > 0.15) {
     found.push(
-      `DEAD ROUND: ${pct(stats.rounds.gamesWithDeadRound)} of nights contain a round where no fight happens — ` +
-        `the party gathers for the reveal and nothing is revealed.`,
+      `DEAD ROUND: ${pct(stats.rounds.gamesWithDeadRound)} of games contain a round where no matchup happens — ` +
+        `the party gathers for the reveal and nothing happens.`,
     );
   }
   if (stats.contact.teamsInAFight < 0.6) {
     found.push(
-      `NO CONTACT: only ${pct(stats.contact.teamsInAFight)} of teams ever get into a fight — ` +
-        `most guests never experience the head-to-head.`,
+      `NO CONTACT: only ${pct(stats.contact.teamsInAFight)} of teams ever get into a matchup — ` +
+        `most guests never play a head-to-head.`,
     );
   }
   if (stats.champion.hadMostItems > 0.85) {
     found.push(
-      `ITEMS DECIDE: the champion carried the most power-ups in ${pct(stats.champion.hadMostItems)} of nights — ` +
-        `the quiz is decoration.`,
+      `ITEMS DECIDE: the winner carried the most items in ${pct(stats.champion.hadMostItems)} of games — ` +
+        `the quiz barely matters.`,
     );
   }
   if (stats.champion.hadBestSkill > 0.7) {
     found.push(
-      `SKILL DECIDES: the sharpest trivia team won ${pct(stats.champion.hadBestSkill)} of nights — ` +
-        `the map is decoration.`,
+      `SKILL DECIDES: the sharpest trivia team won ${pct(stats.champion.hadBestSkill)} of games — ` +
+        `the map barely matters.`,
     );
   }
   if (stats.champion.neverFought > 0.4) {
     found.push(
-      `COWARD WINS: the champion reached the finale without a single fight in ${pct(stats.champion.neverFought)} of nights — ` +
-        `hiding all evening is a winning line.`,
+      `COWARD WINS: the winner reached the Trailhead without a single matchup in ${pct(stats.champion.neverFought)} of games — ` +
+        `avoiding everybody all evening is a winning strategy.`,
     );
   }
   return found;

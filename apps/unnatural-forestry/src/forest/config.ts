@@ -16,7 +16,7 @@ import {
 } from '../core/validate';
 import type {
   BandDefinition,
-  FightModel,
+  MatchupModel,
   ItemDefinition,
   LocationDefinition,
   MapDefinition,
@@ -51,6 +51,7 @@ export function parseItems(raw: unknown, path = 'items.json'): Map<string, ItemD
     return Object.freeze({
       id: str(o.id, `${p}.id`),
       name: str(o.name, `${p}.name`),
+      kind: oneOf(o.kind, `${p}.kind`, ['helper', 'hindrance'] as const),
       effect: str(o.effect, `${p}.effect`),
       symbol: str(o.symbol, `${p}.symbol`),
     }) satisfies ItemDefinition;
@@ -105,33 +106,65 @@ export function parseMap(
   });
 }
 
-function parseFightModel(raw: unknown, path: string): FightModel {
+function parseMatchupModel(raw: unknown, path: string): MatchupModel {
   const o = obj(raw, path);
   return Object.freeze({
-    skillSpread: num(o.skillSpread, `${path}.skillSpread`),
-    itemEdge: num(o.itemEdge, `${path}.itemEdge`),
-    luck: num(o.luck, `${path}.luck`),
+    triviaSkillRange: num(o.triviaSkillRange, `${path}.triviaSkillRange`),
+    helpPerItem: num(o.helpPerItem, `${path}.helpPerItem`),
+    luckRange: num(o.luckRange, `${path}.luckRange`),
   });
 }
 
 export function parseRules(raw: unknown, path = 'rules.json'): RuleParameters {
   const o = obj(raw, path);
-  const target = obj(o.targetFinalists, `${path}.targetFinalists`);
+  const target = obj(o.targetTeamsAtTheTrailhead, `${path}.targetTeamsAtTheTrailhead`);
   return Object.freeze({
-    fight: parseFightModel(o.fight, `${path}.fight`),
-    startingItems: int(o.startingItems, `${path}.startingItems`),
-    hunterNoPreyPenalty: int(o.hunterNoPreyPenalty, `${path}.hunterNoPreyPenalty`),
-    trapPenalty: int(o.trapPenalty, `${path}.trapPenalty`),
-    trapsPerDeadTeam: int(o.trapsPerDeadTeam, `${path}.trapsPerDeadTeam`),
-    trapsFromRound: int(o.trapsFromRound, `${path}.trapsFromRound`),
-    allMeetingsFight: optBool(o.allMeetingsFight, `${path}.allMeetingsFight`, false),
-    deepCoverIsSanctuary: optBool(o.deepCoverIsSanctuary, `${path}.deepCoverIsSanctuary`, true),
-    soloTakesLoot: optBool(o.soloTakesLoot, `${path}.soloTakesLoot`, true),
-    winnerTakesItems: optBool(o.winnerTakesItems, `${path}.winnerTakesItems`, true),
-    winnerTakesLoot: optBool(o.winnerTakesLoot, `${path}.winnerTakesLoot`, true),
-    targetFinalists: Object.freeze({
-      min: int(target.min, `${path}.targetFinalists.min`),
-      max: int(target.max, `${path}.targetFinalists.max`),
+    matchup: parseMatchupModel(o.matchup, `${path}.matchup`),
+
+    itemsDrawnAtStart: int(o.itemsDrawnAtStart, `${path}.itemsDrawnAtStart`),
+    treasureForWinningAMatchup: int(
+      o.treasureForWinningAMatchup,
+      `${path}.treasureForWinningAMatchup`,
+    ),
+    winnerAlsoTakesTheLosersItems: optBool(
+      o.winnerAlsoTakesTheLosersItems,
+      `${path}.winnerAlsoTakesTheLosersItems`,
+      false,
+    ),
+
+    trapsSetByEachLoser: int(o.trapsSetByEachLoser, `${path}.trapsSetByEachLoser`),
+    itemsLostToATrap: int(o.itemsLostToATrap, `${path}.itemsLostToATrap`),
+    trapsStartFromRound: int(o.trapsStartFromRound, `${path}.trapsStartFromRound`),
+
+    aTeamAloneTakesWhatIsLyingThere: optBool(
+      o.aTeamAloneTakesWhatIsLyingThere,
+      `${path}.aTeamAloneTakesWhatIsLyingThere`,
+      true,
+    ),
+    theWinnerTakesWhatIsLyingThere: optBool(
+      o.theWinnerTakesWhatIsLyingThere,
+      `${path}.theWinnerTakesWhatIsLyingThere`,
+      true,
+    ),
+
+    everyMeetingIsAMatchup: optBool(
+      o.everyMeetingIsAMatchup,
+      `${path}.everyMeetingIsAMatchup`,
+      true,
+    ),
+    hidingInDeepCoverAlwaysWorks: optBool(
+      o.hidingInDeepCoverAlwaysWorks,
+      `${path}.hidingInDeepCoverAlwaysWorks`,
+      false,
+    ),
+    itemsLostByHuntingAndFindingNobody: int(
+      o.itemsLostByHuntingAndFindingNobody,
+      `${path}.itemsLostByHuntingAndFindingNobody`,
+    ),
+
+    targetTeamsAtTheTrailhead: Object.freeze({
+      min: int(target.min, `${path}.targetTeamsAtTheTrailhead.min`),
+      max: int(target.max, `${path}.targetTeamsAtTheTrailhead.max`),
     }),
   });
 }
@@ -142,8 +175,11 @@ export function mergeRules(base: RuleParameters, over?: Partial<RuleParameters>)
   return Object.freeze({
     ...base,
     ...over,
-    fight: Object.freeze({ ...base.fight, ...(over.fight ?? {}) }),
-    targetFinalists: Object.freeze({ ...base.targetFinalists, ...(over.targetFinalists ?? {}) }),
+    matchup: Object.freeze({ ...base.matchup, ...(over.matchup ?? {}) }),
+    targetTeamsAtTheTrailhead: Object.freeze({
+      ...base.targetTeamsAtTheTrailhead,
+      ...(over.targetTeamsAtTheTrailhead ?? {}),
+    }),
   });
 }
 

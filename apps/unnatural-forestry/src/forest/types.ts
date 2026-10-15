@@ -33,7 +33,9 @@ export interface TerrainType {
 export interface ItemDefinition {
   readonly id: string;
   readonly name: string;
-  /** What it does in the quiz, in plain words. Flavour for the token. */
+  /** A helper makes your own question easier; a hindrance makes theirs harder. */
+  readonly kind: 'helper' | 'hindrance';
+  /** What it does in the quiz, in plain words. Printed on the token. */
   readonly effect: string;
   readonly symbol: string;
 }
@@ -60,55 +62,55 @@ export interface MapDefinition {
 }
 
 /**
- * How a fight is decided. The real thing is a trivia quiz; this is a stand-in
- * that lets us ask whether items decide everything or whether knowing the
+ * How a matchup is decided. The real thing is a trivia duel; this is a stand-in
+ * that lets us ask whether the items decide everything or whether knowing the
  * answers still matters.
  *
- *   score = skill + itemEdge x items + uniform(0, luck)
+ *   score = how good they are at trivia + what their items are worth + luck
  */
-export interface FightModel {
-  /** Width of the per-team trivia-ability draw. Bigger = team skill matters more. */
-  readonly skillSpread: number;
-  /** Score added per item carried. Bigger = power-ups decide fights. */
-  readonly itemEdge: number;
-  /** Width of the per-question luck draw. Bigger = anyone can win. */
-  readonly luck: number;
+export interface MatchupModel {
+  /** How much team-to-team trivia ability varies. Bigger = skill matters more. */
+  readonly triviaSkillRange: number;
+  /** What one item is worth. Bigger = the items decide it. */
+  readonly helpPerItem: number;
+  /** How much the luck of the question matters. Bigger = anyone can win. */
+  readonly luckRange: number;
 }
 
 export interface RuleParameters {
-  readonly fight: FightModel;
-  /** Items a team starts with. */
-  readonly startingItems: number;
-  /** Items a hunter drops when it finds nobody to fight. */
-  readonly hunterNoPreyPenalty: number;
+  readonly matchup: MatchupModel;
+
+  /** Items every team draws, at random, before the game starts. */
+  readonly itemsDrawnAtStart: number;
+  /** Treasure drawn by the team that wins a matchup. */
+  readonly treasureForWinningAMatchup: number;
+  /** Whether the winner also keeps everything the loser was carrying. */
+  readonly winnerAlsoTakesTheLosersItems: boolean;
+
+  /** Traps laid by each team as it goes out. */
+  readonly trapsSetByEachLoser: number;
   /** Items a trap strips from each team that walks into it. */
-  readonly trapPenalty: number;
-  /** Traps each eliminated team may place, per round. */
-  readonly trapsPerDeadTeam: number;
-  /** From which round (1-based) the dead may start placing traps. */
-  readonly trapsFromRound: number;
+  readonly itemsLostToATrap: number;
+  /** The round from which traps are in play (1-based). */
+  readonly trapsStartFromRound: number;
+
+  /** Whether a team alone somewhere picks up what is lying there. */
+  readonly aTeamAloneTakesWhatIsLyingThere: boolean;
+  /** Whether the winner of a matchup picks up what is lying there. */
+  readonly theWinnerTakesWhatIsLyingThere: boolean;
+
   /**
-   * When true, posture is removed from the game entirely: any two teams that
-   * pick the same location meet and fight, whatever the terrain. The quiz
-   * decides everything, which is what the quiz was always going to do. Set it
-   * to compare the two-decision game against the one-decision game.
+   * When true there is no hunting or hiding: any two teams in the same place
+   * have a matchup. When false, terrain and posture decide whether they meet.
    */
-  readonly allMeetingsFight: boolean;
-  /**
-   * When true, deep cover ("never") is an absolute sanctuary: no fight can
-   * happen there, so a team that wants to avoid all contact can do so with
-   * certainty. When false, deep cover is merely quiet ground and behaves like
-   * mixed cover — a fight happens if anybody there came hunting.
-   */
-  readonly deepCoverIsSanctuary: boolean;
-  /** Whether a lone team on a location picks up its visible loot. */
-  readonly soloTakesLoot: boolean;
-  /** Whether the winner of a fight takes the losers' items. */
-  readonly winnerTakesItems: boolean;
-  /** Whether the winner of a fight also takes the location's loot. */
-  readonly winnerTakesLoot: boolean;
-  /** Target band of finalists, used only to report dead ends. */
-  readonly targetFinalists: { readonly min: number; readonly max: number };
+  readonly everyMeetingIsAMatchup: boolean;
+  /** Only read when `everyMeetingIsAMatchup` is false. */
+  readonly hidingInDeepCoverAlwaysWorks: boolean;
+  /** Only read when `everyMeetingIsAMatchup` is false. */
+  readonly itemsLostByHuntingAndFindingNobody: number;
+
+  /** How many teams we want to reach the Trailhead. Used to report problems. */
+  readonly targetTeamsAtTheTrailhead: { readonly min: number; readonly max: number };
 }
 
 export interface TeamSetup {
