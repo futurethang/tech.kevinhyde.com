@@ -4,6 +4,9 @@ A development tool for prototyping a physical Halloween party game: teams of
 woodland animals, lost in a Pacific Northwest forest, moving one hex per round
 across a shared map toward trailheads on the perimeter.
 
+**Start with `STATE-OF-PLAY.md`** — it is the handoff document and covers the
+game, the board, production status and what is left to do.
+
 The party is one night, one play, **three rounds**, up to ten teams, and one
 facilitator who only has everyone's attention twice. `DECISIONS.md` holds the
 constraints, what is settled, what is a placeholder, and what the simulator has

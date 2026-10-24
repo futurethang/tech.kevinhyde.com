@@ -10,6 +10,8 @@ Every entry carries a status:
   not the designer. A placeholder.
 - **OPEN** — not decided. Listed so it cannot be forgotten.
 
+See `STATE-OF-PLAY.md` for the current handoff summary.
+
 Last updated: 2026-10-15 (third pass: hunting and hiding cut; items, treasure and traps settled). The machine-readable version of everything in
 sections B and C lives in `src/data/forest/*.json`.
 
