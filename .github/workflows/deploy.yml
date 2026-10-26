@@ -36,6 +36,22 @@ jobs:
       - name: Build showcase site
         run: pnpm --filter=site build
 
+      # apps-manifest.json is the registry, but site/src/pages/index.astro
+      # imports it, so it is compiled into the HTML and never served as a
+      # file. kevinhyde.com's /lab reads it over HTTP at build time, so
+      # publish a copy. The filtering happens here, where the rules live:
+      # slots and templates are scaffolding, and an `idea` has no app at
+      # /apps/<slug>/ to link to yet.
+      - name: Publish the apps registry
+        run: |
+          node -e '
+            const manifest = require("./apps-manifest.json");
+            const apps = manifest.apps.filter(
+              (a) => !/^(slot-|_template)/.test(a.slug) && a.status !== "idea",
+            );
+            require("fs").writeFileSync("dist/apps.json", JSON.stringify({ apps }, null, 2) + "\n");
+          '
+
       - name: Build all apps with Turbo
         run: pnpm turbo build --filter='./apps/*'
 
