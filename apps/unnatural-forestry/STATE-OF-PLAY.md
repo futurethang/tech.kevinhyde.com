@@ -223,6 +223,7 @@ explaining the game, do not point at one obviously-best place.**
 | `STATE-OF-PLAY.md` | This file |
 | `DECISIONS.md` | Every decision with its status — fixed / settled / provisional / open — plus measured findings and a superseded table |
 | `QUIZ-BRIEF.md` | The content brief for the quiz master. Standalone |
+| `QUIZ-RESEARCH-PROMPT.md` | Copy-paste prompt for a research agent to generate the 58 questions |
 | `ART-PROMPTS.md` | Image-generation prompts for the map, and what to do by hand |
 | `README.md` | Developer orientation for the simulator |
 
@@ -300,7 +301,8 @@ files at the root of `src/data/`, not `src/data/forest/`), `src/data/maps/`,
    Highest-value visual fix; the game's main decision depends on it.
 2. **Typeset the board**: 21 place names, theme labels, legend, title block, the
    Department's marginalia.
-3. **Gather the questions** from `QUIZ-BRIEF.md`.
+3. **Gather the questions** — paste `QUIZ-RESEARCH-PROMPT.md` into a research
+   agent; `QUIZ-BRIEF.md` is the human-facing version of the same ask.
 4. **Make the tokens**: 7 item types, trap markers, the chaos pile.
 5. **Write the Director's script.**
 6. **Clean the repo** per section 7.

@@ -16,6 +16,7 @@ where only one walks away. Three rounds, then a final showdown at the Trailhead.
 | [`STATE-OF-PLAY.md`](STATE-OF-PLAY.md) | Where everything stands. Read first |
 | [`DECISIONS.md`](DECISIONS.md) | Every decision with its status, the measured findings, and what was tried and rejected |
 | [`QUIZ-BRIEF.md`](QUIZ-BRIEF.md) | The content brief for the quiz master. Standalone |
+| [`QUIZ-RESEARCH-PROMPT.md`](QUIZ-RESEARCH-PROMPT.md) | Copy-paste prompt for a research agent to generate the questions |
 | [`ART-PROMPTS.md`](ART-PROMPTS.md) | Image-generation prompts for the printed map |
 
 ---
