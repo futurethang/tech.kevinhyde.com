@@ -78,8 +78,16 @@
 
 html, body { height: 100%; }
 
+html {
+  overscroll-behavior: none;
+  touch-action: manipulation;
+}
+
 body {
   margin: 0;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
   font-family: var(--sans);
   background: var(--mat);
   color: var(--ink);
@@ -97,7 +105,7 @@ body {
   inset: 0;
   perspective: 1700px;
   perspective-origin: 50% 42%;
-  transform-style: preserve-3d;
+  transform-style: flat;
   touch-action: none;
   background:
     /* cm grid */
@@ -111,6 +119,9 @@ body {
 }
 
 .stage.flat { perspective: none; }
+
+.stage ::selection { background: transparent; }
+.stage img, .stage svg { -webkit-user-drag: none; user-drag: none; }
 
 .stage::after {
   /* mat sheen, keeps the surface from reading as flat colour */
@@ -128,16 +139,17 @@ body {
   left: 50%;
   top: 50%;
   transform-style: preserve-3d;
-  will-change: auto;
+  will-change: transform;
   cursor: grab;
+  touch-action: none;
   user-select: none;
   -webkit-user-select: none;
+  -webkit-touch-callout: none;
   --lift: 0;      /* 0 flat on the mat … 1 fully lifted */
   --bow: 0;       /* degrees of bend in the sheet */
 }
 
 .sheet.dragging { cursor: grabbing; pointer-events: none; }
-.sheet.active { will-change: transform; }
 .sheet:focus { outline: none; }
 
 .bow {
@@ -155,7 +167,6 @@ body {
   background: var(--paper);
   border-radius: 1px 2px 1px 2px;
   overflow: hidden;
-  backface-visibility: hidden;
   box-shadow:
     /* contact shadow: tight and dark when down, gone when lifted */
     0 calc(1px + var(--lift) * 2px) calc(2px + var(--lift) * 3px)
@@ -278,7 +289,7 @@ body {
     0 0 0 1px var(--magenta);
 }
 
-.sheet:focus-visible .face { box-shadow:
+body:not(.pointing) .sheet:focus-visible .face { box-shadow:
     0 2px 3px rgb(0 0 0 / 0.2),
     inset 0 0 0 1px var(--paper-edge),
     0 0 0 2px var(--cyan),
@@ -306,8 +317,8 @@ body {
   border-bottom: 2px solid var(--magenta);
 }
 .sheet.selected .handle,
-.sheet:focus-visible .handle { opacity: 1; }
-.handle:focus-visible { opacity: 1; outline: 2px solid var(--cyan); outline-offset: 2px; }
+body:not(.pointing) .sheet:focus-visible .handle { opacity: 1; }
+body:not(.pointing) .handle:focus-visible { opacity: 1; outline: 2px solid var(--cyan); outline-offset: 2px; }
 
 /* ───────── focus (inspect) mode ───────── */
 
@@ -530,3 +541,15 @@ body {
 }
 
 [hidden] { display: none !important; }
+
+.hud .swap {
+  pointer-events: auto;
+  display: inline-block;
+  margin-top: 7px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--cyan);
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--cyan) 45%, transparent);
+}
+.hud .swap:hover { border-bottom-color: var(--cyan); }

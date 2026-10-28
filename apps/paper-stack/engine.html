@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="description" content="Paper Stack, engine build: every print is a real deformable sheet solved with XPBD and rendered in WebGL2.">
+<meta name="theme-color" content="#b4bcb6">
+<title>Paper Stack Engine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="engine.css">
+</head>
+<body>
+
+<div id="scene">
+  <canvas id="gl" aria-label="A pile of prints on a cutting mat, simulated as deformable sheets"></canvas>
+</div>
+
+<div class="nogl" id="nogl" hidden>
+  <h2>This device has no WebGL2</h2>
+  <p>The engine build needs it for the paper simulation. The transform build
+     does the same job with CSS and runs anywhere.</p>
+  <a href="./index.html">Open the transform build</a>
+</div>
+
+<header class="hud">
+  <h1>Paper Stack</h1>
+  <p>Drag a print and the rest of the sheet follows, because it is actually
+     being solved. Pinch to turn and resize. Double-tap to inspect. Hold Alt
+     to slide one underneath.</p>
+  <a class="swap" href="./index.html">Compare with the CSS transform build &rarr;</a>
+</header>
+
+<ul class="mirror" id="mirror" aria-label="Prints in this collection"></ul>
+
+<aside class="lab" id="lab" aria-label="Simulation lab">
+  <div class="lab-head">
+    <strong>Engine</strong>
+    <span class="fps" id="awake">12 live</span>
+    <span class="fps" id="fps">idle</span>
+    <button class="lab-toggle" id="lab-toggle" aria-expanded="true" aria-controls="lab-body" title="Collapse">&ndash;</button>
+  </div>
+
+  <div class="lab-body" id="lab-body">
+    <fieldset>
+      <legend>Paper stock</legend>
+      <div class="row"><label for="c-bend">Bend &middot; &times;10&#8315;&#8309;</label><output>3.5</output>
+        <input id="c-bend" data-cfg="bend" type="range" min="0.2" max="40" step="0.2"></div>
+      <div class="row"><label for="c-stretch">Stretch &middot; &times;10&#8315;&#8310;</label><output>0.0</output>
+        <input id="c-stretch" data-cfg="stretch" type="range" min="0" max="20" step="0.5"></div>
+      <div class="row"><label for="c-gravity">Gravity</label><output>2400</output>
+        <input id="c-gravity" data-cfg="gravity" type="range" min="200" max="9000" step="100"></div>
+      <div class="row"><label for="c-drag">Air damping</label><output>0.90</output>
+        <input id="c-drag" data-cfg="drag" type="range" min="0.1" max="6" step="0.1"></div>
+      <div class="row"><label for="c-autoFlatten">Settle flat</label><output>0.60</output>
+        <input id="c-autoFlatten" data-cfg="autoFlatten" type="range" min="0" max="1" step="0.05"></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Solver</legend>
+      <div class="row"><label for="c-substeps">Substeps</label><output>4</output>
+        <input id="c-substeps" data-cfg="substeps" type="range" min="1" max="10" step="1"></div>
+      <div class="row"><label for="c-iters">Iterations</label><output>10</output>
+        <input id="c-iters" data-cfg="iters" type="range" min="1" max="16" step="1"></div>
+      <div class="row"><label for="c-lift">Lift height</label><output>120</output>
+        <input id="c-lift" data-cfg="lift" type="range" min="10" max="420" step="5"></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Light</legend>
+      <div class="row"><label for="c-light">Key angle</label><output>38</output>
+        <input id="c-light" data-cfg="light" type="range" min="0" max="72" step="1"></div>
+      <div class="row"><label for="c-shadow">Shadow strength</label><output>0.60</output>
+        <input id="c-shadow" data-cfg="shadow" type="range" min="0" max="0.9" step="0.02"></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Where a drop lands</legend>
+      <select id="c-drop" aria-label="Drop behaviour">
+        <option value="top">Top of the pile</option>
+        <option value="under">Under the sheet it touches</option>
+        <option value="bottom">Bottom of the pile</option>
+      </select>
+    </fieldset>
+
+    <fieldset>
+      <legend>Stack order &middot; top first</legend>
+      <ul class="zlist" id="zlist"></ul>
+    </fieldset>
+
+    <fieldset>
+      <legend>Pile</legend>
+      <div class="btns">
+        <button id="act-shuffle" type="button">Shuffle</button>
+        <button id="act-tidy" type="button">Square up</button>
+        <button id="act-spread" type="button">Contact sheet</button>
+        <button id="act-drop" type="button">Drop it</button>
+        <button id="act-reset" type="button">Reset</button>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Keyboard</legend>
+      <dl class="keys">
+        <dt>Tab</dt><dd>opens the print list</dd>
+        <dt>Arrows</dt><dd>move the selected print</dd>
+        <dt>, .</dt><dd>rotate</dd>
+        <dt>- =</dt><dd>resize</dd>
+        <dt>[ ]</dt><dd>back / forward one layer</dd>
+        <dt>Enter</dt><dd>inspect</dd>
+      </dl>
+    </fieldset>
+  </div>
+</aside>
+
+<p class="sr" id="live" role="status" aria-live="polite"></p>
+
+<script src="art.js"></script>
+<script src="engine.js"></script>
+</body>
+</html>

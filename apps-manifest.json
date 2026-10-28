@@ -3,11 +3,11 @@
     {
       "slug": "paper-stack",
       "name": "Paper Stack",
-      "description": "Kinetic gallery prototype \u2014 a messy pile of prints you lift, lean, pinch and restack, with a live lab for tuning the paper feel",
+      "description": "Kinetic gallery prototype \u2014 a pile of prints simulated as real deformable paper in WebGL, with a CSS-transform build alongside it to compare",
       "type": "static",
       "status": "wip",
       "createdAt": "2026-10-28",
-      "tags": ["ui-experiment", "interaction", "animation", "3d", "portfolio"]
+      "tags": ["ui-experiment", "interaction", "webgl", "physics", "3d", "portfolio"]
     },
     {
       "slug": "jam-book",
