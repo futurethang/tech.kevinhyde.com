@@ -3,7 +3,7 @@
     {
       "slug": "paper-stack",
       "name": "Paper Stack",
-      "description": "Kinetic gallery prototype \u2014 a pile of prints simulated as real deformable paper in WebGL, with a CSS-transform build alongside it to compare",
+      "description": "Kinetic gallery prototype \u2014 a messy pile of prints you lift, turn, resize and restack, with a WebGL physics build alongside it for comparison",
       "type": "static",
       "status": "wip",
       "createdAt": "2026-10-28",

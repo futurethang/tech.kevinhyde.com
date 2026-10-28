@@ -17,22 +17,45 @@ so comparing them compares the rendering approach and nothing else.
 | Stacking | `z-index` from an ordered array | resting height from the same array |
 | Accessibility | native: every sheet is a focusable element | a DOM mirror beside the canvas |
 | Runs on | anything | anything with WebGL2 |
+| Verdict | **shipped** | research, kept for reference |
 
-## Recommendation
+## Verdict: ship the transform build
 
-**Ship the engine build as the experience and keep the transform build as
-the fallback.** That is the arrangement in the repo now: `engine.html`
-detects WebGL2 and hands off to `index.html` when it is missing, and the
-two are linked from each other's HUD.
+Both builds were used side by side. **The transform build wins**, and it is
+what `index.html` serves. The engine build stays in the repo as recorded
+research, not as the plan.
 
-This reverses the recommendation in the first draft of this document, which
-argued for DOM-first on the grounds that a portfolio needs crisp,
-selectable, accessible content. That argument was right about the
-requirement and wrong about the remedy. The requirement is met by keeping
-real DOM content beside the canvas — the accessible mirror — rather than by
-giving up the simulation. And the simulation turns out to matter more than
-expected: once a sheet genuinely droops when you lift it by a corner, the
-faked version reads as a card with a drop shadow.
+The engine is right in principle and wrong in practice. Its sheets do
+genuinely droop, and that single moment is better than anything CSS can
+fake. But under sustained real use they crumple, and a sheet that creases
+and *stays* creased is worse than a rectangle that never creases at all.
+The failure mode is unbounded: the longer you play, the worse the pile
+looks. The transform build's failure mode is that a sheet is a bit too
+stiff, which nobody notices.
+
+The second reason is that the transform build feels web-native in a way the
+canvas does not. Double-tap to inspect, a visible resize handle, a visible
+rotate handle, real focus, real text — these land because they are the
+platform's own idioms rather than reimplementations of them. The CSS build
+nods at the material physics (lift, lean, bend, crooked landing, layered
+shadow) without claiming to be a simulation, and that turns out to be the
+right amount of physics for a gallery.
+
+### A note on how the engine was verified
+
+The engine was checked with scripted drags in headless Chromium, which
+measured constraint strain and reported zero violations after a release.
+That verification was too narrow: one drag path, settling immediately. It
+did not reproduce the crumpling that shows up within a minute of actual
+use, and this document previously recommended the engine on the strength of
+it. Synthetic gesture tests are good at catching a regression in a code
+path and bad at judging whether something feels right.
+
+Fixing it properly would mean bending constraints that resist folding
+rather than just stretching (a dihedral-angle formulation, not a
+two-apart distance), self-collision so sheets cannot pass through each
+other, and a plastic-deformation limit so a crease is bounded. That is a
+real project, not a tuning pass.
 
 ## What the transform build taught, and where it stopped
 
@@ -112,7 +135,8 @@ Tab, gates it.
 
 ## What the engine build cost to get right
 
-Four bugs, each worth recording because none was obvious.
+Four bugs, each worth recording because none was obvious — and none of
+them was the one that actually sank it, which was the crumpling above.
 
 **XPBD compliance is not a 0–1 dial.** The solver compares
 `alpha = compliance / h²` against the sum of inverse masses. At a 4 ms

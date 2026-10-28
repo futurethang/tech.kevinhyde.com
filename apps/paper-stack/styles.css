@@ -298,23 +298,62 @@ body:not(.pointing) .sheet:focus-visible .face { box-shadow:
 
 .handle {
   position: absolute;
-  right: -12px; bottom: -12px;
-  width: 30px; height: 30px;
+  width: 32px; height: 32px;
   padding: 0;
   border: 0;
   background: none;
-  cursor: nwse-resize;
   opacity: 0;
   transition: opacity 140ms ease;
   touch-action: none;
+  display: grid;
+  place-items: center;
 }
-.handle::after {
+
+.handle.resize {
+  right: -13px; bottom: -13px;
+  cursor: nwse-resize;
+}
+.handle.resize::after {
   content: "";
-  position: absolute;
-  right: 9px; bottom: 9px;
   width: 11px; height: 11px;
+  margin: 5px 5px 0 0;
   border-right: 2px solid var(--magenta);
   border-bottom: 2px solid var(--magenta);
+}
+
+/* Rotate rides the top-right corner and turns with the sheet, so the
+   affordance always points the same way relative to the paper. */
+.handle.rotate {
+  right: -15px; top: -15px;
+  cursor: grab;
+}
+.handle.rotate:active { cursor: grabbing; }
+.handle.rotate svg {
+  width: 17px; height: 17px;
+  display: block;
+  fill: none;
+  stroke: var(--magenta);
+  stroke-width: 2.1;
+  stroke-linecap: round;
+  filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.25));
+}
+
+/* Degrees, shown on the mat beside the sheet while you turn it. */
+.angle {
+  position: absolute;
+  left: 50%; top: 50%;
+  z-index: 7500;
+  transform: translate(-50%, -50%);
+  padding: 3px 7px;
+  border-radius: 2px;
+  background: var(--magenta);
+  color: #fff;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  pointer-events: none;
+  white-space: nowrap;
 }
 .sheet.selected .handle,
 body:not(.pointing) .sheet:focus-visible .handle { opacity: 1; }

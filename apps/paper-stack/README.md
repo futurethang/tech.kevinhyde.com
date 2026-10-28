@@ -4,17 +4,18 @@ A kinetic gallery prototype. Every piece is printed on a virtual sheet of
 paper lying on a cutting mat. Sheets lift, droop, land crooked, slide under
 each other, and can be pinched to any size and angle.
 
-Two builds, same twelve prints, so you can feel the difference:
+Two builds, same twelve prints:
 
-- **`engine.html`** — the real one. WebGL2 with an XPBD solver, so each
-  sheet is a deformable surface. Lift one by a corner and the far end
-  actually hangs.
-- **`index.html`** — the fallback. DOM elements and CSS 3D transforms.
-  Runs anywhere, keeps every sheet a focusable element, fakes the bend.
+- **`index.html`** — the one to use. DOM elements and CSS 3D transforms.
+  Nods at the material physics without claiming to simulate it, and feels
+  web-native: double-tap to inspect, visible resize and rotate handles,
+  real focus, real text.
+- **`engine.html`** — WebGL2 with an XPBD solver, kept as recorded
+  research. Sheets genuinely droop, and they also genuinely crumple under
+  sustained use, which is why it is not the one to use.
 
-The engine build hands off to the transform build when WebGL2 is missing.
-[APPROACHES.md](./APPROACHES.md) has the comparison, the recommendation and
-the bugs worth remembering.
+[APPROACHES.md](./APPROACHES.md) has the comparison, the verdict and the
+bugs worth remembering.
 
 ## Try it
 
@@ -25,9 +26,11 @@ Static app, no build step, no dependencies. Open either file, or visit
 
 | Gesture | What happens |
 | --- | --- |
-| Drag | Lifts the sheet; the rest of it follows under gravity |
-| Release | Lands and settles, then goes to the top of the pile |
-| Pinch (two fingers) | Scales and rotates |
+| Drag | Lifts the sheet, which leans into the motion and bends slightly |
+| Release | Lands with momentum and a little crooked, then goes to the top |
+| Pinch (two fingers) | Scales and rotates at once |
+| Corner handle, bottom right | Drag to resize |
+| Corner handle, top right | Drag to rotate; hold Shift to snap to 15° |
 | Double-tap / double-click | Inspect, without disturbing the stack |
 | Hold Alt while dropping | Slides the sheet *under* whatever is beneath the pointer |
 | Tab | Opens the print list — the keyboard path and the screen-reader path |
@@ -36,14 +39,11 @@ Static app, no build step, no dependencies. Open either file, or visit
 ## The lab panel
 
 Both builds are tunable while you use them, which is the point of a
-prototype. The engine build exposes the solver directly: bending and
-stretch compliance, gravity, air damping, substeps, iterations, lift
-height, key-light angle and shadow strength. Bending compliance is the
-paper-stock dial — around 1 is card, 30 is tissue.
-
-The header reads `n live` — how many sheets the solver is actually
-integrating. It should say `0 live` whenever you are not touching
-anything.
+prototype. The transform build exposes the hand feel: lift height, tilt
+into motion, bend while held, spring stiffness and damping, release carry
+and landing mess, plus toggles for each part of the paper model so every
+effect can be judged on its own. The engine build exposes the solver
+instead.
 
 ## How it works
 

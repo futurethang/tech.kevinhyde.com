@@ -93,7 +93,11 @@ function buildSheets() {
         `<div class="caption"><span class="t">${p.t}</span>` +
         `<span class="s">${p.med} · Ed. ${p.ed} · ${p.mm[0]}×${p.mm[1]} mm · ${p.gsm} gsm</span></div>` +
       `</div></div>` +
-      `<button class="handle" tabindex="-1" aria-label="Resize and rotate ${p.t}"></button>`;
+      `<button class="handle resize" data-role="resize" tabindex="-1" aria-label="Resize ${p.t}"></button>` +
+      `<button class="handle rotate" data-role="rotate" tabindex="-1" aria-label="Rotate ${p.t}">` +
+        `<svg viewBox="0 0 24 24" aria-hidden="true">` +
+          `<path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4.2V10h-5.8"/>` +
+        `</svg></button>`;
 
     const s = {
       id, el, piece: p, bw: w, bh: h,
@@ -416,7 +420,7 @@ stage.addEventListener('pointerdown', (e) => {
   if (focusedId && focusedId !== s.id) exitFocus();
   if (document.activeElement !== el) el.focus({ preventScroll: true });
 
-  if (handleEl) { beginHandle(s, e); return; }
+  if (handleEl) { beginHandle(s, e, handleEl.dataset.role); return; }
   beginGrip(s, e);
 }, { passive: false });
 
@@ -526,7 +530,7 @@ window.addEventListener('pointermove', (e) => {
   }
 
   if (g && g.mode === 'handle') {
-    moveHandle(s, g, p);
+    moveHandle(s, g, p, e.shiftKey || g.shift);
   }
 }, { passive: true });
 
@@ -569,6 +573,7 @@ function endPointer(e) {
   s.tyT = 0;
 
   const moved = (g.travel || 0) > 6;
+  if (g.mode === 'handle') hideAngle();
 
   if (g.mode !== 'handle' && !reduced && moved) {
     s.vx = (g.vx || 0) * cfg.fling;
@@ -597,14 +602,21 @@ function endPointer(e) {
 window.addEventListener('pointerup', endPointer, { passive: true });
 window.addEventListener('pointercancel', endPointer, { passive: true });
 
-/* ───────────────────── corner handle: scale + rotate ───────────────────── */
+/* ───────────── corner handles: one resizes, one rotates ─────────────
+ * Both ride the sheet's corners, so they turn with it. Rotation is about
+ * the sheet's own centre and follows the pointer's angle, with Shift
+ * snapping to 15° the way this gesture behaves everywhere else.
+ */
 
-function beginHandle(s, e) {
+const angleBadge = document.getElementById('angle');
+
+function beginHandle(s, e, role) {
   const p = stagePoint(e);
   live2.set(e.pointerId, { id: s.id, x: p.x, y: p.y });
   const g = {
     ids: [e.pointerId],
     mode: 'handle',
+    role: role === 'rotate' ? 'rotate' : 'resize',
     scale0: s.scale,
     rot0: s.rot,
     d0: Math.max(16, Math.hypot(p.x - s.x, p.y - s.y)),
@@ -615,20 +627,44 @@ function beginHandle(s, e) {
   s.dragging = true;
   s.el.classList.add('dragging');
   s.el.style.zIndex = Z.drag;
-  s.liftT = 0.55;
+  // a quarter lift: enough to read as picked up, not so much that the sheet
+  // slides out from under the handle being held
+  s.liftT = 0.4;
+  if (g.role === 'rotate') showAngle(s);
   wake(s);
 }
 
-function moveHandle(s, g, p) {
-  const d = Math.max(16, Math.hypot(p.x - s.x, p.y - s.y));
-  const a = Math.atan2(p.y - s.y, p.x - s.x);
-  if (g.shift) {
-    s.rot = g.rot0 + ((a - g.a0) * 180) / Math.PI;
+function moveHandle(s, g, p, snap) {
+  if (g.role === 'rotate') {
+    const a = Math.atan2(p.y - s.y, p.x - s.x);
+    let deg = g.rot0 + ((a - g.a0) * 180) / Math.PI;
+    if (snap) deg = Math.round(deg / 15) * 15;
+    s.rot = deg;
+    showAngle(s);
   } else {
+    const d = Math.max(16, Math.hypot(p.x - s.x, p.y - s.y));
     s.scale = clamp(g.scale0 * (d / g.d0), 0.3, 2.6);
   }
   wake(s);
 }
+
+/** Live degrees on the mat above the sheet, wrapped to a readable range. */
+function showAngle(s) {
+  if (!angleBadge) return;
+  let deg = s.rot % 360;
+  if (deg > 180) deg -= 360;
+  if (deg < -180) deg += 360;
+  angleBadge.textContent = `${deg > 0 ? '+' : ''}${Math.round(deg)}\u00b0`;
+  // clear the sheet's *rotated* bounding box, so the badge stays above the
+  // paper at every angle rather than sliding across it
+  const rad = (s.rot * Math.PI) / 180;
+  const half = (Math.abs(s.w * Math.sin(rad)) + Math.abs(s.h * Math.cos(rad))) * s.scale / 2;
+  angleBadge.style.transform =
+    `translate(calc(-50% + ${s.x.toFixed(1)}px), calc(-50% + ${(s.y - half - 22).toFixed(1)}px))`;
+  angleBadge.hidden = false;
+}
+
+function hideAngle() { if (angleBadge) angleBadge.hidden = true; }
 
 window.addEventListener('keydown', (e) => {
   if (e.key === 'Alt') altDown = true;
@@ -739,8 +775,8 @@ stage.addEventListener('keydown', (e) => {
     case 'ArrowRight': s.x += nudge; break;
     case 'ArrowUp': s.y -= nudge; break;
     case 'ArrowDown': s.y += nudge; break;
-    case ',': s.rot -= e.shiftKey ? 1 : 5; break;
-    case '.': s.rot += e.shiftKey ? 1 : 5; break;
+    case ',': s.rot -= e.shiftKey ? 1 : 5; flashAngle(s); break;
+    case '.': s.rot += e.shiftKey ? 1 : 5; flashAngle(s); break;
     case '-': case '_': s.scale = clamp(s.scale - 0.06, 0.3, 2.6); break;
     case '=': case '+': s.scale = clamp(s.scale + 0.06, 0.3, 2.6); break;
     case '[': nudgeOrder(s.id, -1); break;
@@ -757,6 +793,14 @@ stage.addEventListener('keydown', (e) => {
     wake(s);
   }
 });
+
+let angleTimer = 0;
+/** The same badge, briefly, when the rotation came from the keyboard. */
+function flashAngle(s) {
+  showAngle(s);
+  clearTimeout(angleTimer);
+  angleTimer = setTimeout(hideAngle, 900);
+}
 
 function nudgeOrder(id, dir) {
   const at = order.indexOf(id);
