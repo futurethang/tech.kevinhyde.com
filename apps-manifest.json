@@ -1,6 +1,15 @@
 {
   "apps": [
     {
+      "slug": "paper-stack",
+      "name": "Paper Stack",
+      "description": "Kinetic gallery prototype \u2014 a messy pile of prints you lift, lean, pinch and restack, with a live lab for tuning the paper feel",
+      "type": "static",
+      "status": "wip",
+      "createdAt": "2026-10-28",
+      "tags": ["ui-experiment", "interaction", "animation", "3d", "portfolio"]
+    },
+    {
       "slug": "jam-book",
       "name": "Jam Book",
       "description": "Bluegrass song catalog and ChordPro chart reader — set the key and capo together and the chart shows the shapes you actually play",

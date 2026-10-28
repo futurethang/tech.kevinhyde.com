@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="description" content="A kinetic gallery prototype: a messy pile of prints you can lift, turn, resize and restack.">
+<meta name="theme-color" content="#b4bcb6">
+<title>Paper Stack</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="app">
+  <div class="stage" id="stage" aria-label="A pile of prints on a cutting mat">
+    <div class="scrim" id="scrim" aria-hidden="true"></div>
+  </div>
+
+  <header class="hud">
+    <h1>Paper Stack</h1>
+    <p>Drag a print to lift it. Pinch to turn and resize. Double-tap to inspect. Hold Alt to slide one underneath.</p>
+  </header>
+
+  <aside class="lab" id="lab" aria-label="Simulation lab">
+    <div class="lab-head">
+      <strong>Lab</strong>
+      <span class="fps" id="fps">idle</span>
+      <button class="lab-toggle" id="lab-toggle" aria-expanded="true" aria-controls="lab-body" title="Collapse">&ndash;</button>
+    </div>
+
+    <div class="lab-body" id="lab-body">
+      <fieldset>
+        <legend>Hand feel</legend>
+        <div class="row"><label for="c-lift">Lift height</label><output>58</output>
+          <input id="c-lift" data-cfg="lift" type="range" min="0" max="140" step="2"></div>
+        <div class="row"><label for="c-tilt">Tilt into motion</label><output>16</output>
+          <input id="c-tilt" data-cfg="tilt" type="range" min="0" max="34" step="1"></div>
+        <div class="row"><label for="c-bow">Bend while held</label><output>7</output>
+          <input id="c-bow" data-cfg="bow" type="range" min="0" max="18" step="1"></div>
+        <div class="row"><label for="c-stiff">Spring stiffness</label><output>200</output>
+          <input id="c-stiff" data-cfg="stiff" type="range" min="60" max="440" step="10"></div>
+        <div class="row"><label for="c-damp">Damping</label><output>22</output>
+          <input id="c-damp" data-cfg="damp" type="range" min="6" max="46" step="1"></div>
+        <div class="row"><label for="c-fling">Release carry</label><output>0.86</output>
+          <input id="c-fling" data-cfg="fling" type="range" min="0" max="1" step="0.02"></div>
+        <div class="row"><label for="c-mess">Mess on landing</label><output>4.5</output>
+          <input id="c-mess" data-cfg="mess" type="range" min="0" max="16" step="0.5"></div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Paper model</legend>
+        <label class="check"><input data-cfg="persp" type="checkbox"> Shared perspective</label>
+        <label class="check"><input data-cfg="sheen" type="checkbox"> Directional sheen</label>
+        <label class="check"><input data-cfg="curl" type="checkbox"> Corner curl</label>
+        <label class="check"><input data-cfg="texture" type="checkbox"> Paper grain</label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Where a drop lands</legend>
+        <select data-cfg="drop" id="c-drop" aria-label="Drop behaviour">
+          <option value="top">Top of the pile</option>
+          <option value="under">Under the sheet it touches</option>
+          <option value="bottom">Bottom of the pile</option>
+        </select>
+      </fieldset>
+
+      <fieldset>
+        <legend>Stack order · top first</legend>
+        <ul class="zlist" id="zlist"></ul>
+      </fieldset>
+
+      <fieldset>
+        <legend>Pile</legend>
+        <div class="btns">
+          <button id="act-shuffle" type="button">Shuffle</button>
+          <button id="act-tidy" type="button">Square up</button>
+          <button id="act-spread" type="button">Contact sheet</button>
+          <button id="act-reset" type="button">Reset</button>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Keyboard</legend>
+        <dl class="keys">
+          <dt>Tab</dt><dd>step through prints</dd>
+          <dt>Arrows</dt><dd>move (Shift = 1 px)</dd>
+          <dt>, .</dt><dd>rotate</dd>
+          <dt>- =</dt><dd>resize</dd>
+          <dt>[ ]</dt><dd>back / forward one layer</dd>
+          <dt>Home</dt><dd>bring to top</dd>
+          <dt>Enter</dt><dd>inspect</dd>
+        </dl>
+      </fieldset>
+    </div>
+  </aside>
+
+  <p class="sr" id="live" role="status" aria-live="polite"></p>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
