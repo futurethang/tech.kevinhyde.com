@@ -61,7 +61,7 @@
   function setMeta(c, text) { c.metaEl.textContent = text; }
 
   function refreshArmed() {
-    var n = CUES.filter(function (c) { return !!c.buffer; }).length;
+    var n = CUES.filter(function (c) { return !!(c.buffer || c.bytes); }).length;
     armedEl.innerHTML = n === 0
       ? "No clips loaded yet"
       : "<b>" + n + "</b> of " + CUES.length + " pads armed";
@@ -75,6 +75,15 @@
   var playing = {};   // pad id -> the voice currently held by that pad
   var voices = [];    // every live voice, however it was started
 
+  /*
+   * Nothing may build the audio graph before the viewer has pressed something.
+   * A context constructed during page load starts `suspended` under every
+   * browser's autoplay policy, and while Chrome wakes it on the first gesture,
+   * Safari does not reliably wake one that was born outside a gesture. So the
+   * clips are only FETCHED at load; the context, and decoding with it, waits
+   * for the first press. That is also why decodeAudioData isn't called here:
+   * it needs a context, and asking for one is the thing we are deferring.
+   */
   function audio() {
     if (!ctx) {
       var AC = window.AudioContext || window.webkitAudioContext;
@@ -86,25 +95,65 @@
       bus.gain.value = 1;               // ramp can duck the whole board at once
       bus.connect(master);
       master.connect(ctx.destination);
+      unlock();
     }
     if (ctx.state === "suspended") { ctx.resume(); }
     return ctx;
   }
 
+  // Run once, inside the gesture that created the context: wake it, push a
+  // silent buffer through (what iOS wants before it will pass audio), and
+  // decode everything already fetched so later pads fire without a wait.
+  function unlock() {
+    if (ctx.state === "suspended") { ctx.resume(); }
+    try {
+      var tick = ctx.createBufferSource();
+      tick.buffer = ctx.createBuffer(1, 1, ctx.sampleRate);
+      tick.connect(ctx.destination);
+      tick.start(0);
+    } catch (e) { /* not fatal — the pads still decode and play */ }
+    CUES.forEach(function (c) { if (c.bytes) { decodeCue(c); } });
+  }
+
   function decode(arrayBuffer) {
-    audio();
-    if (!ctx) { return Promise.reject(new Error("no audio")); }
+    if (!ctx) { return Promise.reject(new Error("no audio context yet")); }
     return new Promise(function (resolve, reject) {
       var p = ctx.decodeAudioData(arrayBuffer, resolve, reject);
       if (p && p.then) { p.then(resolve, reject); }
     });
   }
 
-  function arm(c, buffer, sourceLabel) {
-    c.buffer = buffer;
+  // A pad counts as armed once its bytes are in hand; the AudioBuffer follows
+  // on first press.
+  function armBytes(c, bytes, label) {
+    c.bytes = bytes;
+    c.label = label;
     c.el.classList.remove("empty");
-    setMeta(c, sourceLabel + " · " + buffer.duration.toFixed(1) + "s");
+    setMeta(c, label);
     refreshArmed();
+  }
+
+  function decodeCue(c) {
+    if (c.buffer) { return Promise.resolve(true); }
+    if (!c.bytes) { return Promise.resolve(false); }
+    if (!c.decoding) {
+      c.decoding = decode(c.bytes).then(function (buf) {
+        c.buffer = buf;
+        c.bytes = null;
+        c.decoding = null;
+        setMeta(c, (c.label || "Loaded") + " · " + buf.duration.toFixed(1) + "s");
+        refreshArmed();
+        return true;
+      }).catch(function () {
+        c.bytes = null;
+        c.decoding = null;
+        c.el.classList.add("empty");
+        setMeta(c, "Clip would not decode");
+        refreshArmed();
+        return false;
+      });
+    }
+    return c.decoding;
   }
 
   // A voice is released exactly once, whether it ended on its own, was stopped,
@@ -213,11 +262,33 @@
   function fire(id) {
     var c = byId[id];
 
-    if (!c.buffer) {
+    if (!c.buffer && !c.bytes) {
       setMeta(c, "Load a clip first");
-      setTimeout(function () { setMeta(c, "No clip"); }, 1600);
+      setTimeout(function () { setMeta(c, c.label || "No clip"); }, 1600);
       return;
     }
+
+    // First press of the session: this call builds the context, inside the
+    // gesture, and decoding can finally happen.
+    if (!audio()) { return; }
+
+    if (!c.buffer) {
+      // unlock() has usually started this decode already, so attach to it
+      // rather than bailing out — bailing would swallow the first press.
+      if (c.pendingFire) { return; }
+      c.pendingFire = true;
+      decodeCue(c).then(function (ok) {
+        c.pendingFire = false;
+        if (ok) { fireNow(c); }
+      });
+      return;
+    }
+
+    fireNow(c);
+  }
+
+  function fireNow(c) {
+    var id = c.id;
 
     if (c.loop) {
       if (playing[id]) { stop(id); return; }
@@ -578,10 +649,12 @@
 
   function loadBlob(c, blob, label, persist) {
     return blob.arrayBuffer()
-      .then(decode)
-      .then(function (buf) {
-        arm(c, buf, label);
+      .then(function (bytes) {
+        armBytes(c, bytes, label);
         if (persist) { dbPut(c.id, blob); }
+        // Only decode now if a context already exists; otherwise the first
+        // press makes one and decodes then.
+        if (ctx) { return decodeCue(c); }
       })
       .catch(function () {
         setMeta(c, "Could not read that file");
@@ -677,23 +750,32 @@
     dbClear();
     CUES.forEach(function (c) {
       c.buffer = null;
+      c.bytes = null;
+      c.decoding = null;
+      c.label = null;
       c.el.classList.add("empty");
       setMeta(c, "No clip");
     });
+    // Put the shipped clips back — clearing the rack drops your own takes.
+    CUES.forEach(loadShipped);
     pendingFiles = [];
     renderPending();
     refreshArmed();
   });
 
-  // A clip published alongside the board, at audio/<cue>.mp3.
+  // A clip published alongside the board, at audio/<cue>.mp3. Fetched only —
+  // decoding waits for the first press. A failure is written onto the pad
+  // rather than swallowed, so a clip that didn't deploy is visible.
   function loadShipped(c) {
     fetch("audio/" + c.id + ".mp3").then(function (r) {
-      if (!r.ok || c.buffer) { return null; }
+      if (!r.ok) { throw new Error("HTTP " + r.status); }
       return r.arrayBuffer();
-    }).then(function (ab) {
-      if (!ab || c.buffer) { return; }
-      return decode(ab).then(function (buf) { arm(c, buf, "On the board"); });
-    }).catch(function () {});
+    }).then(function (bytes) {
+      if (c.buffer || c.bytes) { return; }
+      armBytes(c, bytes, "On the board");
+    }).catch(function (e) {
+      setMeta(c, "Clip missing · " + ((e && e.message) || "no response"));
+    });
   }
 
   // A clip this browser holds wins over the shipped one; every other pad falls

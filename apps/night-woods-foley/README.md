@@ -55,6 +55,13 @@ bus. Stopping a voice drops its `loop` flag before calling `stop()`, and
 **Stop all** also ducks the bus to silence, so a source that ignores `stop()`
 still goes quiet.
 
+**The AudioContext is built on the first press, never at load.** Page load only
+*fetches* the clips; decoding waits, because decoding needs a context and a
+context constructed outside a user gesture starts suspended under every
+browser's autoplay policy — Chrome wakes it on the first gesture, Safari does
+not reliably wake one born outside one. Keep it that way: anything that calls
+`audio()` during load silently costs the board its sound on some browsers.
+
 To add a cue, add an entry to `CUES` in `script.js` (id, name, key, cap colour,
 whether it loops, and which effect it draws), add a `case` for that effect in
 the draw loop, and drop `audio/<id>.mp3` alongside the others. The pad markup
