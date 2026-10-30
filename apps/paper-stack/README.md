@@ -33,8 +33,37 @@ Static app, no build step, no dependencies. Open either file, or visit
 | Corner handle, top right | Drag to rotate; hold Shift to snap to 15° |
 | Double-tap / double-click | Inspect, without disturbing the stack |
 | Hold Alt while dropping | Slides the sheet *under* whatever is beneath the pointer |
+| F | Files everything into folders, and back out again |
 | Tab | Opens the print list — the keyboard path and the screen-reader path |
 | Arrows, `,` `.` `-` `=` `[` `]` | Move, rotate, resize, restack. `Enter` inspects, `Home` brings to top |
+
+## Two ways to browse
+
+**The pile** is the default: twelve prints loose on the mat, in no order,
+rearranged by hand.
+
+**The flat files** are the predictable alternative. Press `F` or hit *File
+away* and the prints shuffle into four folders down the left edge, one per
+press — a flat file seen from the side, with a rectangular tab and its
+bundle tucked in behind. Focusing a tab fans that folder open; from there
+the prints lay out either as a paper stack or as a grid, and in the grid a
+double-click brings one up to read and `Escape` puts it back.
+
+It is navigable end to end from the keyboard, and the order is the same one
+a pointer walks:
+
+| Key | Where it goes |
+| --- | --- |
+| `F` | Into the folders, or back to the loose pile |
+| `↑` `↓` | Between folders. The focused one fans open as you pass it |
+| `→` | Into the layout buttons; `←` `→` move between them, `Enter` picks |
+| `↑` `↓` `←` `→` | Between prints, once a folder is laid out as a grid |
+| `Enter` | Brings the focused print up to read |
+| `Escape` | One step back out: print, then layout, then folders, then pile |
+
+Every move is announced to screen readers, and focus follows what you are
+looking at in both directions — clicking a print in the grid moves keyboard
+focus to it, and arrowing onto one selects it.
 
 ## The lab panel
 

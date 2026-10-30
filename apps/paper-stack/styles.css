@@ -298,63 +298,49 @@ body:not(.pointing) .sheet:focus-visible .face { box-shadow:
 
 .handle {
   position: absolute;
-  width: 32px; height: 32px;
+  width: 34px;
+  height: 34px;
   padding: 0;
   border: 0;
   background: none;
   opacity: 0;
   transition: opacity 140ms ease;
   touch-action: none;
-  display: grid;
-  place-items: center;
 }
 
-.handle.resize {
-  right: -13px; bottom: -13px;
-  cursor: nwse-resize;
+.handle::after,
+.handle svg {
+  position: absolute;
+  display: block;
 }
+
+/* bottom-right corner, sitting 6px clear of the paper's edge */
+.handle.resize { right: -20px; bottom: -20px; cursor: nwse-resize; }
 .handle.resize::after {
   content: "";
-  width: 11px; height: 11px;
-  margin: 5px 5px 0 0;
+  right: 14px;
+  bottom: 14px;
+  width: 12px;
+  height: 12px;
   border-right: 2px solid var(--magenta);
   border-bottom: 2px solid var(--magenta);
 }
 
-/* Rotate rides the top-right corner and turns with the sheet, so the
-   affordance always points the same way relative to the paper. */
-.handle.rotate {
-  right: -15px; top: -15px;
-  cursor: grab;
-}
+/* top-right corner, same offset, so the pair reads as one set */
+.handle.rotate { right: -20px; top: -20px; cursor: grab; }
 .handle.rotate:active { cursor: grabbing; }
 .handle.rotate svg {
-  width: 17px; height: 17px;
-  display: block;
+  right: 12px;
+  top: 12px;
+  width: 16px;
+  height: 16px;
   fill: none;
   stroke: var(--magenta);
-  stroke-width: 2.1;
+  stroke-width: 2.2;
   stroke-linecap: round;
-  filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.25));
+  filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.3));
 }
 
-/* Degrees, shown on the mat beside the sheet while you turn it. */
-.angle {
-  position: absolute;
-  left: 50%; top: 50%;
-  z-index: 7500;
-  transform: translate(-50%, -50%);
-  padding: 3px 7px;
-  border-radius: 2px;
-  background: var(--magenta);
-  color: #fff;
-  font-family: var(--mono);
-  font-size: 10.5px;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.02em;
-  pointer-events: none;
-  white-space: nowrap;
-}
 .sheet.selected .handle,
 body:not(.pointing) .sheet:focus-visible .handle { opacity: 1; }
 body:not(.pointing) .handle:focus-visible { opacity: 1; outline: 2px solid var(--cyan); outline-offset: 2px; }
@@ -394,15 +380,6 @@ body:not(.pointing) .handle:focus-visible { opacity: 1; outline: 2px solid var(-
   color: var(--hud);
 }
 
-.hud p {
-  margin: 5px 0 0;
-  max-width: 30ch;
-  font-family: var(--mono);
-  font-size: 10px;
-  line-height: 1.5;
-  letter-spacing: 0.01em;
-  color: var(--hud-dim);
-}
 
 /* ───────── lab panel ───────── */
 
@@ -571,7 +548,6 @@ body:not(.pointing) .handle:focus-visible { opacity: 1; outline: 2px solid var(-
 
 @media (max-width: 560px) {
   .lab { width: calc(100vw - 24px); max-height: 52vh; }
-  .hud p { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -592,3 +568,112 @@ body:not(.pointing) .handle:focus-visible { opacity: 1; outline: 2px solid var(-
   border-bottom: 1px solid color-mix(in srgb, var(--cyan) 45%, transparent);
 }
 .hud .swap:hover { border-bottom-color: var(--cyan); }
+
+/* ───────── the flat files ─────────
+   Folders down the left edge, seen from the side: a rectangular tab with
+   its bundle of prints tucked in behind it. The focused folder fans out. */
+
+.cabinet {
+  position: absolute;
+  inset: 0;
+  z-index: 8200;
+  pointer-events: none;
+}
+
+.tab {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 136px;
+  padding: 8px 10px 8px 11px;
+  border: 1px solid var(--panel-line);
+  border-left: 4px solid var(--tab-ink, var(--cyan));
+  border-radius: 2px;
+  background: var(--panel);
+  color: var(--hud);
+  font-family: var(--sans);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: -0.005em;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 2px 7px rgb(0 0 0 / 0.2);
+  transition: box-shadow 180ms ease, background 180ms ease;
+}
+
+.tab-n {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-weight: 400;
+  font-size: 9.5px;
+  color: var(--ink-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.tab:hover { background: color-mix(in srgb, var(--tab-ink, var(--cyan)) 10%, var(--panel)); }
+
+.tab[aria-selected="true"] {
+  background: color-mix(in srgb, var(--tab-ink, var(--cyan)) 16%, var(--panel));
+  box-shadow: 0 7px 20px rgb(0 0 0 / 0.3);
+}
+
+.tab:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+
+/* the two ways to lay a folder out */
+
+.tools {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 8300;
+  display: flex;
+  gap: 5px;
+  padding: 5px;
+  border: 1px solid var(--panel-line);
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--panel) 94%, transparent);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 6px 18px rgb(0 0 0 / 0.24);
+}
+
+.tools button {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.03em;
+  padding: 6px 11px;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  background: transparent;
+  color: var(--hud);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tools button:hover { border-color: var(--cyan); color: var(--cyan); }
+.tools button:focus-visible { outline: 2px solid var(--cyan); outline-offset: 1px; }
+
+.tools button[aria-pressed="true"] {
+  background: var(--magenta);
+  border-color: var(--magenta);
+  color: #fff;
+}
+
+/* in the filing views the mat recedes so the folders read as the subject */
+.stage.filed::after { opacity: 0.6; }
+
+@media (max-width: 560px) {
+  .tab { width: 104px; font-size: 10.5px; padding: 6px 7px 6px 8px; }
+  .tools button { padding: 6px 8px; font-size: 10px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tab { transition: none; }
+}
+
+/* Where a print cannot be dragged, it carries no drag affordances. */
+.stage.nodrag .sheet { cursor: pointer; }
+.stage.nodrag .handle { display: none; }

@@ -195,6 +195,7 @@ function spread() {
 
 function settleTo(s) {
   s.vx = s.vy = s.vrot = 0;
+  s.goal = null;
   wake(s);
 }
 
@@ -406,10 +407,13 @@ stage.addEventListener('pointerdown', (e) => {
   const s = sheets.get(el.dataset.id);
   if (!s) return;
 
-  // Nothing native is wanted here: no text selection, no image drag, no
-  // long-press menu, no synthetic mouse events. Focus is moved by hand
-  // instead, and the double-tap is detected from the grip, so suppressing
-  // the default costs nothing.
+  // In the filing views a print is clicked, not dragged, so the native
+  // click is left alone to do its job.
+  if (!draggable()) { select(s.id); return; }
+
+  // Nothing native is wanted while dragging: no text selection, no image
+  // drag, no long-press menu. Focus is moved by hand instead, and the
+  // double-tap is read from the grip, so the default costs nothing.
   e.preventDefault();
 
   // A second finger that lands on a different sheet is a slip, not a
@@ -436,6 +440,7 @@ function beginGrip(s, e) {
     s.el.classList.add('dragging');
     s.el.style.zIndex = Z.drag;
     s.dragging = true;
+    s.goal = null;
     s.liftT = 1;
     s.bowT = reduced ? 0 : cfg.bow;
     s.vx = s.vy = s.vrot = 0;
@@ -573,7 +578,6 @@ function endPointer(e) {
   s.tyT = 0;
 
   const moved = (g.travel || 0) > 6;
-  if (g.mode === 'handle') hideAngle();
 
   if (g.mode !== 'handle' && !reduced && moved) {
     s.vx = (g.vx || 0) * cfg.fling;
@@ -608,7 +612,6 @@ window.addEventListener('pointercancel', endPointer, { passive: true });
  * snapping to 15° the way this gesture behaves everywhere else.
  */
 
-const angleBadge = document.getElementById('angle');
 
 function beginHandle(s, e, role) {
   const p = stagePoint(e);
@@ -630,7 +633,6 @@ function beginHandle(s, e, role) {
   // a quarter lift: enough to read as picked up, not so much that the sheet
   // slides out from under the handle being held
   s.liftT = 0.4;
-  if (g.role === 'rotate') showAngle(s);
   wake(s);
 }
 
@@ -640,7 +642,6 @@ function moveHandle(s, g, p, snap) {
     let deg = g.rot0 + ((a - g.a0) * 180) / Math.PI;
     if (snap) deg = Math.round(deg / 15) * 15;
     s.rot = deg;
-    showAngle(s);
   } else {
     const d = Math.max(16, Math.hypot(p.x - s.x, p.y - s.y));
     s.scale = clamp(g.scale0 * (d / g.d0), 0.3, 2.6);
@@ -648,23 +649,6 @@ function moveHandle(s, g, p, snap) {
   wake(s);
 }
 
-/** Live degrees on the mat above the sheet, wrapped to a readable range. */
-function showAngle(s) {
-  if (!angleBadge) return;
-  let deg = s.rot % 360;
-  if (deg > 180) deg -= 360;
-  if (deg < -180) deg += 360;
-  angleBadge.textContent = `${deg > 0 ? '+' : ''}${Math.round(deg)}\u00b0`;
-  // clear the sheet's *rotated* bounding box, so the badge stays above the
-  // paper at every angle rather than sliding across it
-  const rad = (s.rot * Math.PI) / 180;
-  const half = (Math.abs(s.w * Math.sin(rad)) + Math.abs(s.h * Math.cos(rad))) * s.scale / 2;
-  angleBadge.style.transform =
-    `translate(calc(-50% + ${s.x.toFixed(1)}px), calc(-50% + ${(s.y - half - 22).toFixed(1)}px))`;
-  angleBadge.hidden = false;
-}
-
-function hideAngle() { if (angleBadge) angleBadge.hidden = true; }
 
 window.addEventListener('keydown', (e) => {
   if (e.key === 'Alt') altDown = true;
@@ -767,6 +751,8 @@ stage.addEventListener('keydown', (e) => {
   if (!el) return;
   const s = sheets.get(el.dataset.id);
   if (!s) return;
+  if (view === 'grid') { gridKeys(e, s); return; }
+  if (!draggable()) return;
   const nudge = e.shiftKey ? 1 : 10;
   let used = true;
 
@@ -775,8 +761,8 @@ stage.addEventListener('keydown', (e) => {
     case 'ArrowRight': s.x += nudge; break;
     case 'ArrowUp': s.y -= nudge; break;
     case 'ArrowDown': s.y += nudge; break;
-    case ',': s.rot -= e.shiftKey ? 1 : 5; flashAngle(s); break;
-    case '.': s.rot += e.shiftKey ? 1 : 5; flashAngle(s); break;
+    case ',': s.rot -= e.shiftKey ? 1 : 5; break;
+    case '.': s.rot += e.shiftKey ? 1 : 5; break;
     case '-': case '_': s.scale = clamp(s.scale - 0.06, 0.3, 2.6); break;
     case '=': case '+': s.scale = clamp(s.scale + 0.06, 0.3, 2.6); break;
     case '[': nudgeOrder(s.id, -1); break;
@@ -784,7 +770,7 @@ stage.addEventListener('keydown', (e) => {
     case 'Home': promote(s.id, 'top'); break;
     case 'End': promote(s.id, 'bottom'); break;
     case 'Enter': case ' ': toggleFocus(s.id); break;
-    case 'Escape': if (focusedId) exitFocus(); else used = false; break;
+    case 'Escape': used = false; break;
     default: used = false;
   }
 
@@ -793,14 +779,6 @@ stage.addEventListener('keydown', (e) => {
     wake(s);
   }
 });
-
-let angleTimer = 0;
-/** The same badge, briefly, when the rotation came from the keyboard. */
-function flashAngle(s) {
-  showAngle(s);
-  clearTimeout(angleTimer);
-  angleTimer = setTimeout(hideAngle, 900);
-}
 
 function nudgeOrder(id, dir) {
   const at = order.indexOf(id);
@@ -814,7 +792,7 @@ function nudgeOrder(id, dir) {
 }
 
 window.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && focusedId) { exitFocus(); e.preventDefault(); }
+  if (e.key === 'Escape') { stepBack(); e.preventDefault(); }
 });
 
 /* ───────────────────────────── lab panel ───────────────────────────── */
@@ -862,6 +840,7 @@ document.querySelectorAll('[data-cfg]').forEach((input) => {
 });
 
 document.getElementById('act-shuffle').addEventListener('click', () => {
+  if (view !== 'free') setView('free');
   exitFocus();
   // a fresh shuffle also restacks, so the order array is rebuilt in one pass
   order = order.map((id) => ({ id, k: Math.random() })).sort((a, b) => a.k - b.k).map((o) => o.id);
@@ -872,6 +851,7 @@ document.getElementById('act-shuffle').addEventListener('click', () => {
 document.getElementById('act-tidy').addEventListener('click', () => { exitFocus(); tidy(); live.textContent = 'Pile squared up.'; });
 document.getElementById('act-spread').addEventListener('click', () => { exitFocus(); spread(); live.textContent = 'Prints laid out as a contact sheet.'; });
 document.getElementById('act-reset').addEventListener('click', () => {
+  setView('free');
   exitFocus();
   Object.assign(cfg, DEFAULTS);
   document.querySelectorAll('[data-cfg]').forEach((i) => {
@@ -903,6 +883,334 @@ labToggle.addEventListener('click', (e) => {
   e.currentTarget.setAttribute('aria-expanded', String(!closed));
 });
 
+
+/* ─────────────────────── browsing by folder ───────────────────────
+ * An alternative to the pile that is predictable and fully keyboard
+ * driven. The prints shuffle into folders down the left edge — a flat
+ * file seen from the side, one rectangular tab per press. Focusing a tab
+ * fans that folder open; from there the prints can be laid out either as
+ * a paper stack or as a grid.
+ *
+ * Views: free | cabinet | stack | grid.
+ *   free     the messy pile of everything, the original mode
+ *   cabinet  folders filed left, the focused one fanned
+ *   stack    the focused folder as a loose pile, draggable
+ *   grid     the focused folder squared up, double-click to inspect
+ */
+
+const cabinetEl = document.getElementById('cabinet');
+const toolsEl = document.getElementById('tools');
+const btnStack = document.getElementById('tool-stack');
+const btnGrid = document.getElementById('tool-grid');
+
+const folders = CATS.map((c) => ({
+  ...c,
+  ids: PIECES.map((p, i) => (p.cat === c.id ? 'p' + i : null)).filter(Boolean),
+}));
+
+let view = 'free';
+let tabAt = 0;
+const openFolder = () => folders[tabAt];
+const draggable = () => view === 'free' || view === 'stack';
+
+/* ── geometry ── */
+
+function cabX() {
+  const { w } = stageSize();
+  // the filing column must not eat a phone screen
+  return -w / 2 + clamp(w * 0.13, w < 560 ? 64 : 86, 132);
+}
+
+function tabPos(i) {
+  const { h } = stageSize();
+  const pitch = clamp((h - 170) / folders.length, 56, 104);
+  return { x: cabX(), y: (i - (folders.length - 1) / 2) * pitch };
+}
+
+/** The room left for an open folder: clear of the filing column, and clear
+ *  of the lab panel where the screen is wide enough for it to matter. */
+function contentArea() {
+  const { w, h } = stageSize();
+  const left = cabX() + (w < 560 ? 82 : 104);
+  const right = w / 2 - (w >= 920 && !lab.classList.contains('closed') ? 292 : 24);
+  return { left, right, cx: (left + right) / 2, width: Math.max(220, right - left), h };
+}
+
+function gridCols(n) { return contentArea().width < 520 ? 2 : Math.min(3, n); }
+
+/** An open folder leans toward its own tab without being dragged off-screen. */
+function fanY(i) {
+  const { h } = stageSize();
+  return clamp(tabPos(i).y * 0.5, -h / 2 + 150, h / 2 - 150);
+}
+
+/** Send a sheet to a layout slot and let the springs carry it there. */
+function sendTo(s, x, y, rot, scale) {
+  s.goal = { x, y, rot, scale };
+  s.vx = s.vy = s.vrot = 0;
+  wake(s);
+}
+
+/** Tucked in behind its tab: a small bundle of edges, as on a shelf. */
+function layTucked(f, i) {
+  const p = tabPos(i);
+  f.ids.forEach((id, j) => {
+    sendTo(sheets.get(id), p.x + 64 + j * 3.5, p.y + j * 2.5, -2 + j * 1.6, 0.19);
+  });
+}
+
+/** Fanned across the open area, clear of the tucked column. */
+function layFanned(f, i) {
+  const a = contentArea();
+  const n = f.ids.length;
+  const step = Math.min(a.width / (n + 0.5), 158);
+  const y0 = fanY(i);
+  f.ids.forEach((id, j) => {
+    const t = n === 1 ? 0 : j / (n - 1) - 0.5;
+    sendTo(sheets.get(id), a.cx + (j - (n - 1) / 2) * step, y0 + t * 24, t * 12, 0.6);
+  });
+}
+
+function layGrid(f) {
+  const a = contentArea();
+  const n = f.ids.length;
+  const cols = gridCols(n);
+  const rows = Math.ceil(n / cols);
+  const cw = a.width / cols;
+  const ch = (a.h - 120) / rows;
+  f.ids.forEach((id, j) => {
+    const s = sheets.get(id);
+    const c = j % cols;
+    const r = Math.floor(j / cols);
+    const fit = Math.min((cw * 0.84) / s.w, (ch * 0.84) / s.h);
+    sendTo(s, a.left + cw * (c + 0.5), (r - (rows - 1) / 2) * ch, 0, fit);
+  });
+}
+
+function layStack(f) {
+  const a = contentArea();
+  const rng = mulberry32(1000 + tabAt * 97);
+  // a loose pile still has to land inside the room it is given
+  const widest = Math.max(...f.ids.map((id) => sheets.get(id).w));
+  const tallest = Math.max(...f.ids.map((id) => sheets.get(id).h));
+  const sc = clamp(Math.min((a.width * 0.78) / widest, ((a.h - 170) * 0.78) / tallest), 0.4, 1);
+  const spreadX = Math.max(0, a.width / 2 - (widest * sc) / 2) * 0.8;
+  const spreadY = Math.max(0, (a.h - 150) / 2 - (tallest * sc) / 2) * 0.7;
+  f.ids.forEach((id) => {
+    sendTo(sheets.get(id),
+      a.cx + (rng() - 0.5) * 2 * spreadX,
+      (rng() - 0.5) * 2 * spreadY,
+      (rng() - 0.5) * 34,
+      sc);
+  });
+}
+
+function layFree() {
+  const rng = mulberry32(7);
+  const { w, h } = stageSize();
+  const sx = Math.min(w * 0.3, 330);
+  const sy = Math.min(h * 0.26, 210);
+  order.forEach((id) => {
+    sendTo(sheets.get(id), (rng() - 0.5) * 2 * sx, (rng() - 0.5) * 2 * sy + h * 0.02,
+      (rng() - 0.5) * 46, 0.92 + rng() * 0.22);
+  });
+}
+
+/* ── tabs ── */
+
+function buildTabs() {
+  cabinetEl.innerHTML = folders.map((f, i) =>
+    `<button class="tab" type="button" role="tab" data-i="${i}" tabindex="-1"` +
+    ` aria-selected="false" style="--tab-ink:${INKS[f.ink]}">` +
+    `<span>${f.name}</span><span class="tab-n">${f.ids.length}</span></button>`).join('');
+  placeChrome();
+}
+
+function placeChrome() {
+  [...cabinetEl.children].forEach((el, i) => {
+    const p = tabPos(i);
+    const out = i === tabAt && view !== 'free' ? 9 : 0;
+    el.style.transform = `translate(calc(-50% + ${(p.x + out).toFixed(1)}px), calc(-50% + ${p.y.toFixed(1)}px))`;
+    el.setAttribute('aria-selected', String(i === tabAt && view !== 'free'));
+    el.tabIndex = i === tabAt ? 0 : -1;
+  });
+  if (!toolsEl.hidden) {
+    const a = contentArea();
+    // clear of the page header, above whatever the folder is laid out as
+    toolsEl.style.transform =
+      `translate(calc(-50% + ${a.cx.toFixed(1)}px), calc(-50% + ${(-a.h / 2 + 86).toFixed(1)}px))`;
+  }
+}
+
+/* ── the state machine ── */
+
+function setView(next) {
+  view = next;
+  if (focusedId) exitFocus();
+
+  const free = next === 'free';
+  cabinetEl.hidden = free;
+  toolsEl.hidden = free;
+  stage.classList.toggle('filed', !free);
+  stage.classList.toggle('nodrag', !draggable());
+
+  if (free) {
+    layFree();
+  } else {
+    // the open folder sits on top of the pile, by the same ordered array
+    const open = openFolder();
+    order = order.filter((id) => !open.ids.includes(id)).concat(open.ids);
+    reflow();
+    folders.forEach((f, i) => {
+      if (f !== open) layTucked(f, i);
+      else if (next === 'grid') layGrid(f);
+      else if (next === 'stack') layStack(f);
+      else layFanned(f, i);
+    });
+  }
+
+  const fileBtn = document.getElementById('act-file');
+  if (fileBtn) fileBtn.textContent = free ? 'File away' : 'Open pile';
+  btnStack.setAttribute('aria-pressed', String(next === 'stack'));
+  btnGrid.setAttribute('aria-pressed', String(next === 'grid'));
+
+  // sheets are only in the tab order where they are the thing being browsed
+  const reachable = free || next === 'stack' || next === 'grid';
+  for (const s of sheets.values()) s.el.tabIndex = reachable ? 0 : -1;
+
+  placeChrome();
+}
+
+function focusTab(i, announce = true) {
+  tabAt = (i + folders.length) % folders.length;
+  if (view === 'free') setView('cabinet');
+  else setView(view === 'grid' || view === 'stack' ? view : 'cabinet');
+  cabinetEl.children[tabAt].focus({ preventScroll: true });
+  if (announce) {
+    const f = openFolder();
+    live.textContent = `${f.name}, ${f.ids.length} prints.`;
+  }
+}
+
+function toggleCabinet() {
+  if (view === 'free') { setView('cabinet'); cabinetEl.children[tabAt].focus({ preventScroll: true }); live.textContent = 'Filed into folders by press.'; }
+  else { setView('free'); live.textContent = 'Back to the open pile.'; }
+}
+
+/** Escape walks back out one level at a time. */
+function stepBack() {
+  if (focusedId) { exitFocus(); return; }
+  if (view === 'grid' || view === 'stack') { setView('cabinet'); cabinetEl.children[tabAt].focus({ preventScroll: true }); return; }
+  if (view === 'cabinet') { setView('free'); return; }
+}
+
+cabinetEl.addEventListener('keydown', (e) => {
+  const n = folders.length;
+  let used = true;
+  switch (e.key) {
+    case 'ArrowDown': focusTab(tabAt + 1); break;
+    case 'ArrowUp': focusTab(tabAt - 1); break;
+    case 'Home': focusTab(0); break;
+    case 'End': focusTab(n - 1); break;
+    case 'ArrowRight': case 'Enter': case ' ': btnStack.focus(); break;
+    default: used = false;
+  }
+  if (used) e.preventDefault();
+});
+
+cabinetEl.addEventListener('click', (e) => {
+  const t = e.target.closest('.tab');
+  if (t) focusTab(Number(t.dataset.i));
+});
+
+toolsEl.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowLeft' && document.activeElement === btnStack) {
+    cabinetEl.children[tabAt].focus({ preventScroll: true });
+    e.preventDefault();
+  } else if (e.key === 'ArrowRight' && document.activeElement === btnStack) {
+    btnGrid.focus(); e.preventDefault();
+  } else if (e.key === 'ArrowLeft' && document.activeElement === btnGrid) {
+    btnStack.focus(); e.preventDefault();
+  }
+});
+
+btnStack.addEventListener('click', () => {
+  setView(view === 'stack' ? 'cabinet' : 'stack');
+  live.textContent = view === 'stack' ? `${openFolder().name} as a loose stack.` : `${openFolder().name} fanned.`;
+});
+
+btnGrid.addEventListener('click', () => {
+  const to = view === 'grid' ? 'cabinet' : 'grid';
+  setView(to);
+  if (to === 'grid') {
+    const first = sheets.get(openFolder().ids[0]);
+    first.el.focus({ preventScroll: true });
+    select(first.id);
+    live.textContent = `${openFolder().name} as a grid of ${openFolder().ids.length}.`;
+  }
+});
+
+/** Grid navigation: arrows walk the grid, Enter inspects. */
+function gridKeys(e, s) {
+  const f = openFolder();
+  const idx = f.ids.indexOf(s.id);
+  if (idx < 0) return false;
+  const cols = gridCols(f.ids.length);
+  const last = f.ids.length - 1;
+  let next = idx;
+  let used = true;
+  switch (e.key) {
+    case 'ArrowRight': next = Math.min(last, idx + 1); break;
+    case 'ArrowLeft': next = Math.max(0, idx - 1); break;
+    case 'ArrowDown': next = Math.min(last, idx + cols); break;
+    case 'ArrowUp': next = Math.max(0, idx - cols); break;
+    case 'Home': next = 0; break;
+    case 'End': next = last; break;
+    case 'Enter': case ' ': toggleFocus(s.id); break;
+    default: used = false;
+  }
+  if (used) {
+    e.preventDefault();
+    if (next !== idx) {
+      const t = sheets.get(f.ids[next]);
+      t.el.focus({ preventScroll: true });
+      select(t.id);
+      live.textContent = `${t.piece.t}. ${next + 1} of ${f.ids.length}.`;
+    }
+  }
+  return used;
+}
+
+/* Clicking a print does different things depending on what you are doing:
+ * in the cabinet it opens that print's folder, in the grid it selects and
+ * a second click inspects. */
+let lastClick = { t: 0, id: null };
+
+stage.addEventListener('click', (e) => {
+  if (draggable()) return;
+  const el = e.target.closest && e.target.closest('.sheet');
+  if (!el) return;
+  const s = sheets.get(el.dataset.id);
+  if (!s) return;
+  select(s.id);
+  if (view === 'cabinet') { focusTab(folders.findIndex((f) => f.id === s.piece.cat)); return; }
+  if (view === 'grid') {
+    s.el.focus({ preventScroll: true });
+    const now = performance.now();
+    if (lastClick.id === s.id && now - lastClick.t < 420) { lastClick = { t: 0, id: null }; toggleFocus(s.id); }
+    else lastClick = { t: now, id: s.id };
+  }
+});
+
+document.getElementById('act-file').addEventListener('click', toggleCabinet);
+
+window.addEventListener('keydown', (e) => {
+  if (e.target.closest && e.target.closest('input, select, textarea')) return;
+  if (e.key === 'f' || e.key === 'F') { toggleCabinet(); e.preventDefault(); }
+});
+
+buildTabs();
+
 /* ───────────────────────────── boot ───────────────────────────── */
 
 document.documentElement.style.setProperty('--grain', makeGrain());
@@ -933,6 +1241,8 @@ window.addEventListener('resize', () => {
   resizeAt = setTimeout(() => {
     applyUnit();
     for (const s of sheets.values()) { bounds(s); paint(s); }
+    // the filing layouts are computed from the stage size, so redo them
+    if (view !== 'free') setView(view);
   }, 120);
 });
 

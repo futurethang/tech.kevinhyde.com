@@ -15,12 +15,18 @@
 <div id="app">
   <div class="stage" id="stage" aria-label="A pile of prints on a cutting mat">
     <div class="scrim" id="scrim" aria-hidden="true"></div>
-    <div class="angle" id="angle" aria-hidden="true" hidden>0&deg;</div>
+
+    <nav class="cabinet" id="cabinet" role="tablist" aria-orientation="vertical"
+         aria-label="Browse the flat files by press" hidden></nav>
+
+    <div class="tools" id="tools" role="group" aria-label="How to lay this folder out" hidden>
+      <button id="tool-stack" type="button" aria-pressed="false">Paper stack</button>
+      <button id="tool-grid" type="button" aria-pressed="false">Grid</button>
+    </div>
   </div>
 
   <header class="hud">
     <h1>Paper Stack</h1>
-    <p>Drag a print to lift it. Pinch to turn, or use the corner handles. Double-tap to inspect. Hold Alt to slide one underneath.</p>
     <a class="swap" href="./engine.html">Compare with the WebGL engine build &rarr;</a>
   </header>
 
@@ -75,6 +81,7 @@
       <fieldset>
         <legend>Pile</legend>
         <div class="btns">
+          <button id="act-file" type="button">File away</button>
           <button id="act-shuffle" type="button">Shuffle</button>
           <button id="act-tidy" type="button">Square up</button>
           <button id="act-spread" type="button">Contact sheet</button>
@@ -85,6 +92,7 @@
       <fieldset>
         <legend>Keyboard</legend>
         <dl class="keys">
+          <dt>F</dt><dd>file into folders / back out</dd>
           <dt>Tab</dt><dd>step through prints</dd>
           <dt>Arrows</dt><dd>move (Shift = 1 px)</dd>
           <dt>, .</dt><dd>rotate</dd>

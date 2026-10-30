@@ -166,16 +166,26 @@ const ART = {
 const MM = 0.78;
 
 const PIECES = [
-  { t: 'Harbor Interference', art: 'halftone', inks: ['blue', 'pink'], mm: [297, 420], med: 'Risograph, 2 inks', ed: '7/40', gsm: 180, seed: 11 },
-  { t: 'Nine Registers', art: 'modular', inks: ['orange', 'black', 'yellow'], mm: [250, 250], med: 'Screenprint', ed: '3/25', gsm: 300, seed: 23 },
-  { t: 'Soft Return', art: 'contour', inks: ['teal', 'pink'], mm: [420, 297], med: 'Risograph, 2 inks', ed: '12/60', gsm: 160, seed: 37 },
-  { t: 'Specimen: Ampersand', art: 'specimen', inks: ['black', 'pink'], mm: [210, 297], med: 'Letterpress, Vandercook', ed: '4/18', gsm: 270, seed: 41 },
-  { t: 'Low Tide Bands', art: 'bands', inks: ['blue', 'green', 'yellow'], mm: [297, 420], med: 'Risograph, 3 inks', ed: '9/35', gsm: 180, seed: 53 },
-  { t: 'Rings for a Flat Room', art: 'arcs', inks: ['magenta', 'blue'], mm: [250, 250], med: 'Giclée on rag', ed: '2/10', gsm: 310, seed: 67 },
-  { t: 'Overprint Study 04', art: 'halftone', inks: ['yellow', 'teal'], mm: [210, 297], med: 'Risograph, 2 inks', ed: '21/50', gsm: 160, seed: 71 },
-  { t: 'Quarter Grid', art: 'modular', inks: ['pink', 'blue'], mm: [297, 210], med: 'Screenprint', ed: '6/30', gsm: 300, seed: 83 },
-  { t: 'Specimen: Double-Storey', art: 'specimen', inks: ['green', 'grey'], mm: [210, 297], med: 'Letterpress', ed: '1/12', gsm: 270, seed: 97 },
-  { t: 'Weather for Ballard', art: 'contour', inks: ['orange', 'blue', 'black'], mm: [420, 297], med: 'Risograph, 3 inks', ed: '14/45', gsm: 180, seed: 103 },
-  { t: 'Press Check, 6 am', art: 'bands', inks: ['black', 'orange'], mm: [250, 350], med: 'Offset proof', ed: 'A/P', gsm: 150, seed: 109 },
-  { t: 'Concentric Yellow', art: 'arcs', inks: ['yellow', 'orange', 'black'], mm: [297, 297], med: 'Risograph, 3 inks', ed: '18/40', gsm: 180, seed: 127 },
+  { t: 'Harbor Interference', cat: 'riso', art: 'halftone', inks: ['blue', 'pink'], mm: [297, 420], med: 'Risograph, 2 inks', ed: '7/40', gsm: 180, seed: 11 },
+  { t: 'Nine Registers', cat: 'screen', art: 'modular', inks: ['orange', 'black', 'yellow'], mm: [250, 250], med: 'Screenprint, 3 colours', ed: '3/25', gsm: 300, seed: 23 },
+  { t: 'Soft Return', cat: 'riso', art: 'contour', inks: ['teal', 'pink'], mm: [420, 297], med: 'Risograph, 2 inks', ed: '12/60', gsm: 160, seed: 37 },
+  { t: 'Specimen: Ampersand', cat: 'letter', art: 'specimen', inks: ['black', 'pink'], mm: [210, 297], med: 'Letterpress, Vandercook', ed: '4/18', gsm: 270, seed: 41 },
+  { t: 'Low Tide Bands', cat: 'letter', art: 'bands', inks: ['blue', 'green', 'yellow'], mm: [297, 420], med: 'Letterpress, wood furniture', ed: '9/35', gsm: 250, seed: 53 },
+  { t: 'Rings for a Flat Room', cat: 'offset', art: 'arcs', inks: ['magenta', 'blue'], mm: [250, 250], med: 'Offset, duotone', ed: '2/10', gsm: 170, seed: 67 },
+  { t: 'Overprint Study 04', cat: 'riso', art: 'halftone', inks: ['yellow', 'teal'], mm: [210, 297], med: 'Risograph, 2 inks', ed: '21/50', gsm: 160, seed: 71 },
+  { t: 'Quarter Grid', cat: 'screen', art: 'modular', inks: ['pink', 'blue'], mm: [297, 210], med: 'Screenprint, 2 colours', ed: '6/30', gsm: 300, seed: 83 },
+  { t: 'Specimen: Double-Storey', cat: 'letter', art: 'specimen', inks: ['green', 'grey'], mm: [210, 297], med: 'Letterpress, hand-set', ed: '1/12', gsm: 270, seed: 97 },
+  { t: 'Weather for Ballard', cat: 'offset', art: 'contour', inks: ['orange', 'blue', 'black'], mm: [420, 297], med: 'Offset, 4 colour', ed: '14/45', gsm: 150, seed: 103 },
+  { t: 'Press Check, 6 am', cat: 'offset', art: 'bands', inks: ['black', 'orange'], mm: [250, 350], med: 'Offset proof', ed: 'A/P', gsm: 150, seed: 109 },
+  { t: 'Concentric Yellow', cat: 'screen', art: 'arcs', inks: ['yellow', 'orange', 'black'], mm: [297, 297], med: 'Screenprint, 3 colours', ed: '18/40', gsm: 300, seed: 127 },
 ];
+
+/** The filing order. Each folder is a press, which is how a print shop
+ *  actually sorts its flat files. */
+const CATS = [
+  { id: 'riso', name: 'Risograph', ink: 'pink' },
+  { id: 'screen', name: 'Screenprint', ink: 'blue' },
+  { id: 'letter', name: 'Letterpress', ink: 'black' },
+  { id: 'offset', name: 'Offset', ink: 'teal' },
+];
+
