@@ -1,6 +1,15 @@
 {
   "apps": [
     {
+      "slug": "night-woods-foley",
+      "name": "Night Woods Foley",
+      "description": "Ten-pad sound board for running a scene at the table \u2014 each cue fires a recording and a screen-wide visual effect, from lightning flicker to a crimson scream flash",
+      "type": "static",
+      "status": "live",
+      "createdAt": "2026-10-30",
+      "tags": ["game", "audio", "tool", "interactive"]
+    },
+    {
       "slug": "paper-stack",
       "name": "Paper Stack",
       "description": "Kinetic gallery prototype \u2014 a messy pile of prints you lift, turn, resize and restack, with a WebGL physics build alongside it for comparison",

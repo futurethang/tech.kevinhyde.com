@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Night Woods Foley</title>
+  <meta name="description" content="A ten-pad sound board for running a scene: every cue fires a recording and a screen-wide visual effect.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Martian+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<canvas id="fx" aria-hidden="true"></canvas>
+<div id="flash" aria-hidden="true"></div>
+
+<div class="console" id="console">
+  <header>
+    <div>
+      <h1>Night Woods <em>Foley</em></h1>
+      <p class="sub">Ten pads for running a scene: hit a cue and the whole screen answers it. Beds latch on, stingers fire once.</p>
+    </div>
+    <p class="armed" id="armed">No clips loaded yet</p>
+  </header>
+
+  <section>
+    <p class="label" id="pads-label">Cue pads</p>
+    <div class="pads" id="pads" role="group" aria-labelledby="pads-label"></div>
+  </section>
+
+  <section class="rail">
+    <div class="knob">
+      <label class="label" for="volume">Master</label>
+      <input type="range" id="volume" min="0" max="100" value="80" aria-label="Master volume">
+    </div>
+    <label class="switch" for="soften">
+      <input type="checkbox" id="soften">
+      <span class="label">Soften visuals</span>
+    </label>
+    <button class="ghost" id="stopall" type="button">Stop all</button>
+    <span class="running label" id="running">Silent</span>
+    <span class="label" id="keyhint">Keys 1–9, 0 · space stops everything</span>
+  </section>
+
+  <section class="rack" id="rack">
+    <h2>Clip rack</h2>
+    <p>Swap in your own takes: drop audio files here, or onto a single pad to set that one. Files whose names carry the cue — <code>owl.mp3</code>, <code>coyote-howl.wav</code>, <code>scream_long.ogg</code> — land on the right pad by themselves. They stay in this browser and aren't uploaded anywhere.</p>
+    <div class="rack-row">
+      <button class="filebtn" id="pick" type="button">Choose files</button>
+      <input type="file" id="files" accept="audio/*" multiple hidden>
+      <button class="ghost" id="clear" type="button">Clear rack</button>
+      <span class="label" id="rackstate">Rack empty</span>
+    </div>
+    <div class="unmatched" id="unmatched" hidden></div>
+  </section>
+
+  <footer>
+    <b>The clips:</b> ten recordings ship with the board, so every pad is armed on arrival — recorded by dragon-studio, universfield, lazychillzone, debwong1951 and the Freesound community. A clip you load yourself replaces one pad in your browser alone; clear the rack and the shipped clip comes back.
+  </footer>
+</div>
+  <script src="script.js"></script>
+</body>
+</html>
