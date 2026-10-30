@@ -98,34 +98,98 @@ every piece feeling like a sheet of paper of roughly the same stock,
 which is the whole conceit. The caption strip then has to scale with the
 sheet rather than sit at a fixed 34px.
 
-## What the taxonomy has to answer
+## What the real schema says
 
-These decide whether the filing cabinet survives as designed. The demo was
-rigged — I rebalanced it to exactly four groups of three to make the left
-column look right, and real taxonomies rarely oblige.
+Read from `futurethang/sanity-studio` at `c1527a8` — `schemas/artwork.ts`,
+`fields.ts`, `category.ts`. Project `rkukjvpf`, dataset `production`.
 
-1. **How many groups?** The column holds roughly four to eight tabs before
-   it needs scrolling or nesting, at which point it is a different design.
-2. **Can a piece be in more than one?** The current code assumes disjoint
-   sets: opening a folder splices its ids to the top of the order array,
-   which misbehaves if a piece belongs to two folders. Many-to-many is
-   supportable but it is a change, not a config flag.
-3. **Are groups nested?** A two-level taxonomy needs either a disclosure
-   on the tab or a different metaphor.
-4. **Is the grouping lopsided?** One folder of 40 and three of 2 is a
-   legitimate shape for a portfolio and an awkward one for this UI. Worth
-   knowing before the design pass rather than after.
-5. **Is category even the right browse axis?** Year, series or medium may
-   be the way someone actually wants to move through the work. The
-   mechanism does not care — it groups by whatever it is handed.
+Most of the contract is already satisfied, and better than I assumed:
 
-## To write the adapter I need
+| Contract | `artwork` | |
+| --- | --- | --- |
+| `id` | `_id` | ✓ |
+| `slug` | `slug` | ✓ required |
+| `title` | `title` | ✓ required |
+| `image.src` | `image` | ✓ required |
+| `image.alt` | `image.alt` | ✓ **required**, with the right reasoning in the schema comment |
+| `image.width/height` | `asset->metadata.dimensions` | ✓ free from Sanity |
+| `image.lqip` | `asset->metadata.lqip` | ✓ free from Sanity |
+| `meta` | `medium`, `series`, `year`, `description` | ✓ all optional, as expected |
+| `order` | `order` + `pinned` | ✓ better than specified |
+| `groups` | — | **✗ nothing to file by** |
 
-- The schema definitions — the studio's `schemaTypes` / `schemas`
-  directory, or just the piece and category documents.
-- The project id and dataset name.
-- Whether the dataset is public or private.
+Two things the schema adds that the contract missed. `visibility` is a
+required public/draft enum, so every query has to filter on it. And
+`pinned` is a hand-curation flag — "show this first in any list that
+carries it" — which is a sort input, not metadata.
 
-**Do not paste an API token into the chat.** If the dataset is private the
-token belongs in a Vercel environment variable, and I can write the
-adapter against the schema without ever holding it.
+## The taxonomy problem
+
+**`artwork` has no category reference.** `category` is a document type, but
+only `post` uses it. The fields an artwork could be filed by are:
+
+| Field | Shape | As a folder axis |
+| --- | --- | --- |
+| `tags` | references to `tag` docs | Many-to-many. A proper vocabulary with a spelling rule, but a piece lands in several folders at once, which the stacking model cannot take as-is |
+| `series` | free-text string, nullable | Sparse by instruction — "leave empty unless the piece belongs with others" — so most work falls into one Unfiled bucket |
+| `medium` | free-text string, nullable | Single-valued and semantically right, but free text: no slug, no order, no accent, and "Screenprint" / "screen print" fork silently |
+| `year` | number, nullable | Single-valued and always ordered. Drawers by year is literally how a flat file works |
+
+So the filing cabinet cannot be built as designed without a decision. Three
+things are true at once:
+
+1. The demo's folders were media — Risograph, Screenprint, Letterpress,
+   Offset. `medium` is the axis the design was drawn for, and it already
+   exists.
+2. As free text it is not good enough to label a tab. Promoting it to a
+   reference to a small document type — title, slug, order, accent — gives
+   the tabs everything the design needs and kills the spelling drift.
+   That is a schema change, not a query change.
+3. Tags are the right thing for filtering and the wrong thing for folders,
+   because the stacking model assumes folders are disjoint. Opening a
+   folder splices its ids to the top of one shared order array, so a piece
+   in two folders misbehaves. Supportable, but it is a change to the
+   mechanism.
+
+The adapter in `content/sanity.mjs` leaves the axis pluggable — `medium`,
+`series`, `year` or `tag` — and reports `overlapping` so the mechanism can
+refuse an axis it cannot stack. That keeps the decision open rather than
+guessing at it.
+
+## One more unknown
+
+`schemas/index.ts` says `post` is "one type doing five jobs — books,
+articles, blog posts, samples and art, told apart by a category reference"
+and that `artwork` replaces the parts still wanted, with nothing removed
+yet. So some or all of the art may still be `post` documents, and the
+`category` documents may be its current grouping. How many `artwork`
+documents actually exist, and whether a migration has run, changes what
+the first build can show.
+
+## What I still need
+
+The schema says what is possible; only the data says what is there, and
+this environment's network policy denies `rkukjvpf.api.sanity.io`, so I
+cannot look. The shape of the folder column depends entirely on the
+distribution — four media is a design, nineteen is a different one.
+
+Running this in the studio's Vision tab answers it:
+
+```groq
+{
+  "artworks": count(*[_type == "artwork"]),
+  "public": count(*[_type == "artwork" && visibility == "public"]),
+  "byMedium": *[_type == "artwork"]{"k": coalesce(medium, "—")} | {
+    "counts": array::unique(*[_type == "artwork"].medium)
+  },
+  "media": array::unique(*[_type == "artwork"].medium),
+  "series": array::unique(*[_type == "artwork"].series),
+  "years": array::unique(*[_type == "artwork"].year),
+  "tags": array::unique(*[_type == "artwork"].tags[]->title),
+  "stillInPost": count(*[_type == "post"])
+}
+```
+
+No API token needed to tell me the result, and none should be pasted into
+chat — if the dataset is private the token belongs in a Vercel environment
+variable.
