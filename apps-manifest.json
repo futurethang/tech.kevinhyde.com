@@ -1,6 +1,15 @@
 {
   "apps": [
     {
+      "slug": "night-woods-foley",
+      "name": "Night Woods Foley",
+      "description": "Ten-pad sound board for running a scene at the table — each cue fires a recording and a screen-wide visual effect, from lightning flicker to a crimson scream flash",
+      "type": "static",
+      "status": "live",
+      "createdAt": "2026-10-30",
+      "tags": ["game", "audio", "tool", "interactive"]
+    },
+    {
       "slug": "jam-book",
       "name": "Jam Book",
       "description": "Bluegrass song catalog and ChordPro chart reader — set the key and capo together and the chart shows the shapes you actually play",
